@@ -19,6 +19,9 @@ using WebVella.Erp.Web;
 using WebVella.Erp.Web.Middleware;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using WebVella.Erp.Plugins.Mail;
+using WebVella.Erp.Plugins.Next;
+using WebVella.Erp.Plugins.Project;
 
 namespace WebVella.Erp.Site
 {
@@ -181,6 +184,9 @@ namespace WebVella.Erp.Site
 
 			app
 			.UseErpPlugin<SdkPlugin>()
+            .UseErpPlugin<MailPlugin>()
+            .UseErpPlugin<NextPlugin>()
+            .UseErpPlugin<ProjectPlugin>()
             .UseErp()
             .UseErpMiddleware()
             .UseJwtMiddleware();
