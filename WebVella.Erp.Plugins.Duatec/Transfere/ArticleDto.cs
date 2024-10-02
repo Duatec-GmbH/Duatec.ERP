@@ -8,14 +8,14 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             long id,
             ManufacturerDto manufacturer,
             string partNumber, 
-            IReadOnlyDictionary<string, string> designations, 
+            IReadOnlyDictionary<LanguageKey, string> descriptions, 
             string partType, 
             string pictureUrl)
         {
             Id = id;
             Manufacturer = manufacturer;
             PartNumber = partNumber;
-            Designations = designations;
+            Descriptions = descriptions;
             PartType = partType;
             PictureUrl = pictureUrl;
         }
@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
 
         public string PartNumber { get; }
 
-        public IReadOnlyDictionary<string, string> Designations { get; }
+        public IReadOnlyDictionary<LanguageKey, string> Descriptions { get; }
 
         public string PartType { get; }
 
@@ -52,7 +52,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             var attributes = data["attributes"]!;
             var id = long.Parse(data["id"]!.GetValue<string>());
             var manufacturer = GetManufacturer(json);
-            var designations = GetDesignations(attributes["designation"]);
+            var designations = GetDescriptions(attributes);
             var partType = attributes["part_type"]!.GetValue<string>();
             var partNumber = attributes["part_number"]!.GetValue<string>();
 
@@ -63,7 +63,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
                 id: id,
                 manufacturer: manufacturer,
                 partNumber: partNumber,
-                designations: designations,
+                descriptions: designations,
                 partType: partType,
                 pictureUrl: pictureUrl);
         }
@@ -103,22 +103,21 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             return data;
         }
 
-        private static Dictionary<string, string> GetDesignations(JsonNode? json)
+        private static Dictionary<LanguageKey, string> GetDescriptions(JsonNode attributes)
         {
-            var result = new Dictionary<string, string>(8);
+            var result = new Dictionary<LanguageKey, string>(8);
 
-            foreach(var key in LanguageKey.All)
+            foreach (var key in LanguageKeys.All)
             {
-                var value = GetDesignation(json, key);
+                var node = (attributes["description"] as JsonObject)?[key.ToString()]
+                    ?? (attributes["designation"] as JsonObject)?[key.ToString()];
+
+                var value = node?.GetValue<string>();
+
                 if(!string.IsNullOrEmpty(value))
                     result[key] = value;
             }
             return result;
-        }
-
-        private static string? GetDesignation(JsonNode? json, string languageKey)
-        {
-            return json?[languageKey]?.GetValue<string?>();
         }
 
         private static string? GetPictureUrl(JsonNode? json, string? id)
@@ -133,7 +132,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             var node = json?["included"]!.AsArray()
                 .FirstOrDefault(n => $"{n?["type"]}" == "preview" && $"{n?["id"]}" == id)?["attributes"];
 
-            return node?["512"]?.GetValue<string?>()!;
+            return node?["512"]?.GetValue<string?>();
         }
     }
 }

@@ -1,11 +1,17 @@
 ﻿namespace WebVella.Erp.Plugins.Duatec
 {
-    internal static class LanguageKey
+    public enum LanguageKey
     {
-        public static string English => "en_US";
+        en_US,
+        de_DE,
+    }
 
-        public static string German = "de_DE";
+    internal static class LanguageKeys
+    {
+        public static LanguageKey English => LanguageKey.en_US;
 
-        public static IEnumerable<string> All => [English, German];
+        public static LanguageKey German = LanguageKey.de_DE;
+
+        public static LanguageKey[] All => (LanguageKey[])Enum.GetValues(typeof(LanguageKey));
     }
 }
