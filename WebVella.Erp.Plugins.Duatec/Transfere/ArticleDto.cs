@@ -1,85 +1,102 @@
 ﻿using System.Text.Json.Nodes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebVella.Erp.Plugins.Duatec.Transfere
 {
     public class ArticleDto
     {
         private ArticleDto(
-            long id, 
-            long manufacturerId,
+            long id,
+            ManufacturerDto manufacturer,
             string partNumber, 
-            string orderNumber, 
-            string typeNumber, 
             IReadOnlyDictionary<string, string> designations, 
             string partType, 
-            string identCode,
-            string? pictureUrl)
+            string pictureUrl)
         {
             Id = id;
-            ManufacturerId = manufacturerId;
+            Manufacturer = manufacturer;
             PartNumber = partNumber;
-            OrderNumber = orderNumber;
-            TypeNumber = typeNumber;
             Designations = designations;
             PartType = partType;
-            IdentCode = identCode;
             PictureUrl = pictureUrl;
         }
 
         public long Id { get; }
 
-        public long ManufacturerId { get; }
+        public ManufacturerDto Manufacturer { get; }
 
         public string PartNumber { get; }
-
-        public string OrderNumber { get; }
-
-        public string TypeNumber { get; }
 
         public IReadOnlyDictionary<string, string> Designations { get; }
 
         public string PartType { get; }
 
-        public string IdentCode { get; }
+        public string PictureUrl { get; }
 
-        public string? PictureUrl { get; }
-
-        public static ArticleDto? FromJson(JsonNode? json)
+        public static ArticleDto? FromJson(JsonNode? json, string partNumber)
         {
-            var data = GetData(json);
+            return FromJson(json, partNumber, GetDataFromPartNumber);
+        }
+
+        public static ArticleDto? FromJson(JsonNode? json, long id)
+        {
+            return FromJson(json, id, GetDataFromId);
+        }
+
+        private static ArticleDto? FromJson<T>(JsonNode? json, T idValue, Func<JsonNode?, T, JsonNode?> getDataNode)
+        {
+            var data = getDataNode(json, idValue);
 
             if (data == null || $"{data["type"]}" != "parts")
                 return null;
 
-            var id = data["id"]!.GetValue<long>();
             var attributes = data["attributes"]!;
-            var relationships = data["relationships"]!;
+            var id = long.Parse(data["id"]!.GetValue<string>());
+            var manufacturer = GetManufacturer(json);
+            var designations = GetDesignations(attributes["designation"]);
+            var partType = attributes["part_type"]!.GetValue<string>();
+            var partNumber = attributes["part_number"]!.GetValue<string>();
+
+            var pictureId = data["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
+            var pictureUrl = GetPictureUrl(json, pictureId) ?? string.Empty;
 
             return new ArticleDto(
                 id: id,
-                manufacturerId: GetManufacturer(relationships["manufacturer"]!),
-                partNumber: attributes["part_number"]!.GetValue<string>(),
-                orderNumber: attributes["order_number"]!.GetValue<string>(),
-                typeNumber: attributes["type_number"]!.GetValue<string>(),
-                designations: GetDesignations(attributes["designation"]),
-                partType: attributes["part_type"]!.GetValue<string>(),
-                identCode: attributes["ident_code"]!.GetValue<string>(),
-                pictureUrl: GetPictureUrl(GetPictureNode(json)));
+                manufacturer: manufacturer,
+                partNumber: partNumber,
+                designations: designations,
+                partType: partType,
+                pictureUrl: pictureUrl);
         }
 
-        private static JsonNode? GetPictureNode(JsonNode? json)
+        private static ManufacturerDto GetManufacturer(JsonNode? json)
         {
-            return json?["included"]?.AsArray()
-                .FirstOrDefault(n => $"{n?["type"]}" == "preview")?["attributes"];
+            return ManufacturerDto.FromJson(json?["included"]?.AsArray()
+                .FirstOrDefault(n => $"{n?["type"]}" == "manufacturers"))!;
         }
 
-        private static JsonNode? GetData(JsonNode? json)
+        private static JsonNode? GetDataFromPartNumber(JsonNode? json, string partNumber)
+        {
+            static string IdFromNode(JsonNode? n) => $"{n?["attributes"]?["part_number"]}";
+            return GetData(json, partNumber, IdFromNode);
+        }
+
+        private static JsonNode? GetDataFromId(JsonNode? json, long id)
+        {
+            static string IdFromNode(JsonNode? n) => $"{n?["id"]}";
+            return GetData(json, id.ToString(), IdFromNode);
+        }
+
+        private static JsonNode? GetData(JsonNode? json, string id, Func<JsonNode?, string> idFromNode)
         {
             var data = json?["data"];
-            if (data is JsonArray arr)
+            if (data is JsonArray jArr)
             {
-                if (arr.Count > 1 || arr.Count == 0)
+                var idString = id.ToString();
+                var arr = jArr
+                    .Where(n => idFromNode(n) == id)
+                    .ToArray();
+
+                if (arr.Length != 1)
                     return null;
                 return arr[0];
             }
@@ -99,22 +116,24 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             return result;
         }
 
-        private static long GetManufacturer(JsonNode json)
-        {
-            var data = json["data"]!;
-            if ($"{data["type"]}" != "manufacturers")
-                throw new InvalidDataException($"invalid type of manufacturer node.");
-            return data["id"]!.GetValue<long>();
-        }
-
         private static string? GetDesignation(JsonNode? json, string languageKey)
         {
             return json?[languageKey]?.GetValue<string?>();
         }
 
-        private static string? GetPictureUrl(JsonNode? json)
+        private static string? GetPictureUrl(JsonNode? json, string? id)
         {
-            return json?["512"]?.GetValue<string?>();
+            if (string.IsNullOrEmpty(id)) return null;
+
+            id = json?["included"]?.AsArray()
+                .FirstOrDefault(n => $"{n?["type"]}" == "picturefile" && $"{n?["id"]}" == id)?["relationships"]?["preview"]?["data"]?["id"]?.GetValue<string?>();
+
+            if (string.IsNullOrEmpty(id)) return null;
+
+            var node = json?["included"]!.AsArray()
+                .FirstOrDefault(n => $"{n?["type"]}" == "preview" && $"{n?["id"]}" == id)?["attributes"];
+
+            return node?["512"]?.GetValue<string?>()!;
         }
     }
 }

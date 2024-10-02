@@ -4,14 +4,13 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
 {
     public class ManufacturerDto
     {
-        private ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl, bool hasCatalog)
+        private ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string logoUrl)
         {
             Id = id;
             ShortName = shortName;
             Name = name;
             WebsiteUrl = websiteUrl;
             LogoUrl = logoUrl;
-            HasCatalog = hasCatalog;
         }
 
         public long Id { get; }
@@ -22,25 +21,28 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
 
         public string? WebsiteUrl { get; }
 
-        public string? LogoUrl { get; }
-
-        public bool HasCatalog { get; }
+        public string LogoUrl { get; }
 
         public static ManufacturerDto? FromJson(JsonNode? json)
         {
             if(json == null || $"{json["type"]}" != "manufacturers")
                 return null;
 
-            var id = json["id"]!.GetValue<long>();
+            var id = long.Parse(json["id"]!.GetValue<string>());
             json = json["attributes"]!;
+
+            var shortName = json["short_name"]!.GetValue<string>();
+            var name = json["long_name"]!.GetValue<string>()!;
+
+            var websiteUrl = json["website"]?.GetValue<string?>();
+            var logoUrl = json["logo_url"]!.GetValue<string>();
 
             return new ManufacturerDto(
                 id: id,
-                shortName: json["short_name"]!.GetValue<string>(),
-                name: json["name"]!.GetValue<string>()!,
-                websiteUrl: json["website"]?.GetValue<string?>(),
-                logoUrl: json["logo_url"]?.GetValue<string?>(),
-                hasCatalog: json["has_catalog"]!.GetValue<bool>());
+                shortName: shortName,
+                name: name,
+                websiteUrl: websiteUrl,
+                logoUrl: logoUrl);
         }
     }
 }

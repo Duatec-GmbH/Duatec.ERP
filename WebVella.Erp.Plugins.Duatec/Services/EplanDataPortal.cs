@@ -29,20 +29,20 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static async Task<ArticleDto?> GetArticleById(long id)
         {
-            var url = $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview";
+            var url = $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
 
             var json = await ApiCalls.JsonFromUrl(url);
             
-            return ArticleDto.FromJson(json);
+            return ArticleDto.FromJson(json, id);
         }
 
-        public static async Task<ArticleDto?> GetArticleByPartNumber(string manufacturerShortName, string orderNumber)
+        public static async Task<ArticleDto?> GetArticleByPartNumber(string partNumber)
         {
-            var url = $"https://dataportal.eplan.com/api/parts?search=%22{manufacturerShortName}.{orderNumber}%22&include=picture_file.preview";
+            var url = $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
 
             var json = await ApiCalls.JsonFromUrl(url);
 
-            return ArticleDto.FromJson(json);
+            return ArticleDto.FromJson(json, partNumber);
         }
 
         public static async Task<IEnumerable<ArticleDto>> GetArticlesById(params long[] ids)
@@ -57,12 +57,12 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             return articles;
         }
 
-        public static async Task<IEnumerable<ArticleDto>> GetArticlesByPartNumber(params (string ManufacturerShortName, string OrderNumber)[] partNumbers)
+        public static async Task<IEnumerable<ArticleDto>> GetArticlesByPartNumber(params string[] partNumbers)
         {
             var articles = new List<ArticleDto>(partNumbers.Length);
-            foreach (var (man, orderNumb) in partNumbers)
+            foreach (var partNumber in partNumbers)
             {
-                var article = await GetArticleByPartNumber(man, orderNumb);
+                var article = await GetArticleByPartNumber(partNumber);
                 if (article != null)
                     articles.Add(article);
             }

@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.WebAssembly", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec", "WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj", "{4E4A5F55-1137-4D25-A176-7445FBF241B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{EAC6E537-1AD1-43DC-94E1-25730B14565D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAC6E537-1AD1-43DC-94E1-25730B14565D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC6E537-1AD1-43DC-94E1-25730B14565D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAC6E537-1AD1-43DC-94E1-25730B14565D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAC6E537-1AD1-43DC-94E1-25730B14565D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
