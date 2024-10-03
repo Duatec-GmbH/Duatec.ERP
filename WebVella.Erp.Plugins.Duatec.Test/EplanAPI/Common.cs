@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
                 Assert.That(sut!.Id, Is.Not.Zero, nameof(ArticleDto.Id));
                 AssertManufacturerIsValid(sut.Manufacturer);
                 AssertIsNotEmpty(sut.PartNumber, nameof(ArticleDto.PartNumber));
-                AssertIsNotEmpty(sut.Descriptions, nameof(ArticleDto.Descriptions));
+                AssertIsNotEmpty(sut.Description, nameof(ArticleDto.Description));
                 AssertIsNotEmpty(sut.PartType, nameof(ArticleDto.PartType));
                 Assert.That(sut.PictureUrl, Is.Not.Null, nameof(ArticleDto.PictureUrl));
             });

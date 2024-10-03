@@ -8,14 +8,14 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             long id,
             ManufacturerDto manufacturer,
             string partNumber, 
-            IReadOnlyDictionary<LanguageKey, string> descriptions, 
+            string description, 
             string partType, 
             string pictureUrl)
         {
             Id = id;
             Manufacturer = manufacturer;
             PartNumber = partNumber;
-            Descriptions = descriptions;
+            Description = description;
             PartType = partType;
             PictureUrl = pictureUrl;
         }
@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
 
         public string PartNumber { get; }
 
-        public IReadOnlyDictionary<LanguageKey, string> Descriptions { get; }
+        public string Description { get; }
 
         public string PartType { get; }
 
@@ -52,7 +52,10 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             var attributes = data["attributes"]!;
             var id = long.Parse(data["id"]!.GetValue<string>());
             var manufacturer = GetManufacturer(json);
-            var designations = GetDescriptions(attributes);
+            var description = GetDescription(attributes, LanguageKey.de_DE)
+                ?? GetDescription(attributes, LanguageKey.en_US)
+                ?? string.Empty;
+
             var partType = attributes["part_type"]!.GetValue<string>();
             var partNumber = attributes["part_number"]!.GetValue<string>();
 
@@ -63,7 +66,7 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
                 id: id,
                 manufacturer: manufacturer,
                 partNumber: partNumber,
-                descriptions: designations,
+                description: description,
                 partType: partType,
                 pictureUrl: pictureUrl);
         }
@@ -103,21 +106,17 @@ namespace WebVella.Erp.Plugins.Duatec.Transfere
             return data;
         }
 
-        private static Dictionary<LanguageKey, string> GetDescriptions(JsonNode attributes)
+        private static string? GetDescription(JsonNode attributes, LanguageKey key)
         {
-            var result = new Dictionary<LanguageKey, string>(8);
+            var node = (attributes["description"] as JsonObject)?[key.ToString()]
+                ?? (attributes["designation"] as JsonObject)?[key.ToString()];
 
-            foreach (var key in LanguageKeys.All)
-            {
-                var node = (attributes["description"] as JsonObject)?[key.ToString()]
-                    ?? (attributes["designation"] as JsonObject)?[key.ToString()];
+            var value = node?.GetValue<string>();
 
-                var value = node?.GetValue<string>();
+            if (!string.IsNullOrEmpty(value))
+                return value;
 
-                if(!string.IsNullOrEmpty(value))
-                    result[key] = value;
-            }
-            return result;
+            return null;
         }
 
         private static string? GetPictureUrl(JsonNode? json, string? id)
