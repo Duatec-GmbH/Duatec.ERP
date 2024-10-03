@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using WebVella.Erp.Plugins.Duatec.Transfere;
+using WebVella.Erp.Plugins.Duatec.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
 {

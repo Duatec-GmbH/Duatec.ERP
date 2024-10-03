@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using WebVella.Erp.Plugins.Mail;
 using WebVella.Erp.Plugins.Next;
 using WebVella.Erp.Plugins.Project;
+using WebVella.Erp.Plugins.Duatec;
 
 namespace WebVella.Erp.Site
 {
@@ -187,6 +188,7 @@ namespace WebVella.Erp.Site
             .UseErpPlugin<MailPlugin>()
             .UseErpPlugin<NextPlugin>()
             .UseErpPlugin<ProjectPlugin>()
+            .UseErpPlugin<DuatecPlugin>()
             .UseErp()
             .UseErpMiddleware()
             .UseJwtMiddleware();
