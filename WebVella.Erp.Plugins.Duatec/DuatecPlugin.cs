@@ -1,12 +1,14 @@
 ﻿using Newtonsoft.Json;
 using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
     public class DuatecPlugin : ErpPlugin
     {
         [JsonProperty(PropertyName = "name")]
-        public override string Name { get; protected set; } = "duatec";
+        public override string Name { get; protected set; } = "Duatec";
 
         public override void Initialize(IServiceProvider ServiceProvider)
         {
