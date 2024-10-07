@@ -108,8 +108,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataModel
 
         private static string? GetDescription(JsonNode attributes, LanguageKey key)
         {
-            var node = (attributes["description"] as JsonObject)?[key.ToString()]
-                ?? (attributes["designation"] as JsonObject)?[key.ToString()];
+            var node = (attributes["designation"] as JsonObject)?[key.ToString()]
+                ?? (attributes["description"] as JsonObject)?[key.ToString()];
 
             var value = node?.GetValue<string>();
 

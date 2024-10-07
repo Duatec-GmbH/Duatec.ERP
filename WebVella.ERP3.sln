@@ -38,9 +38,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.ConsoleApp", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.WebAssembly", "WebVella.Erp.WebAssembly\Client\WebVella.Erp.WebAssembly.csproj", "{A59872C0-8CE4-4705-9981-CF4087840830}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec", "WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj", "{4E4A5F55-1137-4D25-A176-7445FBF241B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec", "WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj", "{4E4A5F55-1137-4D25-A176-7445FBF241B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{EAC6E537-1AD1-43DC-94E1-25730B14565D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{EAC6E537-1AD1-43DC-94E1-25730B14565D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
