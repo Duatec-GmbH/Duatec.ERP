@@ -66,17 +66,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 if (!TryGetArticle(pageModel, partNumber, out var article))
                     return;
 
-                var articleType = GetArticleType(article.PartType);
-                if (articleType == null)
-                {
-                    PutMessage(pageModel, ScreenMessageType.Error, $"Article type '{article.PartType}' is not defined.");
+                if (!TryGetArticleType(pageModel, article, out var articleType))
                     return;
-                }
 
                 connection.BeginTransaction();
-                var recMan = new RecordManager();
-                var manufacturer = GetManufacturer(article.Manufacturer)
-                    ?? InsertManufacturer(recMan, article.Manufacturer);
+
+                var manufacturer = GetManufacturerId(article.Manufacturer)
+                    ?? InsertManufacturer(article.Manufacturer);
 
                 if (manufacturer == null)
                 {
@@ -85,23 +81,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                     return;
                 }
 
-                var rec = new EntityRecord();
-
-                rec["id"] = Guid.NewGuid();
-                rec["part_number"] = article.PartNumber;
-                rec["eplan_id"] = article.Id.ToString();
-                rec["description"] = article.Description;
-                rec["article_type"] = articleType.Value;
-                rec["manufacturer_id"] = manufacturer.Value;
-                rec["description"] = article.Description;
-                rec["preview"] = article.PictureUrl;
-
-                var response = recMan.CreateRecord("article", rec);
-
-                if (!response.Success)
+                if (!CreateArticle(pageModel, article, articleType.Value, manufacturer.Value))
                 {
                     connection.RollbackTransaction();
-                    PutMessage(pageModel, ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
                     return;
                 }
 
@@ -113,6 +95,39 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 connection.RollbackTransaction();
                 throw;
             }
+        }
+
+        private static bool CreateArticle(BaseErpPageModel pageModel, ArticleDto article, Guid articleType, Guid manufacturer)
+        {
+            var recMan = new RecordManager();
+            var rec = new EntityRecord();
+
+            rec["id"] = Guid.NewGuid();
+            rec["part_number"] = article.PartNumber;
+            rec["eplan_id"] = article.Id.ToString();
+            rec["description"] = article.Description;
+            rec["article_type"] = articleType;
+            rec["manufacturer_id"] = manufacturer;
+            rec["description"] = article.Description;
+            rec["preview"] = article.PictureUrl;
+
+            var response = recMan.CreateRecord("article", rec);
+
+            if (response.Success)
+                return true;
+
+            PutMessage(pageModel, ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
+            return false;
+        }
+
+        private static bool TryGetArticleType(BaseErpPageModel pageModel, ArticleDto article, [NotNullWhen(true)] out Guid? articleType)
+        {
+            articleType = GetArticleType(article.PartType);
+            if (articleType.HasValue && articleType.Value != Guid.Empty)
+                return true;
+            
+            PutMessage(pageModel, ScreenMessageType.Error, $"Article type '{article.PartType}' is not defined.");
+            return false;
         }
 
         private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out ArticleDto? article)
@@ -173,7 +188,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             return null;
         }
 
-        private static Guid? GetManufacturer(ManufacturerDto manufacturer)
+        private static Guid? GetManufacturerId(ManufacturerDto manufacturer)
         {
             var eql = new EqlCommand("select id from manufacturer where eplan_id = @id",
                 new EqlParameter("id", manufacturer.Id.ToString()));
@@ -185,8 +200,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             return null;
         }
 
-        private static Guid? InsertManufacturer(RecordManager recMan, ManufacturerDto manufacturer)
+        private static Guid? InsertManufacturer(ManufacturerDto manufacturer)
         {
+            var recMan = new RecordManager();
             var rec = new EntityRecord();
 
             var id = Guid.NewGuid();
