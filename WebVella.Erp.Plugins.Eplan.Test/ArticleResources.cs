@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
+﻿namespace WebVella.Erp.Plugins.Eplan.Test
 {
     internal class ArticleResources
     {

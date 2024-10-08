@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan
+namespace WebVella.Erp.Plugins.Eplan
 {
-    public class DataPortal
+    public class EplanDataPortal
     {
         private static string GetArticleByIdUrl(long id)
             => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";

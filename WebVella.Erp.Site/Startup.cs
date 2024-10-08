@@ -23,6 +23,7 @@ using WebVella.Erp.Plugins.Mail;
 using WebVella.Erp.Plugins.Next;
 using WebVella.Erp.Plugins.Project;
 using WebVella.Erp.Plugins.Duatec;
+using WebVella.Erp.Plugins.Eplan;
 
 namespace WebVella.Erp.Site
 {
@@ -188,6 +189,7 @@ namespace WebVella.Erp.Site
             .UseErpPlugin<MailPlugin>()
             .UseErpPlugin<NextPlugin>()
             .UseErpPlugin<ProjectPlugin>()
+            .UseErpPlugin<EplanPlugin>()
             .UseErpPlugin<DuatecPlugin>()
             .UseErp()
             .UseErpMiddleware()

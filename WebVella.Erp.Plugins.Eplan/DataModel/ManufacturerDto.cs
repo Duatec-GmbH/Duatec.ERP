@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Duatec.DataModel
+namespace WebVella.Erp.Plugins.Eplan.DataModel
 {
     public class ManufacturerDto
     {

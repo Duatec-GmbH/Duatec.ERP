@@ -1,7 +1,6 @@
-using WebVella.Erp.Plugins.Duatec.Eplan;
-using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
+namespace WebVella.Erp.Plugins.Eplan.Test
 {
     [TestFixture]
     public class ManufacturersTests
@@ -9,7 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
         [Test]
         public async Task GetManufacturers_HasNoEmptyRequiredProperty()
         {
-            var manufacturers = await DataPortal.GetManufacturersAsync();
+            var manufacturers = await EplanDataPortal.GetManufacturersAsync();
 
             Assert.Multiple(() =>
             {
@@ -21,11 +20,11 @@ namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
         [Test]
         public async Task GetManufacturerPerId_ReturnsValidResult()
         {
-            var manufacturers = await DataPortal.GetManufacturersAsync();
+            var manufacturers = await EplanDataPortal.GetManufacturersAsync();
             var tasks = new List<Task<ManufacturerDto?>>();
 
             foreach (var manufacturer in manufacturers)
-                tasks.Add(DataPortal.GetManufacturerAsync(manufacturer.Id, manufacturer.Name));
+                tasks.Add(EplanDataPortal.GetManufacturerAsync(manufacturer.Id, manufacturer.Name));
 
             Task.WaitAll([.. tasks]);
             Assert.Multiple(() =>

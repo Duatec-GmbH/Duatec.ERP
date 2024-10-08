@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec
+﻿namespace WebVella.Erp.Plugins.Eplan
 {
     public enum LanguageKey
     {

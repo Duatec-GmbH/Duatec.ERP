@@ -1,7 +1,7 @@
 ﻿using System.Collections;
-using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Test.EplanAPI
+namespace WebVella.Erp.Plugins.Eplan.Test
 {
     internal static class Common
     {

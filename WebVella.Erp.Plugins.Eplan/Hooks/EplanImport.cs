@@ -5,13 +5,12 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.DataModel;
-using WebVella.Erp.Plugins.Duatec.Eplan;
+using WebVella.Erp.Plugins.Eplan.DataModel;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Eplan.Hooks
 {
     [HookAttachment(key: "eplan_import")]
     public class EplanImport : IPageHook
@@ -132,7 +131,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out ArticleDto? article)
         {
-            article = DataPortal.GetArticleByPartNumber(partNumber);
+            article = EplanDataPortal.GetArticleByPartNumber(partNumber);
 
             if (article == null)
                 PutMessage(pageModel, ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
