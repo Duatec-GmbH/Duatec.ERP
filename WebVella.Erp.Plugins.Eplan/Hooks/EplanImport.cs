@@ -83,6 +83,7 @@ namespace WebVella.Erp.Plugins.Eplan.Hooks
                 if (!CreateArticle(pageModel, article, articleType.Value, manufacturer.Value))
                 {
                     connection.RollbackTransaction();
+                    PutMessage(pageModel, ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
                     return;
                 }
 
