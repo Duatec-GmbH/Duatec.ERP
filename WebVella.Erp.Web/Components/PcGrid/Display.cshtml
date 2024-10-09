@@ -24,40 +24,97 @@
 		 name="@options.Name" culture="@options.Culture" class="@options.Class" query-string-sortby="@options.QueryStringSortBy"
 		 query-string-sort-order="@options.QueryStringSortOrder" query-string-page="@options.QueryStringPage" columns="columns"
 		  page="@pager" total-count="@totalCount" page-size="@pageSize" has-thead="@options.HasThead" has-tfoot="@options.HasTfoot"
-		is-visible="(bool)ViewBag.IsVisible" no-total="@options.NoTotal">
-	@foreach (var record in records)
-	{
-		<wv-grid-row>
-			@for (var i=1; i <= options.VisibleColumns; i++)
-			{
-				var containerId = (options.GetType().GetProperty($"Container{i}Id").GetValue(options, null) ?? "").ToString();
-				var columnNoWrap = (bool)(options.GetType().GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
-				var columnClass = (string)(options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
-				var verticalAlign = (WvVerticalAlignmentType)(options.GetType().GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
-				var horizontalAlign = (WvHorizontalAlignmentType)(options.GetType().GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
-				var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
-				var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
-				<wv-grid-column width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
-					@foreach (var childNode in columnChildNodes)
-					{
-						var nodeComponentName = "";
-						if (childNode != null)
-						{
-							var nameArray = childNode.ComponentName.Split('.');
-							nodeComponentName = nameArray[nameArray.Length - 1];
-						}
-						if (!String.IsNullOrWhiteSpace(nodeComponentName))
-						{
-							var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
-							var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
-							pcContext.DataModel.SetRowRecord(record);
-							@await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
-						}
-					}
-				</wv-grid-column>
-			}
-		</wv-grid-row>
-	}
+        is-visible="(bool)ViewBag.IsVisible" no-total="@options.NoTotal" style="border-spacing:0px!;">
+
+    @{
+        string path = null;
+        if (options.RevealsDetailsOnClick && !string.IsNullOrEmpty(options.DetailPath))
+        {
+            path = options.DetailPath;
+            if (!path.EndsWith('/'))
+                path += '/';
+        }
+
+        foreach(var record in records)
+        {
+            var p = path != null ? path + record["id"].ToString() : null;
+
+            <wv-grid-row>
+                @for (var i = 1; i <= options.VisibleColumns; i++)
+                {
+                    var containerId = (options.GetType().GetProperty($"Container{i}Id").GetValue(options, null) ?? "").ToString();
+                    var columnNoWrap = (bool)(options.GetType().GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
+                    var columnClass = (string)(options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
+                    var verticalAlign = (WvVerticalAlignmentType)(options.GetType().GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
+                    var horizontalAlign = (WvHorizontalAlignmentType)(options.GetType().GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
+                    var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
+                    var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
+
+                    async Task CreateChildren()
+                        {
+                            foreach (var childNode in columnChildNodes)
+                            {
+                                var nodeComponentName = "";
+                                if (childNode != null)
+                                {
+                                    var nameArray = childNode.ComponentName.Split('.');
+                                    nodeComponentName = nameArray[nameArray.Length - 1];
+                                }
+                                if (!String.IsNullOrWhiteSpace(nodeComponentName))
+                                {
+                                    var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
+                                    var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
+                                    pcContext.DataModel.SetRowRecord(record);
+                                    @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
+                                }
+                            }
+                        }
+
+                    if(p == null)
+                    {
+                        <wv-grid-column width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
+                            @{ await CreateChildren(); }
+                        </wv-grid-column>
+                    }
+                    else
+                    {
+                        var aStyles = "display:block; width:300%; height:300%; text-decoration: none; color: unset; "
+                            + "margin:-100%; padding:100%;";
+
+                        var tdStyles = "overflow: hidden; margin:0px;";
+                        if (!string.IsNullOrEmpty(columnWidth))
+                            tdStyles += $" width: {columnWidth};";
+
+                        if (verticalAlign == WvVerticalAlignmentType.Top)
+                            tdStyles += " vertical-align:top;";
+                        else if(verticalAlign == WvVerticalAlignmentType.Middle)
+                            tdStyles += " vertical-align:middle;";
+                        else if(verticalAlign == WvVerticalAlignmentType.Bottom)
+                            tdStyles += " vertical-align:bottom;";
+
+                        if (horizontalAlign == WvHorizontalAlignmentType.Left)
+                            tdStyles += " text-align:left;";
+                        else if (horizontalAlign == WvHorizontalAlignmentType.Center)
+                            tdStyles += " text-align:center;";
+                        else if (horizontalAlign == WvHorizontalAlignmentType.Right)
+                            tdStyles += " text-align:right;";
+
+                        if (columnNoWrap)
+                            tdStyles += " white-space:nowrap;";
+
+                        <td style="@tdStyles" class="@columnClass">
+                            <a style="@aStyles" href="@p">
+                                
+                                @{ 
+                                    await CreateChildren(); 
+                                }
+                            </a>
+                        </td>
+                    }
+                }
+            </wv-grid-row>
+        }
+    }
 	@if (records.Count == 0) { 
 	<tbody>
 		<tr>

@@ -56,6 +56,12 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "hover")]
 			public bool Hover { get; set; } = false;
 
+			[JsonProperty(PropertyName = "reveals_details_on_click")]
+			public bool RevealsDetailsOnClick { get; set; } = false;
+
+			[JsonProperty(PropertyName = "detail_path")]
+			public string DetailPath { get; set; } = "";
+
 			[JsonProperty(PropertyName = "responsive_breakpoint")]
 			public WvCssBreakpoint ResponsiveBreakpoint { get; set; } = WvCssBreakpoint.None;
 
