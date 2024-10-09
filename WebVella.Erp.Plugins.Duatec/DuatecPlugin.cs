@@ -828,28 +828,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page*** Page name: eplan-dataportal-import >>
-                    {
-                        var id = new Guid("d1635d81-b92f-4f93-a2b5-01cb05d79ca7");
-                        var name = @"eplan-dataportal-import";
-                        var label = "Eplan Data Portal Import";
-                        string iconClass = null;
-                        var system = false;
-                        var layout = @"";
-                        var weight = 10;
-                        var type = (PageType)((int)1);
-                        var isRazorBody = false;
-                        Guid? appId = null;
-                        Guid? entityId = null;
-                        Guid? nodeId = null;
-                        Guid? areaId = null;
-                        string razorBody = null;
-                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page*** Page name: all >>
                     {
                         var id = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
@@ -894,6 +872,28 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
+                    #region << ***Create page*** Page name: eplan-import >>
+                    {
+                        var id = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var name = @"eplan-import";
+                        var label = "Eplan import";
+                        string iconClass = null;
+                        var system = false;
+                        var layout = @"";
+                        var weight = 1001;
+                        var type = (PageType)((int)2);
+                        var isRazorBody = false;
+                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
+                        Guid? entityId = null;
+                        Guid? nodeId = null;
+                        Guid? areaId = null;
+                        string razorBody = null;
+                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create page body node*** Page name: all  id: c7d59ef4-6033-40d4-ac17-f9e0b44be529 >>
                     {
                         var id = new Guid("c7d59ef4-6033-40d4-ac17-f9e0b44be529");
@@ -919,12 +919,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         var containerId = "actions";
                         var options = @"{
   ""type"": ""2"",
-  ""text"": ""Eplan Article Import"",
+  ""text"": ""Eplan Import"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": """",
   ""id"": """",
-  ""icon_class"": """",
+  ""icon_class"": ""fa fa-plus go-green"",
   ""is_block"": ""false"",
   ""is_outline"": ""false"",
   ""icon_right"": ""false"",
@@ -932,11 +932,44 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_disabled"": ""false"",
   ""is_visible"": """",
   ""onclick"": """",
-  ""href"": ""/s/eplan-dataportal-import"",
+  ""href"": ""/master-data/a/eplan-import"",
   ""new_tab"": ""false"",
   ""form"": """"
 }";
                         var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: all  id: 60f7995e-a747-41fb-b38b-4a4de2438869 >>
+                    {
+                        var id = new Guid("60f7995e-a747-41fb-b38b-4a4de2438869");
+                        Guid? parentId = new Guid("c7d59ef4-6033-40d4-ac17-f9e0b44be529");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "actions";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Create Article"",
+  ""color"": ""0"",
+  ""size"": ""1"",
+  ""class"": """",
+  ""id"": """",
+  ""icon_class"": ""fa fa-plus go-green"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 2;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -953,7 +986,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         var options = @"{
   ""is_visible"": """",
   ""id"": """",
-  ""visible_columns"": 5,
+  ""visible_columns"": 4,
   ""records"": ""{\""type\"":\""0\"",\""string\"":\""AllArticles\"",\""default\"":\""\""}"",
   ""page_size"": 10,
   ""name"": ""article_grid"",
@@ -963,12 +996,14 @@ namespace WebVella.Erp.Plugins.Duatec
   ""small"": ""false"",
   ""bordered"": ""false"",
   ""borderless"": ""false"",
-  ""hover"": ""false"",
+  ""hover"": ""true"",
   ""responsive_breakpoint"": ""0"",
   ""empty_text"": ""No articles"",
   ""has_thead"": ""true"",
   ""has_tfoot"": ""true"",
   ""no_total"": ""false"",
+  ""reveals_details_on_click"": ""true"",
+  ""detail_path"": ""/master-data/articles/articles/l/all"",
   ""container1_label"": """",
   ""container1_width"": """",
   ""container1_name"": """",
@@ -977,23 +1012,23 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container1_class"": """",
   ""container1_vertical_align"": ""3"",
   ""container1_horizontal_align"": ""2"",
-  ""container2_label"": ""Preview"",
+  ""container2_label"": ""Part Number"",
   ""container2_width"": """",
   ""container2_name"": """",
-  ""container2_nowrap"": ""false"",
+  ""container2_nowrap"": ""true"",
   ""container2_sortable"": ""false"",
   ""container2_class"": """",
   ""container2_vertical_align"": ""3"",
   ""container2_horizontal_align"": ""2"",
-  ""container3_label"": ""Part Number"",
+  ""container3_label"": ""Manufacturer"",
   ""container3_width"": """",
   ""container3_name"": """",
-  ""container3_nowrap"": ""false"",
+  ""container3_nowrap"": ""true"",
   ""container3_sortable"": ""false"",
   ""container3_class"": """",
   ""container3_vertical_align"": ""3"",
   ""container3_horizontal_align"": ""2"",
-  ""container4_label"": ""Manufacturer"",
+  ""container4_label"": ""Description"",
   ""container4_width"": """",
   ""container4_name"": """",
   ""container4_nowrap"": ""false"",
@@ -1079,7 +1114,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcFieldText";
-                        var containerId = "column3";
+                        var containerId = "column2";
                         var options = @"{
   ""is_visible"": """",
   ""label_mode"": ""3"",
@@ -1105,6 +1140,38 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
+                    #region << ***Create page body node*** Page name: all  id: d1cd7593-6f32-4deb-bfd4-c2c8b3bdd97c >>
+                    {
+                        var id = new Guid("d1cd7593-6f32-4deb-bfd4-c2c8b3bdd97c");
+                        Guid? parentId = new Guid("9569b249-9a35-44b2-9d71-1e8c0d60b662");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldHtml";
+                        var containerId = "column1";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""mode"": ""4"",
+  ""value"": ""{\""type\"":\""1\"",\""string\"":\""using System;\\nusing System.Collections.Generic;\\nusing WebVella.Erp.Web.Models;\\nusing WebVella.Erp.Api.Models;\\nusing Newtonsoft.Json;\\n\\npublic class GetDatasourceValueCodeVariable : ICodeVariable\\n{\\n\\tpublic object Evaluate(BaseErpPageModel pageModel)\\n\\t{\\n        try\\n        {\\n    \\t\\tvar url = pageModel.TryGetDataSourceProperty<EntityRecord>(\\\""RowRecord\\\"")?[\\\""preview\\\""];\\n    \\t\\treturn $\\\""<img src=\\\\\\\""{url}\\\\\\\"" widht=\\\\\\\""50\\\\\\\"" height=\\\\\\\""50\\\\\\\""/>\\\"";\\n        }\\n        catch (Exception ex)\\n        {\\n            return \\\""Error: \\\"" + ex.Message;\\n        }\\n\\t}\\n}\\n\"",\""default\"":\""no icon\""}"",
+  ""name"": ""field"",
+  ""class"": """",
+  ""upload_mode"": ""1"",
+  ""toolbar_mode"": ""1"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create page body node*** Page name: all  id: 442fa321-20be-4a58-b69c-d7b35bf01636 >>
                     {
                         var id = new Guid("442fa321-20be-4a58-b69c-d7b35bf01636");
@@ -1112,7 +1179,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcFieldText";
-                        var containerId = "column5";
+                        var containerId = "column4";
                         var options = @"{
   ""is_visible"": """",
   ""label_mode"": ""3"",
@@ -1138,38 +1205,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: all  id: d1cd7593-6f32-4deb-bfd4-c2c8b3bdd97c >>
-                    {
-                        var id = new Guid("d1cd7593-6f32-4deb-bfd4-c2c8b3bdd97c");
-                        Guid? parentId = new Guid("9569b249-9a35-44b2-9d71-1e8c0d60b662");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
-                        var componentName = "WebVella.Erp.Web.Components.PcFieldHtml";
-                        var containerId = "column2";
-                        var options = @"{
-  ""is_visible"": """",
-  ""label_mode"": ""3"",
-  ""label_text"": """",
-  ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""1\"",\""string\"":\""using System;\\nusing System.Collections.Generic;\\nusing WebVella.Erp.Web.Models;\\nusing WebVella.Erp.Api.Models;\\nusing Newtonsoft.Json;\\n\\npublic class GetDatasourceValueCodeVariable : ICodeVariable\\n{\\n\\tpublic object Evaluate(BaseErpPageModel pageModel)\\n\\t{\\n        try\\n        {\\n    \\t\\tvar url = pageModel.TryGetDataSourceProperty<EntityRecord>(\\\""RowRecord\\\"")?[\\\""preview\\\""];\\n    \\t\\treturn $\\\""<img src=\\\\\\\""{url}\\\\\\\"" widht=\\\\\\\""50\\\\\\\"" height=\\\\\\\""50\\\\\\\""/>\\\"";\\n        }\\n        catch (Exception ex)\\n        {\\n            return \\\""Error: \\\"" + ex.Message;\\n        }\\n\\t}\\n}\\n\"",\""default\"":\""no icon\""}"",
-  ""name"": ""field"",
-  ""class"": """",
-  ""upload_mode"": ""1"",
-  ""toolbar_mode"": ""1"",
-  ""connected_entity_id"": """",
-  ""connected_record_id_ds"": """",
-  ""access_override_ds"": """",
-  ""required_override_ds"": """",
-  ""ajax_api_url_ds"": """",
-  ""description"": """",
-  ""label_help_text"": """"
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: all  id: 778f3b63-0da5-482b-a241-a3c63ce268e3 >>
                     {
                         var id = new Guid("778f3b63-0da5-482b-a241-a3c63ce268e3");
@@ -1177,7 +1212,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcFieldText";
-                        var containerId = "column4";
+                        var containerId = "column3";
                         var options = @"{
   ""is_visible"": """",
   ""label_mode"": ""0"",
@@ -1198,145 +1233,6 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_help_text"": """"
 }";
                         var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page body node*** Page name: all  id: 2568a2a0-d330-4b01-934e-3bebab8c5f06 >>
-                    {
-                        var id = new Guid("2568a2a0-d330-4b01-934e-3bebab8c5f06");
-                        Guid? parentId = new Guid("9569b249-9a35-44b2-9d71-1e8c0d60b662");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
-                        var options = @"{
-  ""type"": ""2"",
-  ""text"": """",
-  ""color"": ""0"",
-  ""size"": ""1"",
-  ""class"": """",
-  ""id"": """",
-  ""icon_class"": ""fa fa-eye"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": ""{\""type\"":\""1\"",\""string\"":\""using System;\\nusing System.Collections.Generic;\\nusing WebVella.Erp.Web.Models;\\nusing WebVella.Erp.Api.Models;\\nusing Newtonsoft.Json;\\n\\npublic class ViewDetailCodeVariable : ICodeVariable\\n{\\n\\tpublic object Evaluate(BaseErpPageModel pageModel)\\n\\t{\\n\\t    var datasource = pageModel?.TryGetDataSourceProperty<Guid>(\\\""RowRecord.id\\\"");\\n\\t    if(datasource == null)\\n\\t        return null;\\n\\t    return $\\\""/master-data/articles/articles/{datasource}\\\"";\\n\\t}\\n}\"",\""default\"":\""\""}"",
-  ""new_tab"": ""false"",
-  ""form"": """"
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page body node*** Page name: eplan-dataportal-import  id: cdd4ccad-f658-4f11-97b9-691962d9be41 >>
-                    {
-                        var id = new Guid("cdd4ccad-f658-4f11-97b9-691962d9be41");
-                        Guid? parentId = null;
-                        Guid? nodeId = null;
-                        var pageId = new Guid("d1635d81-b92f-4f93-a2b5-01cb05d79ca7");
-                        var componentName = "WebVella.Erp.Web.Components.PcForm";
-                        var containerId = "";
-                        var options = @"{
-  ""is_visible"": """",
-  ""id"": ""importEplanArticleForm"",
-  ""name"": ""importEplanArticleForm"",
-  ""hook_key"": ""eplan_import"",
-  ""method"": ""post"",
-  ""label_mode"": ""1"",
-  ""mode"": ""1"",
-  ""class"": """",
-  ""show_validation"": ""true""
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page body node*** Page name: eplan-dataportal-import  id: d8f95f49-0019-4be5-9534-5665f581b370 >>
-                    {
-                        var id = new Guid("d8f95f49-0019-4be5-9534-5665f581b370");
-                        Guid? parentId = new Guid("cdd4ccad-f658-4f11-97b9-691962d9be41");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("d1635d81-b92f-4f93-a2b5-01cb05d79ca7");
-                        var componentName = "WebVella.Erp.Web.Components.PcPageHeader";
-                        var containerId = "body";
-                        var options = @"{}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page body node*** Page name: eplan-dataportal-import  id: 9e1b09a4-f779-4be7-b0d8-2ab9285fa03e >>
-                    {
-                        var id = new Guid("9e1b09a4-f779-4be7-b0d8-2ab9285fa03e");
-                        Guid? parentId = new Guid("cdd4ccad-f658-4f11-97b9-691962d9be41");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("d1635d81-b92f-4f93-a2b5-01cb05d79ca7");
-                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
-                        var containerId = "body";
-                        var options = @"{
-  ""is_visible"": """",
-  ""label_mode"": ""0"",
-  ""label_text"": ""Eplan Identifier"",
-  ""link"": """",
-  ""mode"": ""0"",
-  ""value"": """",
-  ""name"": ""eplan_identifier"",
-  ""class"": """",
-  ""maxlength"": 0,
-  ""placeholder"": ""e.g. RIT.123456"",
-  ""connected_entity_id"": """",
-  ""connected_record_id_ds"": """",
-  ""access_override_ds"": """",
-  ""required_override_ds"": """",
-  ""ajax_api_url_ds"": """",
-  ""description"": """",
-  ""label_help_text"": """"
-}";
-                        var weight = 2;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page body node*** Page name: eplan-dataportal-import  id: 912111f3-009f-4cc2-8d9f-5f56b1122d46 >>
-                    {
-                        var id = new Guid("912111f3-009f-4cc2-8d9f-5f56b1122d46");
-                        Guid? parentId = new Guid("cdd4ccad-f658-4f11-97b9-691962d9be41");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("d1635d81-b92f-4f93-a2b5-01cb05d79ca7");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "body";
-                        var options = @"{
-  ""type"": ""1"",
-  ""text"": ""Import Article"",
-  ""color"": ""0"",
-  ""size"": ""3"",
-  ""class"": """",
-  ""id"": """",
-  ""icon_class"": """",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": """",
-  ""new_tab"": ""false"",
-  ""form"": ""importEplanArticleForm""
-}";
-                        var weight = 3;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -1645,6 +1541,112 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_help_text"": """"
 }";
                         var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: de518724-815f-4aff-ada7-b62f5832edb4 >>
+                    {
+                        var id = new Guid("de518724-815f-4aff-ada7-b62f5832edb4");
+                        Guid? parentId = null;
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcPageHeader";
+                        var containerId = "";
+                        var options = @"{}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 73c0e370-0564-443a-9055-d015f401b7ef >>
+                    {
+                        var id = new Guid("73c0e370-0564-443a-9055-d015f401b7ef");
+                        Guid? parentId = null;
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcForm";
+                        var containerId = "";
+                        var options = @"{
+  ""is_visible"": """",
+  ""id"": ""wv-73c0e370-0564-443a-9055-d015f401b7ef"",
+  ""name"": ""importEplanArticleForm"",
+  ""hook_key"": ""eplan_import"",
+  ""method"": ""post"",
+  ""label_mode"": ""1"",
+  ""mode"": ""1"",
+  ""class"": """",
+  ""show_validation"": ""true""
+}";
+                        var weight = 2;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: c3b53b06-cae2-4f65-ac46-73e92891a015 >>
+                    {
+                        var id = new Guid("c3b53b06-cae2-4f65-ac46-73e92891a015");
+                        Guid? parentId = new Guid("73c0e370-0564-443a-9055-d015f401b7ef");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "body";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""0"",
+  ""label_text"": ""Eplan Identifier"",
+  ""link"": """",
+  ""mode"": ""0"",
+  ""value"": """",
+  ""name"": ""eplan_identifier"",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": ""e.g. RIT.123456"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: e47f8836-2033-46cc-afbe-87d550a6a0c9 >>
+                    {
+                        var id = new Guid("e47f8836-2033-46cc-afbe-87d550a6a0c9");
+                        Guid? parentId = new Guid("73c0e370-0564-443a-9055-d015f401b7ef");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "body";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Import Article"",
+  ""color"": ""0"",
+  ""size"": ""3"",
+  ""class"": """",
+  ""id"": """",
+  ""icon_class"": """",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-73c0e370-0564-443a-9055-d015f401b7ef""
+}";
+                        var weight = 2;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
