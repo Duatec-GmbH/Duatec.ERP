@@ -12,7 +12,7 @@ using WebVella.Erp.Web.Pages.Application;
 namespace WebVella.Erp.Plugins.Project.Hooks.Page
 {
 	[HookAttachment]
-	public class PageHook : IPageHook
+	public class PageHook : Web.Hooks.IPageHook
 	{
 		private Guid CREATE_TASK_PAGE_ID = new Guid("68100014-1fd7-456c-9b26-27aa9f858287");
 

@@ -23,7 +23,7 @@ using WebVella.Erp.Plugins.Mail;
 using WebVella.Erp.Plugins.Next;
 using WebVella.Erp.Plugins.Project;
 using WebVella.Erp.Plugins.Duatec;
-using WebVella.Erp.Plugins.Eplan;
+using WebVella.Erp.Plugins.Duatec;
 
 namespace WebVella.Erp.Site
 {

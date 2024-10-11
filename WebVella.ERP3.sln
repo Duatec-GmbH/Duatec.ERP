@@ -40,9 +40,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.WebAssembly", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec", "WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj", "{4E4A5F55-1137-4D25-A176-7445FBF241B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Eplan", "WebVella.Erp.Plugins.Eplan\WebVella.Erp.Plugins.Eplan.csproj", "{C3901C11-5E94-42FF-8316-8975309E0A3D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Eplan.Test", "WebVella.Erp.Plugins.Eplan.Test\WebVella.Erp.Plugins.Eplan.Test.csproj", "{1EF02193-887F-4FB3-BE4D-B8DFF1668415}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{544579D5-581D-44E5-A896-72DE33397AA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,14 +88,10 @@ Global
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E4A5F55-1137-4D25-A176-7445FBF241B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3901C11-5E94-42FF-8316-8975309E0A3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3901C11-5E94-42FF-8316-8975309E0A3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3901C11-5E94-42FF-8316-8975309E0A3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3901C11-5E94-42FF-8316-8975309E0A3D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EF02193-887F-4FB3-BE4D-B8DFF1668415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EF02193-887F-4FB3-BE4D-B8DFF1668415}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EF02193-887F-4FB3-BE4D-B8DFF1668415}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EF02193-887F-4FB3-BE4D-B8DFF1668415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544579D5-581D-44E5-A896-72DE33397AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544579D5-581D-44E5-A896-72DE33397AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544579D5-581D-44E5-A896-72DE33397AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544579D5-581D-44E5-A896-72DE33397AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

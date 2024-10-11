@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.DataModel;
 
-namespace WebVella.Erp.Plugins.Eplan
+namespace WebVella.Erp.Plugins.Duatec
 {
     public class EplanDataPortal
     {
@@ -33,7 +33,7 @@ namespace WebVella.Erp.Plugins.Eplan
         public static async Task<ManufacturerDto?> GetManufacturerAsync(long id, string? search = null)
         {
             return (await GetManufacturersAsync(search))
-                .FirstOrDefault(m => m.Id == id);
+                .FirstOrDefault(m => m.EplanId == id);
         }
 
         public static ArticleDto? GetArticleById(long id)

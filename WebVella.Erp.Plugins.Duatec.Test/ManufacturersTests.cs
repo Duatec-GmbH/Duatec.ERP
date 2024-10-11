@@ -1,6 +1,6 @@
-using WebVella.Erp.Plugins.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.DataModel;
 
-namespace WebVella.Erp.Plugins.Eplan.Test
+namespace WebVella.Erp.Plugins.Duatec.Test
 {
     [TestFixture]
     public class ManufacturersTests
@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Eplan.Test
             var tasks = new List<Task<ManufacturerDto?>>();
 
             foreach (var manufacturer in manufacturers)
-                tasks.Add(EplanDataPortal.GetManufacturerAsync(manufacturer.Id, manufacturer.Name));
+                tasks.Add(EplanDataPortal.GetManufacturerAsync(manufacturer.EplanId, manufacturer.Name));
 
             Task.WaitAll([.. tasks]);
             Assert.Multiple(() =>

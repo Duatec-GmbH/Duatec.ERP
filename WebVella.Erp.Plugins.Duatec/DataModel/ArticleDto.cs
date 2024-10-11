@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.DataModel
 {
     public class ArticleDto
     {
@@ -9,26 +9,22 @@ namespace WebVella.Erp.Plugins.Eplan.DataModel
             ManufacturerDto manufacturer,
             string partNumber, 
             string description, 
-            string partType, 
             string pictureUrl)
         {
-            Id = id;
+            EplanId = id;
             Manufacturer = manufacturer;
             PartNumber = partNumber;
             Description = description;
-            PartType = partType;
             PictureUrl = pictureUrl;
         }
 
-        public long Id { get; }
+        public long EplanId { get; }
 
         public ManufacturerDto Manufacturer { get; }
 
         public string PartNumber { get; }
 
         public string Description { get; }
-
-        public string PartType { get; }
 
         public string PictureUrl { get; }
 
@@ -56,9 +52,7 @@ namespace WebVella.Erp.Plugins.Eplan.DataModel
                 ?? GetDescription(attributes, LanguageKey.en_US)
                 ?? string.Empty;
 
-            var partType = attributes["part_type"]!.GetValue<string>();
             var partNumber = attributes["part_number"]!.GetValue<string>();
-
             var pictureId = data["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
             var pictureUrl = GetPictureUrl(json, pictureId) ?? string.Empty;
 
@@ -67,7 +61,6 @@ namespace WebVella.Erp.Plugins.Eplan.DataModel
                 manufacturer: manufacturer,
                 partNumber: partNumber,
                 description: description,
-                partType: partType,
                 pictureUrl: pictureUrl);
         }
 

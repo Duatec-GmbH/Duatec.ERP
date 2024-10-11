@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebVella.Erp.Plugins.Eplan\WebVella.Erp.Plugins.Eplan.csproj" />
+    <ProjectReference Include="..\WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj" />
   </ItemGroup>
 
   <ItemGroup>

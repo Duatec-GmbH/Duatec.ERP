@@ -1,25 +1,25 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.DataModel
 {
     public class ManufacturerDto
     {
-        private ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string logoUrl)
+        private ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
         {
-            Id = id;
+            EplanId = id;
             ShortName = shortName;
             Name = name;
-            WebsiteUrl = websiteUrl;
-            LogoUrl = logoUrl;
+            WebsiteUrl = websiteUrl ?? string.Empty;
+            LogoUrl = logoUrl ?? string.Empty;
         }
 
-        public long Id { get; }
+        public long EplanId { get; }
 
         public string ShortName { get; }
 
         public string Name { get; }
 
-        public string? WebsiteUrl { get; }
+        public string WebsiteUrl { get; }
 
         public string LogoUrl { get; }
 
@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Eplan.DataModel
             var name = json["long_name"]!.GetValue<string>()!;
 
             var websiteUrl = json["website"]?.GetValue<string?>();
-            var logoUrl = json["logo_url"]!.GetValue<string>();
+            var logoUrl = json["logo_url"]?.GetValue<string>();
 
             return new ManufacturerDto(
                 id: id,

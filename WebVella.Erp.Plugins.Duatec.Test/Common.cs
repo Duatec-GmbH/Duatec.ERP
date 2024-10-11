@@ -1,7 +1,7 @@
 ﻿using System.Collections;
-using WebVella.Erp.Plugins.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.DataModel;
 
-namespace WebVella.Erp.Plugins.Eplan.Test
+namespace WebVella.Erp.Plugins.Duatec.Test
 {
     internal static class Common
     {
@@ -10,11 +10,10 @@ namespace WebVella.Erp.Plugins.Eplan.Test
             Assert.That(sut, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(sut!.Id, Is.Not.Zero, nameof(ArticleDto.Id));
+                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(ArticleDto.EplanId));
                 AssertManufacturerIsValid(sut.Manufacturer);
                 AssertIsNotEmpty(sut.PartNumber, nameof(ArticleDto.PartNumber));
                 AssertIsNotEmpty(sut.Description, nameof(ArticleDto.Description));
-                AssertIsNotEmpty(sut.PartType, nameof(ArticleDto.PartType));
                 Assert.That(sut.PictureUrl, Is.Not.Null, nameof(ArticleDto.PictureUrl));
             });
         }
@@ -24,7 +23,7 @@ namespace WebVella.Erp.Plugins.Eplan.Test
             Assert.That(sut, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(sut!.Id, Is.Not.Zero, nameof(ManufacturerDto.Id));
+                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(ManufacturerDto.EplanId));
                 AssertIsNotEmpty(sut.Name, nameof(ManufacturerDto.Name));
                 AssertIsNotEmpty(sut.ShortName, nameof(ManufacturerDto.ShortName));
                 Assert.That(sut.WebsiteUrl, Is.Not.Null, nameof(ManufacturerDto.WebsiteUrl));

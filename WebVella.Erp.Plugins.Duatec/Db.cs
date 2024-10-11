@@ -1,0 +1,95 @@
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Eql;
+using WebVella.Erp.Plugins.Duatec.DataModel;
+using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
+
+namespace WebVella.Erp.Plugins.Duatec
+{
+    internal class Db
+    {
+        public static Guid? GetArticleIdByEplanId(string eplanId)
+        {
+            var eql = new EqlCommand($"select id from {Article.Entity} " +
+                $"where {Article.EplanId} = @param",
+                new EqlParameter("param", eplanId));
+
+            return GetIdFromQueryResult(eql.Execute());
+        }
+
+        public static Guid? GetArticleIdByPartNumber(string partNumber)
+        {
+            var eql = new EqlCommand($"select id from {Article.Entity} " +
+                $"where {Article.PartNumber} = @param",
+                new EqlParameter("param", partNumber));
+
+            return GetIdFromQueryResult(eql.Execute());
+        }
+
+        public static Guid? GetManufacturerIdByEplanId(string eplanId)
+        {
+            var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
+                $"where {Manufacturer.EplanId} = @param",
+                new EqlParameter("param", eplanId));
+
+            return GetIdFromQueryResult(eql.Execute());
+        }
+
+        public static Guid? GetManufacturerIdByShortName(string shortName)
+        {
+            var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
+                $"where {Manufacturer.ShortName} = @param",
+                new EqlParameter("param", shortName));
+
+            return GetIdFromQueryResult(eql.Execute());
+        }
+
+        private static Guid? GetIdFromQueryResult(EntityRecordList? result)
+        {
+            if (result != null && result.Count > 0)
+                return (Guid)result[0]["id"];
+            return null;
+        }
+
+        public static Guid? InsertManufacturer(ManufacturerDto manufacturer)
+        {
+            var recMan = new RecordManager();
+            var rec = new EntityRecord();
+
+            var id = Guid.NewGuid();
+
+            rec["id"] = id;
+            rec[Manufacturer.EplanId] = manufacturer.EplanId.ToString();
+            rec[Manufacturer.LogoUrl] = manufacturer.LogoUrl;
+            rec[Manufacturer.Name] = manufacturer.Name;
+            rec[Manufacturer.ShortName] = manufacturer.ShortName;
+            rec[Manufacturer.WebsiteUrl] = manufacturer.WebsiteUrl;
+
+            var result = recMan.CreateRecord(Manufacturer.Entity, rec);
+            if (result.Success)
+                return id;
+            return null;
+        }
+
+        public static Guid? InsertArticle(ArticleDto article, Guid manufacturerId, string articleType)
+        {
+            var recMan = new RecordManager();
+            var rec = new EntityRecord();
+
+            var id = Guid.NewGuid();
+
+            rec["id"] = Guid.NewGuid();
+            rec[Article.PartNumber] = article.PartNumber;
+            rec[Article.EplanId] = article.EplanId.ToString();
+            rec[Article.Designation] = article.Description;
+            rec[Article.Type] = articleType;
+            rec[Article.ManufacturerId] = manufacturerId;
+            rec[Article.Image] = article.PictureUrl;
+
+            var result = recMan.CreateRecord(Article.Entity, rec);
+            if (result.Success)
+                return id;
+            return null;
+        }
+    }
+}

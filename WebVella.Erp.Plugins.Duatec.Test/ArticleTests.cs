@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Eplan.Test
+﻿namespace WebVella.Erp.Plugins.Duatec.Test
 {
     [TestFixture]
     internal class ArticleTests
