@@ -1,9 +1,9 @@
 ﻿
 namespace WebVella.Erp.Plugins.Duatec.DataModel
 {
-    internal static class EntityInfo
+    public static class EntityInfo
     {
-        internal static class Manufacturer
+        public static class Manufacturer
         {
             public const string Entity = "manufacturer";
             public const string EplanId = "eplan_id";
@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataModel
             public const string LogoUrl = "logo";
         }
 
-        internal static class Article
+        public static class Article
         {
             public const string Entity = "article";
             public const string EplanId = "eplan_id";

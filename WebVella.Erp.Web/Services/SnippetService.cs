@@ -12,8 +12,7 @@ namespace WebVella.Erp.Web.Services
 		static SnippetService()
 		{
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-							.Where(a => !(a.FullName.ToLowerInvariant().StartsWith("microsoft.")
-								|| a.FullName.ToLowerInvariant().StartsWith("system.")));
+							.Where(a => a.FullName.StartsWith("WebVella.Erp.Plugins"));
 
 			foreach (var assembly in assemblies)
 			{

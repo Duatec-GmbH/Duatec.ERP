@@ -10,7 +10,7 @@ using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
 namespace WebVella.Erp.Plugins.Duatec.Hooks
 {
     [HookAttachment(key: "article_create")]
-    internal class ArticleCreateHook : IRecordCreatePageHook
+    public class ArticleCreateHook : IRecordCreatePageHook
     {
         const string partNumberField = "part_number";
 

@@ -189,7 +189,6 @@ namespace WebVella.Erp.Site
             .UseErpPlugin<MailPlugin>()
             .UseErpPlugin<NextPlugin>()
             .UseErpPlugin<ProjectPlugin>()
-            .UseErpPlugin<EplanPlugin>()
             .UseErpPlugin<DuatecPlugin>()
             .UseErp()
             .UseErpMiddleware()

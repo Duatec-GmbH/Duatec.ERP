@@ -25,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             => GetFormField(pageModel, "eplan_identifier");
 
         private static string GetType(BaseErpPageModel pageModel)
-            => GetFormField(pageModel, "type");
+            => GetFormField(pageModel, "article_type");
 
         private static string GetFormField(BaseErpPageModel pageModel, string id)
         {

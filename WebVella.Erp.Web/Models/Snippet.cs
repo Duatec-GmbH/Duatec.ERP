@@ -11,10 +11,9 @@ namespace WebVella.Erp.Web.Models
 
 		public string GetText()
 		{
-			Stream resource = Assembly.GetManifestResourceStream(Name);
-			StreamReader reader = new StreamReader(resource);
+			using var stream = Assembly.GetManifestResourceStream(Name);
+			using var reader = new StreamReader(stream);
 			return reader.ReadToEnd();
 		}
-
 	}
 }

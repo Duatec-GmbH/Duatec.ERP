@@ -1,28 +1,14 @@
 ﻿using CSScriptLib;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Web.Service
 {
 	public static class CodeEvalService
 	{
-		private static object lockObj = new object();
-		private static readonly Dictionary<string, object> scriptObjects = new Dictionary<string, object>();
-
-		//private static string CalculateMD5Hash(string input)
-		//{
-		//	MD5 md5 = MD5.Create();
-		//	byte[] inputBytes = Encoding.ASCII.GetBytes(input);
-		//	byte[] hash = md5.ComputeHash(inputBytes);
-
-		//	StringBuilder sb = new StringBuilder();
-		//	for (int i = 0; i < hash.Length; i++)
-		//		sb.Append(hash[i].ToString("X2"));
-		//	return sb.ToString();
-		//}
+		private static readonly object lockObj = new object();
+		private static readonly Dictionary<string, object> scriptObjects = [];
 
 		private static ICodeVariable GetScriptObject(string sourceCode)
 		{
@@ -56,7 +42,7 @@ namespace WebVella.Erp.Web.Service
 
 		internal static void Compile(string sourceCode)
 		{
-			ICodeVariable script = GetScriptObject(sourceCode);
+			GetScriptObject(sourceCode);
 		}
 	}
 }

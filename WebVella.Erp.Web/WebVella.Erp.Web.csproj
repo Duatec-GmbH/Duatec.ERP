@@ -54,6 +54,7 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="wwwroot\**\*" />
+		<EmbeddedResource Remove="Snippets\EmptySampleClassSnippet.cs" />
 		<EmbeddedResource Include="Components\Nav\script.js" />
 		<EmbeddedResource Include="Components\PcBtnToolbar\service.js" />
 		<EmbeddedResource Include="Components\PcBtnGroup\service.js" />

@@ -6,6 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Snippets\ArticleDetailImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ArticleListImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ArticleManufacturerNameSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ManufacturerDetailImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ManufacturerListImageSnippet.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
