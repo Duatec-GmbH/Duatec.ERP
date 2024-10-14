@@ -7,7 +7,7 @@ namespace WebVella.Erp.Plugins.Duatec
     public static class EplanDataPortal
     {
         private static DateTimeOffset ManufacturersValidUntil = DateTimeOffset.Now;
-        private static ManufacturerDto[] Manufacturers = [];
+        private static List<ManufacturerDto> Manufacturers = [];
 
         private static string GetArticleByPartNumberUrl(string partNumber)
             => $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
@@ -15,9 +15,9 @@ namespace WebVella.Erp.Plugins.Duatec
         private static string GetArticleByIdUrl(long id)
             => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
 
-        public static IEnumerable<ManufacturerDto> GetManufacturers()
+        public static List<ManufacturerDto> GetManufacturers()
         {
-            if(Manufacturers.Length == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
+            if(Manufacturers.Count == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
             {
                 var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
                 var values = json?["data"]?.AsArray();
@@ -27,7 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     Manufacturers = values
                         .Select(ManufacturerDto.FromJson)
                         .Where(m => m != null)!
-                        .ToArray()!;
+                        .ToList()!;
                 }
                 ManufacturersValidUntil = DateTimeOffset.Now.AddHours(10);
             }

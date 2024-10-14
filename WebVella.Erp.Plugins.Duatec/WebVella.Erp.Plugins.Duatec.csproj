@@ -13,6 +13,7 @@
     <Compile Remove="Snippets\ManageUrlSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImageSnippet.cs" />
+    <Compile Remove="Snippets\VisitManufacturerButtonSnippet.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +41,10 @@
   <ItemGroup>
     <ProjectReference Include="..\WebVella.Erp.Web\WebVella.Erp.Web.csproj" />
     <ProjectReference Include="..\WebVella.ERP\WebVella.Erp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Snippets\VisitManufacturerButtonSnippet.cs" />
   </ItemGroup>
 
 </Project>
