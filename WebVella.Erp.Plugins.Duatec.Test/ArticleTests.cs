@@ -5,18 +5,18 @@
     {
         [Test]
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticleIds100))]
-        public async Task GetArticleWithId_ReturnsValidDto(string id)
+        public void GetArticleWithId_ReturnsValidDto(string id)
         {
-            var sut = await EplanDataPortal.GetArticleByIdAsync(long.Parse(id));
+            var sut = EplanDataPortal.GetArticleById(long.Parse(id));
 
             Common.AssertArticleIsValid(sut);
         }
 
         [Test]
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticlePartNumbers100))]
-        public async Task GetArticleWithPartNumber_ReturnsValidDto(string partNumber)
+        public void GetArticleWithPartNumber_ReturnsValidDto(string partNumber)
         {
-            var sut = await EplanDataPortal.GetArticleByPartNumberAsync(partNumber);
+            var sut = EplanDataPortal.GetArticleByPartNumber(partNumber);
 
             Common.AssertArticleIsValid(sut);
         }

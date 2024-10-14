@@ -4,54 +4,47 @@ using WebVella.Erp.Plugins.Duatec.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
-    public class EplanDataPortal
+    public static class EplanDataPortal
     {
-        private static string GetArticleByIdUrl(long id)
-            => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
+        private static DateTimeOffset ManufacturersValidUntil = DateTimeOffset.Now;
+        private static ManufacturerDto[] Manufacturers = [];
 
         private static string GetArticleByPartNumberUrl(string partNumber)
             => $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
 
+        private static string GetArticleByIdUrl(long id)
+            => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
 
-        public static async Task<IEnumerable<ManufacturerDto>> GetManufacturersAsync(string? search = null)
+        public static IEnumerable<ManufacturerDto> GetManufacturers()
         {
-            var url = "https://dataportal.eplan.com/api/manufacturers";
-            if (!string.IsNullOrWhiteSpace(search))
-                url += $"?search={search}";
+            if(Manufacturers.Length == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
+            {
+                var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
+                var values = json?["data"]?.AsArray();
 
-            var json = await JsonFromUrlAsync(url);
-            var values = json?["data"]?.AsArray();
+                if (values != null && values.Count >= 0)
+                {
+                    Manufacturers = values
+                        .Select(ManufacturerDto.FromJson)
+                        .Where(m => m != null)!
+                        .ToArray()!;
+                }
+                ManufacturersValidUntil = DateTimeOffset.Now.AddHours(10);
+            }
 
-            if (values == null || values.Count == 0)
-                return [];
-
-            return values
-                .Select(ManufacturerDto.FromJson)
-                .Where(m =>  m != null)!;
+            return Manufacturers;
         }
 
-        public static async Task<ManufacturerDto?> GetManufacturerAsync(long id, string? search = null)
+        public static ManufacturerDto? GetManufacturerByShortName(string shortName)
         {
-            return (await GetManufacturersAsync(search))
+            return GetManufacturers()
+                .FirstOrDefault(m => m.ShortName == shortName);
+        }
+
+        public static ManufacturerDto? GetManufacturerById(long id)
+        {
+            return GetManufacturers()
                 .FirstOrDefault(m => m.EplanId == id);
-        }
-
-        public static ArticleDto? GetArticleById(long id)
-        {
-            var url = GetArticleByIdUrl(id);
-
-            var json = JsonFromUrl(url);
-
-            return ArticleDto.FromJson(json, id);
-        }
-
-        public static async Task<ArticleDto?> GetArticleByIdAsync(long id)
-        {
-            var url = GetArticleByIdUrl(id);
-
-            var json = await JsonFromUrlAsync(url);
-            
-            return ArticleDto.FromJson(json, id);
         }
 
         public static ArticleDto? GetArticleByPartNumber(string partNumber)
@@ -63,46 +56,13 @@ namespace WebVella.Erp.Plugins.Duatec
             return ArticleDto.FromJson(json, partNumber);
         }
 
-        public static async Task<ArticleDto?> GetArticleByPartNumberAsync(string partNumber)
+        public static ArticleDto? GetArticleById(long id)
         {
-            var url = GetArticleByPartNumberUrl(partNumber);
+            var url = GetArticleByIdUrl(id);
 
-            var json = await JsonFromUrlAsync(url);
+            var json = JsonFromUrl(url);
 
-            return ArticleDto.FromJson(json, partNumber);
-        }
-
-        public static async Task<IEnumerable<ArticleDto>> GetArticlesById(params long[] ids)
-        {
-            var articles = new List<ArticleDto>(ids.Length);
-            foreach(var id in ids)
-            {
-                var article = await GetArticleByIdAsync(id);
-                if (article != null)
-                    articles.Add(article);
-            }
-            return articles;
-        }
-
-
-
-        public static async Task<IEnumerable<ArticleDto>> GetArticlesByPartNumber(params string[] partNumbers)
-        {
-            var articles = new List<ArticleDto>(partNumbers.Length);
-            foreach (var partNumber in partNumbers)
-            {
-                var article = await GetArticleByPartNumberAsync(partNumber);
-                if (article != null)
-                    articles.Add(article);
-            }
-            return articles;
-        }
-
-        private async static Task<JsonNode?> JsonFromUrlAsync(string url)
-        {
-            using var client = GetClient();
-
-            return JsonObject.Parse(await client.GetStringAsync(url));
+            return ArticleDto.FromJson(json, id);
         }
 
         private static JsonNode? JsonFromUrl(string url)
