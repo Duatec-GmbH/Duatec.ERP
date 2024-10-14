@@ -7,9 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Snippets\ArticleDetailImageSnippet.cs" />
+    <Compile Remove="Snippets\ArticleListImageSnippet.cs" />
+    <Compile Remove="Snippets\DetailUrlSnippet.cs" />
+    <Compile Remove="Snippets\ManageUrlSnippet.cs" />
+    <Compile Remove="Snippets\ManufacturerDetailImageSnippet.cs" />
+    <Compile Remove="Snippets\ManufacturerListImageSnippet.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Snippets\ArticleDetailImageSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleListImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\ArticleManufacturerNameSnippet.cs" />
+    <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />
     <EmbeddedResource Include="Snippets\ManufacturerDetailImageSnippet.cs" />
     <EmbeddedResource Include="Snippets\ManufacturerListImageSnippet.cs" />
   </ItemGroup>

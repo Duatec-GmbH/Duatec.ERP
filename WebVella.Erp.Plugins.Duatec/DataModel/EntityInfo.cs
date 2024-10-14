@@ -22,6 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataModel
             public const string Type = "article_type";
             public const string ManufacturerId = "manufacturer_id";
             public const string Image = "preview";
+            public const string IsBlocked = "is_blocked";
         }
     }
 }

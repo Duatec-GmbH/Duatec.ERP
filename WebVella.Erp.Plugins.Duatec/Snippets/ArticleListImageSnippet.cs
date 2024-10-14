@@ -1,24 +1,13 @@
-﻿#pragma warning disable IDE0005
-using System;
-#pragma warning restore IDE0005
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.DataModel;
-using WebVella.Erp.Web.Models;
+﻿using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class ArticleListImageSnippet : ICodeVariable
+public class ArticleListImageSnippet : ImageSnippetBase
 {
-    public object Evaluate(BaseErpPageModel pageModel)
-    {
-        try
-        {
-            var url = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[EntityInfo.Article.Image];
-            return $"<img src=\"{url}\" height=\"50\" width=\"50\"/>";
-        }
-        catch (Exception ex)
-        {
-            return "Error: " + ex.Message;
-        }
-    }
+    protected override int? Height => 50;
+
+    protected override int? Width => 50;
+
+    protected override string Property => EntityInfo.Article.Image;
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime

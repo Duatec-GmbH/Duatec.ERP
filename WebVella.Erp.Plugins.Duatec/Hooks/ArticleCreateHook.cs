@@ -50,12 +50,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             }
 
             var result = true;
-            if (partNumber.Any(char.IsWhiteSpace))
+            if (char.IsWhiteSpace(partNumber[0]))
             {
                 result = false;
-                validationErrors.Add(new ValidationError(partNumberField, "Part number must not contain any white spaces"));
+                validationErrors.Add(new ValidationError(partNumberField, "Part number must not start with white spaces"));
             }
-            if(partNumber.Any(c => !CharIsAllowed(c)))
+            if (char.IsWhiteSpace(partNumber[^1]))
+            {
+                result = false;
+                validationErrors.Add(new ValidationError(partNumberField, "Part number must not end with white spaces"));
+            }
+            if (partNumber.Any(c => !CharIsAllowed(c)))
             {
                 result = false;
                 validationErrors.Add(new ValidationError(partNumberField, "Part number contains invalid characters"));
@@ -70,7 +75,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         private static bool CharIsAllowed(char c)
         {
-            return c >= '!' && c <= '~'; 
+            return c >= ' ' && c <= '~'; 
             // TODO maybe restrict this more
         }
 
