@@ -4,7 +4,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataModel
 {
     public class ManufacturerDto
     {
-        private ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
+        public ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
         {
             EplanId = id;
             ShortName = shortName;

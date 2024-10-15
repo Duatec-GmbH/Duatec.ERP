@@ -6,7 +6,7 @@ using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
-    internal class Db
+    public static class Db
     {
         public static Guid? GetArticleIdByEplanId(string eplanId)
         {
@@ -90,6 +90,18 @@ namespace WebVella.Erp.Plugins.Duatec
             if (result.Success)
                 return id;
             return null;
+        }
+
+        public static bool CanImportManufacturer(ManufacturerDto manufacturer)
+        {
+            var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
+                $"where {Manufacturer.ShortName} = @shortName OR {Manufacturer.EplanId} = @id OR {Manufacturer.Name} = @name",
+                new EqlParameter("shortName", manufacturer.ShortName),
+                new EqlParameter("id", manufacturer.EplanId.ToString()),
+                new EqlParameter("name", manufacturer.Name));
+
+            var res = eql.Execute();
+            return res == null || res.Count == 0;
         }
     }
 }

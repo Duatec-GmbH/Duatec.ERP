@@ -31,8 +31,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var sortBy = (string?)arguments["sortBy"];
             var sortOrder = (string?)arguments["sortOrder"];
 
+            var comparison = StringComparison.OrdinalIgnoreCase;
             var manufacturers = EplanDataPortal.GetManufacturers()
-                .Where(m => (shortName == null || m.ShortName.Equals(shortName)) && (name == null || m.Name.StartsWith(name)));
+                .Where(m => (shortName == null || m.ShortName.Equals(shortName, comparison)) 
+                    && (name == null || m.Name.StartsWith(name, comparison)));
 
             if (sortBy == Manufacturer.Name)
                 manufacturers = manufacturers.OrderBy(m => m.Name);

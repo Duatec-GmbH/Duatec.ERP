@@ -1,34 +1,74 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
+using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
-using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks
 {
     [HookAttachment("manufacturer_eplan_import")]
-    internal class ManufacturerEplanImportHook : IPageHook
+    internal class ManufacturerEplanImportHook : IParameterizedHook
     {
-        public IActionResult OnGet(BaseErpPageModel pageModel)
-        {
-            return null!;
-        }
+        private const string EplanIdArg = "hEplanId";
 
-        public IActionResult OnPost(BaseErpPageModel pageModel)
-        {
-            var shortName = pageModel.GetFormValue("eplan_identifier");
-            Import(pageModel, shortName);
-            return null!;
-        }
+        public string[] Parameters => [EplanIdArg];
 
-        private void Import(BaseErpPageModel pageModel, string shortName)
+        public IActionResult OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            if (string.IsNullOrEmpty(shortName))
+            if(!args.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
+                PutInvalidArg(pageModel);
+            else
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Please enter a manufacturer short name part number.");
-                return;
+                var manufacturer = EplanDataPortal.GetManufacturers()
+                    .SingleOrDefault(m => m.EplanId == eplanId);
+
+                if (manufacturer == null)
+                    PutInvalidArg(pageModel);
+                else if (!Db.CanImportManufacturer(manufacturer))
+                    pageModel.PutMessage(ScreenMessageType.Error, $"Can not import manufacturer '{manufacturer}' due to unique constraints.");
+                else Import(pageModel, manufacturer);
             }
+                
+            return null!;
+        }
+
+
+        public IActionResult OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        {
+            return null!;
+        }
+
+        private static void Import(BaseErpPageModel pageModel, ManufacturerDto manufacturer)
+        {
+            using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
+            using var connection = dbCtx.CreateConnection();
+            using var scope = SecurityContext.OpenSystemScope();
+
+            connection.BeginTransaction();
+
+            try
+            {
+                if (Db.InsertManufacturer(manufacturer) == null)
+                    pageModel.PutMessage(ScreenMessageType.Error, $"Failed to import manufacturer '{manufacturer.Name}'");
+                else
+                {
+                    connection.CommitTransaction();
+                    pageModel.PutMessage(ScreenMessageType.Success, $"Successfully imported manufacturer '{manufacturer.Name}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                connection.RollbackTransaction();
+                pageModel.PutMessage(ScreenMessageType.Error, $"Failed to import manufacturer '{manufacturer.Name}': {ex.Message}");
+            }
+        }
+
+        private static void PutInvalidArg(BaseErpPageModel pageModel)
+        {
+            pageModel.PutMessage(ScreenMessageType.Error, $"invalid argument '{EplanIdArg}'");
         }
     }
 }

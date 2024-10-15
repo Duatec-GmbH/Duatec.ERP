@@ -29,20 +29,34 @@ namespace WebVella.Erp.Web.Pages.Application
 				if (PageContext.HttpContext.Request.Query.ContainsKey("hookKey"))
 					hookKey = HttpContext.Request.Query["hookKey"].ToString();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(hookKey);
-				foreach (IPageHook inst in globalHookInstances)
+				var parameterizedHooks = HookManager.GetHookedInstances<IParameterizedHook>(hookKey);
+				if(parameterizedHooks.Count > 0)
 				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
+					foreach (var inst in parameterizedHooks)
+					{
+						var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
+						var result = inst.OnGet(this, args);
+						if (result != null)
+							return result;
+					}
+				}
+				else
+				{
+					foreach (IPageHook inst in HookManager.GetHookedInstances<IPageHook>(hookKey))
+					{
+						var result = inst.OnGet(this);
+						if (result != null)
+							return result;
+					}
+
+					foreach (IApplicationNodePageHook inst in HookManager.GetHookedInstances<IApplicationNodePageHook>(hookKey))
+					{
+						var result = inst.OnGet(this);
+						if (result != null)
+							return result;
+					}
 				}
 
-
-				foreach (IApplicationNodePageHook inst in HookManager.GetHookedInstances<IApplicationNodePageHook>(hookKey))
-				{
-					var result = inst.OnGet(this);
-					if (result != null)
-						return result;
-				}
 				BeforeRender();
 				return Page();
 			}
@@ -68,19 +82,33 @@ namespace WebVella.Erp.Web.Pages.Application
 				if (initResult != null) return initResult;
 				if (ErpRequestContext.Page == null) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
+				var parameterizedHooks = HookManager.GetHookedInstances<IParameterizedHook>(HookKey);
+				if (parameterizedHooks.Count > 0)
 				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
+					foreach (var inst in parameterizedHooks)
+					{
+						var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
+						var result = inst.OnPost(this, args);
+						if (result != null)
+							return result;
+					}
+				}
+				else
+				{
+					foreach (IPageHook inst in HookManager.GetHookedInstances<IPageHook>(HookKey))
+					{
+						var result = inst.OnPost(this);
+						if (result != null) return result;
+					}
+
+					foreach (IApplicationNodePageHook inst in HookManager.GetHookedInstances<IApplicationNodePageHook>(HookKey))
+					{
+						var result = inst.OnPost(this);
+						if (result != null)
+							return result;
+					}
 				}
 
-				foreach (IApplicationNodePageHook inst in HookManager.GetHookedInstances<IApplicationNodePageHook>(HookKey))
-				{
-					var result = inst.OnPost(this);
-					if (result != null)
-						return result;
-				}
 				BeforeRender();
 				return Page();
 			}
