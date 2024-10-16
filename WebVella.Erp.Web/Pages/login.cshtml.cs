@@ -32,12 +32,9 @@ namespace WebVella.Erp.Web.Pages
 		{
 			var initResult = Init();
 			if (initResult != null) return initResult;
-			var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-			foreach (IPageHook inst in globalHookInstances)
-			{
-				var result = inst.OnGet(this);
-				if (result != null) return result;
-			}
+
+			if (ExecutePageHooksOnGet() is IActionResult res)
+				return res;
 
 			if (CurrentUser != null)
 			{
@@ -66,15 +63,11 @@ namespace WebVella.Erp.Web.Pages
 			var initResult = Init();
 			if (initResult != null) return initResult;
 
-			var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-			foreach (IPageHook inst in globalHookInstances)
-			{
-				var result = inst.OnPost(this);
-				if (result != null) return result;
-			}
+			if (ExecutePageHooksOnPost() is IActionResult res)
+				return res;
 
 			var hookInstances = HookManager.GetHookedInstances<ILoginPageHook>(HookKey);
-			foreach (ILoginPageHook inst in hookInstances)
+			foreach (var inst in hookInstances)
 			{
 				var result = inst.OnPostPreLogin(this);
 				if (result != null) return result;
@@ -82,7 +75,7 @@ namespace WebVella.Erp.Web.Pages
 
 			ErpUser user = authService.Authenticate(Username, Password);
 
-			foreach (ILoginPageHook inst in hookInstances)
+			foreach (var inst in hookInstances)
 			{
 				var result = inst.OnPostAfterLogin(user, this);
 				if (result != null) return result;

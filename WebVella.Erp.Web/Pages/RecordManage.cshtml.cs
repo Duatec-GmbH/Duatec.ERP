@@ -33,12 +33,8 @@ namespace WebVella.Erp.Web.Pages.Application
 					return Redirect($"/{ErpRequestContext.App.Name}/{ErpRequestContext.SitemapArea.Name}/{ErpRequestContext.SitemapNode.Name}/m/{ErpRequestContext.RecordId}/{ErpRequestContext.Page.Name}{queryString}");
 				}
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
 				BeforeRender();
 				return Page();
@@ -68,13 +64,8 @@ namespace WebVella.Erp.Web.Pages.Application
 				var PostObject = new PageService().ConvertFormPostToEntityRecord(PageContext.HttpContext, entity: ErpRequestContext.Entity, recordId: RecordId);
 				DataModel.SetRecord(PostObject);
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
-
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
 				if (!PostObject.Properties.ContainsKey("id"))
 					PostObject["id"] = RecordId.Value;
@@ -82,7 +73,7 @@ namespace WebVella.Erp.Web.Pages.Application
 				var hookInstances = HookManager.GetHookedInstances<IRecordManagePageHook>(HookKey);
 
 				//pre manage hooks
-				foreach (IRecordManagePageHook inst in hookInstances)
+				foreach (var inst in hookInstances)
 				{
 					List<ValidationError> errors = new List<ValidationError>();
 					var result = inst.OnPreManageRecord(PostObject, ErpRequestContext.Entity, this, errors);
@@ -115,7 +106,7 @@ namespace WebVella.Erp.Web.Pages.Application
 				}
 
 				//post manage hook
-				foreach (IRecordManagePageHook inst in hookInstances)
+				foreach (var inst in hookInstances)
 				{
 					var result = inst.OnPostManageRecord(PostObject, ErpRequestContext.Entity, this);
 					if (result != null) return result;

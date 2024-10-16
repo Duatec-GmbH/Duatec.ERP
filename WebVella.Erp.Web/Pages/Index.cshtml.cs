@@ -28,15 +28,10 @@ namespace WebVella.Erp.Web.Pages
 
 				if (ErpRequestContext.Page == null) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
-				var hookInstances = HookManager.GetHookedInstances<IHomePageHook>(HookKey);
-				foreach (IHomePageHook inst in hookInstances)
+				foreach (var inst in HookManager.GetHookedInstances<IHomePageHook>(HookKey))
 				{
 					var result = inst.OnGet(this);
 					if (result != null) return result;
@@ -63,15 +58,10 @@ namespace WebVella.Erp.Web.Pages
 				if (initResult != null) return initResult;
 				if (ErpRequestContext.Page == null) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
-				var hookInstances = HookManager.GetHookedInstances<IHomePageHook>(HookKey);
-				foreach (IHomePageHook inst in hookInstances)
+				foreach (var inst in HookManager.GetHookedInstances<IHomePageHook>(HookKey))
 				{
 					var result = inst.OnPost(this);
 					if (result != null) return result;

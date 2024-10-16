@@ -9,6 +9,8 @@ using System.Linq;
 using System.Web;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
+using WebVella.Erp.Hooks;
+using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
 
@@ -84,6 +86,45 @@ namespace WebVella.Erp.Web.Models
 					hookKey = HttpContext.Request.Query["hookKey"].ToString();
 				return hookKey;
 			}
+		}
+
+		protected IActionResult ExecutePageHooksOnGet(string hookKey = null)
+		{
+			hookKey ??= HookKey;
+
+			foreach (var inst in HookManager.GetHookedInstances<IParameterizedPageHook>(hookKey))
+			{
+				var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
+				var result = inst.OnGet(this, args);
+				if (result != null)
+					return result;
+			}
+
+			foreach (var inst in HookManager.GetHookedInstances<IPageHook>(hookKey))
+			{
+				var result = inst.OnGet(this);
+				if (result != null) return result;
+			}
+			return null;
+		}
+
+		protected IActionResult ExecutePageHooksOnPost()
+		{
+			foreach (var inst in HookManager.GetHookedInstances<IParameterizedPageHook>(HookKey))
+			{
+				var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
+				var result = inst.OnPost(this, args);
+				if (result != null)
+					return result;
+			}
+
+			foreach (var inst in HookManager.GetHookedInstances<IPageHook>(HookKey))
+			{
+				var result = inst.OnPost(this);
+				if (result != null) 
+					return result;
+			}
+			return null;
 		}
 
 		public IActionResult Init(string appName = "", string areaName = "", string nodeName = "",

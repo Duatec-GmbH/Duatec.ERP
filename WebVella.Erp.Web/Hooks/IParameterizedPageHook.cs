@@ -6,12 +6,12 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Web.Hooks
 {
 	[Hook("Global page hooks")]
-	public interface IParameterizedHook
+	public interface IParameterizedPageHook
 	{
 		string[] Parameters { get; }
 
-		IActionResult OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args);
+		IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args);
 
-		IActionResult OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args);
+		IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args);
 	}
 }

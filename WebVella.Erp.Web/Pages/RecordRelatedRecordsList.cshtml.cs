@@ -26,15 +26,10 @@ namespace WebVella.Erp.Web.Pages.Application
 					return Redirect($"/{ErpRequestContext.App.Name}/{ErpRequestContext.SitemapArea.Name}/{ErpRequestContext.SitemapNode.Name}/r/{ErpRequestContext.ParentRecordId}/rl/{ErpRequestContext.RelationId}/l/{ErpRequestContext.Page.Name}{queryString}");
 				}
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
-				var hookInstances = HookManager.GetHookedInstances<IRecordRelatedRecordsListPageHook>(HookKey);
-				foreach (IRecordRelatedRecordsListPageHook inst in hookInstances)
+				foreach (var inst in HookManager.GetHookedInstances<IRecordRelatedRecordsListPageHook>(HookKey))
 				{
 					var result = inst.OnGet(this);
 					if (result != null) return result;
@@ -60,15 +55,10 @@ namespace WebVella.Erp.Web.Pages.Application
 				if (initResult != null) return initResult;
 				if (ErpRequestContext.Page == null) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
-				var hookInstances = HookManager.GetHookedInstances<IRecordRelatedRecordsListPageHook>(HookKey);
-				foreach (IRecordRelatedRecordsListPageHook inst in hookInstances)
+				foreach (var inst in HookManager.GetHookedInstances<IRecordRelatedRecordsListPageHook>(HookKey))
 				{
 					var result = inst.OnPost(this);
 					if (result != null) return result;

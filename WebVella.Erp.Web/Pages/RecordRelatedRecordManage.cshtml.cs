@@ -32,12 +32,8 @@ namespace WebVella.Erp.Web.Pages.Application
 				}
 				if (!RecordsExists()) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
 				BeforeRender();
 				return Page();
@@ -67,12 +63,8 @@ namespace WebVella.Erp.Web.Pages.Application
 				var PostObject = new PageService().ConvertFormPostToEntityRecord(PageContext.HttpContext, entity: ErpRequestContext.Entity, recordId: RecordId);
 				DataModel.SetRecord(PostObject);
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
 				//record submission validates required fields and auto number - these fields are validated in recordmanager
 				//ValidateRecordSubmission(PostObject, ErpRequestContext.Entity, Validation);
@@ -85,7 +77,7 @@ namespace WebVella.Erp.Web.Pages.Application
 					var hookInstances = HookManager.GetHookedInstances<IRecordRelatedRecordManagePageHook>(HookKey);
 
 					//pre manage hooks
-					foreach (IRecordRelatedRecordManagePageHook inst in hookInstances)
+					foreach (var inst in hookInstances)
 					{
 						List<ValidationError> errors = new List<ValidationError>();
 						var result = inst.OnPreManageRecord(PostObject, ErpRequestContext.Entity, this, errors);
@@ -112,7 +104,7 @@ namespace WebVella.Erp.Web.Pages.Application
 					}
 
 					//post manage hook
-					foreach (IRecordRelatedRecordManagePageHook inst in hookInstances)
+					foreach (var inst in hookInstances)
 					{
 						var result = inst.OnPostManageRecord(PostObject, ErpRequestContext.Entity, this);
 						if (result != null) return result;

@@ -28,12 +28,8 @@ namespace WebVella.Erp.Web.Pages.Application
 					return Redirect($"/{ErpRequestContext.App.Name}/{ErpRequestContext.SitemapArea.Name}/{ErpRequestContext.SitemapNode.Name}/r/{ErpRequestContext.RecordId}/{ErpRequestContext.Page.Name}{queryString}");
 				}
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
 				BeforeRender();
 				return Page();
@@ -57,12 +53,8 @@ namespace WebVella.Erp.Web.Pages.Application
 				if (ErpRequestContext.Page == null) return NotFound();
 				if (!RecordsExists()) return NotFound();
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
 				/// Standard Page Delete behavior
 				if (HookKey == "delete" && ErpRequestContext.Entity != null && ErpRequestContext.RecordId != null)

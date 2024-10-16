@@ -32,12 +32,8 @@ namespace WebVella.Erp.Web.Pages.Application
 					return Redirect($"/{ErpRequestContext.App.Name}/{ErpRequestContext.SitemapArea.Name}/{ErpRequestContext.SitemapNode.Name}/c/{ErpRequestContext.Page.Name}{queryString}");
 				}
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnGet(this);
-					if (result != null) return result;
-				}
+				if (ExecutePageHooksOnGet() is IActionResult res)
+					return res;
 
 				BeforeRender();
 				return Page();
@@ -64,13 +60,8 @@ namespace WebVella.Erp.Web.Pages.Application
 				var PostObject = (EntityRecord)new PageService().ConvertFormPostToEntityRecord(PageContext.HttpContext, entity: ErpRequestContext.Entity, recordId: RecordId);
 				DataModel.SetRecord(PostObject);
 
-				var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-				foreach (IPageHook inst in globalHookInstances)
-				{
-					var result = inst.OnPost(this);
-					if (result != null) return result;
-				}
-
+				if (ExecutePageHooksOnPost() is IActionResult res)
+					return res;
 
 				if (!PostObject.Properties.ContainsKey("id"))
 					PostObject["id"] = Guid.NewGuid();
@@ -78,12 +69,12 @@ namespace WebVella.Erp.Web.Pages.Application
 				var hookInstances = HookManager.GetHookedInstances<IRecordCreatePageHook>(HookKey);
 
 				//pre create hooks
-				foreach (IRecordCreatePageHook inst in hookInstances)
+				foreach (var inst in hookInstances)
 				{
-					List<ValidationError> errors = new List<ValidationError>();
+					var errors = new List<ValidationError>();
 					var result = inst.OnPreCreateRecord(PostObject, ErpRequestContext.Entity, this, errors);
 					if (result != null) return result;
-					if (errors.Any())
+					if (errors.Count > 0)
 					{
 						Validation.Errors.AddRange(errors);
 						BeforeRender();

@@ -10,7 +10,7 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks
 {
     [HookAttachment("manufacturer_eplan_import")]
-    internal class ManufacturerEplanImportHook : IParameterizedHook
+    internal class ManufacturerEplanImportHook : IParameterizedPageHook
     {
         private const string EplanIdArg = "hEplanId";
 

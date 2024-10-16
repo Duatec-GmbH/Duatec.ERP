@@ -16,15 +16,10 @@ namespace WebVella.Erp.Web.Pages
 			if (initResult != null) return initResult;
 			authService.Logout();
 
-			var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-			foreach (IPageHook inst in globalHookInstances)
-			{
-				var result = inst.OnGet(this);
-				if (result != null) return result;
-			}
+			if (ExecutePageHooksOnGet() is IActionResult res)
+				return res;
 
-			var hookInstances = HookManager.GetHookedInstances<ILogoutPageHook>(HookKey);
-			foreach (ILogoutPageHook inst in hookInstances)
+			foreach (var inst in HookManager.GetHookedInstances<ILogoutPageHook>(HookKey))
 			{
 				var result = inst.OnGet(this);
 				if (result != null) return result;
@@ -39,15 +34,10 @@ namespace WebVella.Erp.Web.Pages
 			if (initResult != null) return initResult;
 			authService.Logout();
 
-			var globalHookInstances = HookManager.GetHookedInstances<IPageHook>(HookKey);
-			foreach (IPageHook inst in globalHookInstances)
-			{
-				var result = inst.OnPost(this);
-				if (result != null) return result;
-			}
+			if (ExecutePageHooksOnPost() is IActionResult res)
+				return res;
 
-			var hookInstances = HookManager.GetHookedInstances<ILogoutPageHook>(HookKey);
-			foreach (ILogoutPageHook inst in hookInstances)
+			foreach (var inst in HookManager.GetHookedInstances<ILogoutPageHook>(HookKey))
 			{
 				var result = inst.OnPost(this);
 				if (result != null) return result;

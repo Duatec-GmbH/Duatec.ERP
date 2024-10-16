@@ -6,7 +6,7 @@ namespace WebVella.Erp.Web.Hooks
 {
 	internal class ParameterizedHook
 	{
-		public static Dictionary<string, string?> GetArguments(IParameterizedHook hook, IQueryCollection query)
+		public static Dictionary<string, string?> GetArguments(IParameterizedPageHook hook, IQueryCollection query)
 		{
 			return hook.Parameters
 				.ToDictionary(p => p, p => query.TryGetValue(p, out var value) ? $"{value}" : null);
