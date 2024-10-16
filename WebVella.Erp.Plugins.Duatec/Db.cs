@@ -92,7 +92,7 @@ namespace WebVella.Erp.Plugins.Duatec
             return null;
         }
 
-        public static bool CanImportManufacturer(ManufacturerDto manufacturer)
+        public static bool ManufacturerCanBeImported(ManufacturerDto manufacturer)
         {
             var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
                 $"where {Manufacturer.ShortName} = @shortName OR {Manufacturer.EplanId} = @id OR {Manufacturer.Name} = @name",
@@ -102,6 +102,26 @@ namespace WebVella.Erp.Plugins.Duatec
 
             var res = eql.Execute();
             return res == null || res.Count == 0;
+        }
+
+        public static bool ManufacturerWithShortNameExists(string shortName)
+        {
+            var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
+                $"where {Manufacturer.ShortName} = @shortName",
+                new EqlParameter("shortName", shortName));
+
+            var res = eql.Execute();
+            return res != null && res.Count > 0;
+        }
+
+        public static bool ManufacturerWithNameExists(string name)
+        {
+            var eql = new EqlCommand($"select id from {Manufacturer.Entity} " +
+                $"where {Manufacturer.Name} = @name",
+                new EqlParameter("name", name));
+
+            var res = eql.Execute();
+            return res != null && res.Count > 0;
         }
     }
 }

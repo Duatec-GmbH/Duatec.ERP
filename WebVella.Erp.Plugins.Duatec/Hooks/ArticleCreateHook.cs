@@ -30,7 +30,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 return null!;
 
             var manufacturerShortName = ArticleValidations.ExtractManufacturerShortName(partNumber);
-            if (!ManufacturerValidations.ManufacturerExists(manufacturerShortName, partNumberField, validationErrors))
+            if (!ManufacturerValidations.ManufacturerWithShortNameExists(manufacturerShortName, partNumberField, validationErrors))
                 return null!;
 
             var manufacturerId = Db.GetManufacturerIdByShortName(manufacturerShortName)!;

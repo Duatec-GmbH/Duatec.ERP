@@ -4,7 +4,7 @@ using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
 public class ManufacturerDetailImageSnippet : ImageSnippetBase
 {
-    protected override int? Height => 200;
+    protected override int? Width => 200;
 
     protected override string Property => Manufacturer.LogoUrl;
 

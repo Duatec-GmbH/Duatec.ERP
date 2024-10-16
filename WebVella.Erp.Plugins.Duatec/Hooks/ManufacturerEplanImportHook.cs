@@ -27,7 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
                 if (manufacturer == null)
                     PutInvalidArg(pageModel);
-                else if (!Db.CanImportManufacturer(manufacturer))
+                else if (!Db.ManufacturerCanBeImported(manufacturer))
                     pageModel.PutMessage(ScreenMessageType.Error, $"Can not import manufacturer '{manufacturer}' due to unique constraints.");
                 else Import(pageModel, manufacturer);
             }

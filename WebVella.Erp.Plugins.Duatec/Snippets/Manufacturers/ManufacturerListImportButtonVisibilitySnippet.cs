@@ -1,7 +1,4 @@
-﻿#pragma warning disable IDE0005
-using System;
-#pragma warning restore IDE0005
-using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.DataModel;
@@ -9,7 +6,7 @@ using WebVella.Erp.Plugins.Duatec;
 using WebVella.Erp.Plugins.Duatec.Entities;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class ImportManufacturerButtonVisibilitySnippet : SnippetBase
+public class ManufacturerListImportButtonVisibilitySnippet : SnippetBase
 {
     protected override object? GetValue(BaseErpPageModel pageModel)
     {
@@ -26,7 +23,7 @@ public class ImportManufacturerButtonVisibilitySnippet : SnippetBase
 
         var dto = new ManufacturerDto(eplanId, shortName, name, null, null);
 
-        return Db.CanImportManufacturer(dto);
+        return Db.ManufacturerCanBeImported(dto);
     }
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime

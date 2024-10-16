@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ECE0CA21-685B-414D-9438-7E7C9B9B9870}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		create-nuget-pkgs.bat = create-nuget-pkgs.bat
 		global.json = global.json
 	EndProjectSection
@@ -40,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.WebAssembly", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec", "WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj", "{4E4A5F55-1137-4D25-A176-7445FBF241B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{544579D5-581D-44E5-A896-72DE33397AA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{544579D5-581D-44E5-A896-72DE33397AA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
