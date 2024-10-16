@@ -9,6 +9,8 @@ public class ArticleDetailImageSnippet : ImageSnippetBase
     protected override int? Width => 200;
 
     protected override string Property => Article.Image;
+
+    protected override string RecordProperty => "Record";
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime
 

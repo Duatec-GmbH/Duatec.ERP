@@ -3858,6 +3858,11 @@ border-bottom-style:dashed;
 
 .pc-page-header .actions.right {
 	padding-left:0.75rem;
+	max-width:66%;
+	min-width:10%;
+	display:flex;
+	align-items:center;
+	justify-content: end;
 }
 
 /*Meta*/

@@ -7,5 +7,7 @@ public class ManufacturerListImageSnippet : ImageSnippetBase
     protected override int? Height => 50;
 
     protected override string Property => Manufacturer.LogoUrl;
+
+    protected override string RecordProperty => "RowRecord";
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime

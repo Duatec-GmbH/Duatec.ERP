@@ -11,9 +11,11 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 
         protected abstract string Property { get; }
 
+        protected abstract string RecordProperty { get; }
+
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var url = $"{pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[Property]}";
+            var url = $"{pageModel.TryGetDataSourceProperty<EntityRecord>(RecordProperty)?[Property]}";
             if (string.IsNullOrEmpty(url))
                 return null!;
 
