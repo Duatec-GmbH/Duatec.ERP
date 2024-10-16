@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec
+namespace WebVella.Erp.Plugins.Duatec.Eplan
 {
     public static class EplanDataPortal
     {
@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec
 
         public static List<ManufacturerDto> GetManufacturers()
         {
-            if(Manufacturers.Count == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
+            if (Manufacturers.Count == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
             {
                 var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
                 var values = json?["data"]?.AsArray();
@@ -72,7 +72,7 @@ namespace WebVella.Erp.Plugins.Duatec
             var t = client.GetStringAsync(url);
             t.Wait();
 
-            return JsonObject.Parse(t.Result);
+            return JsonNode.Parse(t.Result);
         }
 
         private static HttpClient GetClient()

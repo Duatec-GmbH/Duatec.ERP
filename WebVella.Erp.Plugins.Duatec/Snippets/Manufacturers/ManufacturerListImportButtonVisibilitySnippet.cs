@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
-using WebVella.Erp.Plugins.Duatec.DataModel;
+using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec;
 using WebVella.Erp.Plugins.Duatec.Entities;
 

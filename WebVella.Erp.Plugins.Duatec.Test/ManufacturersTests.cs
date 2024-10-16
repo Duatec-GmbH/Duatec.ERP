@@ -1,3 +1,5 @@
+using WebVella.Erp.Plugins.Duatec.Eplan;
+
 namespace WebVella.Erp.Plugins.Duatec.Test
 {
     [TestFixture]

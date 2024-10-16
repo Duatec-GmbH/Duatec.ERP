@@ -1,14 +1,14 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Duatec.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
     public class ArticleDto
     {
         private ArticleDto(
             long id,
             ManufacturerDto manufacturer,
-            string partNumber, 
-            string description, 
+            string partNumber,
+            string description,
             string pictureUrl)
         {
             EplanId = id;

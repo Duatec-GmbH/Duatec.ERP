@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Eplan;
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
 {
@@ -9,23 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool PartNumberFormatIsValid(string partNumber, string formField, List<ValidationError> validationErrors)
         {
-            if (partNumber.Length == 0)
-            {
-                validationErrors.Add(new ValidationError(formField, "Article part number must not be empty"));
-                return false;
-            }
-
-            var result = true;
-            if (char.IsWhiteSpace(partNumber[0]))
-            {
-                result = false;
-                validationErrors.Add(new ValidationError(formField, "Article part number must not start with white space"));
-            }
-            if (char.IsWhiteSpace(partNumber[^1]))
-            {
-                result = false;
-                validationErrors.Add(new ValidationError(formField, "Article part number must not end with white space"));
-            }
+            var result = Common.NameIsValid(partNumber, formField, validationErrors, "Article part number");
             if (partNumber.Where(c => !char.IsWhiteSpace(c)).Any(c => !IsValidPartNumberCharacter(c)))
             {
                 result = false;

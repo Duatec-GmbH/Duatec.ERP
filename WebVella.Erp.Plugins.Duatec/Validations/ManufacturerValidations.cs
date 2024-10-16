@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Eplan;
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
 {
@@ -50,22 +51,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool NameFormatIsValid(string name, string formField, List<ValidationError> validationErrors)
         {
-            if(name.Length == 0)
-            {
-                validationErrors.Add(new ValidationError(formField, "Manufacturer name must not be empty"));
-                return false;
-            }
-            var result = true;
-            if (char.IsWhiteSpace(name[0]))
-            {
-                result = false;
-                validationErrors.Add(new ValidationError(formField, "Manufacturer name must not start with whitespace characters"));
-            }
-            if (char.IsWhiteSpace(name[^1]))
-            {
-                result = false;
-                validationErrors.Add(new ValidationError(formField, "Manufacturer name must not end with whitespace characters"));
-            }
+            var result = Common.NameIsValid(name, formField, validationErrors, "Manufacturer name");
+
             if(name.Where(c => !char.IsWhiteSpace(c)).Any(c => !IsValidNameChar(c)))
             {
                 result = false;

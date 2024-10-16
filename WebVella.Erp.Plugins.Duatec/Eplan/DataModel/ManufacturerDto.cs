@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Duatec.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
     public class ManufacturerDto
     {
@@ -25,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataModel
 
         public static ManufacturerDto? FromJson(JsonNode? json)
         {
-            if(json == null || $"{json["type"]}" != "manufacturers")
+            if (json == null || $"{json["type"]}" != "manufacturers")
                 return null;
 
             var id = long.Parse(json["id"]!.GetValue<string>());

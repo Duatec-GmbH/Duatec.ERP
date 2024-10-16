@@ -1,4 +1,6 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Validations
+﻿using WebVella.Erp.Exceptions;
+
+namespace WebVella.Erp.Plugins.Duatec.Validations
 {
     internal class Common
     {
@@ -17,6 +19,27 @@
                 return $"'{invalidChars[0]}'";
 
             return $"{{ {string.Join(", ", invalidChars.Select(c => $"'{c}'")) }}}";
+        }
+
+        public static bool NameIsValid(string name, string formField, List<ValidationError> validationErrors, string who)
+        {
+            if (name.Length == 0)
+            {
+                validationErrors.Add(new ValidationError(formField, $"{who} must not be empty"));
+                return false;
+            }
+            var result = true;
+            if (char.IsWhiteSpace(name[0]))
+            {
+                result = false;
+                validationErrors.Add(new ValidationError(formField, $"{who} must not start with whitespace characters"));
+            }
+            if (char.IsWhiteSpace(name[^1]))
+            {
+                result = false;
+                validationErrors.Add(new ValidationError(formField, $"{who} must not end with whitespace characters"));
+            }
+            return result;
         }
     }
 }

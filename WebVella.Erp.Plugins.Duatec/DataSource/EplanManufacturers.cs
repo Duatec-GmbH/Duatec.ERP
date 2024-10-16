@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Eplan;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {

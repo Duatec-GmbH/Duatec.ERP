@@ -1,8 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
-using WebVella.Erp.Plugins.Duatec.DataModel;
 using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
@@ -22,6 +22,15 @@ namespace WebVella.Erp.Plugins.Duatec
             var eql = new EqlCommand($"select id from {Article.Entity} " +
                 $"where {Article.PartNumber} = @param",
                 new EqlParameter("param", partNumber));
+
+            return GetIdFromQueryResult(eql.Execute());
+        }
+
+        public static Guid? GetArticleTypeByLabel(string label)
+        {
+            var eql = new EqlCommand($"select id from {ArticleType.Entity} "
+                + $"where {ArticleType.Label} = @param",
+                new EqlParameter("param", label));
 
             return GetIdFromQueryResult(eql.Execute());
         }
