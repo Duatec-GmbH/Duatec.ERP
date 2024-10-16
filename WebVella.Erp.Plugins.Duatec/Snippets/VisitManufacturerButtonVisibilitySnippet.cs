@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
-using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
 public class VisitManufacturerButtonSnippet : SnippetBase

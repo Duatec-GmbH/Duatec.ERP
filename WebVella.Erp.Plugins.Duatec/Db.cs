@@ -2,7 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Plugins.Duatec.DataModel;
-using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
+using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec
 {

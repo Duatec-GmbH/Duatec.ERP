@@ -1,17 +1,17 @@
 ﻿using System.Text.RegularExpressions;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
-using static WebVella.Erp.Plugins.Duatec.DataModel.EntityInfo;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
 public class ManufacturerListImportSnippet : SnippetBase
 {
     const string hookValue = "hookKey=manufacturer_eplan_import&hEplanId=";
 
-#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
+#pragma warning disable SYSLIB1045 // Is compiled at Runtime
     private static readonly Regex s_reg = new ($"{hookValue}[^&]*", RegexOptions.Compiled);
-#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
+#pragma warning restore SYSLIB1045 // Is compiled at Runtime
 
     protected override object? GetValue(BaseErpPageModel pageModel)
     {
