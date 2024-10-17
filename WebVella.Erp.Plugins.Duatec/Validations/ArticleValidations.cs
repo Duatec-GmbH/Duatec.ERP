@@ -10,11 +10,11 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool PartNumberFormatIsValid(string partNumber, string formField, List<ValidationError> validationErrors)
         {
-            var result = Common.NameIsValid(partNumber, formField, validationErrors, "Article part number");
+            var result = CommonValidations.NameIsValid(partNumber, formField, validationErrors, "Article part number");
             if (partNumber.Where(c => !char.IsWhiteSpace(c)).Any(c => !IsValidPartNumberCharacter(c)))
             {
                 result = false;
-                var invalidChars = Common.InvalidCharacters(partNumber, IsValidPartNumberCharacter);
+                var invalidChars = CommonValidations.InvalidCharacters(partNumber, IsValidPartNumberCharacter);
                 validationErrors.Add(new ValidationError(formField, "Article part number contains invalid characters"));
             }
             if (partNumber.IndexOf('.') < 1)

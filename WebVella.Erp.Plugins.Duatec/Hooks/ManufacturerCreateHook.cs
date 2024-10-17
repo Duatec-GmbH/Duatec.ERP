@@ -12,12 +12,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
     [HookAttachment("manufacturer_create")]
     internal class ManufacturerCreateHook : IRecordCreatePageHook
     {
-        public IActionResult OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
+        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
-            return null!;
+            return null;
         }
 
-        public IActionResult OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
             const string nameField = "name";
             const string shortNameField = "short_name";
@@ -28,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             ManufacturerValidations.ValidateShortName(shortName, shortNameField, validationErrors);
             ManufacturerValidations.ValidateName(name, nameField, validationErrors);
 
-            return null!;
+            return null;
         }
     }
 }

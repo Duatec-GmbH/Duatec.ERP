@@ -26,13 +26,35 @@ namespace WebVella.Erp.Plugins.Duatec
             return GetIdFromQueryResult(eql.Execute());
         }
 
-        public static Guid? GetArticleTypeByLabel(string label)
+        public static string? GetArticleTypeLabel(Guid id)
+        {
+            var eql = new EqlCommand($"select {ArticleType.Label} from {ArticleType.Entity} " +
+                $"where id = @param",
+                new EqlParameter("param", id));
+
+            return eql.Execute()?.FirstOrDefault()?[ArticleType.Label]?.ToString();
+        }
+
+        public static Guid? GetArticleTypeIdByLabel(string label)
         {
             var eql = new EqlCommand($"select id from {ArticleType.Entity} "
                 + $"where {ArticleType.Label} = @param",
                 new EqlParameter("param", label));
 
             return GetIdFromQueryResult(eql.Execute());
+        }
+
+        public static EntityRecordList GetAllArticleTypes()
+        {
+            return new EqlCommand($"select * from {ArticleType.Entity}").Execute();
+        }
+
+        public static EntityRecord? GetArticleTypeById(Guid id)
+        {
+            var eql = new EqlCommand($"select * from {ArticleType.Entity} where id = @param",
+                new EqlParameter("param", id));
+
+            return eql.Execute()?.SingleOrDefault();
         }
 
         public static Guid? GetManufacturerIdByEplanId(string eplanId)
@@ -57,6 +79,34 @@ namespace WebVella.Erp.Plugins.Duatec
         {
             if (result != null && result.Count > 0)
                 return (Guid)result[0]["id"];
+            return null;
+        }
+
+        public static Guid? CreateArticleType()
+        {
+            var label = ArticleType.Entity.Replace('_', ' ');
+
+            var types = GetAllArticleTypes()
+                .Select(r => r[ArticleType.Label]?.ToString())
+                .Where(s => !string.IsNullOrEmpty(s) && s.StartsWith(label, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            var i = 0;
+            var resultingLabel = label;
+
+            while (Array.Exists(types, s => s!.Equals(resultingLabel, StringComparison.OrdinalIgnoreCase)))
+                resultingLabel = $"{label}{++i}";
+
+            var recMan = new RecordManager();
+            var rec = new EntityRecord();
+
+            var id = Guid.NewGuid();
+            rec["id"] = id;
+            rec[ArticleType.Label] = resultingLabel;
+
+            var result = recMan.CreateRecord(ArticleType.Entity, rec);
+            if (result.Success)
+                return id;
             return null;
         }
 

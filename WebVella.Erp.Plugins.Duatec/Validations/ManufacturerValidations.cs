@@ -43,7 +43,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
             if (shortName.Where(c => !char.IsWhiteSpace(c)).Any(c => !IsValidShortNameChar(c)))
             {
                 result = false;
-                var invalidCharString = Common.InvalidCharacters(shortName, IsValidShortNameChar);
+                var invalidCharString = CommonValidations.InvalidCharacters(shortName, IsValidShortNameChar);
                 validationErrors.Add(new ValidationError(formField, $"Manufacturer short name must not contain invalid characters {invalidCharString}"));
             }
             return result;
@@ -51,12 +51,12 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool NameFormatIsValid(string name, string formField, List<ValidationError> validationErrors)
         {
-            var result = Common.NameIsValid(name, formField, validationErrors, "Manufacturer name");
+            var result = CommonValidations.NameIsValid(name, formField, validationErrors, "Manufacturer name");
 
             if(name.Where(c => !char.IsWhiteSpace(c)).Any(c => !IsValidNameChar(c)))
             {
                 result = false;
-                var invalidCharString = Common.InvalidCharacters(name, IsValidNameChar);
+                var invalidCharString = CommonValidations.InvalidCharacters(name, IsValidNameChar);
                 validationErrors.Add(new ValidationError(formField, $"Manufacturer name must not contain invalid characters {invalidCharString}"));
             }
             return result;

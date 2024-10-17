@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public string[] Parameters => [EplanIdArg];
 
-        public IActionResult OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
             if(!args.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
                 PutInvalidArg(pageModel);
@@ -32,21 +32,23 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                     pageModel.PutMessage(ScreenMessageType.Error, $"Can not import manufacturer '{manufacturer}' due to unique constraints.");
                 else Import(pageModel, manufacturer);
             }
-                
-            return null!;
+
+            var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
+            url = Url.RemoveParameter(url, EplanIdArg);
+
+            return pageModel.LocalRedirect(url);
         }
 
 
-        public IActionResult OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            return null!;
+            return null;
         }
 
         private static void Import(BaseErpPageModel pageModel, ManufacturerDto manufacturer)
         {
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();
-            using var scope = SecurityContext.OpenSystemScope();
 
             connection.BeginTransaction();
 

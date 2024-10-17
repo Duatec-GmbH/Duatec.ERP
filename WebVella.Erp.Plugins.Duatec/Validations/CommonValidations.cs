@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
 {
-    internal class Common
+    internal class CommonValidations
     {
         public static string InvalidCharacters(string value, Predicate<char> isValid)
         {

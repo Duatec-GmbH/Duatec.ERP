@@ -26,8 +26,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             var response = new RecordManager().DeleteRecord(ArticleType.Entity, id);
             if (!response.Success)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Error: {response.Message}");
+            else
+            {
+                var label = Db.GetArticleTypeLabel(id);
+                pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted article type '{label}'");
+            }
 
-            return null!;
+            return pageModel.RedirectToPage();
         }
 
         public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)

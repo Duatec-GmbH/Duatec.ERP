@@ -20,10 +20,10 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool LabelIsValid(string label, string formField, List<ValidationError> validationErrors)
         {
-            if (!Common.NameIsValid(label, formField, validationErrors, "Article type label"))
+            if (!CommonValidations.NameIsValid(label, formField, validationErrors, "Article type label"))
                 return false;
 
-            if(Db.GetArticleTypeByLabel(label) != null)
+            if(Db.GetArticleTypeIdByLabel(label) != null)
             {
                 validationErrors.Add(new ValidationError(formField, $"Article type with label '{label}' already exists."));
                 return false;
@@ -32,6 +32,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
         }
 
         public static bool UnitIsValid(string unit, string formField, List<ValidationError> validationErrors)
-            => Common.NameIsValid(unit, formField, validationErrors, "Article type unit");
+            => CommonValidations.NameIsValid(unit, formField, validationErrors, "Article type unit");
     }
 }

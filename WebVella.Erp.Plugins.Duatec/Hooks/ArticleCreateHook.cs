@@ -13,30 +13,30 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
     [HookAttachment(key: "article_create")]
     public class ArticleCreateHook : IRecordCreatePageHook
     {
-        public IActionResult OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
+        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
-            return null!;
+            return null;
         }
 
-        public IActionResult OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
             const string partNumberField = "part_number";
             var partNumber = pageModel.GetFormValue(partNumberField);
 
             if(!ArticleValidations.PartNumberFormatIsValid(partNumber, partNumberField, validationErrors))
-                return null!;
+                return null;
 
             if (!ArticleValidations.PartNumberIsNotTaken(partNumber, partNumberField, validationErrors))
-                return null!;
+                return null;
 
             var manufacturerShortName = ArticleValidations.ExtractManufacturerShortName(partNumber);
             if (!ManufacturerValidations.ManufacturerWithShortNameExists(manufacturerShortName, partNumberField, validationErrors))
-                return null!;
+                return null;
 
             var manufacturerId = Db.GetManufacturerIdByShortName(manufacturerShortName)!;
             record[Article.ManufacturerId] = manufacturerId.Value;
 
-            return null!;
+            return null;
         }
     }
 }

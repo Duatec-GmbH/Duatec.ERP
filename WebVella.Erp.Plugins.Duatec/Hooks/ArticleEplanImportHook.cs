@@ -14,17 +14,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
     [HookAttachment(key: "article_eplan_import")]
     public class ArticleEplanImportHook : IPageHook
     {
-        public IActionResult OnGet(BaseErpPageModel pageModel)
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
-            return null!;
+            return null;
         }
 
-        public IActionResult OnPost(BaseErpPageModel pageModel)
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             var id = pageModel.GetFormValue("eplan_identifier");
             var type = pageModel.GetFormValue("article_type");
             Import(pageModel, id, type);
-            return null!;
+            return pageModel.RedirectToPage();
         }
 
         public static void Import(BaseErpPageModel pageModel, string partNumber, string type)
@@ -43,7 +43,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();
-            using var scope = SecurityContext.OpenSystemScope();
 
             try
             {

@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Web.Models;
-using WebVella.Erp.Plugins.Duatec.Snippets.Common;
+using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
