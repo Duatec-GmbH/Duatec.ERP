@@ -14,7 +14,9 @@
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <Compile Remove="Snippets\DetailUrlSnippet.cs" />
     <Compile Remove="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
+    <Compile Remove="Snippets\ManageUrlSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImportButtonVisibilitySnippet.cs" />
@@ -35,7 +37,9 @@
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
     <EmbeddedResource Include="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailImageSnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailVisitButtonVisibilitySnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImageSnippet.cs" />
