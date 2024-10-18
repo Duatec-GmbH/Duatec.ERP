@@ -82,34 +82,6 @@ namespace WebVella.Erp.Plugins.Duatec
             return null;
         }
 
-        public static Guid? CreateArticleType()
-        {
-            var label = ArticleType.Entity.Replace('_', ' ');
-
-            var types = GetAllArticleTypes()
-                .Select(r => r[ArticleType.Label]?.ToString())
-                .Where(s => !string.IsNullOrEmpty(s) && s.StartsWith(label, StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            var i = 0;
-            var resultingLabel = label;
-
-            while (Array.Exists(types, s => s!.Equals(resultingLabel, StringComparison.OrdinalIgnoreCase)))
-                resultingLabel = $"{label}{++i}";
-
-            var recMan = new RecordManager();
-            var rec = new EntityRecord();
-
-            var id = Guid.NewGuid();
-            rec["id"] = id;
-            rec[ArticleType.Label] = resultingLabel;
-
-            var result = recMan.CreateRecord(ArticleType.Entity, rec);
-            if (result.Success)
-                return id;
-            return null;
-        }
-
         public static Guid? InsertManufacturer(ManufacturerDto manufacturer)
         {
             var recMan = new RecordManager();

@@ -9,7 +9,7 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
     [HookAttachment(key: "article_eplan_import")]
     public class ArticleEplanImportHook : IPageHook

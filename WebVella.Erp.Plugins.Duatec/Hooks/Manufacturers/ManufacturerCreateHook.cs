@@ -7,7 +7,7 @@ using WebVella.Erp.Plugins.Duatec.Validations;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
     [HookAttachment("manufacturer_create")]
     internal class ManufacturerCreateHook : IRecordCreatePageHook

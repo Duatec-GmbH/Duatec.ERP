@@ -8,7 +8,7 @@ using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Entities;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
     [HookAttachment(key: "article_create")]
     public class ArticleCreateHook : IRecordCreatePageHook
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             const string partNumberField = "part_number";
             var partNumber = pageModel.GetFormValue(partNumberField);
 
-            if(!ArticleValidations.PartNumberFormatIsValid(partNumber, partNumberField, validationErrors))
+            if (!ArticleValidations.PartNumberFormatIsValid(partNumber, partNumberField, validationErrors))
                 return null;
 
             if (!ArticleValidations.PartNumberIsNotTaken(partNumber, partNumberField, validationErrors))

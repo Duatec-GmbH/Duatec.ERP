@@ -1,14 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.Erp.Plugins.Duatec.Validations;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
 {
     [HookAttachment("article_type_manage")]
     internal class ArticleTypeManageHook : IParameterizedPageHook

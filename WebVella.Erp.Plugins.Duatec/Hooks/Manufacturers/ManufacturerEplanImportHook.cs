@@ -8,7 +8,7 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
     [HookAttachment("manufacturer_eplan_import")]
     internal class ManufacturerEplanImportHook : IParameterizedPageHook
@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            if(!args.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
+            if (!args.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
                 PutInvalidArg(pageModel);
             else
             {

@@ -6,18 +6,18 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
 {
     [HookAttachment("article_type_delete")]
     internal class ArticleTypeDeleteHook : IParameterizedPageHook
     {
         private const string idParam = "hId";
 
-        public string[] Parameters => [ idParam ];
+        public string[] Parameters => [idParam];
 
         public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            if(!args.TryGetValue(idParam, out var idVal) || !Guid.TryParse(idVal, out var id))
+            if (!args.TryGetValue(idParam, out var idVal) || !Guid.TryParse(idVal, out var id))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, $"Invalid argument '{idParam}'");
                 return null;
