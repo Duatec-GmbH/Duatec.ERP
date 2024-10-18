@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec
                 var relMan = new EntityRelationManager();
                 var recMan = new RecordManager();
 
-                // insert difference code here
+                // insert difference code within braces here here
                 {
                     #region << ***Create entity*** Entity name: manufacturer >>
                     {
@@ -2980,12 +2980,12 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container1_span"": 12,
   ""container1_span_sm"": 12,
   ""container1_span_md"": 6,
-  ""container1_span_lg"": 5,
+  ""container1_span_lg"": 4,
   ""container1_span_xl"": 0,
   ""container1_offset"": 0,
   ""container1_offset_sm"": 0,
-  ""container1_offset_md"": 1,
-  ""container1_offset_lg"": 0,
+  ""container1_offset_md"": 0,
+  ""container1_offset_lg"": 1,
   ""container1_offset_xl"": 0,
   ""container1_flex_self_align"": ""1"",
   ""container1_flex_order"": 0,
@@ -3217,6 +3217,39 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
+                    #region << ***Create page body node*** Page name: all  id: 9e6b6616-aaca-40f3-9ac6-18d2ba21e02a >>
+                    {
+                        var id = new Guid("9e6b6616-aaca-40f3-9ac6-18d2ba21e02a");
+                        Guid? parentId = new Guid("d7360326-6ceb-4eb9-8acf-88bf9c8bfccd");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("f3d09045-f4a9-4492-a95a-b87d9483d398");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column2";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Cancel"",
+  ""color"": ""0"",
+  ""size"": ""3"",
+  ""class"": """",
+  ""id"": """",
+  ""icon_class"": """",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.RecordIsNotNullSnippet.cs\"",\""default\"":\""\""}"",
+  ""onclick"": """",
+  ""href"": ""/master-data/article-type/article-types/l/all"",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 5;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create page body node*** Page name: all  id: 7c00b7ca-ae9f-4b31-8898-c7140f763811 >>
                     {
                         var id = new Guid("7c00b7ca-ae9f-4b31-8898-c7140f763811");
@@ -3332,7 +3365,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""page_size"": 10,
   ""name"": ""article_grid"",
   ""prefix"": """",
-  ""class"": """",
+  ""class"": ""mb-5"",
   ""striped"": ""true"",
   ""small"": ""true"",
   ""bordered"": ""false"",
@@ -3340,7 +3373,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""hover"": ""false"",
   ""responsive_breakpoint"": ""0"",
   ""empty_text"": ""No articles"",
-  ""has_thead"": ""false"",
+  ""has_thead"": ""true"",
   ""has_tfoot"": ""false"",
   ""no_total"": ""false"",
   ""reveals_details_on_click"": ""false"",
@@ -3349,7 +3382,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container1_width"": """",
   ""container1_name"": """",
   ""container1_nowrap"": ""true"",
-  ""container1_sortable"": ""true"",
+  ""container1_sortable"": ""false"",
   ""container1_class"": """",
   ""container1_vertical_align"": ""3"",
   ""container1_horizontal_align"": ""2"",
@@ -3357,7 +3390,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container2_width"": """",
   ""container2_name"": """",
   ""container2_nowrap"": ""true"",
-  ""container2_sortable"": ""true"",
+  ""container2_sortable"": ""false"",
   ""container2_class"": """",
   ""container2_vertical_align"": ""3"",
   ""container2_horizontal_align"": ""2"",
@@ -3496,7 +3529,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""size"": ""1"",
   ""class"": """",
   ""id"": """",
-  ""icon_class"": """",
+  ""icon_class"": ""fa fa-pencil-alt"",
   ""is_block"": ""false"",
   ""is_outline"": ""false"",
   ""icon_right"": ""false"",

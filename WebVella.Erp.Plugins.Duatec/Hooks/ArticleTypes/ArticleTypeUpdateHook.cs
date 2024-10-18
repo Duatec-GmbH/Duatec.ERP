@@ -92,16 +92,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
             var unit = (string)rec[ArticleType.Unit];
 
             pageModel.Validation.Errors ??= [];
-            var result = CommonValidations.NameIsValid(label, labelField, pageModel.Validation.Errors, "Article type label")
-                && ArticleTypeValidations.UnitIsValid(unit, unitField, pageModel.Validation.Errors);
+            CommonValidations.NameIsValid(label, labelField, pageModel.Validation.Errors, "Article type label");
+            ArticleTypeValidations.UnitIsValid(unit, unitField, pageModel.Validation.Errors);
 
-            if(result && Db.GetAllArticleTypes().Exists(t => (Guid)t["id"] != id
+            if(pageModel.Validation.Errors.Count == 0 && Db.GetAllArticleTypes().Exists(t => (Guid)t["id"] != id
                 && t[ArticleType.Label]?.ToString()?.Equals(label, StringComparison.OrdinalIgnoreCase) is true))
             {
                 pageModel.Validation.Errors.Add(new ValidationError(labelField, $"Article type with label '{label}' already exists"));
                 return false;
             }
-            return result;
+            return pageModel.Validation.Errors.Count == 0;
         }
 
         private static bool CreateValidationSucceeds(BaseErpPageModel pageModel, EntityRecord rec)
@@ -110,8 +110,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
             var unit = (string)rec[ArticleType.Unit];
 
             pageModel.Validation.Errors ??= [];
-            return ArticleTypeValidations.LabelIsValid(label, labelField, pageModel.Validation.Errors)
-                && ArticleTypeValidations.UnitIsValid(unit, unitField, pageModel.Validation.Errors);
+            ArticleTypeValidations.LabelIsValid(label, labelField, pageModel.Validation.Errors);
+            ArticleTypeValidations.UnitIsValid(unit, unitField, pageModel.Validation.Errors);
+
+            return pageModel.Validation.Errors.Count == 0;
         }
 
         private static bool TryUpdate(BaseErpPageModel pageModel, EntityRecord rec)
