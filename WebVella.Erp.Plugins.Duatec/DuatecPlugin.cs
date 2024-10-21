@@ -23,6 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec
                 var relMan = new EntityRelationManager();
                 var recMan = new RecordManager();
 
+#pragma warning disable
                 // insert difference code within braces here here
                 {
                     #region << ***Create entity*** Entity name: manufacturer >>
@@ -8091,6 +8092,7 @@ OFFSET 0
 
 
                 }
+#pragma warning restore
             }
         }
     }

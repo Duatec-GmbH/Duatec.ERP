@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
@@ -32,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool PartNumberIsNotTaken(string partNumber, string formField, List<ValidationError> validationErrors)
         {
-            if (Db.GetArticleIdByPartNumber(partNumber) != null)
+            if (Article.Exists(partNumber))
                 validationErrors.Add(new ValidationError(formField, $"Article with part number '{partNumber}' already exists"));
             else if (EplanDataPortal.GetArticleByPartNumber(partNumber) != null)
                 validationErrors.Add(new ValidationError(formField, $"Article with part number '{partNumber}' is an EPLAN article use EPLAN import instead"));

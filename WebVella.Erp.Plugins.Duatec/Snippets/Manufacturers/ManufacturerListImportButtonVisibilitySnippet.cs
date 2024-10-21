@@ -2,7 +2,6 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
-using WebVella.Erp.Plugins.Duatec;
 using WebVella.Erp.Plugins.Duatec.Entities;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
@@ -23,7 +22,7 @@ public class ManufacturerListImportButtonVisibilitySnippet : SnippetBase
 
         var dto = new ManufacturerDto(eplanId, shortName, name, null, null);
 
-        return Db.ManufacturerCanBeImported(dto);
+        return Manufacturer.CanBeImported(dto);
     }
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime

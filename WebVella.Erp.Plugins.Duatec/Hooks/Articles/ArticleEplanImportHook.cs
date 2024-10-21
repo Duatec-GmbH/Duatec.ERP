@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.CodeAnalysis;
-using WebVella.Erp.Api;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
@@ -51,8 +51,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
                 connection.BeginTransaction();
 
-                var manufacturer = Db.GetManufacturerIdByShortName(article.Manufacturer.ShortName)
-                    ?? Db.InsertManufacturer(article.Manufacturer);
+                var manufacturer = Manufacturer.FindId(article.Manufacturer.ShortName)
+                    ?? Manufacturer.Insert(article.Manufacturer);
 
                 if (manufacturer == null)
                 {
@@ -80,7 +80,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         private static bool CreateArticle(BaseErpPageModel pageModel, ArticleDto article, Guid manufacturer, string type)
         {
-            if (Db.InsertArticle(article, manufacturer, type) != null)
+            if (Article.Insert(article, manufacturer, type) != null)
                 return true;
 
             pageModel.PutMessage(ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
@@ -93,9 +93,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
             if (article == null)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
-            else if (Db.GetArticleIdByEplanId(article.EplanId.ToString()) != null)
+            else if (Article.Exists(article.EplanId))
                 pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");
-            else if (Db.GetArticleIdByPartNumber(article.PartNumber) != null)
+            else if (Article.Exists(article.PartNumber))
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' already exists in the data base.");
             else return true;
 

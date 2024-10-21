@@ -95,7 +95,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
             CommonValidations.NameIsValid(label, labelField, pageModel.Validation.Errors, "Article type label");
             ArticleTypeValidations.UnitIsValid(unit, unitField, pageModel.Validation.Errors);
 
-            if(pageModel.Validation.Errors.Count == 0 && Db.GetAllArticleTypes().Exists(t => (Guid)t["id"] != id
+            if(pageModel.Validation.Errors.Count == 0 && ArticleType.FindAll().Exists(t => (Guid)t["id"] != id
                 && t[ArticleType.Label]?.ToString()?.Equals(label, StringComparison.OrdinalIgnoreCase) is true))
             {
                 pageModel.Validation.Errors.Add(new ValidationError(labelField, $"Article type with label '{label}' already exists"));

@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
 {
@@ -9,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
             if (!CommonValidations.NameIsValid(label, formField, validationErrors, "Article type label"))
                 return false;
 
-            if(Db.GetArticleTypeIdByLabel(label) != null)
+            if(ArticleType.FindId(label) != null)
             {
                 validationErrors.Add(new ValidationError(formField, $"Article type with label '{label}' already exists."));
                 return false;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
@@ -15,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
             if (!args.TryGetValue("hId", out var idValue) || !Guid.TryParse(idValue, out var id))
                 return null;
 
-            var articleType = Db.GetArticleTypeById(id);
+            var articleType = ArticleType.Find(id);
             pageModel.DataModel.SetRecord(articleType);
 
             return null;

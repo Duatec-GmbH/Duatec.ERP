@@ -28,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
                 pageModel.PutMessage(ScreenMessageType.Error, $"Error: {response.Message}");
             else
             {
-                var label = Db.GetArticleTypeLabel(id);
+                var label = ArticleType.FindLabel(id);
                 pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted article type '{label}'");
             }
 

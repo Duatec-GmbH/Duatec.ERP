@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 
 namespace WebVella.Erp.Plugins.Duatec.Validations
@@ -9,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
         {
             if (NameFormatIsValid(name, formField, validationErrors))
             {
-                if (Db.ManufacturerWithNameExists(name))
+                if (Manufacturer.WithNameExists(name))
                     validationErrors.Add(new ValidationError(formField, $"A manufacturer with name '{name}' already exists."));
                 if (EplanDataPortal.GetManufacturers().Exists(m => name.Equals(m.Name, StringComparison.OrdinalIgnoreCase)))
                     validationErrors.Add(new ValidationError(formField, $"A manufacturer with name '{name}' is listed in EPLAN use EPLAN import instead"));
@@ -20,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
         {
             if (ShortNameFormatIsValid(shortName, formField, validationErrors))
             {
-                if (Db.ManufacturerWithShortNameExists(shortName))
+                if (Manufacturer.WithShortNameExists(shortName))
                     validationErrors.Add(new ValidationError(formField, $"A manufacturer with short name '{shortName}' already exists"));
                 if (EplanDataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName, StringComparison.OrdinalIgnoreCase)))
                     validationErrors.Add(new ValidationError(formField, $"A manufacturer with short name '{shortName}' is listed in EPLAN use EPLAN import instead"));
@@ -64,7 +65,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validations
 
         public static bool ManufacturerWithShortNameExists(string shortName, string formField, List<ValidationError> validationErrors)
         {
-            if (Db.GetManufacturerIdByShortName(shortName) == null)
+            if (Manufacturer.FindId(shortName) == null)
             {
                 validationErrors.Add(new ValidationError(formField, $"Manufacturer with short name '{shortName}' does not exist"));
                 return false;
