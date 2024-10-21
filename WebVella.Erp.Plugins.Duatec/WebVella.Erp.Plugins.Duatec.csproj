@@ -10,6 +10,7 @@
     <Compile Remove="Snippets\ArticleDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ArticleListImageSnippet.cs" />
     <Compile Remove="Snippets\Articles\ArticleDetailImageSnippet.cs" />
+    <Compile Remove="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
     <Compile Remove="Snippets\Articles\ArticleListImageSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
@@ -33,6 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Snippets\Articles\ArticleDetailImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
     <EmbeddedResource Include="Snippets\Articles\ArticleListImageSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />

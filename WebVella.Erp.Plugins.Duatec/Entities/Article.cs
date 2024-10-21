@@ -16,6 +16,22 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Image = "preview";
         public const string IsBlocked = "is_blocked";
 
+        public static EntityRecord? Find(Guid id)
+        {
+            var cmd = new EqlCommand($"select *, $article_manufacturer.name from {Entity} where id = @param",
+                new EqlParameter("param", id));
+
+            return cmd.Execute()?.SingleOrDefault();
+        }
+
+        public static bool HasAlternatives(Guid id)
+        {
+            var cmd = new EqlCommand($"select id from {ArticleEquivalent.Entity} where {ArticleEquivalent.Source} = @id",
+                new EqlParameter("id", id));
+
+            return QueryResults.Exists(cmd.Execute());
+        }
+
         public static bool Exists(long eplanId)
         {
             var cmd = new EqlCommand($"select id from {Entity} where {EplanId} = @param",
