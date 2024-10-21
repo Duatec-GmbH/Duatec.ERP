@@ -24,12 +24,12 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static bool CanBeImported(ManufacturerDto manufacturer)
         {
-            var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName OR {EplanId} = @id OR {Name} = @name",
+            var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName or {EplanId} = @id or {Name} = @name",
                 new EqlParameter("shortName", manufacturer.ShortName),
                 new EqlParameter("id", manufacturer.EplanId.ToString()),
                 new EqlParameter("name", manufacturer.Name));
 
-            return QueryResults.Exists(cmd.Execute());
+            return !QueryResults.Exists(cmd.Execute());
         }
 
         public static bool WithShortNameExists(string shortName)
@@ -37,8 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName",
                 new EqlParameter("shortName", shortName));
 
-            var res = cmd.Execute();
-            return res != null && res.Count > 0;
+            return QueryResults.Exists(cmd.Execute());
         }
 
         public static bool WithNameExists(string name)
@@ -46,8 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var cmd = new EqlCommand($"select id from {Entity} where {Name} = @name",
                 new EqlParameter("name", name));
 
-            var res = cmd.Execute();
-            return res != null && res.Count > 0;
+            return QueryResults.Exists(cmd.Execute());
         }
 
         public static Guid? Insert(ManufacturerDto manufacturer)
