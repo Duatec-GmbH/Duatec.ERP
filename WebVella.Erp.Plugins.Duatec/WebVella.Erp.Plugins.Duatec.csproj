@@ -9,11 +9,44 @@
   <ItemGroup>
     <Compile Remove="Snippets\ArticleDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ArticleListImageSnippet.cs" />
+    <Compile Remove="Snippets\Articles\ArticleDetailImageSnippet.cs" />
+    <Compile Remove="Snippets\Articles\ArticleListImageSnippet.cs" />
+    <Compile Remove="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
+    <Compile Remove="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
+    <Compile Remove="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <Compile Remove="Snippets\DetailUrlSnippet.cs" />
+    <Compile Remove="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
+    <Compile Remove="Snippets\ManageUrlSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImportButtonVisibilitySnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImportSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListVisitButtonVisibilitySnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerDetailImageSnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerDetailVisitButtonVisibilitySnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerListImageSnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
+    <Compile Remove="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
+    <Compile Remove="Snippets\RecordIsNotNullSnippet.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Snippets\Articles\ArticleDetailImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Articles\ArticleListImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
+    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
+    <EmbeddedResource Include="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailVisitButtonVisibilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\RecordIsNotNullSnippet.cs" />
   </ItemGroup>
 
 
