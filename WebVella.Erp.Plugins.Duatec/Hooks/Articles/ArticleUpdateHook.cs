@@ -12,7 +12,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
-    [HookAttachment(key: "article_update")]
+    [HookAttachment(key: HookKeys.Article.Update)]
     internal class ArticleUpdateHook : IRecordManagePageHook
     {
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)

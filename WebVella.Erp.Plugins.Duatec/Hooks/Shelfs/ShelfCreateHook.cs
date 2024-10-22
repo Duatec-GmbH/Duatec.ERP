@@ -4,18 +4,17 @@ using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Shelfs
 {
-    [HookAttachment(key: HookKeys.ArticleType.Create)]
-    internal class ArticleTypeCreateHook : CreateOnListHookBase
+    [HookAttachment(key: HookKeys.Shelf.Create)]
+    internal class ShelfCreateHook : CreateOnListHookBase
     {
-        protected override string ManageHook => HookKeys.ArticleType.Manage;
+        protected override string ManageHook => HookKeys.Shelf.Manage;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
             var rec = new EntityRecord();
-            rec[ArticleType.Label] = string.Empty;
-            rec[ArticleType.Unit] = string.Empty;
+            rec[Shelf.Designation] = string.Empty;
             return rec;
         }
     }

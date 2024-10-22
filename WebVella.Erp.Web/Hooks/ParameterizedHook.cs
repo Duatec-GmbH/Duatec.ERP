@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace WebVella.Erp.Web.Hooks
 {
+#nullable enable
+
 	internal class ParameterizedHook
 	{
 		public static Dictionary<string, string?> GetArguments(IParameterizedPageHook hook, IQueryCollection query)
@@ -12,4 +14,6 @@ namespace WebVella.Erp.Web.Hooks
 				.ToDictionary(p => p, p => query.TryGetValue(p, out var value) ? $"{value}" : null);
 		} 
 	}
+
+#nullable restore
 }

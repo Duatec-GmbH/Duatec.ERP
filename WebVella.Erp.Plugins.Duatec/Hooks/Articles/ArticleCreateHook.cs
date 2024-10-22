@@ -3,16 +3,18 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.Erp.Plugins.Duatec.Validations;
+using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
-    [HookAttachment(key: "article_create")]
+    [HookAttachment(key: HookKeys.Article.Create)]
     public class ArticleCreateHook : IRecordCreatePageHook
     {
+        private static readonly ArticleValidator _articleValidator = new();
+
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
             return null;
@@ -20,21 +22,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            const string partNumberField = "part_number";
-            var partNumber = pageModel.GetFormValue(partNumberField);
+            var errors = _articleValidator.ValidateOnCreate(record);
+            validationErrors.AddRange(errors);
 
-            if (!ArticleValidations.PartNumberFormatIsValid(partNumber, partNumberField, validationErrors))
+            if (errors.Count > 0)
                 return null;
 
-            if (!ArticleValidations.PartNumberIsNotTaken(partNumber, partNumberField, validationErrors))
-                return null;
+            var shortName = (string)record[Article.PartNumber];
+            shortName = shortName[..shortName.IndexOf('.')];
 
-            var manufacturerShortName = ArticleValidations.ExtractManufacturerShortName(partNumber);
-            if (!ManufacturerValidations.ManufacturerWithShortNameExists(manufacturerShortName, partNumberField, validationErrors))
-                return null;
-
-            var manufacturerId = Manufacturer.FindId(manufacturerShortName)!;
-            record[Article.ManufacturerId] = manufacturerId.Value;
+            var manufacturerId = Manufacturer.FindId(shortName)!.Value;
+            record[Article.ManufacturerId] = manufacturerId;
 
             return null;
         }

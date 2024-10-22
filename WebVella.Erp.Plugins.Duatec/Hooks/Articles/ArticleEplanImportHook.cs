@@ -11,7 +11,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
-    [HookAttachment(key: "article_eplan_import")]
+    [HookAttachment(key: HookKeys.Article.EplanImport)]
     public class ArticleEplanImportHook : IPageHook
     {
         public IActionResult? OnGet(BaseErpPageModel pageModel)
@@ -93,10 +93,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
             if (article == null)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
-            else if (Article.Exists(article.EplanId))
-                pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");
             else if (Article.Exists(article.PartNumber))
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' already exists in the data base.");
+            else if (Article.Exists(article.EplanId))
+                pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");
             else return true;
 
             article = null;

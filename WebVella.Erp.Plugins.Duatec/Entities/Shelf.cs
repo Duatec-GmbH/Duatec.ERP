@@ -1,14 +1,12 @@
-﻿
-using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    public static class ArticleType
+    internal class Shelf
     {
-        public const string Entity = "article_type";
-        public const string Label = "label";
-        public const string Unit = "unit";
+        public const string Entity = "shelf";
+        public const string Designation = "designation";
 
         public static EntityRecord? Find(Guid id)
         {

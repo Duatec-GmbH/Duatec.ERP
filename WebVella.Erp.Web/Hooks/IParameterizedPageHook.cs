@@ -5,6 +5,8 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Web.Hooks
 {
+#nullable enable
+
 	[Hook("Global page hooks")]
 	public interface IParameterizedPageHook
 	{
@@ -14,4 +16,5 @@ namespace WebVella.Erp.Web.Hooks
 
 		IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args);
 	}
+#nullable restore
 }

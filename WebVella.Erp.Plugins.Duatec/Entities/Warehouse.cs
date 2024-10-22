@@ -4,11 +4,10 @@ using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    public static class ArticleType
+    internal class Warehouse
     {
-        public const string Entity = "article_type";
-        public const string Label = "label";
-        public const string Unit = "unit";
+        public const string Entity = "warehouse";
+        public const string Designation = "designation";
 
         public static EntityRecord? Find(Guid id)
         {
