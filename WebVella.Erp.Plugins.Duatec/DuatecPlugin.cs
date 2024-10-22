@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec
 
         public override void Initialize(IServiceProvider ServiceProvider)
         {
-            // ProcessPatches();
+            //ProcessPatches();
         }
 
         private void ProcessPatches()
