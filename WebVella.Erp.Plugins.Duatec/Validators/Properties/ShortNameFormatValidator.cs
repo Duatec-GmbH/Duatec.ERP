@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    internal class ShortNameFormatValidator : NameValidator
+    internal class ShortNameFormatValidator : NameFormatValidator
     {
         public ShortNameFormatValidator()
             : base(Manufacturer.Entity, Manufacturer.ShortName)

@@ -5,10 +5,10 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ArticleTypeValidator : IValidator
+    internal class ArticleTypeValidator : IRecordValidator
     {
-        private static readonly UniqueNameValidator _labelValidator = new(ArticleType.Entity, ArticleType.Label);
-        private static readonly NameValidator _unitValidator = new(ArticleType.Entity, ArticleType.Unit);
+        private static readonly NameUniqueValidator _labelValidator = new(ArticleType.Entity, ArticleType.Label);
+        private static readonly NameFormatValidator _unitValidator = new(ArticleType.Entity, ArticleType.Unit);
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
         {

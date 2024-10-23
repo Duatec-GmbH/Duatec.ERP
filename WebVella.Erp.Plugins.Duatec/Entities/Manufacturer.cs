@@ -40,14 +40,6 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return QueryResults.Exists(cmd.Execute());
         }
 
-        public static bool WithNameExists(string name)
-        {
-            var cmd = new EqlCommand($"select id from {Entity} where {Name} = @name",
-                new EqlParameter("name", name));
-
-            return QueryResults.Exists(cmd.Execute());
-        }
-
         public static Guid? Insert(ManufacturerDto manufacturer)
         {
             var recMan = new RecordManager();

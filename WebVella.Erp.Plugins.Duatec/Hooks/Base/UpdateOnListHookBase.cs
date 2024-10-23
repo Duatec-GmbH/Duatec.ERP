@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         protected abstract string LabelProperty { get; }
 
-        protected abstract IValidator Validator { get; }
+        protected abstract IRecordValidator Validator { get; }
 
         protected abstract EntityRecord CreateRecord(BaseErpPageModel pageModel);
 

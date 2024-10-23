@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Shelfs
     {
         private static readonly ShelfValidator _validator = new();
 
-        protected override IValidator Validator => _validator;
+        protected override IRecordValidator Validator => _validator;
 
         protected override string Entity => Shelf.Entity;
 

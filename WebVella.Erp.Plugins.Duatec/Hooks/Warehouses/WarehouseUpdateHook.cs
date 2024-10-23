@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
     {
         private static readonly WareHouseValidator _validator = new();
 
-        protected override IValidator Validator => _validator;
+        protected override IRecordValidator Validator => _validator;
 
         protected override string Entity => Warehouse.Entity;
 

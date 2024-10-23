@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Compartments
     {
         private static readonly CompartmentValidator _validator = new();
 
-        protected override IValidator Validator => _validator;
+        protected override IRecordValidator Validator => _validator;
 
         protected override string Entity => Compartment.Entity;
 

@@ -7,10 +7,10 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ManufacturerValidator : IValidator
+    internal class ManufacturerValidator : IRecordValidator
     {
-        private static readonly UniqueNameValidator _nameValidator = new(Manufacturer.Entity, Manufacturer.Name);
-        private static readonly ShortNameValidator _shortNameValidator = new();
+        private static readonly NameUniqueValidator _nameValidator = new(Manufacturer.Entity, Manufacturer.Name);
+        private static readonly ShortNameUniqueValidator _shortNameValidator = new();
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
         {

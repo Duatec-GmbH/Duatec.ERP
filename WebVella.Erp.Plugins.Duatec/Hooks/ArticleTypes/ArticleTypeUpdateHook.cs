@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
 
         private static readonly ArticleTypeValidator _validator = new();
 
-        protected override IValidator Validator => _validator;
+        protected override IRecordValidator Validator => _validator;
 
         protected override string Entity => ArticleType.Entity;
 

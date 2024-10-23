@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    public static class QueryResults
+    internal static class QueryResults
     {
         public static Guid? Id(EntityRecordList? recList)
         {

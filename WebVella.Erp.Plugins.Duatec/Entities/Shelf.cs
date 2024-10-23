@@ -3,7 +3,7 @@ using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    internal class Shelf
+    public static class Shelf
     {
         public const string Entity = "shelf";
         public const string Designation = "designation";

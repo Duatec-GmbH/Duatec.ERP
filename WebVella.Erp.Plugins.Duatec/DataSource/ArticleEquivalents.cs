@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Id = new Guid("33a3f693-5f26-478e-8ded-64b8f8009798");
             Name = nameof(ArticleEquivalents);
             Description = "All equivalents of an article";
-            ResultModel = "EntityRecordList";
+            ResultModel = nameof(EntityRecordList);
 
             Parameters.Add(new DataSourceParameter { Name = "id", Type = "guid", Value = "null" });
             Parameters.Add(new DataSourceParameter { Name = "sortBy", Type = "text", Value = Article.PartNumber });

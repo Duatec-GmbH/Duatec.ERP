@@ -5,13 +5,13 @@ using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    internal class PartNumberValidator : UniqueNameValidator
+    internal class PartNumberUniqueValidator : NameUniqueValidator
     {
         private static readonly ShortNameFormatValidator _shortNameValidator = new();
-        private static readonly string manufacturer = Text.FancyfySnakeCase(Manufacturer.Entity);
-        private static readonly string manufacturerShortName = Text.FancyfySnakeCase(Manufacturer.ShortName);
+        private static readonly string _manufacturer = Text.FancyfySnakeCase(Manufacturer.Entity);
+        private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Manufacturer.ShortName);
 
-        public PartNumberValidator() 
+        public PartNumberUniqueValidator() 
             : base(Article.Entity, Article.PartNumber)
         { }
 
@@ -38,7 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         private void Validate(string value, string formField, List<ValidationError> result, Func<string, List<ValidationError>> validation)
         {
             if (value.IndexOf('.') < 1)
-                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must contain {manufacturer}s {manufacturerShortName} followed by '.'"));
+                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must contain {_manufacturer}s {_manufacturerShortName} followed by '.'"));
 
             if (result.Count == 0)
             {
@@ -49,7 +49,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
                 if (shortNameErrors.Count == 0)
                 {
                     if (shortNameErrors.Count == 0 && !Manufacturer.WithShortNameExists(shortName))
-                        result.Add(new ValidationError(formField, $"{manufacturer} with {manufacturerShortName} '{shortName}' does not exist"));
+                        result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
                     if (EplanDataPortal.GetArticleByPartNumber(value) != null)
                         result.Add(new ValidationError(formField, $"{_entityPretty} with {_entityPropertyPretty} '{value}' is an EPLAN article"));

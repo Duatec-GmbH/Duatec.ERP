@@ -24,6 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return cmd.Execute()?.SingleOrDefault();
         }
 
+        // is used in snippet do not delete
         public static bool HasAlternatives(Guid id)
         {
             var cmd = new EqlCommand($"select id from {ArticleEquivalent.Entity} where {ArticleEquivalent.Source} = @id",

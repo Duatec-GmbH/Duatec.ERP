@@ -4,7 +4,7 @@ using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    internal class ArticleEquivalent
+    public static class ArticleEquivalent
     {
         public const string Entity = "article_equivalent";
         public const string Source = "source";

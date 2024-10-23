@@ -3,8 +3,8 @@ using WebVella.Erp.Exceptions;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    public class UniqueNameValidator(string entity, string entityProperty)
-        : NameValidator(entity, entityProperty)
+    public class NameUniqueValidator(string entity, string entityProperty)
+        : NameFormatValidator(entity, entityProperty)
     {
         protected bool RecordExists(string value, Guid id = default)
         {

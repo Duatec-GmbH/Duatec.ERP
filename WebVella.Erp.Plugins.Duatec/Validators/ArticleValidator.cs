@@ -5,9 +5,9 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ArticleValidator : IValidator
+    internal class ArticleValidator : IRecordValidator
     {
-        private static readonly PartNumberValidator _partNumberValidator = new();
+        private static readonly PartNumberUniqueValidator _partNumberValidator = new();
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
         {

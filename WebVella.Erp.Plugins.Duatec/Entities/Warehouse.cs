@@ -4,7 +4,7 @@ using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    internal class Warehouse
+    public static class Warehouse
     {
         public const string Entity = "warehouse";
         public const string Designation = "designation";
