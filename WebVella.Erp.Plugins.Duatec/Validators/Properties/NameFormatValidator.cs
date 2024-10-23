@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    public class NameFormatValidator : IPropertyValidator<string>
+    internal class NameFormatValidator
     {
         protected readonly string _entity;
         protected readonly string _entityProperty;

@@ -3,7 +3,7 @@ using WebVella.Erp.Exceptions;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    public class NameUniqueValidator(string entity, string entityProperty)
+    internal class NameUniqueValidator(string entity, string entityProperty)
         : NameFormatValidator(entity, entityProperty)
     {
         protected bool RecordExists(string value, Guid id = default)
@@ -16,9 +16,12 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         }
 
         public override List<ValidationError> ValidateOnCreate(string value, string formField)
-            => ValidateOnUpdate(value, formField, default);
+            => Validate(value, formField, default);
 
         public override List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
+            => Validate(value, formField, id);
+
+        protected List<ValidationError> Validate(string value, string formField, Guid id)
         {
             var result = base.ValidateFormat(value, formField);
             if (result.Count == 0 && RecordExists(value, id))

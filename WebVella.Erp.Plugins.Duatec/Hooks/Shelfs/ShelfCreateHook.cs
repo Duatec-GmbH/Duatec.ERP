@@ -15,6 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Shelfs
         {
             var rec = new EntityRecord();
             rec[Shelf.Designation] = string.Empty;
+            rec[Shelf.Warehouse] = null;
             return rec;
         }
     }

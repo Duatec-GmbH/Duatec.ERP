@@ -15,6 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Compartments
         {
             var rec = new EntityRecord();
             rec[Compartment.Designation] = string.Empty;
+            rec[Compartment.Shelf] = null;
             return rec;
         }
     }

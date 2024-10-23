@@ -22,11 +22,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Shelfs
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
             var designation = pageModel.GetFormValue(Shelf.Designation) ?? string.Empty;
+            var warehouseId = GetId(pageModel, Shelf.Warehouse);
 
             var rec = new EntityRecord();
             rec[Shelf.Designation] = designation;
+            rec[Shelf.Warehouse] = warehouseId;
 
             return rec;
+        }
+
+        private static Guid? GetId(BaseErpPageModel pageModel, string formField)
+        {
+            return Guid.TryParse(pageModel.GetFormValue(formField), out var id)
+                ? id : null;
         }
     }
 }

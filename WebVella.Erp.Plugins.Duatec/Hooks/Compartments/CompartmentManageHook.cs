@@ -9,6 +9,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Compartments
     public class CompartmentManageHook : ManageOnListHook
     {
         protected override EntityRecord? Find(Guid id) 
-            => Compartment.Find(id);
+        {
+            var rec = Compartment.Find(id);
+            if(rec != null)
+                rec[Shelf.Warehouse] = (Guid)((List<EntityRecord>)((List<EntityRecord>)rec["$shelf"])[0]["$warehouse"])[0]["id"];
+
+            return rec;
+        }
     }
 }

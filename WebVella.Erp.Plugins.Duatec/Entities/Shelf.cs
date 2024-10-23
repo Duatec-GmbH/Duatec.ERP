@@ -6,6 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
     public static class Shelf
     {
         public const string Entity = "shelf";
+        public const string Warehouse = "warehouse_id";
         public const string Designation = "designation";
 
         public static EntityRecord? Find(Guid id)
@@ -14,6 +15,17 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
                 new EqlParameter("param", id));
 
             return cmd.Execute()?.SingleOrDefault();
+        }
+
+        public static bool Exists(Guid warehouse, string designation, Guid? excludedId = null)
+        {
+            var cmd = new EqlCommand($"select * from {Entity} where " +
+                $"{Warehouse} = @wh and {Designation} = @designation and id != @id",
+                new EqlParameter("wh", warehouse),
+                new EqlParameter("designation", designation),
+                new EqlParameter("id", excludedId ?? Guid.Empty));
+
+            return QueryResults.Exists(cmd.Execute());
         }
     }
 }
