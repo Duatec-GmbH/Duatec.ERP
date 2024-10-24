@@ -2,12 +2,14 @@
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class DetailUrlSnippet : SnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets
 {
-    protected override object? GetValue(BaseErpPageModel pageModel)
+    [Snippet]
+    public class DetailUrlSnippet : SnippetBase
     {
-        return Url.ReplacePageKind(pageModel, 'r');
+        protected override object? GetValue(BaseErpPageModel pageModel)
+        {
+            return Url.ReplacePageKind(pageModel, 'r');
+        }
     }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime

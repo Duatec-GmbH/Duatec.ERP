@@ -4354,7 +4354,7 @@ namespace WebVella.Erp.Web.Controllers
 				if (snippet == null)
 					throw new Exception($"Snippet '{name}' is not found.");
 				else
-					response.Object = snippet.GetText();
+					response.Object = name;
 			}
 			catch (Exception e)
 			{

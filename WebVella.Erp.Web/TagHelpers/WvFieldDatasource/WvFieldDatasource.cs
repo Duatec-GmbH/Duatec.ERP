@@ -600,7 +600,7 @@ public class SampleCodeVariable : ICodeVariable
 					{
 						var snippet = SnippetService.GetSnippet(DataSourceVariable.String);
 						if(snippet != null)
-							inputEl.Attributes.Add("value", snippet.GetText());
+							inputEl.Attributes.Add("value", DataSourceVariable.String);
 					}
 					fieldGroupEl.InnerHtml.AppendHtml(inputEl);
 					snippetWrapEl.InnerHtml.AppendHtml(fieldGroupEl);

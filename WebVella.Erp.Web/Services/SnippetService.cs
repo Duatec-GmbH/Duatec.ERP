@@ -1,43 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Web.Services
 {
 	internal static class SnippetService
 	{
-		public static Dictionary<string, Snippet> Snippets { get; set; } = new Dictionary<string, Snippet>();
+		public static Dictionary<string, ICodeVariable> Snippets { get; } = [];
 
 		static SnippetService()
 		{
-			var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-							.Where(a => a.FullName.StartsWith("WebVella.Erp.Plugins"));
+			var types = AppDomain.CurrentDomain.GetAssemblies()
+				.Where(a => a.FullName.StartsWith("WebVella.Erp.Plugins"))
+				.SelectMany(t => t.GetTypes().Where(t => t.GetCustomAttributes<SnippetAttribute>().Any()));
 
-			foreach (var assembly in assemblies)
+			foreach(var type in types)
 			{
-				try
-				{
-					var resources = assembly.GetManifestResourceNames().Where(x => x.Contains(".Snippets.")).ToList();
-					foreach (var resource in resources)
-					{
-						if(!Snippets.ContainsKey(resource))
-							Snippets.Add(resource, new Snippet { Name = resource, Assembly = assembly });
-					}
-				}
-				catch (NotSupportedException)
-				{
-					continue;
-				}
+				if (Activator.CreateInstance(type) is ICodeVariable instance)
+					Snippets.Add(type.FullName, instance);
 			}
 		}
 
-		public static Snippet GetSnippet(string name)
+		public static ICodeVariable? GetSnippet(string name)
 		{
-			if (!Snippets.ContainsKey(name))
+			if (!Snippets.TryGetValue(name, out var variable))
 				return null;
-
-			return Snippets[name];
+			return variable;
 		}
 	}
 }

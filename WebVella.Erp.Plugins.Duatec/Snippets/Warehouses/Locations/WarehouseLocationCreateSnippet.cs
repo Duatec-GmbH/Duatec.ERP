@@ -1,12 +1,13 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Hooks;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class WarehouseLocationCreateSnippet : ListCreateSnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets.Warehouses.Locations
 {
-    protected override string IdProperty => "wlId";
+    [Snippet]
+    public class WarehouseLocationCreateSnippet : ListCreateSnippetBase
+    {
+        protected override string IdProperty => "wlId";
 
-    protected override string HookKey => HookKeys.Warehouse.Location.Create;
+        protected override string HookKey => HookKeys.Warehouse.Location.Create;
+    }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime
-

@@ -29,10 +29,6 @@
 
 
 	<!--This group specify that all cs and html files from Snippets folder will be embedded-->
-	<ItemGroup>
-		<EmbeddedResource Include="Snippets\**\*.cs" />
-		<EmbeddedResource Include="Snippets\**\*.html" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Remove="CsEval\**" />
@@ -45,7 +41,6 @@
 		<None Remove="Components\PcFieldIcon\service.js" />
 		<None Remove="Components\PcFieldMultiFileUpload\service.js" />
 		<None Remove="Components\PcFieldDataCsv\service.js" />
-		<None Remove="Snippets\boz.html" />
 		<None Remove="TagHelpers\WvFieldDatasource\form.js" />
 		<None Remove="TagHelpers\WvFieldUserFileMultiple\form.js" />
 		<None Remove="TagHelpers\WvFieldUserFileMultiple\inline-edit.js" />
@@ -54,7 +49,6 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="wwwroot\**\*" />
-		<EmbeddedResource Remove="Snippets\EmptySampleClassSnippet.cs" />
 		<EmbeddedResource Include="Components\Nav\script.js" />
 		<EmbeddedResource Include="Components\PcBtnToolbar\service.js" />
 		<EmbeddedResource Include="Components\PcBtnGroup\service.js" />

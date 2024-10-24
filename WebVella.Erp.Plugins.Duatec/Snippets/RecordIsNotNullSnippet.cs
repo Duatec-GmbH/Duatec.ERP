@@ -2,12 +2,14 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class RecordIsNotNullSnippet : SnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets
 {
-    protected override object? GetValue(BaseErpPageModel pageModel)
+    [Snippet]
+    public class RecordIsNotNullSnippet : SnippetBase
     {
-        return pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null;
+        protected override object? GetValue(BaseErpPageModel pageModel)
+        {
+            return pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null;
+        }
     }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime

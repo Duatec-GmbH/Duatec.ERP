@@ -3,15 +3,16 @@ using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.TagHelpers.Models;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class FieldAccessByRecordNullabilitySnippet : SnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets
 {
-    protected override object? GetValue(BaseErpPageModel pageModel)
+    [Snippet]
+    public class FieldAccessByRecordNullabilitySnippet : SnippetBase
     {
-        if (pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null)
-            return WvFieldAccess.Full;
-        return WvFieldAccess.ReadOnly;
+        protected override object? GetValue(BaseErpPageModel pageModel)
+        {
+            if (pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null)
+                return WvFieldAccess.Full;
+            return WvFieldAccess.ReadOnly;
+        }
     }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime
-

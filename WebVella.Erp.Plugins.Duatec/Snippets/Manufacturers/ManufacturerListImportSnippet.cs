@@ -2,12 +2,14 @@
 using WebVella.Erp.Plugins.Duatec.Hooks;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class ManufacturerListImportSnippet : ParameterizedHookFromListSnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
-    protected override string HookKey => HookKeys.Manufacturer.EplanImport;
+    [Snippet]
+    public class ManufacturerListImportSnippet : ParameterizedHookFromListSnippetBase
+    {
+        protected override string HookKey => HookKeys.Manufacturer.EplanImport;
 
-    protected override (string HookParameter, string RecordParameter)[] ParameterInfos =>
-        [("hEplanId", Manufacturer.EplanId)];
+        protected override (string HookParameter, string RecordParameter)[] ParameterInfos =>
+            [("hEplanId", Manufacturer.EplanId)];
+    }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime

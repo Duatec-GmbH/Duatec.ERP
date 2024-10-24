@@ -9,64 +9,11 @@
   <ItemGroup>
     <Compile Remove="Snippets\ArticleDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ArticleListImageSnippet.cs" />
-    <Compile Remove="Snippets\Articles\ArticleDetailImageSnippet.cs" />
-    <Compile Remove="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
-    <Compile Remove="Snippets\Articles\ArticleListImageSnippet.cs" />
-    <Compile Remove="Snippets\Articles\Types\ArticleTypeCreateSnippet.cs" />
-    <Compile Remove="Snippets\Articles\Types\ArticleTypeDeleteSnippet.cs" />
-    <Compile Remove="Snippets\Articles\Types\ArticleTypeManageSnippet.cs" />
-    <Compile Remove="Snippets\DetailUrlSnippet.cs" />
-    <Compile Remove="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
-    <Compile Remove="Snippets\ManageUrlSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerDetailImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImageSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImportButtonVisibilitySnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListImportSnippet.cs" />
     <Compile Remove="Snippets\ManufacturerListVisitButtonVisibilitySnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerDetailImageSnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerDetailVisitButtonVisibilitySnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerListImageSnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
-    <Compile Remove="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
-    <Compile Remove="Snippets\RecordIsNotNullAndHasNoIdSnippet.cs" />
-    <Compile Remove="Snippets\RecordIsNotNullSnippet.cs" />
-    <Compile Remove="Snippets\RowRecordIsCurrentRecordSnippet.cs" />
-    <Compile Remove="Snippets\RowRecordIsNotCurrentRecordSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\WarehouseCreateSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\WarehouseDeleteSnippet.cs" />
-    <Compile Remove="Snippets\Warehouses\WarehouseManageSnippet.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Snippets\Articles\ArticleDetailImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Articles\ArticleListImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeManageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
-    <EmbeddedResource Include="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
-    <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerDetailVisitButtonVisibilitySnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
-    <EmbeddedResource Include="Snippets\RecordIsNotNullAndHasNoIdSnippet.cs" />
-    <EmbeddedResource Include="Snippets\RecordIsNotNullSnippet.cs" />
-    <EmbeddedResource Include="Snippets\RowRecordIsCurrentRecordSnippet.cs" />
-    <EmbeddedResource Include="Snippets\RowRecordIsNotCurrentRecordSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\WarehouseCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\WarehouseDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Warehouses\WarehouseManageSnippet.cs" />
   </ItemGroup>
 
 

@@ -2,14 +2,16 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
-#pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class ArticleHasAlternativesSnippet : SnippetBase
+namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
 {
-    protected override object? GetValue(BaseErpPageModel pageModel)
+    [Snippet]
+    public class ArticleHasAlternativesSnippet : SnippetBase
     {
-        if (!pageModel.RecordId.HasValue)
-            return false;
-        return Article.HasAlternatives(pageModel.RecordId.Value);
+        protected override object? GetValue(BaseErpPageModel pageModel)
+        {
+            if (!pageModel.RecordId.HasValue)
+                return false;
+            return Article.HasAlternatives(pageModel.RecordId.Value);
+        }
     }
 }
-#pragma warning restore CA1050 // Compiler can not create assemblies at runtime
