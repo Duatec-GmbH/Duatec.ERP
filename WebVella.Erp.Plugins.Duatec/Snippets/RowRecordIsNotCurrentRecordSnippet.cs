@@ -7,15 +7,16 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets
     [Snippet]
     public class RowRecordIsNotCurrentRecordSnippet : SnippetBase
     {
+        protected virtual string IdParameter => "hId";
+
         protected override object GetValue(BaseErpPageModel pageModel)
         {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
             var rowRec = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
+            if (rowRec?["id"] is not Guid id || id == Guid.Empty)
+                return false;
 
-            return rowRec != null && rowRec["id"] is Guid rowRecId && rowRecId != Guid.Empty
-                && (rec?["id"] == null
-                    || rec["id"] is Guid recId && rowRecId != recId
-                );
+            return !Guid.TryParse(pageModel.Request.Query[IdParameter], out var reqId)
+                || id != reqId;
         }
     }
 }
