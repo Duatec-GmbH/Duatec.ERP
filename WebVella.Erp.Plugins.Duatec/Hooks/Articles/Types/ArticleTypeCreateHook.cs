@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
     [HookAttachment(key: HookKeys.Article.Type.Create)]
     internal class ArticleTypeCreateHook : CreateOnListHookBase
     {
-        protected override string ManageHook => HookKeys.ArticleType.Manage;
+        protected override string ManageHook => HookKeys.Article.Type.Manage;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
