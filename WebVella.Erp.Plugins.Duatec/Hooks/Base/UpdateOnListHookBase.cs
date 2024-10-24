@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
     public abstract class UpdateOnListHookBase : IPageHook
     {
-        const string idParam = "hId";
+        protected virtual string IdProperty => "hId";
 
         protected string EntityName => Text.FancyfySnakeCase(Entity);
 
@@ -31,7 +31,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             var rec = CreateRecord(pageModel);
-            var idVal = pageModel.Request.Query[idParam];
+            var idVal = pageModel.Request.Query[IdProperty];
             var isCreate = idVal == StringValues.Empty;
 
             var success = isCreate
@@ -45,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             }
 
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
-            url = Url.RemoveParameter(url, idParam);
+            url = Url.RemoveParameter(url, IdProperty);
 
             return pageModel.LocalRedirect(url);
         }
@@ -54,7 +54,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
         {
             if (!Guid.TryParse(idVal, out var id))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format at hook argument '{idParam}'");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format at hook argument '{IdProperty}'");
                 pageModel.DataModel.SetRecord(rec);
                 return false;
             }

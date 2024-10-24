@@ -2,7 +2,9 @@
 {
     public abstract class ListManageSnippetBase : ParameterizedHookFromListSnippetBase
     {
+        protected virtual string IdProperty => "hId";
+
         protected override (string HookParameter, string RecordParameter)[] ParameterInfos
-            => [("hId", "id")];
+            => [(IdProperty, "id")];
     }
 }

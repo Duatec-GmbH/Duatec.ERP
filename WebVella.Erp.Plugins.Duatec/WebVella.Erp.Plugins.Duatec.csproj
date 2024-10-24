@@ -30,6 +30,9 @@
     <Compile Remove="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
     <Compile Remove="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
     <Compile Remove="Snippets\RecordIsNotNullSnippet.cs" />
+    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
+    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
+    <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseCreateSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseDeleteSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseManageSnippet.cs" />

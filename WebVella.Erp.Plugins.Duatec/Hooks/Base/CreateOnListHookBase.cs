@@ -8,7 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
     public abstract class CreateOnListHookBase : IPageHook
     {
-        private const string idParam = "hId";
+        protected virtual string IdProperty => "hId";
 
         protected abstract string ManageHook { get; }
 
@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
-            url = Url.RemoveParameter(url, idParam);
+            url = Url.RemoveParameter(url, IdProperty);
 
             pageModel.DataModel.SetRecord(CreateRecord(pageModel));
 

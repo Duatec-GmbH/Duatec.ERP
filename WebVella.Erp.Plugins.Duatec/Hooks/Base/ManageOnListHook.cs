@@ -8,17 +8,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
     public abstract class ManageOnListHook : IParameterizedPageHook
     {
-        private const string idParam = "hId";
+        protected virtual string IdProperty => "hId";
 
-        public string[] Parameters => [idParam];
+        public string[] Parameters => [IdProperty];
 
         protected abstract EntityRecord? Find(Guid id);
 
         public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            if (!args.TryGetValue(idParam, out var idValue) || !Guid.TryParse(idValue, out var id))
+            if (!args.TryGetValue(IdProperty, out var idValue) || !Guid.TryParse(idValue, out var id))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{idParam}'");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdProperty}'");
                 return null;
             }
 

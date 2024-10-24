@@ -8,9 +8,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
     public abstract class DeleteOnListHookBase : IParameterizedPageHook
     {
-        private const string idParam = "hId";
+        protected virtual string IdProperty => "hId";
 
-        public string[] Parameters => [idParam];
+        public string[] Parameters => [IdProperty];
 
         protected string EntityName => Text.FancyfySnakeCase(Entity);
 
@@ -20,9 +20,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
-            if (!args.TryGetValue(idParam, out var idVal) || !Guid.TryParse(idVal, out var id))
+            if (!args.TryGetValue(IdProperty, out var idVal) || !Guid.TryParse(idVal, out var id))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{idParam}'");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdProperty}'");
                 return null;
             }
 
