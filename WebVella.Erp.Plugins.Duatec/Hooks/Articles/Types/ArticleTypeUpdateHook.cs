@@ -6,9 +6,9 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 {
-    [HookAttachment(key: HookKeys.ArticleType.Update)]
+    [HookAttachment(key: HookKeys.Article.Type.Update)]
     internal class ArticleTypeUpdateHook : UpdateOnListHookBase
     {
         const string labelField = "label";

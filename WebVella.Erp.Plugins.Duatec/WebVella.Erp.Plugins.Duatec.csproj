@@ -12,9 +12,9 @@
     <Compile Remove="Snippets\Articles\ArticleDetailImageSnippet.cs" />
     <Compile Remove="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
     <Compile Remove="Snippets\Articles\ArticleListImageSnippet.cs" />
-    <Compile Remove="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
-    <Compile Remove="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
-    <Compile Remove="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <Compile Remove="Snippets\Articles\Types\ArticleTypeCreateSnippet.cs" />
+    <Compile Remove="Snippets\Articles\Types\ArticleTypeDeleteSnippet.cs" />
+    <Compile Remove="Snippets\Articles\Types\ArticleTypeManageSnippet.cs" />
     <Compile Remove="Snippets\DetailUrlSnippet.cs" />
     <Compile Remove="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
     <Compile Remove="Snippets\ManageUrlSnippet.cs" />
@@ -39,9 +39,9 @@
     <EmbeddedResource Include="Snippets\Articles\ArticleDetailImageSnippet.cs" />
     <EmbeddedResource Include="Snippets\Articles\ArticleHasAlternativesSnippet.cs" />
     <EmbeddedResource Include="Snippets\Articles\ArticleListImageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeCreateSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeDeleteSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Articles\Types\ArticleTypeManageSnippet.cs" />
     <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
     <EmbeddedResource Include="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
     <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />

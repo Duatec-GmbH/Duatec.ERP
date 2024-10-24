@@ -3,12 +3,12 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.ArticleTypes
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 {
-    [HookAttachment(key: HookKeys.ArticleType.Manage)]
+    [HookAttachment(key: HookKeys.Article.Type.Manage)]
     public class ArticleTypeManageHook : ManageOnListHook
     {
-        protected override EntityRecord? Find(Guid id) 
+        protected override EntityRecord? Find(Guid id)
             => ArticleType.Find(id);
     }
 }

@@ -4,7 +4,7 @@ using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
 public class ArticleTypeCreateSnippet : ListCreateSnippetBase
 {
-    protected override string HookKey => HookKeys.ArticleType.Create;
+    protected override string HookKey => HookKeys.Article.Type.Create;
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime
 
