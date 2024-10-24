@@ -8,6 +8,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
     [HookAttachment(key: HookKeys.Warehouse.Manage)]
     public class WarehouseManageHook : ManageOnListHook
     {
+        protected override string IdProperty => "wId";
+
         protected override EntityRecord? Find(Guid id) 
             => Warehouse.Find(id);
     }

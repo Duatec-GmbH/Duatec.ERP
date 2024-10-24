@@ -9,6 +9,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
     [HookAttachment(key: HookKeys.Warehouse.Location.Create)]
     internal class WarehouseLocationCreateHook : CreateOnListHookBase
     {
+        protected override string IdProperty => "wlId";
+
         protected override string ManageHook => HookKeys.Warehouse.Location.Manage;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)

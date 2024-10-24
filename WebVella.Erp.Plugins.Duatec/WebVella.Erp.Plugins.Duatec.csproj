@@ -29,7 +29,10 @@
     <Compile Remove="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
     <Compile Remove="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
     <Compile Remove="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
+    <Compile Remove="Snippets\RecordIsNotNullAndHasNoIdSnippet.cs" />
     <Compile Remove="Snippets\RecordIsNotNullSnippet.cs" />
+    <Compile Remove="Snippets\RowRecordIsCurrentRecordSnippet.cs" />
+    <Compile Remove="Snippets\RowRecordIsNotCurrentRecordSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
@@ -54,7 +57,10 @@
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportButtonVisibilitySnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
+    <EmbeddedResource Include="Snippets\RecordIsNotNullAndHasNoIdSnippet.cs" />
     <EmbeddedResource Include="Snippets\RecordIsNotNullSnippet.cs" />
+    <EmbeddedResource Include="Snippets\RowRecordIsCurrentRecordSnippet.cs" />
+    <EmbeddedResource Include="Snippets\RowRecordIsNotCurrentRecordSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
