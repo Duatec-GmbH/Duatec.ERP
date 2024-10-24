@@ -15,9 +15,6 @@
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
     <Compile Remove="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
-    <Compile Remove="Snippets\Compartments\CompartmentCreateSnippet.cs" />
-    <Compile Remove="Snippets\Compartments\CompartmentDeleteSnippet.cs" />
-    <Compile Remove="Snippets\Compartments\CompartmentManageSnippet.cs" />
     <Compile Remove="Snippets\DetailUrlSnippet.cs" />
     <Compile Remove="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
     <Compile Remove="Snippets\ManageUrlSnippet.cs" />
@@ -33,9 +30,6 @@
     <Compile Remove="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
     <Compile Remove="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
     <Compile Remove="Snippets\RecordIsNotNullSnippet.cs" />
-    <Compile Remove="Snippets\Shelfs\ShelfCreateSnippet.cs" />
-    <Compile Remove="Snippets\Shelfs\ShelfDeleteSnippet.cs" />
-    <Compile Remove="Snippets\Shelfs\ShelfManageSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseCreateSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseDeleteSnippet.cs" />
     <Compile Remove="Snippets\Warehouses\WarehouseManageSnippet.cs" />
@@ -48,9 +42,6 @@
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeCreateSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeDeleteSnippet.cs" />
     <EmbeddedResource Include="Snippets\ArticleTypes\ArticleTypeManageSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Compartments\CompartmentCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Compartments\CompartmentDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Compartments\CompartmentManageSnippet.cs" />
     <EmbeddedResource Include="Snippets\DetailUrlSnippet.cs" />
     <EmbeddedResource Include="Snippets\FieldAccessByRecordNullabilitySnippet.cs" />
     <EmbeddedResource Include="Snippets\ManageUrlSnippet.cs" />
@@ -61,9 +52,9 @@
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListImportSnippet.cs" />
     <EmbeddedResource Include="Snippets\Manufacturers\ManufacturerListVisitButtonVisibilitySnippet.cs" />
     <EmbeddedResource Include="Snippets\RecordIsNotNullSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Shelfs\ShelfCreateSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Shelfs\ShelfDeleteSnippet.cs" />
-    <EmbeddedResource Include="Snippets\Shelfs\ShelfManageSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationCreateSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationDeleteSnippet.cs" />
+    <EmbeddedResource Include="Snippets\Warehouses\Locations\WarehouseLocationManageSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\WarehouseCreateSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\WarehouseDeleteSnippet.cs" />
     <EmbeddedResource Include="Snippets\Warehouses\WarehouseManageSnippet.cs" />

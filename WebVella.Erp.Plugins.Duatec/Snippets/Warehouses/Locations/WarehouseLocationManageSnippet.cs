@@ -2,9 +2,8 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
 #pragma warning disable CA1050 // Compiler can not create assemblies at runtime
-public class ShelfCreateSnippet : ListCreateSnippetBase
+public class WarehouseLocationManageSnippet : ListManageSnippetBase
 {
-    protected override string HookKey => HookKeys.Shelf.Create;
+    protected override string HookKey => HookKeys.Warehouse.Location.Manage;
 }
 #pragma warning restore CA1050 // Compiler can not create assemblies at runtime
-

@@ -6,27 +6,27 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Shelfs
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
 {
-    [HookAttachment(key: HookKeys.Shelf.Update)]
-    internal class ShelfUpdateHook : UpdateOnListHookBase
+    [HookAttachment(key: HookKeys.Warehouse.Location.Update)]
+    internal class WarehouseLocationUpdateHook : UpdateOnListHookBase
     {
-        private static readonly ShelfValidator _validator = new();
+        private static readonly WarehouseLocationValidator _validator = new();
 
         protected override IRecordValidator Validator => _validator;
 
-        protected override string Entity => Shelf.Entity;
+        protected override string Entity => WarehouseLocation.Entity;
 
-        protected override string LabelProperty => Shelf.Designation;
+        protected override string LabelProperty => WarehouseLocation.Designation;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
-            var designation = pageModel.GetFormValue(Shelf.Designation) ?? string.Empty;
-            var warehouseId = GetId(pageModel, Shelf.Warehouse);
+            var designation = pageModel.GetFormValue(WarehouseLocation.Designation) ?? string.Empty;
+            var warehouseId = GetId(pageModel, WarehouseLocation.Warehouse);
 
             var rec = new EntityRecord();
-            rec[Shelf.Designation] = designation;
-            rec[Shelf.Warehouse] = warehouseId;
+            rec[WarehouseLocation.Designation] = designation;
+            rec[WarehouseLocation.Warehouse] = warehouseId;
 
             return rec;
         }

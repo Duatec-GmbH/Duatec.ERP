@@ -3,9 +3,9 @@ using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
-    public static class Shelf
+    public static class WarehouseLocation
     {
-        public const string Entity = "shelf";
+        public const string Entity = "warehouse_location";
         public const string Warehouse = "warehouse_id";
         public const string Designation = "designation";
 
