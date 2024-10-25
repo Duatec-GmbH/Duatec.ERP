@@ -9,8 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
     [HookAttachment(key: HookKeys.Warehouse.Create)]
     internal class WarehouseCreateHook : CreateOnListHookBase
     {
-        protected override string IdProperty => "wId";
-
         protected override string ManageHook => HookKeys.Warehouse.Manage;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)

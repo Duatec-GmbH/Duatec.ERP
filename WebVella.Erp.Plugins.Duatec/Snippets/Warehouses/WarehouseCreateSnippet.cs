@@ -6,8 +6,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Warehouses
     [Snippet]
     public class WarehouseCreateSnippet : ListCreateSnippetBase
     {
-        protected override string IdProperty => "wId";
-
         protected override string HookKey => HookKeys.Warehouse.Create;
     }
 }

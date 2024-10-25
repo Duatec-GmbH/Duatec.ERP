@@ -7,8 +7,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
     [HookAttachment(key: HookKeys.Warehouse.Delete)]
     internal class WarehouseDeleteHook : DeleteOnListHookBase
     {
-        protected override string IdProperty => "wId";
-
         protected override string Entity => Warehouse.Entity;
 
         protected override string? RecordLabel(Guid id)

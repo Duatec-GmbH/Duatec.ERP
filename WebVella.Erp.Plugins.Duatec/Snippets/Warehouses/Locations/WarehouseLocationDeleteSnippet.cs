@@ -6,8 +6,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Warehouses.Locations
     [Snippet]
     public class WarehouseLocationDeleteSnippet : ListManageSnippetBase
     {
-        protected override string IdProperty => "wlId";
-
         protected override string HookKey => HookKeys.Warehouse.Location.Delete;
     }
 }

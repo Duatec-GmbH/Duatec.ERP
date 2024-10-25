@@ -13,8 +13,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
     {
         private static readonly WarehouseLocationValidator _validator = new();
 
-        protected override string IdProperty => "wlId";
-
         protected override IRecordValidator Validator => _validator;
 
         protected override string Entity => WarehouseLocation.Entity;
