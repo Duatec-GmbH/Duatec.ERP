@@ -8,9 +8,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
     public abstract class DeleteOnListHookBase : IParameterizedPageHook
     {
-        protected virtual string IdProperty => "hId";
+        protected virtual string IdParameter => "hId";
 
-        public string[] Parameters => [IdProperty];
+        public string[] Parameters => [IdParameter];
 
         protected string EntityName => Text.FancyfySnakeCase(Entity);
 
@@ -21,11 +21,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
         public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
         {
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
-            url = Url.RemoveParameter(url, IdProperty);
+            pageModel.CurrentUrl = Url.RemoveParameter(url, IdParameter);
 
-            if (!args.TryGetValue(IdProperty, out var idVal) || !Guid.TryParse(idVal, out var id))
+            if (!args.TryGetValue(IdParameter, out var idVal) || !Guid.TryParse(idVal, out var id))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdProperty}'");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdParameter}'");
                 return null;
             }
 
@@ -37,7 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             else
                 pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted {EntityName} '{label}'");
 
-            return pageModel.LocalRedirect(url);
+            return null;
         }
 
         public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)

@@ -29,11 +29,7 @@
     @{
         string path = null;
         if (options.RevealsDetailsOnClick && !string.IsNullOrEmpty(options.DetailPath))
-        {
             path = options.DetailPath;
-            if (!path.EndsWith('/'))
-                path += '/';
-        }
 
         foreach(var record in records)
         {
