@@ -5,7 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
 {
     [HookAttachment(key: HookKeys.Warehouse.Location.Delete)]
-    internal class WarehouseLocationDeleteHook : DeleteOnListHookBase
+    internal class WarehouseLocationDeleteHook : DeleteHookBase
     {
         protected override string Entity => WarehouseLocation.Entity;
 

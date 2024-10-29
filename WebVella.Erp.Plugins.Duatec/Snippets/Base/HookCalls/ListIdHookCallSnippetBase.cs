@@ -7,6 +7,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls
     {
         protected virtual string IdParameter => "hId";
 
+        protected virtual string IdProperty => "id";
+
         protected override IEnumerable<string> Parameters => [IdParameter];
 
         protected override object? GetParameterValue(string parameter, BaseErpPageModel pageModel)
@@ -14,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls
             if (parameter != IdParameter)
                 return null;
 
-            return pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[IdParameter];
+            return pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[IdProperty];
         }
     }
 }

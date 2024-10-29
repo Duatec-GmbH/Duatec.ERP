@@ -7,7 +7,7 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 {
     [HookAttachment(key: HookKeys.Article.Type.Create)]
-    internal class ArticleTypeCreateHook : CreateOnListHookBase
+    internal class ArticleTypeCreateHook : CreateHookBase
     {
         protected override string ManageHook => HookKeys.Article.Type.Manage;
 

@@ -9,7 +9,7 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
 {
     [HookAttachment(key: HookKeys.Warehouse.Update)]
-    internal class WarehouseUpdateHook : UpdateOnListHookBase
+    internal class WarehouseUpdateHook : UpdateHookBase
     {
         private static readonly WareHouseValidator _validator = new();
 

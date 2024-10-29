@@ -1,18 +1,25 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets
 {
     [Snippet]
-    public class RecordIsNotNullAndHasIdSnippet : SnippetBase
+    public class RecordIsNotNullAndHasIdSnippet : ICodeVariable
     {
-        protected override object? GetValue(BaseErpPageModel pageModel)
+        protected virtual string IdParameter => "hId";
+
+        public object Evaluate(BaseErpPageModel pageModel)
         {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            return rec != null 
-                && rec["id"] is Guid id
-                && id != Guid.Empty;
+            try
+            {
+                var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+                return rec?["id"] is Guid id
+                    && id != Guid.Empty;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -6,11 +6,9 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    public abstract class DeleteOnListHookBase : IParameterizedPageHook
+    public abstract class DeleteHookBase : IPageHook
     {
         protected virtual string IdParameter => "hId";
-
-        public string[] Parameters => [IdParameter];
 
         protected string EntityName => Text.FancyfySnakeCase(Entity);
 
@@ -18,14 +16,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         protected abstract string? RecordLabel(Guid id);
 
-        public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
+        {
+            return null;
+        }
+
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
-            pageModel.CurrentUrl = Url.RemoveParameter(url, IdParameter);
+            url = Url.RemoveParameter(url, IdParameter);
 
-            if (!args.TryGetValue(IdParameter, out var idVal) || !Guid.TryParse(idVal, out var id))
+            if(!pageModel.Request.Query.TryGetValue(IdParameter, out var idVal) || !Guid.TryParse(idVal, out var id) || id == Guid.Empty)
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdParameter}'");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Error: no id");
                 return null;
             }
 
@@ -37,12 +40,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             else
                 pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted {EntityName} '{label}'");
 
-            return null;
-        }
-
-        public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
-        {
-            return null;
+            return pageModel.LocalRedirect(url);
         }
     }
 }

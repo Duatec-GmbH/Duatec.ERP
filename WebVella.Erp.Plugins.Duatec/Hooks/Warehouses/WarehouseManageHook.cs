@@ -6,7 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
 {
     [HookAttachment(key: HookKeys.Warehouse.Manage)]
-    public class WarehouseManageHook : ManageOnListHook
+    public class WarehouseManageHook : ManageHookBase
     {
         protected override EntityRecord? Find(Guid id) 
             => Warehouse.Find(id);

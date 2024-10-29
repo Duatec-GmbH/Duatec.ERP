@@ -6,7 +6,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    public abstract class CreateOnListHookBase : IPageHook
+    public abstract class CreateHookBase : IPageHook
     {
         protected virtual string IdProperty => "hId";
 

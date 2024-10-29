@@ -1,15 +1,16 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Hooks;
-using WebVella.Erp.Plugins.Duatec.Snippets.Base;
+using WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
     [Snippet]
-    public class ManufacturerListImportSnippet : ParameterizedHookFromListSnippetBase
+    public class ManufacturerListImportSnippet : ListIdHookCallSnippetBase
     {
         protected override string HookKey => HookKeys.Manufacturer.EplanImport;
 
-        protected override (string HookParameter, string RecordParameter)[] ParameterInfos =>
-            [("hEplanId", Manufacturer.EplanId)];
+        protected override string IdParameter => "hEplanId";
+
+        protected override string IdProperty => Manufacturer.EplanId;
     }
 }

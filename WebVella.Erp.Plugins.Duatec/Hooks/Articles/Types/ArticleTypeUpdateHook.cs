@@ -9,7 +9,7 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 {
     [HookAttachment(key: HookKeys.Article.Type.Update)]
-    internal class ArticleTypeUpdateHook : UpdateOnListHookBase
+    internal class ArticleTypeUpdateHook : UpdateHookBase
     {
         const string labelField = "label";
         const string unitField = "unit";
