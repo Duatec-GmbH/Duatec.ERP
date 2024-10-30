@@ -63,7 +63,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static string ErrorPrefix(string property, string value)
         {
-            return $"{Text.FancyfySnakeCaseStartUpper(Manufacturer.Entity)} " +
+            return $"{Text.FancyfySnakeCaseStartWithUpper(Manufacturer.Entity)} " +
                 $"with {Text.FancyfySnakeCase(property)} '{value}'";
         }
     }

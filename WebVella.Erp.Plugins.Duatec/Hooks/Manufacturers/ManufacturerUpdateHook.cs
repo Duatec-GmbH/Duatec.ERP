@@ -8,19 +8,19 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
-    [HookAttachment(key: HookKeys.Manufacturer.Create)]
-    internal class ManufacturerCreateHook : IRecordCreatePageHook
+    [HookAttachment(key: HookKeys.Manufacturer.Update)]
+    internal class ManufacturerUpdateHook : IRecordManagePageHook
     {
         private readonly static ManufacturerValidator _validator = new();
 
-        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
+        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
             return null;
         }
 
-        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = _validator.ValidateOnCreate(record);
+            var errors = _validator.ValidateOnUpdate(record);
             validationErrors.AddRange(errors);
 
             return null;

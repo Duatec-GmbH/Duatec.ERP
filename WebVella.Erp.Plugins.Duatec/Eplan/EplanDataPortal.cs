@@ -28,8 +28,9 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
                         .Select(ManufacturerDto.FromJson)
                         .Where(m => m != null)!
                         .ToList()!;
+
+                    ManufacturersValidUntil = DateTimeOffset.Now.AddHours(2);
                 }
-                ManufacturersValidUntil = DateTimeOffset.Now.AddHours(10);
             }
 
             return Manufacturers;

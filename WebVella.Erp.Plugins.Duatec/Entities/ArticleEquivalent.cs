@@ -10,6 +10,17 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Source = "source";
         public const string Target = "target";
 
+        public static Guid[] AllTargetsForSource(Guid id)
+        {
+            var cmd = new EqlCommand($"select {Target} from {Entity} " +
+                $"where {Source} = @id",
+                new EqlParameter("id", id));
+
+            return cmd.Execute()
+                .Select(eq => (Guid)eq[Target])
+                .ToArray();
+        }
+
         public static bool Exists(Guid source, Guid target)
         {
             var cmd = new EqlCommand($"select id from {Entity} where {Source} = @source and {Target} = @target",

@@ -1,5 +1,7 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
 {
@@ -10,8 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
 
         protected override int? Width => 200;
 
-        protected override string Property => Article.Image;
-
-        protected override string RecordProperty => "Record";
+        protected override string? Url(BaseErpPageModel pageModel)
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[Article.Image]?.ToString();
     }
 }

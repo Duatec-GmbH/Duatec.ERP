@@ -1,5 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Web.Models;
+﻿using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 {
@@ -9,13 +8,11 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 
         protected virtual int? Height { get; }
 
-        protected abstract string Property { get; }
-
-        protected abstract string RecordProperty { get; }
+        protected abstract string? Url(BaseErpPageModel pageModel);
 
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var url = $"{pageModel.TryGetDataSourceProperty<EntityRecord>(RecordProperty)?[Property]}";
+            var url = Url(pageModel);
             if (string.IsNullOrEmpty(url))
                 return null!;
 

@@ -5,7 +5,24 @@
         public static string FancyfySnakeCase(string entityName) 
             => entityName.ToLower().Replace('_', ' ');
 
-        public static string FancyfySnakeCaseStartUpper(string entityName)
+        public static string FancyfySnakeCaseStartWithUpper(string entityName)
             => char.ToUpper(entityName[0]) + FancyfySnakeCase(entityName[1..]);
+
+        public static string InvalidCharacters(string value, Predicate<char> charIsAllowed)
+        {
+            var invalidChars = value.Where(value => !charIsAllowed(value))
+                .Order()
+                .Distinct()
+                .Where(c => !char.IsWhiteSpace(c))
+                .ToArray();
+
+            if (invalidChars.Length == 0)
+                return string.Empty;
+
+            if (invalidChars.Length == 1)
+                return $"'{invalidChars[0]}'";
+
+            return $"{{ {string.Join(", ", invalidChars.Select(c => $"'{c}'"))}}}";
+        }
     }
 }

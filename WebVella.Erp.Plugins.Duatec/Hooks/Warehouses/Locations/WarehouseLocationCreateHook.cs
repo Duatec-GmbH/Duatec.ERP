@@ -7,7 +7,7 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
 {
     [HookAttachment(key: HookKeys.Warehouse.Location.Create)]
-    internal class WarehouseLocationCreateHook : CreateHookBase
+    internal class WarehouseLocationCreateHook : CreateOnListHookBase
     {
         protected override string ManageHook => HookKeys.Warehouse.Location.Manage;
 

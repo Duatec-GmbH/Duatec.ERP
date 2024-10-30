@@ -4,11 +4,12 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Snippets
 {
     [Snippet]
-    public class SearchSnippet : SnippetBase
+    internal class CreateUrlSnippet : SnippetBase
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            return pageModel.CurrentUrl;
+            var context = pageModel.ErpRequestContext;
+            return $"/{context?.App?.Name}/{context?.SitemapArea?.Name}/{context?.SitemapNode?.Name}/c/";
         }
     }
 }

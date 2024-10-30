@@ -22,6 +22,14 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return QueryResults.Id(cmd.Execute());
         }
 
+        public static EntityRecord? Find(Guid id)
+        {
+            var cmd = new EqlCommand($"select * from {Entity} where id = @param",
+                new EqlParameter("param", id));
+
+            return cmd.Execute()?.SingleOrDefault();
+        }
+
         public static bool CanBeImported(ManufacturerDto manufacturer)
         {
             var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName or {EplanId} = @id or {Name} = @name",

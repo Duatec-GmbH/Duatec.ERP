@@ -24,20 +24,16 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!arguments.TryGetValue("id", out var objId) || objId is not Guid id)
                 return result;
 
-            var cmd = new EqlCommand($"select {ArticleEquivalent.Target} from {ArticleEquivalent.Entity} " +
-                $"where {ArticleEquivalent.Source} = @id",
-                new EqlParameter("id", id));
-
-            var targets = cmd.Execute();
-            var articles = targets.Select(target => Article.Find((Guid)target[ArticleEquivalent.Target])!)
+            var articles = ArticleEquivalent.AllTargetsForSource(id)
+                .Select(Article.Find)
                 .Where(a => a != null)!;
 
             var sortBy = (string)arguments["sortBy"];
             var sortOrder = (string)arguments["sortOrder"];
 
             if (sortBy == Article.Designation)
-                articles = articles.OrderBy(a => (string)a[Article.Designation]);
-            else articles = articles.OrderBy(a => (string)a[Article.PartNumber]);
+                articles = articles.OrderBy(a => (string)a![Article.Designation]);
+            else articles = articles.OrderBy(a => (string)a![Article.PartNumber]);
 
             if (sortOrder == "desc")
                 articles = articles.Reverse();

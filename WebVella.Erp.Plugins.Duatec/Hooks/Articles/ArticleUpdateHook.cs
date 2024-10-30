@@ -3,7 +3,6 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
@@ -18,16 +17,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
             var recordId = (Guid)record["id"];
-            var args = new Dictionary<string, object>()
-            {
-                ["id"] = recordId,
-                ["sortOrder"] = "asc",
-                ["sortBy"] = Article.PartNumber
-            };
 
-            var oldEquivalents = ((EntityRecordList)new ArticleEquivalents().Execute(args))
-                .Select(r => (Guid)r["id"])
-                .ToArray();
+            var oldEquivalents = ArticleEquivalent.AllTargetsForSource(recordId);
 
             var current = pageModel.GetFormValue("equivalents").Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Guid.Parse)

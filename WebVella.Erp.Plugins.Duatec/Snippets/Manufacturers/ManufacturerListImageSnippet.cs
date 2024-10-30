@@ -1,5 +1,7 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
@@ -8,8 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
     {
         protected override int? Height => 45;
 
-        protected override string Property => Manufacturer.LogoUrl;
-
-        protected override string RecordProperty => "RowRecord";
+        protected override string? Url(BaseErpPageModel pageModel)
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[Manufacturer.LogoUrl]?.ToString();
     }
 }

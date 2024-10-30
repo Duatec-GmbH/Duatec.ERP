@@ -8,6 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Create = "article_create";
             public const string EplanImport = "article_eplan_import";
             public const string Update = "article_update";
+            public const string Delete = "article_delete";
 
             public static class Type
             {
@@ -21,6 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
         public static class Manufacturer
         {
             public const string Create = "manufacturer_create";
+            public const string Update = "manufacturer_update";
             public const string EplanImport = "manufacturer_eplan_import";
         }
 
@@ -38,6 +40,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Delete = "warehouse_location_delete";
                 public const string Update = "warehouse_location_update";
             }
+        }
+
+        public static class Project
+        {
+            public const string Create = "project_create";
+            public const string Update = "project_update";
         }
     }
 }

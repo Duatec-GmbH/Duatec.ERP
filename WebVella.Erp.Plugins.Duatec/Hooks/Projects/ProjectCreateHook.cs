@@ -6,12 +6,12 @@ using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
 {
-    [HookAttachment(key: HookKeys.Manufacturer.Create)]
-    internal class ManufacturerCreateHook : IRecordCreatePageHook
+    [HookAttachment(key: HookKeys.Project.Create)]
+    internal class ProjectCreateHook : IRecordCreatePageHook
     {
-        private readonly static ManufacturerValidator _validator = new();
+        private readonly static ProjectValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {

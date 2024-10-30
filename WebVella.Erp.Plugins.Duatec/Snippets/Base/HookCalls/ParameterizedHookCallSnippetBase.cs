@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebVella.Erp.Plugins.Duatec.Util;
+﻿using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls

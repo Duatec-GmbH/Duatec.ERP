@@ -7,6 +7,12 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 {
     public static class Article
     {
+        public static class Relations
+        {
+            public const string Manufacturer = "article_manufacturer";
+            public const string Type = "article_article_type";
+        }
+
         public const string Entity = "article";
         public const string EplanId = "eplan_id";
         public const string PartNumber = "part_number";
@@ -18,13 +24,12 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static EntityRecord? Find(Guid id)
         {
-            var cmd = new EqlCommand($"select *, $article_manufacturer.name from {Entity} where id = @param",
+            var cmd = new EqlCommand($"select *, ${Relations.Manufacturer}.{Manufacturer.Name} from {Entity} where id = @param",
                 new EqlParameter("param", id));
 
             return cmd.Execute()?.SingleOrDefault();
         }
 
-        // is used in snippet do not delete
         public static bool HasAlternatives(Guid id)
         {
             var cmd = new EqlCommand($"select id from {ArticleEquivalent.Entity} where {ArticleEquivalent.Source} = @id",
