@@ -1,5 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -10,22 +10,22 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Designation = "designation";
 
         public static EntityRecord? Find(Guid id)
-        {
-            var cmd = new EqlCommand($"select * from {Entity} where id = @param",
-                new EqlParameter("param", id));
-
-            return cmd.Execute()?.SingleOrDefault();
-        }
+            => Record.Find(Entity, id);
 
         public static bool Exists(Guid warehouse, string designation, Guid? excludedId = null)
         {
-            var cmd = new EqlCommand($"select * from {Entity} where " +
-                $"{Warehouse} = @wh and {Designation} = @designation and id != @id",
-                new EqlParameter("wh", warehouse),
-                new EqlParameter("designation", designation),
-                new EqlParameter("id", excludedId ?? Guid.Empty));
+            var subQueries = new List<QueryObject>()
+            {
+                new() { FieldName = Warehouse, FieldValue = warehouse, QueryType = QueryType.EQ },
+                new() { FieldName = Designation, FieldValue = designation, QueryType = QueryType.EQ },
+                new() { QueryType = QueryType.NOT, SubQueries = [new() { FieldName = "id", FieldValue = excludedId ?? Guid.Empty, QueryType = QueryType.EQ }] }
+            };
 
-            return QueryResults.Exists(cmd.Execute());
+            var recMan = new RecordManager();
+            var response = recMan.Count(new EntityQuery(Entity, "*", 
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
+
+            return response.Object > 0;
         }
     }
 }

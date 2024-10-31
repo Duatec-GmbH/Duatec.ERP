@@ -36,11 +36,11 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             var shortName = (string?)record[Manufacturer.ShortName] ?? string.Empty;
 
             var result = _nameValidator.ValidateOnUpdate(name, Manufacturer.Name, id);
-            if(result.Count == 0 && ValidateNameWithEplanApi(name) is ValidationError nameError)
+            if(result.Count == 0 && record[Manufacturer.EplanId] == null && ValidateNameWithEplanApi(name) is ValidationError nameError)
                 result.Add(nameError);
 
             var shortNameErrors = _shortNameValidator.ValidateOnUpdate(shortName, Manufacturer.ShortName, id);
-            if (shortNameErrors.Count == 0 && ValidateShortNameWithEplanApi(name) is ValidationError shortNameError)
+            if (shortNameErrors.Count == 0 && record[Manufacturer.EplanId] == null && ValidateShortNameWithEplanApi(name) is ValidationError shortNameError)
                 shortNameErrors.Add(shortNameError);
 
             result.AddRange(shortNameErrors);

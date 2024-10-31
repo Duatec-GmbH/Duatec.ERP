@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls
             if (parameter != IdParameter)
                 return null;
 
-            return pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[IdProperty];
+            return pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[IdProperty];
         }
     }
 }

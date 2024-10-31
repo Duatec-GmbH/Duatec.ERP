@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -12,66 +11,58 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static Guid[] AllTargetsForSource(Guid id)
         {
-            var cmd = new EqlCommand($"select {Target} from {Entity} " +
-                $"where {Source} = @id",
-                new EqlParameter("id", id));
-
-            return cmd.Execute()
-                .Select(eq => (Guid)eq[Target])
+            return Record.FindManyBy(Entity, Source, id, Target)
+                .Select(r => (Guid)r[Target])
                 .ToArray();
         }
 
-        public static bool Exists(Guid source, Guid target)
+        public static void InsertMapping(Guid a, Guid b)
         {
-            var cmd = new EqlCommand($"select id from {Entity} where {Source} = @source and {Target} = @target",
-                new EqlParameter("source", source),
-                new EqlParameter("target", target));
-
-            return QueryResults.Exists(cmd.Execute());
+            Insert(a, b);
+            Insert(b, a);
         }
 
-        public static Guid? Find(Guid source, Guid target)
+        public static void DeleteMapping(Guid a, Guid b)
         {
-            var cmd = new EqlCommand($"select id from {Entity} where {Source} = @source and {Target} = @target",
-                new EqlParameter("source", source),
-                new EqlParameter("target", target));
-
-            return QueryResults.Id(cmd.Execute());
+            Delete(a, b);
+            Delete(b, a);
         }
 
-        public static bool InsertMapping(Guid a, Guid b)
+        private static EntityRecord? Find(Guid source, Guid target)
         {
-            return Insert(a, b) && Insert(b, a);
-        }
-
-        public static bool DeleteMapping(Guid a, Guid b)
-        {
-            return Delete(a, b) && Delete(b, a);
-        }
-
-        private static bool Insert(Guid source, Guid target)
-        {
-            if (Exists(source, target))
-                return true;
+            var subQueries = new List<QueryObject>()
+            {
+                new() { FieldName = Source, FieldValue = source, QueryType = QueryType.EQ },
+                new() { FieldName = Target, FieldValue = target, QueryType = QueryType.EQ },
+            };
 
             var recMan = new RecordManager();
-            var rec = new EntityRecord();
+            var response = recMan.Find(new EntityQuery(Entity, "*",
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
 
-            rec["id"] = Guid.NewGuid();
+            return response.Object.Data.SingleOrDefault();
+        }
+
+        private static Guid? Insert(Guid source, Guid target)
+        {
+            var id = Find(source, target)?["id"] as Guid?;
+            if (id.HasValue)
+                return id;
+
+            var rec = new EntityRecord();
             rec[Source] = source;
             rec[Target] = target;
 
-            return recMan.CreateRecord(Entity, rec).Success;
+            return Record.Insert(Entity, rec);
         }
 
-        private static bool Delete(Guid source, Guid target)
+        private static void Delete(Guid source, Guid target)
         {
-            var id = Find(source, target);
+            var id = Find(source, target)?["id"] as Guid?;
             if (!id.HasValue)
-                return true;
+                return;
 
-            var recMan = new RecordManager();
-            return recMan.DeleteRecord(Entity, id.Value).Success;
+            Record.Delete(Entity, id.Value);
         }
     }
 }

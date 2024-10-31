@@ -1,6 +1,4 @@
-﻿using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
+﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
@@ -23,56 +21,29 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string IsBlocked = "is_blocked";
 
         public static EntityRecord? Find(Guid id)
-        {
-            var cmd = new EqlCommand($"select *, ${Relations.Manufacturer}.{Manufacturer.Name} from {Entity} where id = @param",
-                new EqlParameter("param", id));
-
-            return cmd.Execute()?.SingleOrDefault();
-        }
+            => Record.Find(Entity, id, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}");
 
         public static bool HasAlternatives(Guid id)
-        {
-            var cmd = new EqlCommand($"select id from {ArticleEquivalent.Entity} where {ArticleEquivalent.Source} = @id",
-                new EqlParameter("id", id));
-
-            return QueryResults.Exists(cmd.Execute());
-        }
+            => Record.Exists(ArticleEquivalent.Entity, ArticleEquivalent.Source, id);
 
         public static bool Exists(long eplanId)
-        {
-            var cmd = new EqlCommand($"select id from {Entity} where {EplanId} = @param",
-                new EqlParameter("param", eplanId.ToString()));
-
-            return QueryResults.Exists(cmd.Execute());
-        }
+            => Record.Exists(Entity, EplanId, eplanId.ToString());
 
         public static bool Exists(string partNumber)
-        {
-            var cmd = new EqlCommand($"select id from {Entity} where {PartNumber} = @param",
-                new EqlParameter("param", partNumber));
+            => Record.Exists(Entity, PartNumber, partNumber);
 
-            return QueryResults.Exists(cmd.Execute());
-        }
-
-        public static Guid? Insert(ArticleDto article, Guid manufacturerId, string articleType)
+        public static Guid? Insert(ArticleDto article, Guid manufacturerId, Guid typeId)
         {
-            var recMan = new RecordManager();
             var rec = new EntityRecord();
 
-            var id = Guid.NewGuid();
-
-            rec["id"] = Guid.NewGuid();
             rec[PartNumber] = article.PartNumber;
             rec[EplanId] = article.EplanId.ToString();
             rec[Designation] = article.Description;
-            rec[Type] = articleType;
             rec[ManufacturerId] = manufacturerId;
+            rec[Type] = typeId;
             rec[Image] = article.PictureUrl;
 
-            var result = recMan.CreateRecord(Entity, rec);
-            if (result.Success)
-                return id;
-            return null;
+            return Record.Insert(Entity, rec);
         }
     }
 }

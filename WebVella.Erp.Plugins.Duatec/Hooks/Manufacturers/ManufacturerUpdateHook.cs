@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
@@ -20,6 +21,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
+            var oldRec = Manufacturer.Find((Guid)record["id"]);
+            record[Manufacturer.EplanId] = oldRec![Manufacturer.EplanId];
+
             var errors = _validator.ValidateOnUpdate(record);
             validationErrors.AddRange(errors);
 

@@ -1,6 +1,5 @@
 ﻿
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -10,11 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Designation = "designation";
 
         public static EntityRecord? Find(Guid id)
-        {
-            var cmd = new EqlCommand($"select * from {Entity} where id = @param",
-                new EqlParameter("param", id));
-
-            return cmd.Execute()?.SingleOrDefault();
-        }
+            => Record.Find(Entity, id);
     }
 }

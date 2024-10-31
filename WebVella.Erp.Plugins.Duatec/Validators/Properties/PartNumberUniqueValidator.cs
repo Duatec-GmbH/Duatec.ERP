@@ -48,7 +48,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && !Manufacturer.WithShortNameExists(shortName))
+                    if (shortNameErrors.Count == 0 && !Manufacturer.FindId(shortName).HasValue)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
                     if (EplanDataPortal.GetArticleByPartNumber(value) != null)

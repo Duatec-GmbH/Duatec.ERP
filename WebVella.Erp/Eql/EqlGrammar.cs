@@ -43,7 +43,6 @@ namespace WebVella.Erp.Eql
 			var expression = new NonTerminal("expression");
 			var exprList = new NonTerminal("expression_list");
 			var selList = new NonTerminal("select_list");
-			var countClause = new NonTerminal("count_clause");
 			var fromClause = new NonTerminal("from_clause");
 			var orderClauseOpt = new NonTerminal("order_clause_optional");
 			var columnItemList = new NonTerminal("column_item_list");
@@ -75,7 +74,7 @@ namespace WebVella.Erp.Eql
 
 			//order
 			orderList.Rule = MakePlusRule(orderList, COMMA, orderMember);
-			orderMember.Rule = identifier + orderDirOpt | argument + orderDirOpt;
+			orderMember.Rule = columnRelationList + DOT + identifier + orderDirOpt | identifier + orderDirOpt | argument + orderDirOpt;
 			orderDirOpt.Rule = Empty | ASC | DESC | argument;
 
 			//select statement

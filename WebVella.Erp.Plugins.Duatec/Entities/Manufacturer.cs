@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
@@ -15,57 +14,37 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string LogoUrl = "logo";
 
         public static Guid? FindId(string shortName)
-        {
-            var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @param",
-                new EqlParameter("param", shortName));
-
-            return QueryResults.Id(cmd.Execute());
-        }
+            => Record.FindBy(Entity, ShortName, shortName, "id")?["id"] as Guid?;
 
         public static EntityRecord? Find(Guid id)
-        {
-            var cmd = new EqlCommand($"select * from {Entity} where id = @param",
-                new EqlParameter("param", id));
-
-            return cmd.Execute()?.SingleOrDefault();
-        }
+            => Record.Find(Entity, id);
 
         public static bool CanBeImported(ManufacturerDto manufacturer)
         {
-            var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName or {EplanId} = @id or {Name} = @name",
-                new EqlParameter("shortName", manufacturer.ShortName),
-                new EqlParameter("id", manufacturer.EplanId.ToString()),
-                new EqlParameter("name", manufacturer.Name));
+            var subQueries = new List<QueryObject>()
+            {
+                new(){ FieldName = ShortName, FieldValue = manufacturer.ShortName, QueryType = QueryType.EQ },
+                new(){ FieldName = Name, FieldValue = manufacturer.Name, QueryType = QueryType.EQ },
+                new(){ FieldName = EplanId, FieldValue = manufacturer.EplanId.ToString(), QueryType = QueryType.EQ },
+            };
 
-            return !QueryResults.Exists(cmd.Execute());
-        }
+            var recMan = new RecordManager();
+            var response = recMan.Count(new EntityQuery(Entity, "id",
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
 
-        public static bool WithShortNameExists(string shortName)
-        {
-            var cmd = new EqlCommand($"select id from {Entity} where {ShortName} = @shortName",
-                new EqlParameter("shortName", shortName));
-
-            return QueryResults.Exists(cmd.Execute());
+            return response.Success && response.Object == 0;
         }
 
         public static Guid? Insert(ManufacturerDto manufacturer)
         {
-            var recMan = new RecordManager();
             var rec = new EntityRecord();
-
-            var id = Guid.NewGuid();
-
-            rec["id"] = id;
             rec[EplanId] = manufacturer.EplanId.ToString();
             rec[LogoUrl] = manufacturer.LogoUrl;
             rec[Name] = manufacturer.Name;
             rec[ShortName] = manufacturer.ShortName;
             rec[WebsiteUrl] = manufacturer.WebsiteUrl;
 
-            var result = recMan.CreateRecord(Entity, rec);
-            if (result.Success)
-                return id;
-            return null;
+            return Record.Insert(Entity, rec);
         }
     }
 }

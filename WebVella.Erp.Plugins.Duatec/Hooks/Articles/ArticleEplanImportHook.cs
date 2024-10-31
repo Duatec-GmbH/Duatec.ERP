@@ -41,13 +41,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return;
             }
 
+            if(!Guid.TryParse(type, out var typeId) || ArticleType.Find(typeId) == null)
+            {
+                pageModel.PutMessage(ScreenMessageType.Error, $"Type with id '{type}' does not exist.");
+                return;
+            }
+
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();
 
             try
             {
                 if (!TryGetArticle(pageModel, partNumber, out var article))
-                    return;
+                    return;                
 
                 connection.BeginTransaction();
 
@@ -61,7 +67,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                     return;
                 }
 
-                if (!CreateArticle(pageModel, article, manufacturer.Value, type))
+                if (!CreateArticle(pageModel, article, manufacturer.Value, typeId))
                 {
                     connection.RollbackTransaction();
                     pageModel.PutMessage(ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
@@ -78,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             }
         }
 
-        private static bool CreateArticle(BaseErpPageModel pageModel, ArticleDto article, Guid manufacturer, string type)
+        private static bool CreateArticle(BaseErpPageModel pageModel, ArticleDto article, Guid manufacturer, Guid type)
         {
             if (Article.Insert(article, manufacturer, type) != null)
                 return true;

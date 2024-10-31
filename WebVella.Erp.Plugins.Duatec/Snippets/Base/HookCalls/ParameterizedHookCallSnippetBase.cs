@@ -18,7 +18,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls
 
                 var val = GetParameterValue(parameter, pageModel);
                 if (val != null)
-                    url += $"${parameter}={val}";
+                    url += $"&{parameter}={val}";
             }
             return url;
         }

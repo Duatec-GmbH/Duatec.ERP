@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
+using WebVella.Erp.Utilities;
 
 namespace WebVella.Erp.Eql
 {
@@ -67,14 +68,10 @@ namespace WebVella.Erp.Eql
 			if (parameters != null)
 				Parameters = parameters;
 
-			var grammar = new EqlGrammar();
-			var language = new LanguageData(grammar);
-			var parser = new Parser(language);
-
-			List<EqlError> errors = new List<EqlError>();
+			var errors = new List<EqlError>();
 			var parseTree = Parse(Text, errors);
 
-			EqlBuildResult result = new EqlBuildResult();
+			var result = new EqlBuildResult();
 
 			try
 			{
@@ -83,8 +80,7 @@ namespace WebVella.Erp.Eql
 
 				if (errors.Count == 0)
 				{
-					Entity fromEntity = null;
-					result.Sql = BuildSql(result.Tree, errors, result.Meta, Settings, out fromEntity);
+					result.Sql = BuildSql(result.Tree, errors, result.Meta, Settings, out var fromEntity);
 					result.FromEntity = fromEntity;
 				}
 
@@ -109,9 +105,6 @@ namespace WebVella.Erp.Eql
 			if (string.IsNullOrWhiteSpace(source))
 				throw new EqlException("Source is empty.");
 
-			if (errors == null)
-				errors = new List<EqlError>();
-
 			var grammar = new EqlGrammar();
 			var language = new LanguageData(grammar);
 			var parser = new Parser(language);
@@ -121,7 +114,7 @@ namespace WebVella.Erp.Eql
 			{
 				foreach (var error in tree.ParserMessages.Where(x => x.Level == Irony.ErrorLevel.Error))
 				{
-					EqlError err = new EqlError { Message = error.Message };
+					var err = new EqlError { Message = error.Message };
 					err.Line = error.Location.Line;
 					err.Column = error.Location.Column;
 					errors.Add(err);
@@ -300,9 +293,9 @@ namespace WebVella.Erp.Eql
 
 			foreach (var orderMemberNode in orderbyListNode)
 			{
-				string fieldName = string.Empty;
+				var fieldName = string.Empty;
 				var direction = "ASC";
-				if (orderMemberNode.ChildNodes[0].ChildNodes[0].Token.ValueString == "@") //argument
+				if (orderMemberNode.ChildNodes[0].ChildNodes[0]?.Token?.ValueString == "@") //argument
 				{
 					var paramName = "@" + orderMemberNode.ChildNodes[0].ChildNodes[1].Token.ValueString;
 					if (!ExpectedParameters.Contains(paramName))
@@ -314,6 +307,10 @@ namespace WebVella.Erp.Eql
 					fieldName = (param.Value ?? string.Empty).ToString();
 					if (string.IsNullOrWhiteSpace(fieldName))
 						throw new EqlException($"ORDER BY: Invalid order field name in parameter '{paramName}'");
+				}
+				else if (orderMemberNode.ChildNodes[0].ChildNodes[0]?.ChildNodes[0]?.Token?.ValueString == "$") // relation
+				{
+					var relation = orderMemberNode.ChildNodes[0].GetText();
 				}
 				else
 					fieldName = orderMemberNode.ChildNodes[0].ChildNodes[0].Token.ValueString;
