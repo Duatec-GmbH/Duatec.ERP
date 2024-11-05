@@ -16,9 +16,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new DataSourceParameter { Name = "shortName", Type = "text", Value = "null" });
             Parameters.Add(new DataSourceParameter { Name = "name", Type = "text", Value = "null" });
 
-            Parameters.Add(new DataSourceParameter { Name = "sortBy", Type = "text", Value = Manufacturer.EplanId });
-            Parameters.Add(new DataSourceParameter { Name = "sortOrder", Type = "text", Value = "asc" });
-
             Parameters.Add(new DataSourceParameter { Name = "page", Type = "int", Value = "1" });
             Parameters.Add(new DataSourceParameter { Name = "pageSize", Type = "int", Value = "10" });
         }
@@ -29,37 +26,17 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var pageSize = (int)arguments["pageSize"];
             var shortName = (string?)arguments["shortName"];
             var name = (string?)arguments["name"];
-            var sortBy = (string?)arguments["sortBy"];
-            var sortOrder = (string?)arguments["sortOrder"];
 
             var comparison = StringComparison.OrdinalIgnoreCase;
             var manufacturers = EplanDataPortal.GetManufacturers()
-                .Where(m => (shortName == null || m.ShortName.Equals(shortName, comparison)) 
-                    && (name == null || m.Name.StartsWith(name, comparison)));
+                .Where(m => (shortName == null || m.ShortName.Contains(shortName, comparison)) 
+                    && (name == null || m.Name.Contains(name, comparison)))
+                .OrderBy(m => m.ShortName)
+                .ToArray();
 
-            if (sortBy == Manufacturer.Name)
-                manufacturers = manufacturers.OrderBy(m => m.Name);
-            else if (sortBy == Manufacturer.ShortName)
-                manufacturers = manufacturers.OrderBy(m => m.ShortName);
-            else manufacturers = manufacturers.OrderBy(m => m.EplanId);
+            var result = new EntityRecordList { TotalCount = manufacturers.Length };
 
-            if (sortOrder == "desc")
-                manufacturers = manufacturers.Reverse();
-
-            if (shortName != null || name != null)
-            {
-                manufacturers = manufacturers.Where(m => 
-                    (shortName == null || m.ShortName.Equals(shortName, StringComparison.OrdinalIgnoreCase)) 
-                    && (name == null || m.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase)));
-            }
-
-            var all = manufacturers.ToArray();
-            var result = new EntityRecordList
-            {
-                TotalCount = all.Length
-            };
-
-            foreach (var m in all.Skip((page -1) * pageSize).Take(pageSize))
+            foreach (var m in manufacturers.Skip((page -1) * pageSize).Take(pageSize))
             {
                 result.Add(new EntityRecord()
                 {

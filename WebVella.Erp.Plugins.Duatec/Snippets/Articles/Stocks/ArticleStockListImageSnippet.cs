@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
     {
         protected override string? Url(BaseErpPageModel pageModel)
         {
-            return (pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[ArticleStock.Relations.Article] as List<EntityRecord>)
+            return (pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?['$' + ArticleStock.Relations.Article] as List<EntityRecord>)
                 ?[0][Article.Image]?.ToString();
         }
     }

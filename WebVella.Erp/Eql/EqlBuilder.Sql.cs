@@ -60,12 +60,48 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 			public SelectInfoWrapper Parent { get; set; } = null;
 		}
 
+		private void AddOrderRelations(Entity fromEntity, EqlOrderByNode orderByNode, List<EqlRelationFieldNode> relations)
+		{
+			var relationFields = orderByNode?.Fields
+				.Where(f => f.FieldName.StartsWith('$'));
+
+			if (relationFields == null || !relationFields.Any())
+				return;
+
+			var allRelations = relMan.Read().Object;
+			var allEntities = entMan.ReadEntities().Object;
+
+			foreach (var field in relationFields)
+			{
+				var value = field.FieldName;
+				var idx = value.LastIndexOf('.');
+
+				var identifier = value[(idx + 1)..];
+
+				var relationNames = value[..idx].Split('.')
+					.Select(s => s.TrimStart('$'));
+
+				var entity = fromEntity;
+				var relationNode = new EqlRelationFieldNode() { FieldName = identifier };
+
+				foreach(var relationName in relationNames)
+				{
+					var relation = allRelations.FirstOrDefault(r => relationName == r.Name && r.TargetEntityId == entity.Id)
+						?? throw new EqlException(new EqlError() { Message = $"Relation '{relationName}' does not exist or is invalid within ORDER clause" });
+
+					relationNode.Relations.Add(new EqlRelationInfo() { Name = relationName, Direction = EqlRelationDirectionType.TargetOrigin });
+					entity = allEntities.First(e => e.Id == relation.OriginEntityId);
+				}
+
+				relations.Add(relationNode);
+			}
+		}
+
 		private string BuildSql(EqlAbstractTree tree, List<EqlError> errors, List<EqlFieldMeta> fieldsMeta, EqlSettings settings, out Entity fromEntity )
 		{
-			if (errors == null)
-				errors = new List<EqlError>();
+			errors ??= [];
 
-			EqlSelectNode selectNode = ((EqlSelectNode)tree.RootNode);
+			var selectNode = (EqlSelectNode)tree.RootNode;
 			var entities = entMan.ReadEntities().Object;
 			fromEntity = entities.SingleOrDefault(x => x.Name == selectNode.From.EntityName);
 			this.fromEntity = fromEntity;
@@ -75,8 +111,8 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 				return string.Empty;
 			}
 
-			SelectInfoWrapper rootInfo = ProcessEntity(fromEntity, selectNode.Fields);
-			StringBuilder sql = new StringBuilder();
+			var rootInfo = ProcessEntity(fromEntity, selectNode.Fields);
+			var sql = new StringBuilder();
 			sql.AppendLine(BEGIN_OUTER_SELECT);
 			if(settings.Distinct )
 				sql.AppendLine(BEGIN_SELECT_DISTINCT);
@@ -88,21 +124,20 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 			sql.AppendLine(string.Format(FROM, $"{RECORD_COLLECTION_PREFIX}{rootInfo.Entity.Name}"));
 
 			//WHERE
-			List<EqlRelationFieldNode> relationsUsedInWhere = new List<EqlRelationFieldNode>();
-			if (selectNode.Where != null && selectNode.Where.RootExpressionNode != null)
-			{
-				string whereExpressionSql = ProcessExpressionNode(selectNode.Where.RootExpressionNode, fromEntity.Name, relationsUsedInWhere);
-				if (!string.IsNullOrWhiteSpace(whereExpressionSql))
-				{
-					if (relationsUsedInWhere.Any())
-					{
-						string joinSql = ProcessWhereJoins(relationsUsedInWhere, fromEntity);
-						sql.AppendLine(joinSql);
-					}
+			var relations = new List<EqlRelationFieldNode>();
+			var whereSql = string.Empty;
 
-					sql.AppendLine("WHERE " + whereExpressionSql);
-				}
-			}
+			AddOrderRelations(fromEntity, selectNode.OrderBy, relations);
+
+			if (selectNode.Where != null && selectNode.Where.RootExpressionNode != null)
+				whereSql = ProcessExpressionNode(selectNode.Where.RootExpressionNode, fromEntity.Name, relations);
+
+			if (relations.Count > 0)
+				sql.AppendLine(ProcessJoins(relations, fromEntity));
+
+			if (!string.IsNullOrWhiteSpace(whereSql))
+				sql.AppendLine("WHERE " + whereSql);
+
 
 			//ORDER BY
 			if (selectNode.OrderBy != null && selectNode.OrderBy.Fields.Count > 0)
@@ -110,16 +145,52 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 				sql.Append("ORDER BY ");
 				foreach (var field in selectNode.OrderBy.Fields)
 				{
-					if (!fromEntity.Fields.Any(x => x.Name == field.FieldName))
+					if (field.FieldName.StartsWith('$'))
 					{
-						errors.Add(new EqlError { Message = $"Order field '{field.FieldName}' is not found in entity '{fromEntity.Name}'" });
-						return string.Empty;
+						var pointIdx = field.FieldName.LastIndexOf('.');
+
+						var fieldName = field.FieldName[(pointIdx + 1)..];
+						var entityNames = field.FieldName[..pointIdx].Split('.')
+							.Select(s => s.TrimStart('$'))
+							.ToArray();
+
+						var orderEntities = entityNames
+							.Select(n => entities.FirstOrDefault(e => e.Name.Equals(n, StringComparison.OrdinalIgnoreCase)))
+							.Where(e => e != null)
+							.ToArray();
+
+						var notFound = entityNames
+							.Where(n => !orderEntities.Any(e => n.Equals(e?.Name, StringComparison.OrdinalIgnoreCase)))
+							.Select(s => $"'{s}'")
+							.ToArray();
+
+						if(notFound.Length != 0)
+						{
+							if (notFound.Length == 1)
+								errors.Add(new EqlError { Message = $"Entity {notFound[0]} does not exist" });
+							else
+								errors.Add(new EqlError { Message = $"Entities {string.Join(", ", notFound)} do not exist" });
+
+							return string.Empty;
+						}
+
+						// TODO check if the relation is valid
+						
+						var orderEntity = orderEntities[^1];
+						sql.Append($"{orderEntity.Name}_tar_org.\"{fieldName}\" {field.Direction}");
 					}
+					else
+					{
+						if (!fromEntity.Fields.Any(x => x.Name == field.FieldName))
+						{
+							errors.Add(new EqlError { Message = $"Order field '{field.FieldName}' is not found in entity '{fromEntity.Name}'" });
+							return string.Empty;
+						}
+						sql.Append(RECORD_COLLECTION_PREFIX + fromEntity.Name + ".\"" + field.FieldName + "\"" + " " + field.Direction);
 
-					sql.Append(RECORD_COLLECTION_PREFIX + fromEntity.Name + ".\"" + field.FieldName + "\"" + " " + field.Direction);
-					if (selectNode.OrderBy.Fields.Last() != field )
+					}
+					if (selectNode.OrderBy.Fields.Last() != field)
 						sql.Append(" , ");
-
 				}
 				sql.AppendLine();
 			}
@@ -202,9 +273,8 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 			for (int i = 0; i < relCount; i++)
 			{
 				var relInfo = relationFieldNode.Relations[i];
-				var relation = relations.SingleOrDefault(r => r.Name == relInfo.Name);
-				if (relation == null)
-					throw new EqlException($"Relation '{relInfo.Name}' not found.");
+				var relation = relations.SingleOrDefault(r => r.Name == relInfo.Name)
+					?? throw new EqlException($"Relation '{relInfo.Name}' not found.");
 
 				bool isLast = (i == (relCount - 1));
 				if (isLast)
@@ -592,36 +662,48 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 					break;
 				case EqlNodeType.RelationField:
 					{
-						EqlRelationFieldNode relON = ((EqlRelationFieldNode)operandNode);
-						if (relON.Relations.Count != 1)
-							throw new EqlException($"WHERE CLAUSE: Only first level relation fields can be used in WHERE clause.");
-
-						if (!relationsUsedInWhere.Any(x => x.Relations[0].Name == relON.Relations[0].Name))
-							relationsUsedInWhere.Add(relON);
-
+						var relON = (EqlRelationFieldNode)operandNode;
 						var entities = entMan.ReadEntities().Object;
 						var relations = relMan.Read().Object;
 
-						var relation = relations.SingleOrDefault(x => x.Name == relON.Relations[0].Name);
-						if (relation == null)
-							throw new EqlException($"WHERE CLAUSE: Relation '{relON.Relations[0].Name}' not found.");
+						var suffix = string.Empty;
+						var entity = fromEntity;
 
-						var originEntity = entities.Single(x => x.Id == relation.OriginEntityId);
-						var targetEntity = entities.Single(x => x.Id == relation.TargetEntityId);
-
-						var relatedEntity = targetEntity;
-						var suffix = "_org_tar";
-						if ( this.fromEntity.Id != originEntity.Id )
+						for (int i = 0; i < relON.Relations.Count; i++)
 						{
-							suffix = "_tar_org";
-							relatedEntity = originEntity;
+							if (i > 0 && suffix != "_tar_org")
+								throw new EqlException($"WHERE CLAUSE: Invalid nested relation '{string.Join('.', relON.Relations.Select(r => '$' + r.Name))}'");
+
+							var rel = relON.Relations[i];
+
+							if (!relationsUsedInWhere.Any(x => x.Relations.Any(y => y.Name == rel.Name)))
+								relationsUsedInWhere.Add(relON);
+
+							var relation = relations.SingleOrDefault(x => x.Name == rel.Name)
+								?? throw new EqlException($"WHERE CLAUSE: Relation '{rel.Name}' not found.");
+
+							var originEntity = entities.Single(x => x.Id == relation.OriginEntityId);
+							var targetEntity = entities.Single(x => x.Id == relation.TargetEntityId);
+							var relatedEntity = targetEntity;
+							suffix = "_org_tar";
+
+							if (relatedEntity.Id != originEntity.Id)
+							{
+								suffix = "_tar_org";
+								relatedEntity = originEntity;
+							}
+
+							if(i == relON.Relations.Count - 1)
+							{
+								field = relatedEntity.Fields.SingleOrDefault(x => x.Name == relON.FieldName);
+								if (field == null)
+									throw new EqlException($"WHERE CLAUSE: Field '{relON.FieldName}' not found in entity '{relatedEntity.Name}' from '{relON.Relations[0].Name}'.");
+								operandString = rel.Name + suffix + ".\"" + relON.FieldName + "\"";
+							}
+
+							entity = relatedEntity;
 						}
 
-						field = relatedEntity.Fields.SingleOrDefault(x => x.Name == relON.FieldName);
-						if (field == null)
-							throw new EqlException($"WHERE CLAUSE: Field '{relON.FieldName}' not found in entity '{relatedEntity.Name}' from '{relON.Relations[0].Name}'.");
-
-						operandString = relON.Relations[0].Name + suffix + ".\"" + relON.FieldName + "\"";
 					}
 					break;
 			}
@@ -812,60 +894,38 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 			return string.Empty;
 		}
 
-		private string ProcessWhereJoins(List<EqlRelationFieldNode> relationsUsedInWhere, Entity fromEntity)
+		private string ProcessJoins(List<EqlRelationFieldNode> relationsUsedInWhere, Entity fromEntity)
 		{
 			string relationJoinSql = string.Empty;
 			List<string> aliases = new List<string>();
-			var relations = relMan.Read().Object;
-			var entities = entMan.ReadEntities().Object;
+			var allRelations = relMan.Read().Object;
+			var allEntities = entMan.ReadEntities().Object;
 
 			foreach (var relNode in relationsUsedInWhere)
 			{
-				var relationInfo = relNode.Relations[0];
-				var relation = relations.SingleOrDefault(x => x.Name == relationInfo.Name);
+				var suffix = string.Empty;
 
-				if (relation == null)
-					throw new EqlException($"WHERE: Relation with name '{relationInfo.Name}' is not found.");
-
-				var suffix = "_org_tar";
-				//if (relNode.Relations[0].Direction == EqlRelationDirectionType.TargetOrigin)
-				if (relation.OriginEntityId != fromEntity.Id)
-					suffix = "_tar_org";
-
-				var relationAlias = relation.Name + suffix;
-				if (aliases.Contains(relationAlias))
-					continue;
-
-				aliases.Add(relationAlias);
-
-				if (relation.RelationType == EntityRelationType.OneToOne)
+				for(var i = 0; i < relNode.Relations.Count; i++)
 				{
-					//when the relation is origin -> target entity
-					if (relation.OriginEntityId == fromEntity.Id)
-					{
-						relationJoinSql += string.Format(FILTER_JOIN,
-							$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
-							relationAlias,
-							relationAlias,
-							relation.TargetFieldName,
-							$"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
-							relation.OriginFieldName);
-					}
-					else //when the relation is target -> origin, we have to query origin entity
-					{
-						relationJoinSql += string.Format(FILTER_JOIN,
-							   $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
-							   relationAlias,
-							   relationAlias,
-							   relation.OriginFieldName,
-							   $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
-							   relation.TargetFieldName);
-					}
-				}
-				else if (relation.RelationType == EntityRelationType.OneToMany)
-				{
-					//when origin and target entity are different, then direction don't matter
-					if (relation.OriginEntityId != relation.TargetEntityId)
+					if (i > 0 && suffix != "_tar_org")
+						throw new EqlException(new EqlError { Message = "Invalid nested relation in ORDER clause" });
+
+					var relationInfo = relNode.Relations[i];
+					var relation = allRelations.SingleOrDefault(x => x.Name == relationInfo.Name)
+						?? throw new EqlException($"WHERE: Relation with name '{relationInfo.Name}' is not found.");
+
+					suffix = "_org_tar";
+					//if (relNode.Relations[0].Direction == EqlRelationDirectionType.TargetOrigin)
+					if (relation.OriginEntityId != fromEntity.Id)
+						suffix = "_tar_org";
+
+					var relationAlias = relation.Name + suffix;
+					if (aliases.Contains(relationAlias))
+						continue;
+
+					aliases.Add(relationAlias);
+
+					if (relation.RelationType == EntityRelationType.OneToOne)
 					{
 						//when the relation is origin -> target entity
 						if (relation.OriginEntityId == fromEntity.Id)
@@ -875,81 +935,138 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 								relationAlias,
 								relationAlias,
 								relation.TargetFieldName,
-								 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+								$"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
 								relation.OriginFieldName);
 						}
 						else //when the relation is target -> origin, we have to query origin entity
 						{
-							relationJoinSql += string.Format(FILTER_JOIN,
-								 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
-								relationAlias,
-								relationAlias,
-								relation.OriginFieldName,
-								$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
-								relation.TargetFieldName);
+							if (i > 0)
+							{
+								relationJoinSql += string.Format(FILTER_JOIN,
+								   $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+								   relationAlias,
+								   relationAlias,
+								   relation.OriginFieldName,
+								   $"{relation.TargetEntityName}_tar_org",
+								   relation.TargetFieldName);
+							}
+							else
+							{
+								relationJoinSql += string.Format(FILTER_JOIN,
+								   $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+								   relationAlias,
+								   relationAlias,
+								   relation.OriginFieldName,
+								   $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
+								   relation.TargetFieldName);
+							}
 						}
 					}
-					else //when the origin entity is same as target entity direction matters
+					else if (relation.RelationType == EntityRelationType.OneToMany)
 					{
-						if (relationInfo.Direction == EqlRelationDirectionType.TargetOrigin)
+						//when origin and target entity are different, then direction don't matter
+						if (relation.OriginEntityId != relation.TargetEntityId)
 						{
-							relationJoinSql = string.Format(FILTER_JOIN,
-								$"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
-							   relationAlias,
-							   relationAlias,
-							   relation.OriginFieldName,
-							   $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
-							   relation.TargetFieldName);
+							//when the relation is origin -> target entity
+							if (relation.OriginEntityId == fromEntity.Id)
+							{
+								relationJoinSql += string.Format(FILTER_JOIN,
+									$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
+									relationAlias,
+									relationAlias,
+									relation.TargetFieldName,
+									 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+									relation.OriginFieldName);
+							}
+							else //when the relation is target -> origin, we have to query origin entity
+							{
+								if(i > 0)
+								{
+									relationJoinSql += string.Format(FILTER_JOIN,
+										 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+										relationAlias,
+										relationAlias,
+										relation.OriginFieldName,
+										$"{relation.TargetEntityName}_tar_org",
+										relation.TargetFieldName);
+								}
+								else
+								{
+									relationJoinSql += string.Format(FILTER_JOIN,
+										 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+										relationAlias,
+										relationAlias,
+										relation.OriginFieldName,
+										$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
+										relation.TargetFieldName);
+								}
+							}
 						}
-						else
+						else //when the origin entity is same as target entity direction matters
 						{
-							relationJoinSql += string.Format(FILTER_JOIN,
-								$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
-								relationAlias,
-								relationAlias,
-								relation.TargetFieldName,
-								 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
-								relation.OriginFieldName);
+							if (relationInfo.Direction == EqlRelationDirectionType.TargetOrigin)
+							{
+								relationJoinSql = string.Format(FILTER_JOIN,
+									$"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+								   relationAlias,
+								   relationAlias,
+								   relation.OriginFieldName,
+								   $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
+								   relation.TargetFieldName);
+							}
+							else
+							{
+								relationJoinSql += string.Format(FILTER_JOIN,
+									$"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}",
+									relationAlias,
+									relationAlias,
+									relation.TargetFieldName,
+									 $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}",
+									relation.OriginFieldName);
+							}
 						}
 					}
-				}
-				else if (relation.RelationType == EntityRelationType.ManyToMany)
-				{
-					string relationTable = "rel_" + relation.Name;
-
-					string targetJoinTable = $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}";
-					string originJoinTable = $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}";
-
-					//if target is entity we query
-					if (fromEntity.Id == relation.TargetEntityId)
+					else if (relation.RelationType == EntityRelationType.ManyToMany)
 					{
-						string targetJoinAlias = relation.Name + "_target";
-						string originJoinAlias = relationAlias;
+						if (i < relNode.Relations.Count - 1)
+							throw new EqlException(new EqlError { Message = "Accessing many to many relation with relation is not supported now" });
 
-						relationJoinSql += string.Format(FILTER_JOIN,
-								 /*LEFT OUTER JOIN*/ relationTable, /* */ targetJoinAlias /*ON*/,
-								 targetJoinAlias, /*.*/ "target_id", /* =  */
-								 targetJoinTable, /*.*/ relation.TargetFieldName);
+						string relationTable = "rel_" + relation.Name;
 
-						relationJoinSql += Environment.NewLine + string.Format(FILTER_JOIN,
-								/*LEFT OUTER JOIN*/ originJoinTable, /* */ originJoinAlias /*ON*/,
-								targetJoinAlias, /*.*/ "origin_id", /* =  */
-								originJoinAlias, /*.*/ relation.OriginFieldName);
-					}
-					else // if origin is entity we query
-					{
-						string targetJoinAlias = relationAlias;
-						string originJoinAlias = relation.Name + "_origin";
+						string targetJoinTable = $"{RECORD_COLLECTION_PREFIX}{relation.TargetEntityName}";
+						string originJoinTable = $"{RECORD_COLLECTION_PREFIX}{relation.OriginEntityName}";
 
-						relationJoinSql += string.Format(FILTER_JOIN,
-								/*LEFT OUTER JOIN*/ relationTable, /* */ originJoinAlias /*ON*/,
-								originJoinAlias, /*.*/ "origin_id", /* =  */
-								originJoinTable, /*.*/ relation.OriginFieldName);
+						//if target is entity we query
+						if (fromEntity.Id == relation.TargetEntityId)
+						{
+							string targetJoinAlias = relation.Name + "_target";
+							string originJoinAlias = relationAlias;
 
-						relationJoinSql += Environment.NewLine + string.Format(FILTER_JOIN,
-								  /*LEFT OUTER JOIN*/ targetJoinTable, /* */ targetJoinAlias /*ON*/,
-								originJoinAlias, /*.*/ "target_id", /* =  */
-								targetJoinAlias, /*.*/ relation.TargetFieldName);
+							relationJoinSql += string.Format(FILTER_JOIN,
+									 /*LEFT OUTER JOIN*/ relationTable, /* */ targetJoinAlias /*ON*/,
+									 targetJoinAlias, /*.*/ "target_id", /* =  */
+									 targetJoinTable, /*.*/ relation.TargetFieldName);
+
+							relationJoinSql += Environment.NewLine + string.Format(FILTER_JOIN,
+									/*LEFT OUTER JOIN*/ originJoinTable, /* */ originJoinAlias /*ON*/,
+									targetJoinAlias, /*.*/ "origin_id", /* =  */
+									originJoinAlias, /*.*/ relation.OriginFieldName);
+						}
+						else // if origin is entity we query
+						{
+							string targetJoinAlias = relationAlias;
+							string originJoinAlias = relation.Name + "_origin";
+
+							relationJoinSql += string.Format(FILTER_JOIN,
+									/*LEFT OUTER JOIN*/ relationTable, /* */ originJoinAlias /*ON*/,
+									originJoinAlias, /*.*/ "origin_id", /* =  */
+									originJoinTable, /*.*/ relation.OriginFieldName);
+
+							relationJoinSql += Environment.NewLine + string.Format(FILTER_JOIN,
+									  /*LEFT OUTER JOIN*/ targetJoinTable, /* */ targetJoinAlias /*ON*/,
+									originJoinAlias, /*.*/ "target_id", /* =  */
+									targetJoinAlias, /*.*/ relation.TargetFieldName);
+						}
 					}
 				}
 			}

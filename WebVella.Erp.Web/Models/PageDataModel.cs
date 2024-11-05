@@ -509,6 +509,8 @@ namespace WebVella.Erp.Web.Models
 				var pName = ppName.Trim();
 				if (string.IsNullOrWhiteSpace(currentPropertyNamePath))
 					currentPropertyNamePath = pName;
+				else if (pName.StartsWith('['))
+					currentPropertyNamePath += pName;
 				else
 					currentPropertyNamePath += $".{pName}";
 

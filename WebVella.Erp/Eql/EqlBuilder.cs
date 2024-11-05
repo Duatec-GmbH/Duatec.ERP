@@ -124,7 +124,7 @@ namespace WebVella.Erp.Eql
 			return tree;
 		}
 
-		private EqlAbstractTree BuildAbstractTree(ParseTree parseTree)
+		internal EqlAbstractTree BuildAbstractTree(ParseTree parseTree)
 		{
 			EqlAbstractTree resultTree = new EqlAbstractTree();
 			var rootQueryNode = parseTree.Root.ChildNodes[0];
@@ -178,15 +178,14 @@ namespace WebVella.Erp.Eql
 							{
 								case "argument":
 									{
-										string paramName = "@" + parseNode.ChildNodes[1].ChildNodes[1].Token.ValueString;
+										var paramName = "@" + parseNode.ChildNodes[1].ChildNodes[1].Token.ValueString;
 										if (!ExpectedParameters.Contains(paramName))
 											ExpectedParameters.Add(paramName);
-										var param = Parameters.SingleOrDefault(x => x.ParameterName == paramName);
-										if (param == null)
-											throw new EqlException($"PAGE: Parameter '{paramName}' not found.");
 
-										int number;
-										if (!Int32.TryParse((param.Value ?? string.Empty).ToString(), out number))
+										var param = Parameters.SingleOrDefault(x => x.ParameterName == paramName)
+											?? throw new EqlException($"PAGE: Parameter '{paramName}' not found.");
+
+										if (!Int32.TryParse((param.Value ?? string.Empty).ToString(), out var number))
 											throw new EqlException($"PAGE: Invalid parameter '{paramName}' value '{param.Value}'.");
 
 										selectNode.Page.Number = number;
@@ -211,12 +210,12 @@ namespace WebVella.Erp.Eql
 							{
 								case "argument":
 									{
-										string paramName = "@" + parseNode.ChildNodes[1].ChildNodes[1].Token.ValueString;
+										var paramName = "@" + parseNode.ChildNodes[1].ChildNodes[1].Token.ValueString;
 										if (!ExpectedParameters.Contains(paramName))
 											ExpectedParameters.Add(paramName);
-										var param = Parameters.SingleOrDefault(x => x.ParameterName == paramName);
-										if (param == null)
-											throw new EqlException($"PAGESIZE: Parameter '{paramName}' not found.");
+
+										var param = Parameters.SingleOrDefault(x => x.ParameterName == paramName)
+											?? throw new EqlException($"PAGESIZE: Parameter '{paramName}' not found.");
 
 										int number;
 										if (!Int32.TryParse((param.Value ?? string.Empty).ToString(), out number))
@@ -294,8 +293,10 @@ namespace WebVella.Erp.Eql
 			foreach (var orderMemberNode in orderbyListNode)
 			{
 				var fieldName = string.Empty;
+				var orderIndex = 1;
 				var direction = "ASC";
-				if (orderMemberNode.ChildNodes[0].ChildNodes[0]?.Token?.ValueString == "@") //argument
+
+				if (orderMemberNode.ChildNodes[0].ChildNodes.FirstOrDefault().Token?.ValueString == "@") //argument
 				{
 					var paramName = "@" + orderMemberNode.ChildNodes[0].ChildNodes[1].Token.ValueString;
 					if (!ExpectedParameters.Contains(paramName))
@@ -308,19 +309,24 @@ namespace WebVella.Erp.Eql
 					if (string.IsNullOrWhiteSpace(fieldName))
 						throw new EqlException($"ORDER BY: Invalid order field name in parameter '{paramName}'");
 				}
-				else if (orderMemberNode.ChildNodes[0].ChildNodes[0]?.ChildNodes[0]?.Token?.ValueString == "$") // relation
+				else if (orderMemberNode.ChildNodes[0].Term?.Name.ToLowerInvariant() == "column_relation_list")
 				{
-					var relation = orderMemberNode.ChildNodes[0].GetText();
+					var relList = orderMemberNode.ChildNodes[0];
+					var identifier = orderMemberNode.ChildNodes[2].GetText();
+					fieldName = string.Join('.', relList.ChildNodes.Select(child => child.GetText())) + '.' + identifier;
+					orderIndex = 3;
 				}
 				else
 					fieldName = orderMemberNode.ChildNodes[0].ChildNodes[0].Token.ValueString;
 
-				if (orderMemberNode.ChildNodes.Count > 1 && orderMemberNode.ChildNodes[1].ChildNodes.Count > 0)
+				if (orderMemberNode.ChildNodes.Count > orderIndex && orderMemberNode.ChildNodes[orderIndex].ChildNodes.Count > 0)
 				{
-					if (orderMemberNode.ChildNodes[1].ChildNodes[0].ChildNodes.Count > 0 &&
-						orderMemberNode.ChildNodes[1].ChildNodes[0].ChildNodes[0].Token.ValueString == "@")
+					var orderDirNode = orderMemberNode.ChildNodes[orderIndex];
+
+					if (orderDirNode.ChildNodes[0].ChildNodes.Count > 0 &&
+						orderDirNode.ChildNodes[0].ChildNodes[0].Token.ValueString == "@")
 					{
-						var paramName = "@" + orderMemberNode.ChildNodes[1].ChildNodes[0].ChildNodes[1].Token.ValueString;
+						var paramName = "@" + orderDirNode.ChildNodes[0].ChildNodes[1].Token.ValueString;
 						if (!ExpectedParameters.Contains(paramName))
 							ExpectedParameters.Add(paramName);
 						var param = Parameters.SingleOrDefault(x => x.ParameterName == paramName);
@@ -337,7 +343,7 @@ namespace WebVella.Erp.Eql
 							throw new EqlException($"ORDER BY: Invalid direction '{direction}'");
 					}
 					else
-						direction = orderMemberNode.ChildNodes[1].ChildNodes[0].Token.ValueString.ToUpper();
+						direction = orderDirNode.ChildNodes[0].Token.ValueString.ToUpper();
 				}
 
 				orderByNode.Fields.Add(new EqlOrderByFieldNode { FieldName = fieldName, Direction = direction });
@@ -384,16 +390,19 @@ namespace WebVella.Erp.Eql
 				{
 					case "expression_identifier":
 						if (parseTreeNode.ChildNodes[0].ChildNodes[0].Term != null &&
-							parseTreeNode.ChildNodes[0].ChildNodes[0].Term.Name == "column_relation")
+							parseTreeNode.ChildNodes[0].ChildNodes[0].Term.Name == "column_relation_list")
 						{
+							var relations = parseTreeNode.ChildNodes[0].ChildNodes[0].ChildNodes;
+							var identifier = parseTreeNode.ChildNodes[0].ChildNodes[2].GetText();
+
 							var direction = EqlRelationDirectionType.TargetOrigin;
-							if (parseTreeNode.ChildNodes[0].ChildNodes[0].ChildNodes[0].Token.ValueString == "$$")
+							if (relations[0].ChildNodes[0].Token.ValueString == "$$")
 								direction = EqlRelationDirectionType.OriginTarget;
 
-							var relationNameNode = parseTreeNode.ChildNodes[0].ChildNodes[0].ChildNodes[1];
-							var fieldName = parseTreeNode.ChildNodes[0].ChildNodes[2].ChildNodes[0].Token.ValueString;
-							EqlRelationFieldNode result = new EqlRelationFieldNode { FieldName = fieldName };
-							result.Relations.Add(new EqlRelationInfo { Name = relationNameNode.ChildNodes[0].Token.ValueString, Direction = direction });
+							EqlRelationFieldNode result = new EqlRelationFieldNode { FieldName = identifier };
+							result.Relations.Add(new EqlRelationInfo { Name = relations[0].GetText().TrimStart('$'), Direction = direction });
+							for (int i = 1; i < relations.Count; i++)
+								result.Relations.Add(new EqlRelationInfo { Name = relations[i].GetText().TrimStart('$'), Direction = EqlRelationDirectionType.TargetOrigin });
 							return result;
 						}
 						else

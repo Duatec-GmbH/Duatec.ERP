@@ -97,7 +97,7 @@ namespace WebVella.Erp.Eql
 			exprList.Rule = MakePlusRule(exprList, COMMA, expression);
 			expression.Rule = term | binExpr;
 			term.Rule = expressionIdentifier | argument | tuple | NUMBER | STRING | NULL | TRUE | FALSE;
-			expressionIdentifier.Rule = identifier | columnRelation + DOT + identifier;
+			expressionIdentifier.Rule = identifier | columnRelationList + DOT + identifier;
 			tuple.Rule = "(" + exprList + ")";
 			binExpr.Rule = expression + binOp + expression;
 			binOp.Rule = ToTerm("=") | ">" | "<" | ">=" | "<=" | "<>" | "!=" | //compare operators
