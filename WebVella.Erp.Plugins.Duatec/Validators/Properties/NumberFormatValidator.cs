@@ -7,12 +7,14 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
     {
         protected readonly bool _isInteger;
         protected readonly bool _mustBePositive;
+        protected readonly bool _zeroAllowed;
 
-        public NumberFormatValidator(string entity, string entityProperty, bool isInteger = false, bool mustBePositive = false)
+        public NumberFormatValidator(string entity, string entityProperty, bool isInteger = false, bool mustBePositive = false, bool zeroAllowed = true)
             : base(entity, entityProperty)
         {
             _isInteger = isInteger;
             _mustBePositive = mustBePositive;
+            _zeroAllowed = zeroAllowed;
         }
 
         protected override bool CharIsAllowed(char c)
@@ -34,6 +36,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
                         result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be an integer"));
                     else if (i < 0 && _mustBePositive)
                         result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be negative"));
+                    else if (i == 0 && !_zeroAllowed)
+                        result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be '0'"));
                 }
                 else
                 {
@@ -41,6 +45,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
                         result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be a number"));
                     else if(d < 0 && _mustBePositive)
                         result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be negative"));
+                    else if (d == 0 && !_zeroAllowed)
+                        result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be '0'"));
                 }
             }
             return result;

@@ -17,6 +17,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Delete = "article_type_delete";
                 public const string Update = "article_type_update";
             }
+
+            public static class Stock
+            {
+                public const string Create = "article_stock_create";
+            }
         }
 
         public static class Manufacturer

@@ -11,8 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private readonly static string _entityPretty = Text.FancyfySnakeCaseStartWithUpper(ArticleStock.Entity);
         private readonly static string _articlePretty = Text.FancyfySnakeCase(Article.Entity);
         private readonly static string _locationPretty = Text.FancyfySnakeCase(WarehouseLocation.Entity);
-        private static readonly NumberFormatValidator _amountValidator 
-            = new(ArticleStock.Entity, ArticleStock.Amount, false, true);
+        private static readonly NumberFormatValidator _amountValidator = new(ArticleStock.Entity, ArticleStock.Amount, false, true, false);
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
             => Validate(record);
@@ -27,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             var article = record[ArticleStock.Article] as Guid?;
             var location = record[ArticleStock.WarehouseLocation] as Guid?;
 
-            var amount = record[ArticleStock.Amount]?.ToString() ?? "0";
+            var amount = record[ArticleStock.Amount]?.ToString() ?? "";
 
             if (!article.HasValue)
                 result.Add(new ValidationError(ArticleStock.Article, $"{_entityPretty} {_articlePretty} is required"));
