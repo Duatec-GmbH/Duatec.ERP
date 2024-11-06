@@ -16,6 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
             var rec = new EntityRecord();
             rec[ArticleType.Label] = string.Empty;
             rec[ArticleType.Unit] = string.Empty;
+            rec[ArticleType.IsInteger] = false;
             return rec;
         }
     }

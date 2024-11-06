@@ -11,9 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
     [HookAttachment(key: HookKeys.Article.Type.Update)]
     internal class ArticleTypeUpdateHook : UpdateOnListHookBase
     {
-        const string labelField = "label";
-        const string unitField = "unit";
-
         private static readonly ArticleTypeValidator _validator = new();
 
         protected override IRecordValidator Validator => _validator;
@@ -24,12 +21,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
-            var label = pageModel.GetFormValue(labelField) ?? string.Empty;
-            var unit = pageModel.GetFormValue(unitField) ?? string.Empty;
+            var label = pageModel.GetFormValue(ArticleType.Label) ?? string.Empty;
+            var unit = pageModel.GetFormValue(ArticleType.Unit) ?? string.Empty;
+            var isInteger = bool.TryParse(pageModel.GetFormValue(ArticleType.IsInteger), out var b) && b;
 
             var rec = new EntityRecord();
             rec[ArticleType.Label] = label;
             rec[ArticleType.Unit] = unit;
+            rec[ArticleType.IsInteger] = isInteger;
 
             return rec;
         }

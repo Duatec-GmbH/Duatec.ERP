@@ -21,6 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public static class Stock
             {
                 public const string Create = "article_stock_create";
+                public const string Update = "article_stock_update";
             }
         }
 

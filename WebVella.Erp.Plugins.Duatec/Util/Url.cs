@@ -23,6 +23,12 @@ namespace WebVella.Erp.Plugins.Duatec.Util
             return result + guid;
         }
 
+        public static string RemoveParameters(string url)
+        {
+            var idx = url.IndexOf('?');
+            return idx < 0 ? url : url[..idx];
+        }
+
         public static string RemoveParameter(string url, string parameter)
         {
             var startIdx = url.IndexOf($"?{parameter}");

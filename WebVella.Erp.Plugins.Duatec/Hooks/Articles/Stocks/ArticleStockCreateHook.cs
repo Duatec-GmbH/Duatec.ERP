@@ -32,10 +32,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
             var context = pageModel.ErpRequestContext;
             var url = $"/{context?.App?.Name}/{context?.SitemapArea?.Name}/{context?.SitemapNode?.Name}/r/";
+
             var article = (Guid)record[ArticleStock.Article];
             var location = (Guid)record[ArticleStock.WarehouseLocation];
             var project = record[ArticleStock.Project] as Guid?;
-            var amount = (decimal)record[ArticleStock.Amount];
+            var amount = (decimal)record[ArticleStock.Amount];          
 
             var rec = ArticleStock.Find(article, location, project);
             var recMan = new RecordManager();

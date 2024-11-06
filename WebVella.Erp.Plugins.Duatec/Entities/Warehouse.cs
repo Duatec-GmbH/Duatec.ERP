@@ -10,5 +10,12 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);
+
+        public static EntityRecord? FromWarehouseLocation(Guid warehouseLocationId)
+        {
+            if (WarehouseLocation.Find(warehouseLocationId)?[WarehouseLocation.Warehouse] is not Guid id)
+                return null;
+            return Find(id);
+        }
     }
 }

@@ -14,13 +14,15 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
             if (rec == null)
                 return null;
             
-            // TODO get decimal places; 
             var amount = rec[ArticleStock.Amount]?.ToString();
             var article = (rec['$' + ArticleStock.Relations.Article] as List<EntityRecord>)?[0];
             var type = (article?['$' + Article.Relations.Type] as List<EntityRecord>)?[0];
             var unit = type?[ArticleType.Unit]?.ToString();
+            var isInteger = type?[ArticleType.IsInteger] is bool b && b;
 
-            return $"{amount} {unit}";
+            return isInteger
+                ? $"{amount:0} {unit}"
+                : $"{amount:0.00} {unit}";
         }
     }
 }

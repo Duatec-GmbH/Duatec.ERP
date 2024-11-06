@@ -3858,11 +3858,16 @@ border-bottom-style:dashed;
 
 .pc-page-header .actions.right {
 	padding-left:0.75rem;
-	max-width:66%;
-	min-width:10%;
+	max-width:40vw;
+	min-width:10vw;
 	display:flex;
 	align-items:center;
 	justify-content: end;
+}
+
+.pc-page-header .actions.right .lnr.row .lnc {
+	min-width: 10vw;
+	max-width: 40vw;
 }
 
 /*Meta*/

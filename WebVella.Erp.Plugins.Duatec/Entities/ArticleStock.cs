@@ -18,6 +18,9 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Project = "project_id";
         public const string Amount = "amount";
 
+        public static EntityRecord? Find(Guid id)
+            => Record.Find(Entity, id);
+
         public static EntityRecord? Find(Guid articleId, Guid locationId, Guid? projectId)
         {
             var subQueries = new List<QueryObject>()

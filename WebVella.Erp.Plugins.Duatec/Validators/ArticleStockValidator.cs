@@ -11,7 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private readonly static string _entityPretty = Text.FancyfySnakeCaseStartWithUpper(ArticleStock.Entity);
         private readonly static string _articlePretty = Text.FancyfySnakeCase(Article.Entity);
         private readonly static string _locationPretty = Text.FancyfySnakeCase(WarehouseLocation.Entity);
-        private static readonly NumberFormatValidator _amountValidator = new(ArticleStock.Entity, ArticleStock.Amount, false, true, false);
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
             => Validate(record);
@@ -26,16 +25,33 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             var article = record[ArticleStock.Article] as Guid?;
             var location = record[ArticleStock.WarehouseLocation] as Guid?;
 
-            var amount = record[ArticleStock.Amount]?.ToString() ?? "";
+            var amount = record[ArticleStock.Amount]?.ToString() ?? "0";
+            NumberFormatValidator amountValidator;
 
-            if (!article.HasValue)
-                result.Add(new ValidationError(ArticleStock.Article, $"{_entityPretty} {_articlePretty} is required"));
             if (!location.HasValue)
                 result.Add(new ValidationError(ArticleStock.WarehouseLocation, $"{_entityPretty} {_locationPretty} is required"));
+            if (article.HasValue)
+                amountValidator = GetAmountValidator(article.Value);
+            else
+            {
+                result.Add(new ValidationError(ArticleStock.Article, $"{_entityPretty} {_articlePretty} is required"));
+                amountValidator = GetDefaultAmountValidator();
+            }
 
-            result.AddRange(_amountValidator.ValidateOnCreate(amount, ArticleStock.Amount));
+            result.AddRange(amountValidator.ValidateOnCreate(amount, ArticleStock.Amount));
 
             return result;
         }
+
+        private static NumberFormatValidator GetAmountValidator(Guid article)
+        {
+            var isInteger = (bool)ArticleType.Find((Guid)Article.Find(article)![Article.Type])
+                ![ArticleType.IsInteger];
+
+            return new (ArticleStock.Entity, ArticleStock.Amount, isInteger, true, false);
+        }
+
+        private static NumberFormatValidator GetDefaultAmountValidator()
+            => new (ArticleStock.Entity, ArticleStock.Amount, true, true, false);
     }
 }
