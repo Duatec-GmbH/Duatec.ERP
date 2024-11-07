@@ -8,8 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets
     public class RecordIsNotNullSnippet : SnippetBase
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
-        {
-            return pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null;
-        }
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("Record") != null;
     }
 }

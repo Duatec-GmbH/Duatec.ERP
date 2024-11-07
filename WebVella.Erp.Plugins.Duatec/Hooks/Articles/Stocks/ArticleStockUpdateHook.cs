@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
@@ -25,26 +24,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var id = (Guid)record["id"];
+
             if (record[ArticleStock.Amount] is null || record[ArticleStock.Amount] is decimal d && d == 0)
             {
-                var recordManager = new RecordManager();
-                var result = recordManager.DeleteRecord(ArticleStock.Entity, id);
-                string url;
+                if (ArticleStock.Delete(id))
+                    return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
 
-                if (result.Success)
-                {
-                    var context = pageModel.ErpRequestContext;
-                    url = $"/{context?.App?.Name}/{context?.SitemapArea?.Name}/{context?.SitemapNode?.Name}/l/";
-                    return pageModel.LocalRedirect(url);
-                }
-
-                url = Url.RemoveParameters(pageModel.CurrentUrl);
-                pageModel.PutMessage(ScreenMessageType.Error, "Could not delete article stock entry");
-                return pageModel.LocalRedirect(url);
+                validationErrors.Add(new ValidationError(string.Empty, "Could not delete record"));
+                return null;
             }
 
             var entry = ArticleStock.Find(id)!;
-
             record[ArticleStock.Article] = entry[ArticleStock.Article];
             record[ArticleStock.Project] = entry[ArticleStock.Project];
             record[ArticleStock.WarehouseLocation] = entry[ArticleStock.WarehouseLocation];

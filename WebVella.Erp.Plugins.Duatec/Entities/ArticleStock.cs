@@ -36,5 +36,11 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             return response.Object.Data.SingleOrDefault();
         }
+
+        public static bool Delete(Guid id)
+        {
+            var recordManager = new RecordManager();
+            return recordManager.DeleteRecord(Entity, id).Success;
+        }
     }
 }

@@ -35,8 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 if (result.Success)
                 {
                     connection.CommitTransaction();
-                    var context = pageModel.ErpRequestContext;
-                    return pageModel.LocalRedirect($"/{context.App.Name}/{context.SitemapArea.Name}/{context.SitemapNode.Name}/l/");
+                    return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
                 }
                 else
                 {

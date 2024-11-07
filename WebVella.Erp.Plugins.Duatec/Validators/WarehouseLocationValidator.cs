@@ -8,7 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     internal class WarehouseLocationValidator : IRecordValidator
     {
-        private static readonly NameFormatValidator _labelValidator = new(WarehouseLocation.Entity, WarehouseLocation.Designation);
+        private static readonly NameFormatValidator _labelValidator = new(Warehouse.Entity, Warehouse.Designation);
         private static readonly string _warehousePretty = Text.FancyfySnakeCase(Warehouse.Entity);
         private static readonly string _entityPretty = Text.FancyfySnakeCaseStartWithUpper(WarehouseLocation.Entity);
         private static readonly string _entityPropertyPretty = Text.FancyfySnakeCase(WarehouseLocation.Designation);

@@ -13,11 +13,13 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 
         protected abstract object? FalseValue { get; }
 
+        protected virtual object? NullValue { get; }
+
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
             var val = pageModel.TryGetDataSourceProperty<EntityRecord>(DataSourceProperty)?[RecordProperty] as bool?;
             if (!val.HasValue)
-                return null;
+                return NullValue;
             return val.Value ? TrueValue : FalseValue;
         }
     }

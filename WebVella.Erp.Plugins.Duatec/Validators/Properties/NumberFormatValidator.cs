@@ -30,17 +30,17 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
             var result = base.ValidateFormat(value, formField);
 
             if (!decimal.TryParse(value, out var number))
-                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be a number"));
+                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} is not a number"));
 
             if(result.Count == 0)
             {
                 if (_isInteger && number % 1 != 0)
-                    result.Add(new ValidationError(formField, "Integer expected"));
+                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} is expected to be an integer"));
 
+                if (number == 0 && !_zeroAllowed)
+                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be positive"));
                 if (number < 0 && _mustBePositive)
                     result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be negative"));
-                else if (number == 0 && !_zeroAllowed)
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be '0'"));
             }
             return result;
         }

@@ -2,12 +2,12 @@
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Snippets
+namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
 {
     [Snippet]
-    public class ListUrlSnippet : SnippetBase
+    internal class ArticleStockMoveSnippet : SnippetBase
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
-            => PageUrl.EntityList(pageModel);
+            => Url.ReplacePageKind(pageModel.CurrentUrl, 'm') + "/move";
     }
 }

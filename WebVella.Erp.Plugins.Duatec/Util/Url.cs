@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Util
 {
@@ -8,17 +7,17 @@ namespace WebVella.Erp.Plugins.Duatec.Util
         [GeneratedRegex("/[a-z]/", RegexOptions.Compiled)]
         private static partial Regex PageKindRegex();
 
-        public static string ReplacePageKind(BaseErpPageModel pageModel, char pageKind)
+        public static string ReplacePageKind(string url, char pageKind)
         {
-            var match = PageKindRegex().Match(pageModel.CurrentUrl);
+            var match = PageKindRegex().Match(url);
 
             if (!match.Success)
                 return null!;
 
-            var result = pageModel.CurrentUrl[..(match.Index + 1)] + $"{pageKind}/";
+            var result = url[..(match.Index + 1)] + $"{pageKind}/";
             var guidStart = result.Length;
-            var guidEnd = pageModel.CurrentUrl.IndexOf('/', guidStart);
-            var guid = pageModel.CurrentUrl[guidStart..guidEnd];
+            var guidEnd = url.IndexOf('/', guidStart);
+            var guid = url[guidStart..guidEnd];
 
             return result + guid;
         }

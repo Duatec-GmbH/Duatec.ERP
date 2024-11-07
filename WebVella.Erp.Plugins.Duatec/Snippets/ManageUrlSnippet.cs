@@ -8,8 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets
     public class ManageUrlSnippet : SnippetBase
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
-        {
-            return Url.ReplacePageKind(pageModel, 'm');
-        }
+            => Url.ReplacePageKind(pageModel.CurrentUrl, 'm');
     }
 }
