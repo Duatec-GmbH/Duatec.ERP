@@ -22,7 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
             if (!long.TryParse(id, out var eplanId) || string.IsNullOrEmpty(shortName) || string.IsNullOrEmpty(name))
                 return false;
 
-            var dto = new ManufacturerDto(eplanId, shortName, name, null, null);
+            var dto = new DataPortalManufacturer(eplanId, shortName, name, null, null);
 
             return Manufacturer.CanBeImported(dto);
         }

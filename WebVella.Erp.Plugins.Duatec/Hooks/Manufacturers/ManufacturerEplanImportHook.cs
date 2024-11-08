@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
                 PutInvalidArg(pageModel);
             else
             {
-                var manufacturer = EplanDataPortal.GetManufacturers()
+                var manufacturer = DataPortal.GetManufacturers()
                     .SingleOrDefault(m => m.EplanId == eplanId);
 
                 if (manufacturer == null)
@@ -45,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
             return null;
         }
 
-        private static void Import(BaseErpPageModel pageModel, ManufacturerDto manufacturer)
+        private static void Import(BaseErpPageModel pageModel, DataPortalManufacturer manufacturer)
         {
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();

@@ -8,8 +8,15 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
-    internal static class ArticleStockRecordHooks
+    internal static class Common
     {
+        public static void RoundAmount(EntityRecord record)
+        {
+            var amount = (decimal)record[ArticleStock.Amount];
+            amount = Math.Round(amount, 2);
+            record[ArticleStock.Amount] = amount;
+        }
+
         public static IActionResult? Create(EntityRecord record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
             var article = (Guid)record[ArticleStock.Article];

@@ -24,7 +24,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             if (errors.Count > 0)
                 return null;
 
-            return ArticleStockRecordHooks.Create(record, pageModel, validationErrors);
+            Common.RoundAmount(record);
+            return Common.Create(record, pageModel, validationErrors);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);
 
-        public static bool CanBeImported(ManufacturerDto manufacturer)
+        public static bool CanBeImported(DataPortalManufacturer manufacturer)
         {
             var subQueries = new List<QueryObject>()
             {
@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return response.Success && response.Object == 0;
         }
 
-        public static Guid? Insert(ManufacturerDto manufacturer)
+        public static Guid? Insert(DataPortalManufacturer manufacturer)
         {
             var rec = new EntityRecord();
             rec[EplanId] = manufacturer.EplanId.ToString();

@@ -1,6 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Eplan;
-
-namespace WebVella.Erp.Plugins.Duatec.Test
+﻿namespace WebVella.Erp.Plugins.Duatec.Test.DataPortal
 {
     [TestFixture]
     internal class ArticleTests
@@ -9,7 +7,7 @@ namespace WebVella.Erp.Plugins.Duatec.Test
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticleIds100))]
         public void GetArticleWithId_ReturnsValidDto(string id)
         {
-            var sut = EplanDataPortal.GetArticleById(long.Parse(id));
+            var sut = Eplan.DataPortal.GetArticleById(long.Parse(id));
 
             Common.AssertArticleIsValid(sut);
         }
@@ -18,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Test
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticlePartNumbers100))]
         public void GetArticleWithPartNumber_ReturnsValidDto(string partNumber)
         {
-            var sut = EplanDataPortal.GetArticleByPartNumber(partNumber);
+            var sut = Eplan.DataPortal.GetArticleByPartNumber(partNumber);
 
             Common.AssertArticleIsValid(sut);
         }

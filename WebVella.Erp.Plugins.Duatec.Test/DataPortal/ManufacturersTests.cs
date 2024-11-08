@@ -1,6 +1,4 @@
-using WebVella.Erp.Plugins.Duatec.Eplan;
-
-namespace WebVella.Erp.Plugins.Duatec.Test
+namespace WebVella.Erp.Plugins.Duatec.Test.DataPortal
 {
     [TestFixture]
     public class ManufacturersTests
@@ -8,7 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.Test
         [Test]
         public void GetManufacturers_HasNoEmptyRequiredProperty()
         {
-            var manufacturers = EplanDataPortal.GetManufacturers();
+            var manufacturers = Eplan.DataPortal.GetManufacturers();
 
             Assert.Multiple(() =>
             {

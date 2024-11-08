@@ -2,9 +2,9 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
-    public class ManufacturerDto
+    public class DataPortalManufacturer
     {
-        public ManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
+        public DataPortalManufacturer(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
         {
             EplanId = id;
             ShortName = shortName;
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 
         public string LogoUrl { get; }
 
-        public static ManufacturerDto? FromJson(JsonNode? json)
+        public static DataPortalManufacturer? FromJson(JsonNode? json)
         {
             if (json == null || $"{json["type"]}" != "manufacturers")
                 return null;
@@ -37,7 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
             var websiteUrl = json["website"]?.GetValue<string?>();
             var logoUrl = json["logo_url"]?.GetValue<string>();
 
-            return new ManufacturerDto(
+            return new DataPortalManufacturer(
                 id: id,
                 shortName: shortName,
                 name: name,

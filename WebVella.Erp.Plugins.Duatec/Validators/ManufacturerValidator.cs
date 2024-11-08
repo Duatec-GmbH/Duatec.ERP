@@ -49,14 +49,14 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static ValidationError? ValidateNameWithEplanApi(string name)
         {
-            if(EplanDataPortal.GetManufacturers().Exists(m => name.Equals(m.Name)))
+            if(DataPortal.GetManufacturers().Exists(m => name.Equals(m.Name)))
                 return new ValidationError(Manufacturer.Name, $"{ErrorPrefix(Manufacturer.Name, name)} is listed in EPLAN");
             return null;
         }
 
         private static ValidationError? ValidateShortNameWithEplanApi(string shortName)
         {
-            if (EplanDataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName)))
+            if (DataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName)))
                 return new ValidationError(Manufacturer.ShortName, $"{ErrorPrefix(Manufacturer.ShortName, shortName)} is listed in EPLAN");
             return null;
         }

@@ -84,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             }
         }
 
-        private static bool CreateArticle(BaseErpPageModel pageModel, ArticleDto article, Guid manufacturer, Guid type)
+        private static bool CreateArticle(BaseErpPageModel pageModel, DataPortalArticle article, Guid manufacturer, Guid type)
         {
             if (Article.Insert(article, manufacturer, type) != null)
                 return true;
@@ -93,9 +93,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             return false;
         }
 
-        private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out ArticleDto? article)
+        private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out DataPortalArticle? article)
         {
-            article = EplanDataPortal.GetArticleByPartNumber(partNumber);
+            article = DataPortal.GetArticleByPartNumber(partNumber);
 
             if (article == null)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");

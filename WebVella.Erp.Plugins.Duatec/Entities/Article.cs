@@ -14,6 +14,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Entity = "article";
         public const string EplanId = "eplan_id";
         public const string PartNumber = "part_number";
+        public const string TypeNumber = "type_number";
+        public const string OrderNumber = "order_number";
         public const string Designation = "designation";
         public const string Type = "article_type";
         public const string ManufacturerId = "manufacturer_id";
@@ -32,13 +34,15 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static bool Exists(string partNumber)
             => Record.Exists(Entity, PartNumber, partNumber);
 
-        public static Guid? Insert(ArticleDto article, Guid manufacturerId, Guid typeId)
+        public static Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
         {
             var rec = new EntityRecord();
 
             rec[PartNumber] = article.PartNumber;
+            rec[TypeNumber] = article.TypeNumber;
+            rec[OrderNumber] = article.OrderNumber;
             rec[EplanId] = article.EplanId.ToString();
-            rec[Designation] = article.Description;
+            rec[Designation] = article.Designation;
             rec[ManufacturerId] = manufacturerId;
             rec[Type] = typeId;
             rec[Image] = article.PictureUrl;

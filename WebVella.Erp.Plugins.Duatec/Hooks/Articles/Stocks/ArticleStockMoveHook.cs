@@ -36,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             if (record[ArticleStock.Amount] == null)
                 record[ArticleStock.Amount] = 0m;
 
-            ArticleStockRecord.RoundAmount(record);
+            Common.RoundAmount(record);
             var max = (decimal)unchanged[ArticleStock.Amount];
             var amount = (decimal)record[ArticleStock.Amount];
 
@@ -78,7 +78,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
                 return null;
             }
             record["id"] = null;
-            return ArticleStockRecordHooks.Create(record, pageModel, validationErrors);
+            return Common.Create(record, pageModel, validationErrors);
         }
 
         private static IActionResult? PartialMove(EntityRecord record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
@@ -87,7 +87,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             var unchanged = ArticleStock.Find(id)!;
 
             unchanged[ArticleStock.Amount] = (decimal)unchanged[ArticleStock.Amount] - (decimal)record[ArticleStock.Amount];
-            ArticleStockRecord.RoundAmount(unchanged);
+            Common.RoundAmount(unchanged);
 
             if (!new RecordManager().UpdateRecord(ArticleStock.Entity, unchanged).Success)
             {
@@ -95,7 +95,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
                 return null;
             }
             record["id"] = null;
-            var result = ArticleStockRecordHooks.Create(record, pageModel, validationErrors);
+            var result = Common.Create(record, pageModel, validationErrors);
             if (result != null)
                 return pageModel.LocalRedirect(PageUrl.EntityManage(pageModel, id, "move"));
             

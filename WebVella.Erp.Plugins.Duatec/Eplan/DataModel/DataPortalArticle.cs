@@ -2,43 +2,51 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
-    public class ArticleDto
+    public class DataPortalArticle
     {
-        private ArticleDto(
+        private DataPortalArticle(
             long id,
-            ManufacturerDto manufacturer,
+            DataPortalManufacturer manufacturer,
             string partNumber,
-            string description,
+            string typeNumber,
+            string orderNumber,
+            string designation,
             string pictureUrl)
         {
             EplanId = id;
             Manufacturer = manufacturer;
             PartNumber = partNumber;
-            Description = description;
+            TypeNumber = typeNumber;
+            OrderNumber = orderNumber;
+            Designation = designation;
             PictureUrl = pictureUrl;
         }
 
         public long EplanId { get; }
 
-        public ManufacturerDto Manufacturer { get; }
+        public DataPortalManufacturer Manufacturer { get; }
 
         public string PartNumber { get; }
 
-        public string Description { get; }
+        public string TypeNumber { get; }
+
+        public string OrderNumber { get; }
+
+        public string Designation { get; }
 
         public string PictureUrl { get; }
 
-        public static ArticleDto? FromJson(JsonNode? json, string partNumber)
+        public static DataPortalArticle? FromJson(JsonNode? json, string partNumber)
         {
             return FromJson(json, partNumber, GetDataFromPartNumber);
         }
 
-        public static ArticleDto? FromJson(JsonNode? json, long id)
+        public static DataPortalArticle? FromJson(JsonNode? json, long id)
         {
             return FromJson(json, id, GetDataFromId);
         }
 
-        private static ArticleDto? FromJson<T>(JsonNode? json, T idValue, Func<JsonNode?, T, JsonNode?> getDataNode)
+        private static DataPortalArticle? FromJson<T>(JsonNode? json, T idValue, Func<JsonNode?, T, JsonNode?> getDataNode)
         {
             var data = getDataNode(json, idValue);
 
@@ -48,25 +56,38 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
             var attributes = data["attributes"]!;
             var id = long.Parse(data["id"]!.GetValue<string>());
             var manufacturer = GetManufacturer(json);
-            var description = GetDescription(attributes, LanguageKey.de_DE)
-                ?? GetDescription(attributes, LanguageKey.en_US)
-                ?? string.Empty;
+
+            LanguageKey? lang = LanguageKeys.Default;
+            var designation = GetDesignation(attributes, lang.Value);
+
+            while(designation == null)
+            {
+                lang = LanguageKeys.FallBackLanguage(lang!.Value);
+                if (!lang.HasValue)
+                    designation = string.Empty;
+                else
+                    designation = GetDesignation(attributes, lang.Value);
+            }
 
             var partNumber = attributes["part_number"]!.GetValue<string>();
+            var typeNumber = attributes["type_number"]?.GetValue<string>() ?? string.Empty;
+            var orderNumber = attributes["order_number"]?.GetValue<string>() ?? string.Empty;
             var pictureId = data["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
             var pictureUrl = GetPictureUrl(json, pictureId) ?? string.Empty;
 
-            return new ArticleDto(
+            return new DataPortalArticle(
                 id: id,
                 manufacturer: manufacturer,
                 partNumber: partNumber,
-                description: description,
+                typeNumber: typeNumber,
+                orderNumber: orderNumber,
+                designation: designation,
                 pictureUrl: pictureUrl);
         }
 
-        private static ManufacturerDto GetManufacturer(JsonNode? json)
+        private static DataPortalManufacturer GetManufacturer(JsonNode? json)
         {
-            return ManufacturerDto.FromJson(json?["included"]?.AsArray()
+            return DataPortalManufacturer.FromJson(json?["included"]?.AsArray()
                 .FirstOrDefault(n => $"{n?["type"]}" == "manufacturers"))!;
         }
 
@@ -99,11 +120,9 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
             return data;
         }
 
-        private static string? GetDescription(JsonNode attributes, LanguageKey key)
+        private static string? GetDesignation(JsonNode attributes, LanguageKey key)
         {
-            var node = (attributes["designation"] as JsonObject)?[key.ToString()]
-                ?? (attributes["description"] as JsonObject)?[key.ToString()];
-
+            var node = (attributes["designation"] as JsonObject)?[key.ToString()];
             var value = node?.GetValue<string>();
 
             if (!string.IsNullOrEmpty(value))
