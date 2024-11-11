@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Collections.Concurrent;
+using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
@@ -19,13 +20,14 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         {
             if (Manufacturers.Count == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
             {
-                var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
-                var values = json?["data"]?.AsArray();
-
-                if (values != null && values.Count >= 0)
+                lock (Manufacturers)
                 {
-                    lock (Manufacturers)
+                    var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
+                    var values = json?["data"]?.AsArray();
+
+                    if (values != null && values.Count >= 0)
                     {
+
                         Manufacturers = values
                             .Select(DataPortalManufacturer.FromJson)
                             .Where(m => m != null)!
@@ -60,6 +62,26 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return DataPortalArticle.FromJson(json, partNumber);
         }
 
+        public static async Task<DataPortalArticle?> GetArticleByPartNumberAsync(string partNumber)
+        {
+            var url = GetArticleByPartNumberUrl(partNumber);
+
+            return await JsonFromUrlAsync(url)
+                .ContinueWith(n => DataPortalArticle.FromJson(n.Result, partNumber));
+        }
+
+        public static Dictionary<string, DataPortalArticle?> GetArticlesByPartNumber(params string[] partNumbers)
+        {
+            if (partNumbers.Length == 0)
+                return[];
+
+            var tasks = partNumbers
+                .Select(async pn => new { PartNumber = pn, Article = await GetArticleByPartNumberAsync(pn) })
+                .ToArray();
+
+            return Task.WhenAll(tasks).Result.ToDictionary(t => t.PartNumber, t => t.Article);
+        }
+
         public static DataPortalArticle? GetArticleById(long id)
         {
             var url = GetArticleByIdUrl(id);
@@ -77,6 +99,15 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             t.Wait();
 
             return JsonNode.Parse(t.Result);
+        }
+
+        private static async Task<JsonNode?> JsonFromUrlAsync(string url)
+        {
+            using var client = GetClient();
+
+            var json = await client.GetStringAsync(url);
+
+            return JsonNode.Parse(json);
         }
 
         private static HttpClient GetClient()

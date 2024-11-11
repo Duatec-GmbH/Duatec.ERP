@@ -1,4 +1,6 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Util
+﻿using System.Text;
+
+namespace WebVella.Erp.Plugins.Duatec.Util
 {
     internal static class Text
     {
@@ -23,6 +25,26 @@
                 return $"'{invalidChars[0]}'";
 
             return $"{{ {string.Join(", ", invalidChars.Select(c => $"'{c}'"))}}}";
+        }
+
+        public static string FancyfyPascalCase(string text)
+        {
+            if(string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            if (text.Length == 1)
+                return text;
+
+            var sb = new StringBuilder(text.Length * 2);
+
+            sb.Append(text[0]);
+            foreach(var c in text.Skip(1))
+            {
+                if (char.IsUpper(c))
+                    sb.Append($" {c}");
+                else sb.Append(c);
+            }
+            return sb.ToString();
         }
     }
 }

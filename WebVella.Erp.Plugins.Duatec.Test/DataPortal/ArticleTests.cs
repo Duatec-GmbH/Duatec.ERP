@@ -20,5 +20,23 @@
 
             Common.AssertArticleIsValid(sut);
         }
+
+        [Test]
+        public void GetMultipleArticlesByPartNumber_ReturnsValidResult()
+        {
+            var partNumbers = ArticleResources.ArticlePartNumbers100;
+
+            var result = Eplan.DataPortal.GetArticlesByPartNumber(partNumbers);
+
+            Assert.That(result, Has.Count.EqualTo(partNumbers.Length));
+            Assert.Multiple(() =>
+            {
+                foreach (var pn in partNumbers)
+                {
+                    Assert.That(result, Contains.Key(pn));
+                    Assert.That(result[pn], Is.Not.Null);
+                }
+            });
+        }
     }
 }

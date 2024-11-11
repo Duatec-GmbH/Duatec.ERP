@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
@@ -33,6 +34,32 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static bool Exists(string partNumber)
             => Record.Exists(Entity, PartNumber, partNumber);
+
+        public static EntityRecord? Find(string partNumber)
+            => Record.FindBy(Entity, PartNumber, partNumber);
+
+        public static Dictionary<string, EntityRecord?> FindMany(params string[] partNumbers)
+        {
+            if (partNumbers.Length == 0)
+                return [];
+
+            var recMan = new RecordManager();
+            var subQuery = partNumbers
+                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = PartNumber, FieldValue = pn })
+                .ToList();
+
+            var queryResponse = recMan.Find(new EntityQuery(Entity, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}",
+                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
+
+            var result = new Dictionary<string, EntityRecord?>(partNumbers.Length);
+            foreach (var pn in partNumbers)
+                result[pn] = null;
+
+            foreach (var obj in queryResponse.Object.Data)
+                result[(string)obj[PartNumber]] = obj;
+
+            return result;
+        }
 
         public static Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
         {

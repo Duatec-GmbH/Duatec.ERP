@@ -1,4 +1,7 @@
 ﻿using System.Xml.Linq;
+using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
@@ -47,6 +50,17 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
                 orderNumber: GetAttributeValue(element, "P_ARTICLE_ORDERNR"),
                 description: GetDescription(element),
                 count: GetCount(element));
+        }
+
+        public EntityRecord ToRecord()
+        {
+            var rec = new EntityRecord();
+            rec[Article.PartNumber] = PartNumber;
+            rec[Article.OrderNumber] = OrderNumber;
+            rec[Article.TypeNumber] = TypeNumber;
+            rec[Article.Designation] = Description;
+            rec["count"] = Count;
+            return rec;
         }
 
         private static string GetAttributeValue(XElement element, string attributeName)
@@ -101,6 +115,29 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
                 return string.Empty;
 
             return value[idx..end];
+        }
+
+        public static Dictionary<string, EntityRecord?> FindMany(params string[] partNumbers)
+        {
+            if (partNumbers.Length == 0)
+                return [];
+
+            var recMan = new RecordManager();
+            var subQuery = partNumbers
+                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = Article.PartNumber, FieldValue = pn })
+                .ToList();
+
+            var queryResponse = recMan.Find(new EntityQuery(Article.Entity, $"*, ${Article.Relations.Manufacturer}.{Manufacturer.Name}",
+                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
+
+            var result = new Dictionary<string, EntityRecord?>(partNumbers.Length);
+            foreach (var pn in partNumbers)
+                result[pn] = null;
+
+            foreach (var obj in queryResponse.Object.Data)
+                result[(string)obj[Article.PartNumber]] = obj;
+
+            return result;
         }
     }
 }
