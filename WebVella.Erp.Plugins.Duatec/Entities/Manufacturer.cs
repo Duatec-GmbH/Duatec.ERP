@@ -19,6 +19,29 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);
 
+        public static Dictionary<string, EntityRecord?> FindMany(params string[] shortNames)
+        {
+            if (shortNames.Length == 0)
+                return [];
+
+            var subQueries = shortNames
+                .Select(sn => new QueryObject { FieldName = ShortName, FieldValue = sn, QueryType = QueryType.EQ })
+                .ToList();
+
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(Entity, "*", 
+                new QueryObject { QueryType = QueryType.OR, SubQueries = subQueries }));
+
+            var result = new Dictionary<string, EntityRecord?>(shortNames.Length);
+            foreach (var sn in shortNames)
+                result[sn] = null;
+
+            foreach (var resObj in response.Object.Data)
+                result[(string)resObj[ShortName]] = resObj;
+
+            return result;
+        }
+
         public static bool CanBeImported(DataPortalManufacturer manufacturer)
         {
             var subQueries = new List<QueryObject>()

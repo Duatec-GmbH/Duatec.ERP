@@ -13,6 +13,14 @@ namespace WebVella.Erp.Plugins.Duatec.Util
             return string.Empty;
         }
 
+        public static string[] GetFormValues(this BaseErpPageModel pageModel, string id)
+        {
+            var form = pageModel.Request.Form;
+            if (form.ContainsKey(id) && !string.IsNullOrWhiteSpace(form[id]))
+                return form[id].ToString().Split(',').Select(s => s.Trim()).ToArray();
+            return [];
+        }
+
         public static void PutMessage(this BaseErpPageModel pageModel, ScreenMessageType type, string message)
         {
             pageModel.TempData.Put("ScreenMessage", new ScreenMessage()

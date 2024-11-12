@@ -1,39 +1,21 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
-using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan
 {
-    internal enum ArticleImportState
-    {
-        UnknownArticle,
-        ValidEplanArticle,
-        ValidDbArticle,
-        InvalidEplanArticle,
-        InvalidDbArticle,
-        InvalidUnknownArticle,
-    }
-
-    public static class ArticleImportAction
-    {
-        public const string NoAction = "No Action";
-        public const string Skip = "Skip";
-        public const string Import = "Import";
-        public const string Create = "Create";
-    }
-
     internal class ArticleImportResult
     {
         public ArticleImportResult(
-            string partNumber, string typeNumber, string orderNumber, decimal demand, 
+            string partNumber, string typeNumber, string orderNumber, string designation, Guid type,
             ArticleImportState importState, string action, string[] availableActions)
         {
             PartNumber = partNumber;
             TypeNumber = typeNumber;
             OrderNumber = orderNumber;
-            Demand = demand;
+            Designation = designation;
             ImportState = importState;
+            Type = type;
             Action = action;
             AvailableActions = availableActions;
         }
@@ -44,7 +26,9 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
 
         public string OrderNumber { get; }
 
-        public decimal Demand { get; }
+        public string Designation { get; }
+
+        public Guid Type { get; }
 
         public ArticleImportState ImportState { get; }
 
@@ -52,36 +36,36 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
 
         public string[] AvailableActions { get; }
 
-
         public static List<ArticleImportResult> FromEplanArticles(List<EplanArticle> eplanArticles)
         {
             if (eplanArticles.Count == 0)
                 return [];
 
-            var partNumbers = eplanArticles
-                .Select(a => a.PartNumber)
-                .ToArray();           
-
+            var partNumbers = GetPartNumbers(eplanArticles);
             var dbArticles = Article.FindMany(partNumbers);
-            var edpArticles = DataPortal.GetArticlesByPartNumber(partNumbers);
+            var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);
 
             foreach(var article in eplanArticles)
             {
-                var dbArticle = dbArticles.GetOrDefault(article.PartNumber);
-                var edpArticle = edpArticles.GetOrDefault(article.PartNumber);
+                var dbArticle = dbArticles[article.PartNumber];
+                var edpArticle = edpArticles[article.PartNumber];
 
                 var importState = GetArticleState(article, edpArticle, dbArticle);
+                var typeId = dbArticle != null
+                    ? (Guid)dbArticle[Article.Type]
+                    : Article.DefaultType;
 
                 var importResult = new ArticleImportResult(
                     partNumber: article.PartNumber,
                     typeNumber: article.TypeNumber,
                     orderNumber: article.OrderNumber,
-                    demand: article.Count,
+                    designation: article.Description,
+                    type: typeId,
                     importState: importState,
-                    action: DefaultActionFromArticleState(importState),
-                    availableActions: ActionsFromArticleState(importState, dbArticle == null));
+                    action: ArticleImportAction.Default(importState),
+                    availableActions: ArticleImportAction.AvailableActions(importState));
 
                 result.Add(importResult);
             }
@@ -89,55 +73,57 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return result;
         }
 
-        private static string DefaultActionFromArticleState(ArticleImportState state)
+        private static string[] GetPartNumbers(List<EplanArticle> eplanArticles)
         {
-            if (state is ArticleImportState.InvalidEplanArticle or ArticleImportState.InvalidDbArticle or ArticleImportState.InvalidUnknownArticle)
-                return ArticleImportAction.Skip;
-            if (state == ArticleImportState.UnknownArticle)
-                return ArticleImportAction.Create;
-            return ArticleImportAction.NoAction;
+            var result = eplanArticles
+                .Select(a => a.PartNumber)
+                .Distinct()
+                .ToArray();
+
+            if (result.Length != eplanArticles.Count)
+                throw new ArgumentException($"argument '{nameof(eplanArticles)}' must not contain multiple articles with equal part numbers");
+
+            return result;
         }
 
-        private static string[] ActionsFromArticleState(ArticleImportState state, bool notInDb)
+        private static Dictionary<string, DataPortalArticle?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, EntityRecord?> dbArticles)
         {
-            if (state is ArticleImportState.InvalidEplanArticle or ArticleImportState.InvalidDbArticle or ArticleImportState.InvalidUnknownArticle)
-                return [ArticleImportAction.Skip];
-            if (state == ArticleImportState.UnknownArticle)
-                return [ArticleImportAction.Skip, ArticleImportAction.Create];
-            if (state == ArticleImportState.ValidEplanArticle && notInDb)
-                return [ArticleImportAction.Skip, ArticleImportAction.NoAction];
-            return [ ArticleImportAction.NoAction ];
+            var result = partNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticle?));
+
+            var edpPartNumbers = partNumbers
+                .Where(pn => dbArticles[pn] == null)
+                .ToArray();
+
+            if (edpPartNumbers.Length == 0)
+                return result;
+
+            var edpArticles = DataPortal.GetArticlesByPartNumber(edpPartNumbers);
+
+            foreach (var (key, val) in edpArticles)
+                result[key] = val;
+
+            return result;
         }
 
-
-        private static ArticleImportState GetArticleState(EplanArticle article, DataPortalArticle? dpArticle, EntityRecord? dbRecord)
+        private static ArticleImportState GetArticleState(EplanArticle article, 
+            DataPortalArticle? edpArticle, EntityRecord? dbRecord)
         {
-            if (IsValidEplanArticle(article, dpArticle))
-                return ArticleImportState.ValidEplanArticle;
             if (IsValidDbArticle(article, dbRecord))
-                return ArticleImportState.ValidDbArticle;
-            if (dpArticle != null)
-                return ArticleImportState.InvalidEplanArticle;
-            if (dbRecord != null)
-                return ArticleImportState.InvalidDbArticle;
+                return ArticleImportState.DbArticle;
 
-            if(string.IsNullOrWhiteSpace(article.PartNumber) 
-                || string.IsNullOrWhiteSpace(article.TypeNumber) 
-                || string.IsNullOrWhiteSpace(article.OrderNumber)
-                || string.IsNullOrWhiteSpace(article.Description))
-            {
-                return ArticleImportState.InvalidUnknownArticle;
-            }
+            if (IsValidEplanArticle(article, edpArticle))
+                return ArticleImportState.EplanArticle;
 
             return ArticleImportState.UnknownArticle;
         }
 
-        private static bool IsValidEplanArticle(EplanArticle article, DataPortalArticle? dpArticle)
+        private static bool IsValidEplanArticle(EplanArticle article, DataPortalArticle? edpArticle)
         {
-            return dpArticle != null
-                && article.PartNumber == dpArticle.PartNumber
-                && article.TypeNumber == dpArticle.TypeNumber
-                && article.OrderNumber == dpArticle.OrderNumber;
+            return edpArticle != null
+                && article.PartNumber == edpArticle.PartNumber
+                && article.TypeNumber == edpArticle.TypeNumber
+                && article.OrderNumber == edpArticle.OrderNumber
+                && !string.IsNullOrWhiteSpace(article.Description);
         }
 
         private static bool IsValidDbArticle(EplanArticle article, EntityRecord? dbArticle)
@@ -145,7 +131,8 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return dbArticle != null
                 && article.PartNumber.Equals(dbArticle[Article.PartNumber])
                 && article.TypeNumber.Equals(dbArticle[Article.TypeNumber])
-                && article.OrderNumber.Equals(dbArticle[Article.OrderNumber]);
+                && article.OrderNumber.Equals(dbArticle[Article.OrderNumber])
+                && !string.IsNullOrWhiteSpace(article.Description);
         }
     }
 }

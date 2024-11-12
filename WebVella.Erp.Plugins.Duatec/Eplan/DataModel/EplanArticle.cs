@@ -7,14 +7,20 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
     internal class EplanArticle
     {
-        private EplanArticle(string partNumber, string typeNumber, string orderNumber, string description, int count)
+        private EplanArticle(string deviceTag, string partNumber, string typeNumber, string orderNumber, string description, int count)
         {
+            DeviceTag = deviceTag;
             PartNumber = partNumber;
             TypeNumber = typeNumber;
             OrderNumber = orderNumber;
             Description = description;
             Count = count;
         }
+
+        /// <summary>
+        /// P_FUNC_IDENTDEVICETAG
+        /// </summary>
+        public string DeviceTag { get; }
 
         /// <summary>
         /// P_ARTICLEREF_PARTNO
@@ -45,22 +51,12 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
         public static EplanArticle FromXElement(XElement element)
         {
             return new EplanArticle(
+                deviceTag: GetAttributeValue(element, "P_FUNC_IDENTDEVICETAG"),
                 partNumber: GetAttributeValue(element, "P_ARTICLEREF_PARTNO"),
                 typeNumber: GetAttributeValue(element, "P_ARTICLE_TYPENR"),
                 orderNumber: GetAttributeValue(element, "P_ARTICLE_ORDERNR"),
                 description: GetDescription(element),
                 count: GetCount(element));
-        }
-
-        public EntityRecord ToRecord()
-        {
-            var rec = new EntityRecord();
-            rec[Article.PartNumber] = PartNumber;
-            rec[Article.OrderNumber] = OrderNumber;
-            rec[Article.TypeNumber] = TypeNumber;
-            rec[Article.Designation] = Description;
-            rec["count"] = Count;
-            return rec;
         }
 
         private static string GetAttributeValue(XElement element, string attributeName)

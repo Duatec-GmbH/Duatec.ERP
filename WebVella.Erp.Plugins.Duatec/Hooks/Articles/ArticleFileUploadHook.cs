@@ -29,12 +29,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             var fsRepository = new DbFileRepository();
 
             if (!filePath.EndsWith(".xml"))
-            {
-                fsRepository.Delete(filePath);
                 return Error(pageModel, "Only xml files are supported");
-            }
 
             var file = fsRepository.Find(filePath);
+            if (file == null)
+                return Error(pageModel, "File not found");
+
 
             var text = Encoding.UTF8.GetString(file.GetBytes());
             var articles = EplanXml.GetArticles(text);
@@ -51,10 +51,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             var list = new EntityRecordList { TotalCount = articles.Count };
 
             record["articles"] = list;
-            record["project"] = null;            
 
             var importResult = ArticleImportResult.FromEplanArticles(articles);
-            foreach (var res in importResult.OrderBy(r => r.PartNumber))
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
                 list.Add(GetRecord(res));
 
             pageModel.DataModel.SetRecord(record);
@@ -76,29 +75,38 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             rec[Article.PartNumber] = article.PartNumber;
             rec[Article.OrderNumber] = article.OrderNumber;
             rec[Article.TypeNumber] = article.TypeNumber;
-            rec["demand"] = article.Demand;
-            rec["import_state"] = GetImportStateElement(article.ImportState);
+            rec[Article.Designation] = article.Designation;
+            rec[Article.Type] = article.Type;
+            rec["import_state"] = article.ImportState;
             rec["action"] = article.Action;
             rec["available_actions"] = GetAvailableActions(article.AvailableActions);
 
             return rec;
-            
         }
 
-        private static string GetImportStateElement(ArticleImportState state)
+        private static SelectOption? GetAction(string action)
         {
-            return Text.FancyfyPascalCase(state.ToString());
+            if (string.IsNullOrEmpty(action))
+                return null;
+
+            var option = new SelectOption
+            {
+                Label = action,
+                Value = action
+            };
+
+            return option;
         }
 
-        private static EntityRecordList GetAvailableActions(string[] actions)
+        private static List<SelectOption> GetAvailableActions(string[] actions)
         {
-            var result = new EntityRecordList { TotalCount = actions.Length };
+            var result = new List<SelectOption>(actions.Length);
 
             foreach (var action in actions)
             {
-                var rec = new EntityRecord();
-                rec["action"] = action;
-                result.Add(rec);
+                var rec = GetAction(action);
+                if(rec != null)
+                    result.Add(rec);
             }
             return result;
         }

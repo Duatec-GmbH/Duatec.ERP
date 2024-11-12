@@ -6,15 +6,24 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
     internal static class EplanXml
     {
         public static List<EplanArticle> GetArticles(string text)
-            => GetArticles(XElement.Parse(text)).ToList();
+        {
+            return GetArticles(XElement.Parse(text))
+                .DistinctBy(a => (a.PartNumber, a.OrderNumber, a.TypeNumber))
+                .ToList();
+        }
 
         private static IEnumerable<EplanArticle> GetArticles(XElement node)
         {
             if (node == null)
                 return [];
-            else if (node.Name == "part")
-                return [EplanArticle.FromXElement(node)];
-            return node.Elements().SelectMany(GetArticles);
+            else if (node.Name != "part")
+                return node.Elements().SelectMany(GetArticles);
+
+            var article = EplanArticle.FromXElement(node);
+            if (article == null || string.IsNullOrEmpty(article.PartNumber))
+                return [];
+
+            return [article];
         }
     }
 }

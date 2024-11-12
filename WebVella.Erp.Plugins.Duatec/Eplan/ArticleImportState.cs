@@ -1,0 +1,19 @@
+﻿using WebVella.Erp.Plugins.Duatec.Util;
+
+namespace WebVella.Erp.Plugins.Duatec.Eplan
+{
+    internal enum ArticleImportState
+    {
+        UnknownArticle,
+        EplanArticle,
+        DbArticle,
+    }
+
+    internal static class ArticleImportStateExtensions
+    {
+        public static string ToPrettyString(this ArticleImportState state)
+        {
+            return Text.FancyfyPascalCase(state.ToString());
+        }
+    }
+}

@@ -25,6 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec
 
 #pragma warning disable
                 // insert difference code within braces here here
+                // don't forget to include entity "article_type"
                 {
                     #region << ***Delete relation*** Relation name: task_type_1n_task >>
                     {
@@ -2510,50 +2511,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page*** Page name: import >>
-                    {
-                        var id = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
-                        var name = @"import";
-                        var label = "Eplan import";
-                        string iconClass = null;
-                        var system = false;
-                        var layout = @"";
-                        var weight = 1001;
-                        var type = (PageType)((int)2);
-                        var isRazorBody = false;
-                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
-                        Guid? entityId = null;
-                        Guid? nodeId = null;
-                        Guid? areaId = null;
-                        string razorBody = null;
-                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
-                    #region << ***Create page*** Page name: import-manufacturers >>
-                    {
-                        var id = new Guid("b86cba50-83da-4d02-9979-6b104a2b3509");
-                        var name = @"import-manufacturers";
-                        var label = "Eplan Manufacturers Import";
-                        string iconClass = null;
-                        var system = false;
-                        var layout = @"";
-                        var weight = 1001;
-                        var type = (PageType)((int)2);
-                        var isRazorBody = false;
-                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
-                        Guid? entityId = null;
-                        Guid? nodeId = null;
-                        Guid? areaId = null;
-                        string razorBody = null;
-                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page*** Page name: move >>
                     {
                         var id = new Guid("ffe30827-f205-4c94-9dc6-fec0371ca01b");
@@ -2567,6 +2524,72 @@ namespace WebVella.Erp.Plugins.Duatec
                         var isRazorBody = false;
                         Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
                         Guid? entityId = new Guid("ab790595-caed-4773-a57f-b022d23a4fc9");
+                        Guid? nodeId = null;
+                        Guid? areaId = null;
+                        string razorBody = null;
+                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page*** Page name: import-manufacturers >>
+                    {
+                        var id = new Guid("b86cba50-83da-4d02-9979-6b104a2b3509");
+                        var name = @"import-manufacturers";
+                        var label = "Data Portal Import";
+                        string iconClass = null;
+                        var system = false;
+                        var layout = @"";
+                        var weight = 1001;
+                        var type = (PageType)((int)2);
+                        var isRazorBody = false;
+                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
+                        Guid? entityId = null;
+                        Guid? nodeId = null;
+                        Guid? areaId = null;
+                        string razorBody = null;
+                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page*** Page name: import >>
+                    {
+                        var id = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var name = @"import";
+                        var label = "Data Portal Import";
+                        string iconClass = null;
+                        var system = false;
+                        var layout = @"";
+                        var weight = 1001;
+                        var type = (PageType)((int)2);
+                        var isRazorBody = false;
+                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
+                        Guid? entityId = null;
+                        Guid? nodeId = null;
+                        Guid? areaId = null;
+                        string razorBody = null;
+                        var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page*** Page name: eplan-import >>
+                    {
+                        var id = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var name = @"eplan-import";
+                        var label = "Eplan import";
+                        var iconClass = "fas fa-glass-martini";
+                        var system = false;
+                        var layout = @"";
+                        var weight = 1001;
+                        var type = (PageType)((int)2);
+                        var isRazorBody = false;
+                        Guid? appId = new Guid("5b6e48a9-edc6-4fd2-8037-46293e6ddeec");
+                        Guid? entityId = null;
                         Guid? nodeId = null;
                         Guid? areaId = null;
                         string razorBody = null;
@@ -2766,10 +2789,10 @@ namespace WebVella.Erp.Plugins.Duatec
                         var containerId = "column1";
                         var options = @"{
   ""type"": ""2"",
-  ""text"": ""Eplan Import"",
+  ""text"": ""Data Portal"",
   ""color"": ""0"",
-  ""size"": ""0"",
-  ""class"": ""text-nowrap w-100 mb-2"",
+  ""size"": ""1"",
+  ""class"": ""w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-cloud-download-alt"",
   ""is_block"": ""false"",
@@ -2801,7 +2824,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""0"",
   ""text"": ""Search"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 ml-0"",
   ""id"": """",
   ""icon_class"": ""fa fa-search"",
@@ -2834,7 +2857,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Create"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fa fa-plus go-green"",
@@ -3269,7 +3292,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""0"",
   ""text"": ""Search"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": """",
   ""id"": """",
   ""icon_class"": ""fa fa-search"",
@@ -3660,7 +3683,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Manage"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-edit"",
@@ -3693,7 +3716,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Delete"",
   ""color"": ""10"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": ""far fa-trash-alt"",
@@ -3717,17 +3740,17 @@ namespace WebVella.Erp.Plugins.Duatec
                     #region << ***Create page body node*** Page name: detail  id: 9651e0e3-9b70-4051-bea6-523678a5b1fa >>
                     {
                         var id = new Guid("9651e0e3-9b70-4051-bea6-523678a5b1fa");
-                        Guid? parentId = new Guid("7cd5d793-ccf3-48ed-ba9a-910715a48500");
+                        Guid? parentId = new Guid("7e6d9d23-37d6-40b6-93a1-ecbd40640ecf");
                         Guid? nodeId = null;
                         var pageId = new Guid("61598892-c98d-426a-87d0-67d41e9dabba");
                         var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
+                        var containerId = "column2";
                         var options = @"{
   ""type"": ""2"",
-  ""text"": ""Eplan Data Portal"",
+  ""text"": ""Data Portal"",
   ""color"": ""0"",
-  ""size"": ""3"",
-  ""class"": ""w-100 mt-2"",
+  ""size"": ""1"",
+  ""class"": ""ml-0 w-100 mt-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-external-link-alt icon"",
   ""is_block"": ""false"",
@@ -3771,15 +3794,15 @@ namespace WebVella.Erp.Plugins.Duatec
                         var componentName = "WebVella.Erp.Web.Components.PcRow";
                         var containerId = "actions";
                         var options = @"{
-  ""visible_columns"": 2,
+  ""visible_columns"": 3,
   ""class"": """",
   ""no_gutters"": ""false"",
   ""flex_vertical_alignment"": ""1"",
   ""flex_horizontal_alignment"": ""1"",
   ""container1_span"": 12,
-  ""container1_span_sm"": 6,
+  ""container1_span_sm"": 0,
   ""container1_span_md"": 0,
-  ""container1_span_lg"": 0,
+  ""container1_span_lg"": 4,
   ""container1_span_xl"": 0,
   ""container1_offset"": 0,
   ""container1_offset_sm"": 0,
@@ -3789,9 +3812,9 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container1_flex_self_align"": ""1"",
   ""container1_flex_order"": 0,
   ""container2_span"": 12,
-  ""container2_span_sm"": 6,
+  ""container2_span_sm"": 0,
   ""container2_span_md"": 0,
-  ""container2_span_lg"": 0,
+  ""container2_span_lg"": 4,
   ""container2_span_xl"": 0,
   ""container2_offset"": 0,
   ""container2_offset_sm"": 0,
@@ -3803,7 +3826,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container3_span"": 0,
   ""container3_span_sm"": 0,
   ""container3_span_md"": 0,
-  ""container3_span_lg"": 0,
+  ""container3_span_lg"": 4,
   ""container3_span_xl"": 0,
   ""container3_offset"": 0,
   ""container3_offset_sm"": 0,
@@ -3934,12 +3957,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column2";
+                        var containerId = "column3";
                         var options = @"{
   ""type"": ""0"",
   ""text"": ""Search"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": ""w-100 ml-0"",
   ""id"": """",
   ""icon_class"": ""fa fa-search"",
@@ -3967,13 +3990,13 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
+                        var containerId = "column2";
                         var options = @"{
   ""type"": ""2"",
-  ""text"": ""Eplan Import"",
+  ""text"": ""Data Portal"",
   ""color"": ""0"",
-  ""size"": ""0"",
-  ""class"": ""text-nowrap w-100 mb-2"",
+  ""size"": ""1"",
+  ""class"": ""w-100 mb-2 text-nowrap"",
   ""id"": """",
   ""icon_class"": ""fas fa-cloud-download-alt"",
   ""is_block"": ""false"",
@@ -3993,6 +4016,39 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
+                    #region << ***Create page body node*** Page name: all  id: 8e8c1555-e3fa-4e9c-bc6d-36109f9b8027 >>
+                    {
+                        var id = new Guid("8e8c1555-e3fa-4e9c-bc6d-36109f9b8027");
+                        Guid? parentId = new Guid("950794a4-35cc-4fd5-9ec6-62d6550d22a8");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Eplan"",
+  ""color"": ""0"",
+  ""size"": ""1"",
+  ""class"": ""w-100 mb-2"",
+  ""id"": """",
+  ""icon_class"": ""fas fa-file-code"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": ""/master-data/a/eplan-import"",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create page body node*** Page name: all  id: 60f7995e-a747-41fb-b38b-4a4de2438869 >>
                     {
                         var id = new Guid("60f7995e-a747-41fb-b38b-4a4de2438869");
@@ -4000,12 +4056,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         Guid? nodeId = null;
                         var pageId = new Guid("11320daa-2725-4fde-acc5-9ff81e549aad");
                         var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column2";
+                        var containerId = "column3";
                         var options = @"{
   ""type"": ""2"",
   ""text"": ""Create"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fa fa-plus go-green"",
@@ -4231,7 +4287,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Cancel"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": """",
@@ -4264,7 +4320,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Save"",
   ""color"": ""1"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-save"",
@@ -5790,7 +5846,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""0"",
   ""text"": ""Search"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""w-100"",
   ""id"": """",
   ""icon_class"": ""fa fa-search"",
@@ -6016,39 +6072,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: all  id: ad79c4e8-131c-4c83-af81-403a25cddbf7 >>
-                    {
-                        var id = new Guid("ad79c4e8-131c-4c83-af81-403a25cddbf7");
-                        Guid? parentId = new Guid("7f099bda-7323-4eb7-a604-b50bb577ede1");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("bd90eb30-4768-44f5-88c2-40a3fac8cf6a");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
-                        var options = @"{
-  ""type"": ""2"",
-  ""text"": ""Create"",
-  ""color"": ""0"",
-  ""size"": ""0"",
-  ""class"": ""text-nowrap w-100 mb-2"",
-  ""id"": """",
-  ""icon_class"": ""fa fa-plus go-green"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.CreateUrlSnippet\"",\""default\"":\""\""}"",
-  ""new_tab"": ""false"",
-  ""form"": """"
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: all  id: 281c5bc0-8b8e-49c5-b267-989284b7c7d5 >>
                     {
                         var id = new Guid("281c5bc0-8b8e-49c5-b267-989284b7c7d5");
@@ -6061,7 +6084,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""0"",
   ""text"": ""Search"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": ""w-100 ml-0"",
   ""id"": """",
   ""icon_class"": ""fa fa-search"",
@@ -6077,6 +6100,39 @@ namespace WebVella.Erp.Plugins.Duatec
   ""form"": """"
 }";
                         var weight = 2;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: all  id: ad79c4e8-131c-4c83-af81-403a25cddbf7 >>
+                    {
+                        var id = new Guid("ad79c4e8-131c-4c83-af81-403a25cddbf7");
+                        Guid? parentId = new Guid("7f099bda-7323-4eb7-a604-b50bb577ede1");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("bd90eb30-4768-44f5-88c2-40a3fac8cf6a");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Create"",
+  ""color"": ""0"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100 mb-2"",
+  ""id"": """",
+  ""icon_class"": ""fa fa-plus go-green"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.CreateUrlSnippet\"",\""default\"":\""\""}"",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 1;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -7131,34 +7187,166 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: import  id: e47f8836-2033-46cc-afbe-87d550a6a0c9 >>
+                    #region << ***Create page body node*** Page name: import  id: 45d2afc9-b7aa-41ee-9b9e-8fcdb508bd38 >>
                     {
-                        var id = new Guid("e47f8836-2033-46cc-afbe-87d550a6a0c9");
+                        var id = new Guid("45d2afc9-b7aa-41ee-9b9e-8fcdb508bd38");
                         Guid? parentId = new Guid("73c0e370-0564-443a-9055-d015f401b7ef");
                         Guid? nodeId = null;
                         var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var componentName = "WebVella.Erp.Web.Components.PcRow";
                         var containerId = "body";
                         var options = @"{
-  ""type"": ""1"",
-  ""text"": ""Import Article"",
-  ""color"": ""1"",
-  ""size"": ""3"",
-  ""class"": """",
-  ""id"": """",
-  ""icon_class"": ""fas fa-cloud-download-alt"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": """",
-  ""new_tab"": ""false"",
-  ""form"": ""wv-73c0e370-0564-443a-9055-d015f401b7ef""
+  ""visible_columns"": 1,
+  ""class"": ""mt-5 mb-5"",
+  ""no_gutters"": ""false"",
+  ""flex_vertical_alignment"": ""1"",
+  ""flex_horizontal_alignment"": ""1"",
+  ""container1_span"": 12,
+  ""container1_span_sm"": 0,
+  ""container1_span_md"": 0,
+  ""container1_span_lg"": 10,
+  ""container1_span_xl"": 8,
+  ""container1_offset"": 0,
+  ""container1_offset_sm"": 0,
+  ""container1_offset_md"": 0,
+  ""container1_offset_lg"": 1,
+  ""container1_offset_xl"": 2,
+  ""container1_flex_self_align"": ""1"",
+  ""container1_flex_order"": 0,
+  ""container2_span"": 0,
+  ""container2_span_sm"": 0,
+  ""container2_span_md"": 0,
+  ""container2_span_lg"": 0,
+  ""container2_span_xl"": 0,
+  ""container2_offset"": 0,
+  ""container2_offset_sm"": 0,
+  ""container2_offset_md"": 0,
+  ""container2_offset_lg"": 0,
+  ""container2_offset_xl"": 0,
+  ""container2_flex_self_align"": ""1"",
+  ""container2_flex_order"": 0,
+  ""container3_span"": 0,
+  ""container3_span_sm"": 0,
+  ""container3_span_md"": 0,
+  ""container3_span_lg"": 0,
+  ""container3_span_xl"": 0,
+  ""container3_offset"": 0,
+  ""container3_offset_sm"": 0,
+  ""container3_offset_md"": 0,
+  ""container3_offset_lg"": 0,
+  ""container3_offset_xl"": 0,
+  ""container3_flex_self_align"": ""1"",
+  ""container3_flex_order"": 0,
+  ""container4_span"": 0,
+  ""container4_span_sm"": 0,
+  ""container4_span_md"": 0,
+  ""container4_span_lg"": 0,
+  ""container4_span_xl"": 0,
+  ""container4_offset"": 0,
+  ""container4_offset_sm"": 0,
+  ""container4_offset_md"": 0,
+  ""container4_offset_lg"": 0,
+  ""container4_offset_xl"": 0,
+  ""container4_flex_self_align"": ""1"",
+  ""container4_flex_order"": 0,
+  ""container5_span"": 0,
+  ""container5_span_sm"": 0,
+  ""container5_span_md"": 0,
+  ""container5_span_lg"": 0,
+  ""container5_span_xl"": 0,
+  ""container5_offset"": 0,
+  ""container5_offset_sm"": 0,
+  ""container5_offset_md"": 0,
+  ""container5_offset_lg"": 0,
+  ""container5_offset_xl"": 0,
+  ""container5_flex_self_align"": ""1"",
+  ""container5_flex_order"": 0,
+  ""container6_span"": 0,
+  ""container6_span_sm"": 0,
+  ""container6_span_md"": 0,
+  ""container6_span_lg"": 0,
+  ""container6_span_xl"": 0,
+  ""container6_offset"": 0,
+  ""container6_offset_sm"": 0,
+  ""container6_offset_md"": 0,
+  ""container6_offset_lg"": 0,
+  ""container6_offset_xl"": 0,
+  ""container6_flex_self_align"": ""1"",
+  ""container6_flex_order"": 0,
+  ""container7_span"": 0,
+  ""container7_span_sm"": 0,
+  ""container7_span_md"": 0,
+  ""container7_span_lg"": 0,
+  ""container7_span_xl"": 0,
+  ""container7_offset"": 0,
+  ""container7_offset_sm"": 0,
+  ""container7_offset_md"": 0,
+  ""container7_offset_lg"": 0,
+  ""container7_offset_xl"": 0,
+  ""container7_flex_self_align"": ""1"",
+  ""container7_flex_order"": 0,
+  ""container8_span"": 0,
+  ""container8_span_sm"": 0,
+  ""container8_span_md"": 0,
+  ""container8_span_lg"": 0,
+  ""container8_span_xl"": 0,
+  ""container8_offset"": 0,
+  ""container8_offset_sm"": 0,
+  ""container8_offset_md"": 0,
+  ""container8_offset_lg"": 0,
+  ""container8_offset_xl"": 0,
+  ""container8_flex_self_align"": ""1"",
+  ""container8_flex_order"": 0,
+  ""container9_span"": 0,
+  ""container9_span_sm"": 0,
+  ""container9_span_md"": 0,
+  ""container9_span_lg"": 0,
+  ""container9_span_xl"": 0,
+  ""container9_offset"": 0,
+  ""container9_offset_sm"": 0,
+  ""container9_offset_md"": 0,
+  ""container9_offset_lg"": 0,
+  ""container9_offset_xl"": 0,
+  ""container9_flex_self_align"": ""1"",
+  ""container9_flex_order"": 0,
+  ""container10_span"": 0,
+  ""container10_span_sm"": 0,
+  ""container10_span_md"": 0,
+  ""container10_span_lg"": 0,
+  ""container10_span_xl"": 0,
+  ""container10_offset"": 0,
+  ""container10_offset_sm"": 0,
+  ""container10_offset_md"": 0,
+  ""container10_offset_lg"": 0,
+  ""container10_offset_xl"": 0,
+  ""container10_flex_self_align"": ""1"",
+  ""container10_flex_order"": 0,
+  ""container11_span"": 0,
+  ""container11_span_sm"": 0,
+  ""container11_span_md"": 0,
+  ""container11_span_lg"": 0,
+  ""container11_span_xl"": 0,
+  ""container11_offset"": 0,
+  ""container11_offset_sm"": 0,
+  ""container11_offset_md"": 0,
+  ""container11_offset_lg"": 0,
+  ""container11_offset_xl"": 0,
+  ""container11_flex_self_align"": ""1"",
+  ""container11_flex_order"": 0,
+  ""container12_span"": 0,
+  ""container12_span_sm"": 0,
+  ""container12_span_md"": 0,
+  ""container12_span_lg"": 0,
+  ""container12_span_xl"": 0,
+  ""container12_offset"": 0,
+  ""container12_offset_sm"": 0,
+  ""container12_offset_md"": 0,
+  ""container12_offset_lg"": 0,
+  ""container12_offset_xl"": 0,
+  ""container12_flex_self_align"": ""1"",
+  ""container12_flex_order"": 0
 }";
-                        var weight = 2;
+                        var weight = 1;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -7167,18 +7355,18 @@ namespace WebVella.Erp.Plugins.Duatec
                     #region << ***Create page body node*** Page name: import  id: dd83f0b6-1a89-4f1c-8ea7-78912c67129b >>
                     {
                         var id = new Guid("dd83f0b6-1a89-4f1c-8ea7-78912c67129b");
-                        Guid? parentId = new Guid("73c0e370-0564-443a-9055-d015f401b7ef");
+                        Guid? parentId = new Guid("45d2afc9-b7aa-41ee-9b9e-8fcdb508bd38");
                         Guid? nodeId = null;
                         var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
                         var componentName = "WebVella.Erp.Web.Components.PcRow";
-                        var containerId = "body";
+                        var containerId = "column1";
                         var options = @"{
   ""visible_columns"": 2,
   ""class"": """",
   ""no_gutters"": ""false"",
   ""flex_vertical_alignment"": ""1"",
   ""flex_horizontal_alignment"": ""1"",
-  ""container1_span"": 0,
+  ""container1_span"": 12,
   ""container1_span_sm"": 5,
   ""container1_span_md"": 4,
   ""container1_span_lg"": 3,
@@ -7190,7 +7378,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container1_offset_xl"": 0,
   ""container1_flex_self_align"": ""2"",
   ""container1_flex_order"": 0,
-  ""container2_span"": 0,
+  ""container2_span"": 12,
   ""container2_span_sm"": 6,
   ""container2_span_md"": 7,
   ""container2_span_lg"": 8,
@@ -7329,39 +7517,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: import  id: c3b53b06-cae2-4f65-ac46-73e92891a015 >>
-                    {
-                        var id = new Guid("c3b53b06-cae2-4f65-ac46-73e92891a015");
-                        Guid? parentId = new Guid("dd83f0b6-1a89-4f1c-8ea7-78912c67129b");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
-                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
-                        var containerId = "column2";
-                        var options = @"{
-  ""is_visible"": """",
-  ""label_mode"": ""0"",
-  ""label_text"": ""Eplan Identifier"",
-  ""link"": """",
-  ""mode"": ""0"",
-  ""value"": """",
-  ""name"": ""eplan_identifier"",
-  ""class"": """",
-  ""maxlength"": 0,
-  ""placeholder"": ""e.g. RIT.123456"",
-  ""connected_entity_id"": """",
-  ""connected_record_id_ds"": """",
-  ""access_override_ds"": """",
-  ""required_override_ds"": """",
-  ""ajax_api_url_ds"": """",
-  ""description"": """",
-  ""label_help_text"": """"
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: import  id: 4f6af4b6-f951-4c42-b5f7-6d3cab84f64b >>
                     {
                         var id = new Guid("4f6af4b6-f951-4c42-b5f7-6d3cab84f64b");
@@ -7393,6 +7548,72 @@ namespace WebVella.Erp.Plugins.Duatec
   ""select_match_type"": ""0""
 }";
                         var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: import  id: c3b53b06-cae2-4f65-ac46-73e92891a015 >>
+                    {
+                        var id = new Guid("c3b53b06-cae2-4f65-ac46-73e92891a015");
+                        Guid? parentId = new Guid("dd83f0b6-1a89-4f1c-8ea7-78912c67129b");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "column2";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""0"",
+  ""label_text"": ""Part Number"",
+  ""link"": """",
+  ""mode"": ""0"",
+  ""value"": """",
+  ""name"": ""eplan_identifier"",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": ""e.g. RIT.123456"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: import  id: e47f8836-2033-46cc-afbe-87d550a6a0c9 >>
+                    {
+                        var id = new Guid("e47f8836-2033-46cc-afbe-87d550a6a0c9");
+                        Guid? parentId = new Guid("45d2afc9-b7aa-41ee-9b9e-8fcdb508bd38");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("948873bc-a2e5-40d7-9eca-dd089feabf8a");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Import Article"",
+  ""color"": ""1"",
+  ""size"": ""3"",
+  ""class"": ""float-right"",
+  ""id"": """",
+  ""icon_class"": ""fas fa-cloud-download-alt"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-73c0e370-0564-443a-9055-d015f401b7ef""
+}";
+                        var weight = 2;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -7768,8 +7989,8 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Cancel"",
   ""color"": ""0"",
-  ""size"": ""3"",
-  ""class"": ""text-nowrap w-100"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100 mt-2 mb-2"",
   ""id"": """",
   ""icon_class"": """",
   ""is_block"": ""false"",
@@ -7801,8 +8022,8 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Create"",
   ""color"": ""1"",
-  ""size"": ""3"",
-  ""class"": ""text-nowrap w-100 mb-2"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100 mt-2"",
   ""id"": """",
   ""icon_class"": ""fa fa-save"",
   ""is_block"": ""false"",
@@ -8258,7 +8479,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Save"",
   ""color"": ""1"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-save"",
@@ -8291,7 +8512,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Cancel"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": """",
@@ -8537,39 +8758,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: move  id: e122a73d-73a8-49ab-abfa-5a43df001e9a >>
-                    {
-                        var id = new Guid("e122a73d-73a8-49ab-abfa-5a43df001e9a");
-                        Guid? parentId = new Guid("719f176c-b85d-40e1-88e1-64de8ce07e6d");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("ffe30827-f205-4c94-9dc6-fec0371ca01b");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
-                        var options = @"{
-  ""type"": ""1"",
-  ""text"": ""Move"",
-  ""color"": ""1"",
-  ""size"": ""3"",
-  ""class"": ""text-nowrap w-100 mb-2"",
-  ""id"": """",
-  ""icon_class"": ""fas fa-save"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": """",
-  ""new_tab"": ""false"",
-  ""form"": ""wv-52a93358-247f-4613-9034-366d1d1c7399""
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: move  id: e8ca48ef-2fd0-41ff-bbda-525804bed67b >>
                     {
                         var id = new Guid("e8ca48ef-2fd0-41ff-bbda-525804bed67b");
@@ -8582,7 +8770,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Cancel"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": """",
@@ -8596,6 +8784,39 @@ namespace WebVella.Erp.Plugins.Duatec
   ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.DetailUrlSnippet\"",\""default\"":\""\""}"",
   ""new_tab"": ""false"",
   ""form"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: move  id: e122a73d-73a8-49ab-abfa-5a43df001e9a >>
+                    {
+                        var id = new Guid("e122a73d-73a8-49ab-abfa-5a43df001e9a");
+                        Guid? parentId = new Guid("719f176c-b85d-40e1-88e1-64de8ce07e6d");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("ffe30827-f205-4c94-9dc6-fec0371ca01b");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Move"",
+  ""color"": ""1"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100 mb-2"",
+  ""id"": """",
+  ""icon_class"": ""fas fa-save"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-52a93358-247f-4613-9034-366d1d1c7399""
 }";
                         var weight = 1;
 
@@ -9555,7 +9776,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Manage"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-edit"",
@@ -9588,7 +9809,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Delete"",
   ""color"": ""10"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": ""far fa-trash-alt"",
@@ -10132,7 +10353,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Cancel"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100"",
   ""id"": """",
   ""icon_class"": """",
@@ -10165,7 +10386,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Save"",
   ""color"": ""1"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-save"",
@@ -11109,6 +11330,465 @@ namespace WebVella.Erp.Plugins.Duatec
                         var componentName = "WebVella.Erp.Web.Components.PcPageHeader";
                         var containerId = "";
                         var options = @"{}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: e507a721-a1b4-4de0-89a0-02c692592854 >>
+                    {
+                        var id = new Guid("e507a721-a1b4-4de0-89a0-02c692592854");
+                        Guid? parentId = null;
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcForm";
+                        var containerId = "";
+                        var options = @"{
+  ""is_visible"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.RecordIsNotNullSnippet\"",\""default\"":\""\""}"",
+  ""id"": ""wv-e507a721-a1b4-4de0-89a0-02c692592854"",
+  ""name"": ""import"",
+  ""hook_key"": ""article_file_import"",
+  ""method"": ""post"",
+  ""label_mode"": ""1"",
+  ""mode"": ""1"",
+  ""class"": """",
+  ""show_validation"": ""true""
+}";
+                        var weight = 3;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 70cda21e-0fbc-489e-a1cd-1c1378c38ae3 >>
+                    {
+                        var id = new Guid("70cda21e-0fbc-489e-a1cd-1c1378c38ae3");
+                        Guid? parentId = new Guid("e507a721-a1b4-4de0-89a0-02c692592854");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "body";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Cancel"",
+  ""color"": ""0"",
+  ""size"": ""3"",
+  ""class"": ""text-nowrap float-right mb-5"",
+  ""id"": """",
+  ""icon_class"": """",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.RemoveParametersSnippet\"",\""default\"":\""\""}"",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 2;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 9618a6d1-9253-421d-bb00-25663ecdc0c1 >>
+                    {
+                        var id = new Guid("9618a6d1-9253-421d-bb00-25663ecdc0c1");
+                        Guid? parentId = new Guid("e507a721-a1b4-4de0-89a0-02c692592854");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "body";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Apply"",
+  ""color"": ""1"",
+  ""size"": ""3"",
+  ""class"": ""text-nowrap float-right mb-5"",
+  ""id"": """",
+  ""icon_class"": ""fa fa-save"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-e507a721-a1b4-4de0-89a0-02c692592854""
+}";
+                        var weight = 3;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 140c0846-0a18-4023-a935-46c3859a7ecf >>
+                    {
+                        var id = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? parentId = new Guid("e507a721-a1b4-4de0-89a0-02c692592854");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcGrid";
+                        var containerId = "body";
+                        var options = @"{
+  ""is_visible"": """",
+  ""id"": """",
+  ""visible_columns"": 7,
+  ""records"": ""{\""type\"":\""0\"",\""string\"":\""Record.articles\"",\""default\"":\""\""}"",
+  ""page_size"": 0,
+  ""name"": """",
+  ""prefix"": """",
+  ""class"": ""mb-5 mt-5"",
+  ""striped"": ""true"",
+  ""small"": ""false"",
+  ""bordered"": ""false"",
+  ""borderless"": ""false"",
+  ""hover"": ""false"",
+  ""responsive_breakpoint"": ""0"",
+  ""empty_text"": ""No records"",
+  ""has_thead"": ""true"",
+  ""has_tfoot"": ""true"",
+  ""no_total"": ""false"",
+  ""reveals_details_on_click"": ""false"",
+  ""detail_path"": """",
+  ""container1_label"": ""Part Number"",
+  ""container1_width"": """",
+  ""container1_name"": """",
+  ""container1_nowrap"": ""false"",
+  ""container1_sortable"": ""false"",
+  ""container1_class"": """",
+  ""container1_vertical_align"": ""3"",
+  ""container1_horizontal_align"": ""2"",
+  ""container2_label"": ""Type Number"",
+  ""container2_width"": """",
+  ""container2_name"": """",
+  ""container2_nowrap"": ""false"",
+  ""container2_sortable"": ""false"",
+  ""container2_class"": """",
+  ""container2_vertical_align"": ""3"",
+  ""container2_horizontal_align"": ""2"",
+  ""container3_label"": ""Order Number"",
+  ""container3_width"": """",
+  ""container3_name"": """",
+  ""container3_nowrap"": ""false"",
+  ""container3_sortable"": ""false"",
+  ""container3_class"": """",
+  ""container3_vertical_align"": ""3"",
+  ""container3_horizontal_align"": ""2"",
+  ""container4_label"": ""Designation"",
+  ""container4_width"": """",
+  ""container4_name"": """",
+  ""container4_nowrap"": ""false"",
+  ""container4_sortable"": ""false"",
+  ""container4_class"": """",
+  ""container4_vertical_align"": ""3"",
+  ""container4_horizontal_align"": ""2"",
+  ""container5_label"": ""State"",
+  ""container5_width"": """",
+  ""container5_name"": """",
+  ""container5_nowrap"": ""false"",
+  ""container5_sortable"": ""false"",
+  ""container5_class"": """",
+  ""container5_vertical_align"": ""3"",
+  ""container5_horizontal_align"": ""2"",
+  ""container6_label"": ""Type"",
+  ""container6_width"": ""250px"",
+  ""container6_name"": """",
+  ""container6_nowrap"": ""false"",
+  ""container6_sortable"": ""false"",
+  ""container6_class"": """",
+  ""container6_vertical_align"": ""3"",
+  ""container6_horizontal_align"": ""2"",
+  ""container7_label"": ""Action"",
+  ""container7_width"": ""250px"",
+  ""container7_name"": """",
+  ""container7_nowrap"": ""false"",
+  ""container7_sortable"": ""false"",
+  ""container7_class"": """",
+  ""container7_vertical_align"": ""3"",
+  ""container7_horizontal_align"": ""2"",
+  ""container8_label"": """",
+  ""container8_width"": """",
+  ""container8_name"": """",
+  ""container8_nowrap"": ""false"",
+  ""container8_sortable"": ""false"",
+  ""container8_class"": """",
+  ""container8_vertical_align"": ""1"",
+  ""container8_horizontal_align"": ""1"",
+  ""container9_label"": """",
+  ""container9_width"": """",
+  ""container9_name"": """",
+  ""container9_nowrap"": ""false"",
+  ""container9_sortable"": ""false"",
+  ""container9_class"": """",
+  ""container9_vertical_align"": ""1"",
+  ""container9_horizontal_align"": ""1"",
+  ""container10_label"": """",
+  ""container10_width"": """",
+  ""container10_name"": """",
+  ""container10_nowrap"": ""false"",
+  ""container10_sortable"": ""false"",
+  ""container10_class"": """",
+  ""container10_vertical_align"": ""1"",
+  ""container10_horizontal_align"": ""1"",
+  ""container11_label"": """",
+  ""container11_width"": """",
+  ""container11_name"": """",
+  ""container11_nowrap"": ""false"",
+  ""container11_sortable"": ""false"",
+  ""container11_class"": """",
+  ""container11_vertical_align"": ""1"",
+  ""container11_horizontal_align"": ""1"",
+  ""container12_label"": """",
+  ""container12_width"": """",
+  ""container12_name"": """",
+  ""container12_nowrap"": ""false"",
+  ""container12_sortable"": ""false"",
+  ""container12_class"": """",
+  ""container12_vertical_align"": ""1"",
+  ""container12_horizontal_align"": ""1""
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: c3775d3f-df22-4b52-8b46-464a3a8a4c94 >>
+                    {
+                        var id = new Guid("c3775d3f-df22-4b52-8b46-464a3a8a4c94");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "column4";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""4"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.designation\"",\""default\"":\""\""}"",
+  ""name"": """",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": """",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: d782a25e-8781-4514-8c3c-ea1a65089088 >>
+                    {
+                        var id = new Guid("d782a25e-8781-4514-8c3c-ea1a65089088");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "column1";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""0"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.part_number\"",\""default\"":\""\""}"",
+  ""name"": ""part_number"",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": """",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.ReadOnlySnippet\"",\""default\"":\""\""}"",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 3ffa8604-9160-4bd1-9da5-7a8923c66eb4 >>
+                    {
+                        var id = new Guid("3ffa8604-9160-4bd1-9da5-7a8923c66eb4");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldSelect";
+                        var containerId = "column6";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""0"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.article_type\"",\""default\"":\""14a2d274-c18e-46f8-a920-2814ea5faa2d\""}"",
+  ""name"": ""article_type"",
+  ""class"": """",
+  ""show_icon"": ""false"",
+  ""placeholder"": """",
+  ""options"": ""{\""type\"":\""0\"",\""string\"":\""TypeSelectOptions\"",\""default\"":\""14a2d274-c18e-46f8-a920-2814ea5faa2d\""}"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.Eplan.ImportActionsFieldAccessibilitySnippet\"",\""default\"":\""\""}"",
+  ""required_override_ds"": ""true"",
+  ""ajax_api_url_ds"": """",
+  ""ajax_datasource_api"": """",
+  ""description"": """",
+  ""label_help_text"": """",
+  ""select_match_type"": ""0""
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 726c37fb-b438-4e36-bb80-f1bc9f465c66 >>
+                    {
+                        var id = new Guid("726c37fb-b438-4e36-bb80-f1bc9f465c66");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "column2";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""4"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.type_number\"",\""default\"":\""\""}"",
+  ""name"": ""type_number"",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": """",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 227736a5-a495-4316-a4f0-2daf270ad9e0 >>
+                    {
+                        var id = new Guid("227736a5-a495-4316-a4f0-2daf270ad9e0");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldText";
+                        var containerId = "column3";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""4"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.order_number\"",\""default\"":\""\""}"",
+  ""name"": ""order_number"",
+  ""class"": """",
+  ""maxlength"": 0,
+  ""placeholder"": """",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 5eef8c68-e950-4f51-a90d-7b4d9ced7765 >>
+                    {
+                        var id = new Guid("5eef8c68-e950-4f51-a90d-7b4d9ced7765");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldHtml";
+                        var containerId = "column5";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""mode"": ""4"",
+  ""value"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.Eplan.ArticleImportStateSnippet\"",\""default\"":\""\""}"",
+  ""name"": ""import_state"",
+  ""class"": """",
+  ""upload_mode"": ""1"",
+  ""toolbar_mode"": ""1"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 35f26056-6bf1-471b-86ba-e46c704e7d24 >>
+                    {
+                        var id = new Guid("35f26056-6bf1-471b-86ba-e46c704e7d24");
+                        Guid? parentId = new Guid("140c0846-0a18-4023-a935-46c3859a7ecf");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldSelect";
+                        var containerId = "column7";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""3"",
+  ""label_text"": """",
+  ""link"": """",
+  ""mode"": ""0"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.action\"",\""default\"":\""\""}"",
+  ""name"": ""action"",
+  ""class"": """",
+  ""show_icon"": ""false"",
+  ""placeholder"": """",
+  ""options"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.available_actions\"",\""default\"":\""\""}"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.Eplan.ImportActionsFieldAccessibilitySnippet\"",\""default\"":\""\""}"",
+  ""required_override_ds"": ""true"",
+  ""ajax_api_url_ds"": """",
+  ""ajax_datasource_api"": """",
+  ""description"": """",
+  ""label_help_text"": """",
+  ""select_match_type"": ""0""
+}";
                         var weight = 1;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
@@ -15015,39 +15695,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: manage  id: c52ce884-40d4-4908-9e2e-11ecbde73399 >>
-                    {
-                        var id = new Guid("c52ce884-40d4-4908-9e2e-11ecbde73399");
-                        Guid? parentId = new Guid("0cb50cde-1150-408f-9cbf-58aea1c08fbd");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("ba2cde89-1991-4028-8bfc-20dc721e91e6");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column2";
-                        var options = @"{
-  ""type"": ""2"",
-  ""text"": ""Cancel"",
-  ""color"": ""0"",
-  ""size"": ""3"",
-  ""class"": ""text-nowrap w-100"",
-  ""id"": """",
-  ""icon_class"": """",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.DetailUrlSnippet\"",\""default\"":\""\""}"",
-  ""new_tab"": ""false"",
-  ""form"": """"
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: manage  id: ffc1f166-ce61-4818-9071-f2545327fbbe >>
                     {
                         var id = new Guid("ffc1f166-ce61-4818-9071-f2545327fbbe");
@@ -15060,7 +15707,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Save"",
   ""color"": ""1"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-save"",
@@ -15074,6 +15721,39 @@ namespace WebVella.Erp.Plugins.Duatec
   ""href"": """",
   ""new_tab"": ""false"",
   ""form"": ""wv-5b3b6324-d438-4381-bb5d-cbbb8600477a""
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: manage  id: c52ce884-40d4-4908-9e2e-11ecbde73399 >>
+                    {
+                        var id = new Guid("c52ce884-40d4-4908-9e2e-11ecbde73399");
+                        Guid? parentId = new Guid("0cb50cde-1150-408f-9cbf-58aea1c08fbd");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("ba2cde89-1991-4028-8bfc-20dc721e91e6");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column2";
+                        var options = @"{
+  ""type"": ""2"",
+  ""text"": ""Cancel"",
+  ""color"": ""0"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100"",
+  ""id"": """",
+  ""icon_class"": """",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.DetailUrlSnippet\"",\""default\"":\""\""}"",
+  ""new_tab"": ""false"",
+  ""form"": """"
 }";
                         var weight = 1;
 
@@ -15274,39 +15954,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: detail  id: 888630c7-7b62-4b82-898d-78297751871e >>
-                    {
-                        var id = new Guid("888630c7-7b62-4b82-898d-78297751871e");
-                        Guid? parentId = new Guid("919f19ba-19c1-43e7-b71f-9f3b99962000");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("f8c28fa8-e57f-4be6-95f3-c757141fd059");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column2";
-                        var options = @"{
-  ""type"": ""1"",
-  ""text"": ""Delete"",
-  ""color"": ""10"",
-  ""size"": ""3"",
-  ""class"": ""text-nowrap w-100"",
-  ""id"": """",
-  ""icon_class"": ""far fa-trash-alt"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": """",
-  ""href"": """",
-  ""new_tab"": ""false"",
-  ""form"": ""wv-419583e8-7069-4b33-b8b7-56b88199e74f""
-}";
-                        var weight = 1;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: detail  id: eaed20ab-2905-427c-bde1-ca39904044f3 >>
                     {
                         var id = new Guid("eaed20ab-2905-427c-bde1-ca39904044f3");
@@ -15319,7 +15966,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Manage"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-edit"",
@@ -15333,6 +15980,39 @@ namespace WebVella.Erp.Plugins.Duatec
   ""href"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.ManageUrlSnippet\"",\""default\"":\""\""}"",
   ""new_tab"": ""false"",
   ""form"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: detail  id: 888630c7-7b62-4b82-898d-78297751871e >>
+                    {
+                        var id = new Guid("888630c7-7b62-4b82-898d-78297751871e");
+                        Guid? parentId = new Guid("919f19ba-19c1-43e7-b71f-9f3b99962000");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("f8c28fa8-e57f-4be6-95f3-c757141fd059");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column2";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Delete"",
+  ""color"": ""10"",
+  ""size"": ""1"",
+  ""class"": ""text-nowrap w-100"",
+  ""id"": """",
+  ""icon_class"": ""far fa-trash-alt"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-419583e8-7069-4b33-b8b7-56b88199e74f""
 }";
                         var weight = 1;
 
@@ -16791,39 +17471,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create page body node*** Page name: all  id: 2513894f-35bd-4434-9d86-53f235685547 >>
-                    {
-                        var id = new Guid("2513894f-35bd-4434-9d86-53f235685547");
-                        Guid? parentId = new Guid("66913be0-f98e-4851-9d98-272b13df6729");
-                        Guid? nodeId = null;
-                        var pageId = new Guid("49939f02-8cd3-4165-bf64-290ab31d965a");
-                        var componentName = "WebVella.Erp.Web.Components.PcButton";
-                        var containerId = "column1";
-                        var options = @"{
-  ""type"": ""0"",
-  ""text"": ""Search"",
-  ""color"": ""0"",
-  ""size"": ""0"",
-  ""class"": ""w-100 ml-0"",
-  ""id"": """",
-  ""icon_class"": ""fa fa-search"",
-  ""is_block"": ""false"",
-  ""is_outline"": ""false"",
-  ""icon_right"": ""false"",
-  ""is_active"": ""false"",
-  ""is_disabled"": ""false"",
-  ""is_visible"": """",
-  ""onclick"": ""ErpEvent.DISPATCH('WebVella.Erp.Web.Components.PcDrawer','open')"",
-  ""href"": """",
-  ""new_tab"": ""false"",
-  ""form"": """"
-}";
-                        var weight = 2;
-
-                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
-                    }
-                    #endregion
-
                     #region << ***Create page body node*** Page name: all  id: c97380b4-e96c-4198-8010-f1bc5ab0f54b >>
                     {
                         var id = new Guid("c97380b4-e96c-4198-8010-f1bc5ab0f54b");
@@ -16836,7 +17483,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Add to Stock"",
   ""color"": ""0"",
-  ""size"": ""0"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fa fa-plus go-green"",
@@ -16852,6 +17499,39 @@ namespace WebVella.Erp.Plugins.Duatec
   ""form"": """"
 }";
                         var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: all  id: 2513894f-35bd-4434-9d86-53f235685547 >>
+                    {
+                        var id = new Guid("2513894f-35bd-4434-9d86-53f235685547");
+                        Guid? parentId = new Guid("66913be0-f98e-4851-9d98-272b13df6729");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("49939f02-8cd3-4165-bf64-290ab31d965a");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""0"",
+  ""text"": ""Search"",
+  ""color"": ""0"",
+  ""size"": ""1"",
+  ""class"": ""w-100 ml-0"",
+  ""id"": """",
+  ""icon_class"": ""fa fa-search"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": ""ErpEvent.DISPATCH('WebVella.Erp.Web.Components.PcDrawer','open')"",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": """"
+}";
+                        var weight = 2;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -17774,7 +18454,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Manage"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-edit"",
@@ -17807,7 +18487,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""1"",
   ""text"": ""Delete"",
   ""color"": ""10"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 ml-0"",
   ""id"": """",
   ""icon_class"": ""far fa-trash-alt"",
@@ -17840,7 +18520,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""type"": ""2"",
   ""text"": ""Move"",
   ""color"": ""0"",
-  ""size"": ""3"",
+  ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mb-2"",
   ""id"": """",
   ""icon_class"": ""fas fa-long-arrow-alt-up"",
@@ -18412,6 +19092,260 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
+                    #region << ***Create page body node*** Page name: eplan-import  id: 168a56a8-8f3a-4e6b-bb25-df1e71ebef84 >>
+                    {
+                        var id = new Guid("168a56a8-8f3a-4e6b-bb25-df1e71ebef84");
+                        Guid? parentId = null;
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcForm";
+                        var containerId = "";
+                        var options = @"{
+  ""is_visible"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.RecordIsNullSnippet\"",\""default\"":\""\""}"",
+  ""id"": ""wv-168a56a8-8f3a-4e6b-bb25-df1e71ebef84"",
+  ""name"": ""update"",
+  ""hook_key"": ""article_file_upload"",
+  ""method"": ""post"",
+  ""label_mode"": ""1"",
+  ""mode"": ""1"",
+  ""class"": """",
+  ""show_validation"": ""true""
+}";
+                        var weight = 2;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 94cb0882-429b-452c-8550-146e7e3b6c91 >>
+                    {
+                        var id = new Guid("94cb0882-429b-452c-8550-146e7e3b6c91");
+                        Guid? parentId = new Guid("168a56a8-8f3a-4e6b-bb25-df1e71ebef84");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcRow";
+                        var containerId = "body";
+                        var options = @"{
+  ""visible_columns"": 1,
+  ""class"": ""mb-5"",
+  ""no_gutters"": ""false"",
+  ""flex_vertical_alignment"": ""1"",
+  ""flex_horizontal_alignment"": ""1"",
+  ""container1_span"": 12,
+  ""container1_span_sm"": 0,
+  ""container1_span_md"": 10,
+  ""container1_span_lg"": 8,
+  ""container1_span_xl"": 0,
+  ""container1_offset"": 0,
+  ""container1_offset_sm"": 0,
+  ""container1_offset_md"": 1,
+  ""container1_offset_lg"": 2,
+  ""container1_offset_xl"": 0,
+  ""container1_flex_self_align"": ""1"",
+  ""container1_flex_order"": 0,
+  ""container2_span"": 0,
+  ""container2_span_sm"": 0,
+  ""container2_span_md"": 0,
+  ""container2_span_lg"": 0,
+  ""container2_span_xl"": 0,
+  ""container2_offset"": 0,
+  ""container2_offset_sm"": 0,
+  ""container2_offset_md"": 0,
+  ""container2_offset_lg"": 0,
+  ""container2_offset_xl"": 0,
+  ""container2_flex_self_align"": ""1"",
+  ""container2_flex_order"": 0,
+  ""container3_span"": 0,
+  ""container3_span_sm"": 0,
+  ""container3_span_md"": 0,
+  ""container3_span_lg"": 0,
+  ""container3_span_xl"": 0,
+  ""container3_offset"": 0,
+  ""container3_offset_sm"": 0,
+  ""container3_offset_md"": 0,
+  ""container3_offset_lg"": 0,
+  ""container3_offset_xl"": 0,
+  ""container3_flex_self_align"": ""1"",
+  ""container3_flex_order"": 0,
+  ""container4_span"": 0,
+  ""container4_span_sm"": 0,
+  ""container4_span_md"": 0,
+  ""container4_span_lg"": 0,
+  ""container4_span_xl"": 0,
+  ""container4_offset"": 0,
+  ""container4_offset_sm"": 0,
+  ""container4_offset_md"": 0,
+  ""container4_offset_lg"": 0,
+  ""container4_offset_xl"": 0,
+  ""container4_flex_self_align"": ""1"",
+  ""container4_flex_order"": 0,
+  ""container5_span"": 0,
+  ""container5_span_sm"": 0,
+  ""container5_span_md"": 0,
+  ""container5_span_lg"": 0,
+  ""container5_span_xl"": 0,
+  ""container5_offset"": 0,
+  ""container5_offset_sm"": 0,
+  ""container5_offset_md"": 0,
+  ""container5_offset_lg"": 0,
+  ""container5_offset_xl"": 0,
+  ""container5_flex_self_align"": ""1"",
+  ""container5_flex_order"": 0,
+  ""container6_span"": 0,
+  ""container6_span_sm"": 0,
+  ""container6_span_md"": 0,
+  ""container6_span_lg"": 0,
+  ""container6_span_xl"": 0,
+  ""container6_offset"": 0,
+  ""container6_offset_sm"": 0,
+  ""container6_offset_md"": 0,
+  ""container6_offset_lg"": 0,
+  ""container6_offset_xl"": 0,
+  ""container6_flex_self_align"": ""1"",
+  ""container6_flex_order"": 0,
+  ""container7_span"": 0,
+  ""container7_span_sm"": 0,
+  ""container7_span_md"": 0,
+  ""container7_span_lg"": 0,
+  ""container7_span_xl"": 0,
+  ""container7_offset"": 0,
+  ""container7_offset_sm"": 0,
+  ""container7_offset_md"": 0,
+  ""container7_offset_lg"": 0,
+  ""container7_offset_xl"": 0,
+  ""container7_flex_self_align"": ""1"",
+  ""container7_flex_order"": 0,
+  ""container8_span"": 0,
+  ""container8_span_sm"": 0,
+  ""container8_span_md"": 0,
+  ""container8_span_lg"": 0,
+  ""container8_span_xl"": 0,
+  ""container8_offset"": 0,
+  ""container8_offset_sm"": 0,
+  ""container8_offset_md"": 0,
+  ""container8_offset_lg"": 0,
+  ""container8_offset_xl"": 0,
+  ""container8_flex_self_align"": ""1"",
+  ""container8_flex_order"": 0,
+  ""container9_span"": 0,
+  ""container9_span_sm"": 0,
+  ""container9_span_md"": 0,
+  ""container9_span_lg"": 0,
+  ""container9_span_xl"": 0,
+  ""container9_offset"": 0,
+  ""container9_offset_sm"": 0,
+  ""container9_offset_md"": 0,
+  ""container9_offset_lg"": 0,
+  ""container9_offset_xl"": 0,
+  ""container9_flex_self_align"": ""1"",
+  ""container9_flex_order"": 0,
+  ""container10_span"": 0,
+  ""container10_span_sm"": 0,
+  ""container10_span_md"": 0,
+  ""container10_span_lg"": 0,
+  ""container10_span_xl"": 0,
+  ""container10_offset"": 0,
+  ""container10_offset_sm"": 0,
+  ""container10_offset_md"": 0,
+  ""container10_offset_lg"": 0,
+  ""container10_offset_xl"": 0,
+  ""container10_flex_self_align"": ""1"",
+  ""container10_flex_order"": 0,
+  ""container11_span"": 0,
+  ""container11_span_sm"": 0,
+  ""container11_span_md"": 0,
+  ""container11_span_lg"": 0,
+  ""container11_span_xl"": 0,
+  ""container11_offset"": 0,
+  ""container11_offset_sm"": 0,
+  ""container11_offset_md"": 0,
+  ""container11_offset_lg"": 0,
+  ""container11_offset_xl"": 0,
+  ""container11_flex_self_align"": ""1"",
+  ""container11_flex_order"": 0,
+  ""container12_span"": 0,
+  ""container12_span_sm"": 0,
+  ""container12_span_md"": 0,
+  ""container12_span_lg"": 0,
+  ""container12_span_xl"": 0,
+  ""container12_offset"": 0,
+  ""container12_offset_sm"": 0,
+  ""container12_offset_md"": 0,
+  ""container12_offset_lg"": 0,
+  ""container12_offset_xl"": 0,
+  ""container12_flex_self_align"": ""1"",
+  ""container12_flex_order"": 0
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: 51205491-20c0-47ab-8240-e786016304c4 >>
+                    {
+                        var id = new Guid("51205491-20c0-47ab-8240-e786016304c4");
+                        Guid? parentId = new Guid("94cb0882-429b-452c-8550-146e7e3b6c91");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcButton";
+                        var containerId = "column1";
+                        var options = @"{
+  ""type"": ""1"",
+  ""text"": ""Load Articles"",
+  ""color"": ""0"",
+  ""size"": ""3"",
+  ""class"": ""text-nowrap float-right"",
+  ""id"": """",
+  ""icon_class"": ""fas fa-clipboard-list"",
+  ""is_block"": ""false"",
+  ""is_outline"": ""false"",
+  ""icon_right"": ""false"",
+  ""is_active"": ""false"",
+  ""is_disabled"": ""false"",
+  ""is_visible"": """",
+  ""onclick"": """",
+  ""href"": """",
+  ""new_tab"": ""false"",
+  ""form"": ""wv-168a56a8-8f3a-4e6b-bb25-df1e71ebef84""
+}";
+                        var weight = 2;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: f06a6224-802d-4896-89dd-9062a082bf1b >>
+                    {
+                        var id = new Guid("f06a6224-802d-4896-89dd-9062a082bf1b");
+                        Guid? parentId = new Guid("94cb0882-429b-452c-8550-146e7e3b6c91");
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcFieldFile";
+                        var containerId = "column1";
+                        var options = @"{
+  ""is_visible"": """",
+  ""label_mode"": ""0"",
+  ""label_text"": ""File"",
+  ""mode"": ""0"",
+  ""value"": """",
+  ""name"": ""file"",
+  ""class"": ""mb-5 mt-5"",
+  ""accept"": "".xml"",
+  ""connected_entity_id"": """",
+  ""connected_record_id_ds"": """",
+  ""access_override_ds"": """",
+  ""required_override_ds"": """",
+  ""ajax_api_url_ds"": """",
+  ""description"": """",
+  ""label_help_text"": """"
+}";
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create page body node*** Page name: all  id: 9569b249-9a35-44b2-9d71-1e8c0d60b662 >>
                     {
                         var id = new Guid("9569b249-9a35-44b2-9d71-1e8c0d60b662");
@@ -18504,7 +19438,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container8_sortable"": ""false"",
   ""container8_class"": """",
   ""container8_vertical_align"": ""3"",
-  ""container8_horizontal_align"": ""3"",
+  ""container8_horizontal_align"": ""2"",
   ""container9_label"": """",
   ""container9_width"": """",
   ""container9_name"": """",
@@ -18799,7 +19733,35 @@ namespace WebVella.Erp.Plugins.Duatec
   ""description"": """",
   ""label_help_text"": """"
 }";
-                        var weight = 2;
+                        var weight = 1;
+
+                        new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page body node*** Page name: eplan-import  id: cbfd6dab-7a27-4a50-b1c5-056a2ea40d46 >>
+                    {
+                        var id = new Guid("cbfd6dab-7a27-4a50-b1c5-056a2ea40d46");
+                        Guid? parentId = null;
+                        Guid? nodeId = null;
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var componentName = "WebVella.Erp.Web.Components.PcPageHeader";
+                        var containerId = "";
+                        var options = @"{
+  ""is_visible"": """",
+  ""fix_on_scroll"": ""false"",
+  ""area_label"": ""{\""type\"":\""0\"",\""string\"":\""Entity.LabelPlural\"",\""default\"":\""\""}"",
+  ""area_sublabel"": """",
+  ""title"": ""{\""type\"":\""0\"",\""string\"":\""Page.Label\"",\""default\"":\""\""}"",
+  ""subtitle"": """",
+  ""description"": """",
+  ""show_page_switch"": ""false"",
+  ""color"": ""{\""type\"":\""0\"",\""string\"":\""App.Color\"",\""default\"":\""\""}"",
+  ""icon_color"": ""#fff"",
+  ""icon_class"": ""{\""type\"":\""0\"",\""string\"":\""Page.IconClass\"",\""default\"":\""\""}"",
+  ""return_url"": ""/master-data/articles/articles/l/all""
+}";
+                        var weight = 1;
 
                         new WebVella.Erp.Web.Services.PageService().CreatePageBodyNode(id, parentId, pageId, nodeId, weight, componentName, containerId, options, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
@@ -19683,6 +20645,30 @@ OFFSET 0
                     }
                     #endregion
 
+                    #region << ***Create page data source*** Name: AllArticleTypes >>
+                    {
+                        var id = new Guid("e4a0ccf0-71d7-4364-a4f7-84a27cd401e4");
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var dataSourceId = new Guid("8cb020ec-5e9d-47b7-9246-d01ad6236cbd");
+                        var name = @"AllArticleTypes";
+                        var parameters = @"[{""name"":""pageSize"",""type"":""int"",""value"":""2147483647"",""ignore_parse_errors"":false}]";
+
+                        new WebVella.Erp.Web.Services.PageService(ErpSettings.ConnectionString).CreatePageDataSource(id, pageId, dataSourceId, name, parameters, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
+                    #region << ***Create page data source*** Name: TypeSelectOptions >>
+                    {
+                        var id = new Guid("4d958f6f-8e16-48e6-b5e0-e0561f26180f");
+                        var pageId = new Guid("27788fb7-71b0-44fe-846e-1cadab2504d8");
+                        var dataSourceId = new Guid("12dcdf08-af03-4347-8015-bd9bace17514");
+                        var name = @"TypeSelectOptions";
+                        var parameters = @"[{""name"":""DataSourceName"",""type"":""text"",""value"":""AllArticleTypes"",""ignore_parse_errors"":false},{""name"":""KeyPropName"",""type"":""text"",""value"":""id"",""ignore_parse_errors"":false},{""name"":""ValuePropName"",""type"":""text"",""value"":""label"",""ignore_parse_errors"":false}]";
+
+                        new WebVella.Erp.Web.Services.PageService(ErpSettings.ConnectionString).CreatePageDataSource(id, pageId, dataSourceId, name, parameters, WebVella.Erp.Database.DbContext.Current.Transaction);
+                    }
+                    #endregion
+
                     #region << ***Create record*** Id: 14a2d274-c18e-46f8-a920-2814ea5faa2d (article_type) >>
                     {
                         var json = @"{
@@ -19691,21 +20677,6 @@ OFFSET 0
   ""unit"": ""pc."",
   ""label"": ""Component"",
   ""is_integer"": true
-}";
-                        EntityRecord rec = JsonConvert.DeserializeObject<EntityRecord>(json);
-                        var result = recMan.CreateRecord("article_type", rec);
-                        if (!result.Success) throw new Exception(result.Message);
-                    }
-                    #endregion
-
-                    #region << ***Create record*** Id: a6f456fe-e886-4594-b94e-2d43fc3d73a7 (article_type) >>
-                    {
-                        var json = @"{
-  ""$type"": ""WebVella.Erp.Api.Models.EntityRecord, WebVella.Erp"",
-  ""id"": ""a6f456fe-e886-4594-b94e-2d43fc3d73a7"",
-  ""unit"": ""m"",
-  ""label"": ""Cable"",
-  ""is_integer"": false
 }";
                         EntityRecord rec = JsonConvert.DeserializeObject<EntityRecord>(json);
                         var result = recMan.CreateRecord("article_type", rec);

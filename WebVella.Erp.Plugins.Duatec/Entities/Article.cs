@@ -12,6 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             public const string Type = "article_article_type";
         }
 
+        public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
+
         public const string Entity = "article";
         public const string EplanId = "eplan_id";
         public const string PartNumber = "part_number";
@@ -59,6 +61,13 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
                 result[(string)obj[PartNumber]] = obj;
 
             return result;
+        }
+
+        public static async Task<Dictionary<string, EntityRecord?>> FindManyAsync(params string[] partNumbers)
+        {
+            var t = new Task<Dictionary<string, EntityRecord?>>(() => FindMany(partNumbers));
+            t.Start();
+            return await t;
         }
 
         public static Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
