@@ -33,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
                 amountValidator = GetDefaultAmountValidator();
             }
 
-            result.AddRange(amountValidator.ValidateOnCreate(amount, ArticleStock.Amount));
+            result.AddRange(amountValidator.Validate(amount, ArticleStock.Amount));
 
             return result;
         }

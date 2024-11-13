@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Util;
 
-namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
+namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
 {
     internal abstract class PropertyValidatorBase
     {
@@ -17,12 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
             _entityPretty = Text.FancyfySnakeCaseStartWithUpper(entity);
             _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
         }
-
-        public virtual List<ValidationError> ValidateOnCreate(string value, string formField)
-            => ValidateFormat(value, formField);
-
-        public virtual List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
-            => ValidateFormat(value, formField);
 
         protected virtual List<ValidationError> ValidateFormat(string value, string formField)
         {

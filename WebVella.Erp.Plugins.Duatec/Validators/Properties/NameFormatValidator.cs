@@ -1,20 +1,20 @@
-﻿using WebVella.Erp.Exceptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    internal class NameFormatValidator : PropertyValidatorBase
+    internal class NameFormatValidator : NameFormatValidatorBase
     {
-        public NameFormatValidator(string entity, string entityProperty)
+        public NameFormatValidator(string entity, string entityProperty) 
             : base(entity, entityProperty)
         { }
 
-        protected override bool CharIsAllowed(char c)
-        {
-            return char.IsLetterOrDigit(c)
-                || c >= ' ' && c <= '~';
-        }
-
-        protected override List<ValidationError> ValidateFormat(string value, string formField)
+        public virtual List<ValidationError> Validate(string value, string formField)
         {
             var result = new List<ValidationError>();
 

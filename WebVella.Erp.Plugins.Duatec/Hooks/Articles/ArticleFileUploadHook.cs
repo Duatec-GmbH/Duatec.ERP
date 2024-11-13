@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
@@ -35,9 +34,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             if (file == null)
                 return Error(pageModel, "File not found");
 
-
-            var text = Encoding.UTF8.GetString(file.GetBytes());
-            var articles = EplanXml.GetArticles(text);
+            using var stream = new MemoryStream(file.GetBytes());
+            var articles = EplanXml.GetArticles(stream);
 
             fsRepository.Delete(filePath);
 

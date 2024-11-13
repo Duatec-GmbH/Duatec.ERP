@@ -10,5 +10,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);
+
+        public static bool Exists(Guid id)
+            => Record.Exists(Entity, "id", id);
     }
 }

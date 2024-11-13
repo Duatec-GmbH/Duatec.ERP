@@ -1,5 +1,4 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
 using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
@@ -24,7 +23,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!arguments.TryGetValue("id", out var objId) || objId is not Guid id)
                 return result;
 
-            var articles = ArticleEquivalent.AllTargetsForSource(id)
+            // This could be optimized but I do not expect many article to be defined as alternative
+            var articles = ArticleAlternative.AllTargetsForSource(id)
                 .Select(Article.Find)
                 .Where(a => a != null)!;
 

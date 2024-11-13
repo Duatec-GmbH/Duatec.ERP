@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             var unit = record[ArticleType.Unit] as string ?? string.Empty;
 
             var result = _labelValidator.ValidateOnCreate(label, ArticleType.Label);
-            var unitErrors = _unitValidator.ValidateOnCreate(unit, ArticleType.Unit);
+            var unitErrors = _unitValidator.Validate(unit, ArticleType.Unit);
 
             result.AddRange(unitErrors);
             return result;
@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             var unit = record[ArticleType.Unit] as string ?? string.Empty;
 
             var result = _labelValidator.ValidateOnUpdate(label, ArticleType.Label, id);
-            var unitErrors = _unitValidator.ValidateOnUpdate(unit, ArticleType.Unit, id);
+            var unitErrors = _unitValidator.Validate(unit, ArticleType.Unit);
 
             result.AddRange(unitErrors);
             return result;

@@ -5,6 +5,8 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
+    using Args = (string PartNumber, string TypeNumber, string OrderNumber, string Designation);
+
     internal class ArticleValidator : IRecordValidator
     {
         private static readonly PartNumberUniqueValidator _partNumberValidator = new();
@@ -14,32 +16,42 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
         {
-            var partNumber = record[Article.PartNumber] as string ?? string.Empty;
-            var typeNumber = record[Article.TypeNumber] as string ?? string.Empty;
-            var orderNumber = record[Article.OrderNumber] as string ?? string.Empty;
-            var designation = record[Article.Designation] as string ?? string.Empty;
+            var args = GetArgs(record);
 
-            var errors = _partNumberValidator.ValidateOnCreate(partNumber, Article.PartNumber);
-            errors.AddRange(_typeNumberValidator.ValidateOnCreate(typeNumber, Article.TypeNumber));
-            errors.AddRange(_orderNumberValidator.ValidateOnCreate(orderNumber, Article.OrderNumber));
-            errors.AddRange(_designationValidator.ValidateOnCreate(designation, Article.Designation));
+            var errors = Validate(args);
+            errors.AddRange(_partNumberValidator.ValidateOnCreate(args.PartNumber, Article.PartNumber));
+
             return errors;
         }
 
         public List<ValidationError> ValidateOnUpdate(EntityRecord record)
         {
             var id = (Guid)record["id"];
-            var partNumber = record[Article.PartNumber] as string ?? string.Empty;
-            var typeNumber = record[Article.TypeNumber] as string ?? string.Empty;
-            var orderNumber = record[Article.OrderNumber] as string ?? string.Empty;
-            var designation = record[Article.Designation] as string ?? string.Empty;
+            var args = GetArgs(record);
 
-            var errors = _partNumberValidator.ValidateOnUpdate(partNumber, Article.PartNumber, id);
-            errors.AddRange(_typeNumberValidator.ValidateOnUpdate(typeNumber, Article.TypeNumber, id));
-            errors.AddRange(_orderNumberValidator.ValidateOnUpdate(orderNumber, Article.OrderNumber, id));
-            errors.AddRange(_designationValidator.ValidateOnUpdate(designation, Article.Designation, id));
+            var errors = Validate(args);
+            errors.AddRange(_partNumberValidator.ValidateOnUpdate(args.PartNumber, Article.PartNumber, id));
 
             return errors;
+        }
+
+        private static List<ValidationError> Validate(Args args)
+        {
+            var (_, typeNumber, orderNumber, designation) = args;
+
+            var result = _typeNumberValidator.Validate(typeNumber, Article.TypeNumber);
+            result.AddRange(_orderNumberValidator.Validate(orderNumber, Article.OrderNumber));
+            result.AddRange(_designationValidator.Validate(designation, Article.Designation));
+
+            return result;
+        }
+
+        private static Args GetArgs(EntityRecord record)
+        {
+            return (record[Article.PartNumber] as string ?? string.Empty,
+                record[Article.TypeNumber] as string ?? string.Empty,
+                record[Article.OrderNumber] as string ?? string.Empty,
+                record[Article.Designation] as string ?? string.Empty);
         }
     }
 }

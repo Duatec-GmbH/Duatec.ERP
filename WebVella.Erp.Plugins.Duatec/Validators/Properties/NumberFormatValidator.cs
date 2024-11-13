@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
@@ -25,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
                 || c == '-';
         }
 
-        protected override List<ValidationError> ValidateFormat(string value, string formField)
+        public List<ValidationError> Validate(string value, string formField)
         {
             var result = base.ValidateFormat(value, formField);
 

@@ -1,10 +1,11 @@
 ﻿using WebVella.Erp.Eql;
 using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
     internal class NameUniqueValidator(string entity, string entityProperty)
-        : NameFormatValidator(entity, entityProperty)
+        : NameFormatValidatorBase(entity, entityProperty)
     {
         protected bool RecordExists(string value, Guid id = default)
         {
@@ -15,13 +16,13 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
             return cmd.Execute()?.Count is > 0;
         }
 
-        public override List<ValidationError> ValidateOnCreate(string value, string formField)
+        public virtual List<ValidationError> ValidateOnCreate(string value, string formField)
             => Validate(value, formField, default);
 
-        public override List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
+        public virtual List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
             => Validate(value, formField, id);
 
-        protected List<ValidationError> Validate(string value, string formField, Guid id)
+        private List<ValidationError> Validate(string value, string formField, Guid id)
         {
             var result = base.ValidateFormat(value, formField);
             if (result.Count == 0 && RecordExists(value, id))

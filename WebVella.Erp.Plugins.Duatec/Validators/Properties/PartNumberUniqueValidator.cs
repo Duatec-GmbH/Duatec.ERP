@@ -18,32 +18,28 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         public override List<ValidationError> ValidateOnCreate(string value, string formField)
         {
             var result = base.ValidateOnCreate(value, formField);
-            List<ValidationError> validation(string shortName) 
-                => _shortNameValidator.ValidateOnCreate(shortName, formField);
-
-            Validate(value, formField, result, validation);
+            result.AddRange(Validate(value, formField));
             return result;
         }
 
         public override List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
         {
             var result = base.ValidateOnUpdate(value, formField, id);
-            List<ValidationError> validation(string shortName) 
-                => _shortNameValidator.ValidateOnUpdate(shortName, formField, id);
-
-            Validate(value, formField, result, validation);
+            result.AddRange(Validate(value, formField));
             return result;
         }
 
-        private void Validate(string value, string formField, List<ValidationError> result, Func<string, List<ValidationError>> validation)
+        private List<ValidationError> Validate(string value, string formField)
         {
+            var result = new List<ValidationError>();
+
             if (value.IndexOf('.') < 1)
                 result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must contain {_manufacturer}s {_manufacturerShortName} followed by '.'"));
 
             if (result.Count == 0)
             {
                 var shortName = value[..value.IndexOf('.')];
-                var shortNameErrors = validation(shortName);
+                var shortNameErrors = _shortNameValidator.Validate(shortName, formField);
                 result.AddRange(shortNameErrors);
 
                 if (shortNameErrors.Count == 0)
@@ -55,6 +51,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
                         result.Add(new ValidationError(formField, $"{_entityPretty} with {_entityPropertyPretty} '{value}' is an EPLAN article"));
                 }
             }
+
+            return result;
         }
     }
 }

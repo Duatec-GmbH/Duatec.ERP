@@ -150,34 +150,24 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 						var pointIdx = field.FieldName.LastIndexOf('.');
 
 						var fieldName = field.FieldName[(pointIdx + 1)..];
-						var entityNames = field.FieldName[..pointIdx].Split('.')
+						var relationNames = field.FieldName[..pointIdx].Split('.')
 							.Select(s => s.TrimStart('$'))
 							.ToArray();
 
-						var orderEntities = entityNames
-							.Select(n => entities.FirstOrDefault(e => e.Name.Equals(n, StringComparison.OrdinalIgnoreCase)))
-							.Where(e => e != null)
-							.ToArray();
-
-						var notFound = entityNames
-							.Where(n => !orderEntities.Any(e => n.Equals(e?.Name, StringComparison.OrdinalIgnoreCase)))
-							.Select(s => $"'{s}'")
-							.ToArray();
-
-						if(notFound.Length != 0)
+						var orderEntity = fromEntity;
+						foreach(var relName in relationNames)
 						{
-							if (notFound.Length == 1)
-								errors.Add(new EqlError { Message = $"Entity {notFound[0]} does not exist" });
-							else
-								errors.Add(new EqlError { Message = $"Entities {string.Join(", ", notFound)} do not exist" });
+							var rel = relMan.Read(relName).Object
+								?? throw new EqlException($"Relation '{relName}' not found.");
 
-							return string.Empty;
+							orderEntity = entities.FirstOrDefault(ent => ent.Id == rel.OriginEntityId)
+								?? throw new EqlException($"Origin entity of relation '{relName}' not found");
 						}
 
-						// TODO check if the relation is valid
-						
-						var orderEntity = orderEntities[^1];
-						sql.Append($"{orderEntity.Name}_tar_org.\"{fieldName}\" {field.Direction}");
+						if (!orderEntity.Fields.Exists(f => f.Name == fieldName))
+							throw new EqlException($"Entity '{orderEntity.Name}' has no field with name '{fieldName}'");
+
+						sql.Append($"{relationNames[^1]}_tar_org.\"{fieldName}\" {field.Direction}");
 					}
 					else
 					{

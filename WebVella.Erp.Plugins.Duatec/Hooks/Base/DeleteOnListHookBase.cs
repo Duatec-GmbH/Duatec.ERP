@@ -36,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             var response = new RecordManager().DeleteRecord(Entity, id);
 
             if (!response.Success)
-                pageModel.PutMessage(ScreenMessageType.Error, $"Error: {response.Message}");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Error: {response.GetMessage()}");
             else
                 pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted {EntityName} '{label}'");
 

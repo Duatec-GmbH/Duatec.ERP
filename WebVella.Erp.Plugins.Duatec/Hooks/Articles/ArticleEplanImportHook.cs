@@ -5,6 +5,7 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -31,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             if (string.IsNullOrEmpty(partNumber))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, $"Please enter a article part number.");
+                pageModel.PutMessage(ScreenMessageType.Error, $"Please enter an article part number.");
                 return;
             }
 
@@ -47,51 +48,23 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return;
             }
 
-            using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
-            using var connection = dbCtx.CreateConnection();
+            if (!TryGetArticle(pageModel, partNumber, out var article))
+                return;
 
-            try
+            void TransactionalAction()
             {
-                if (!TryGetArticle(pageModel, partNumber, out var article))
-                    return;                
-
-                connection.BeginTransaction();
-
                 var manufacturer = Manufacturer.FindId(article.Manufacturer.ShortName)
-                    ?? Manufacturer.Insert(article.Manufacturer);
+                    ?? Manufacturer.Insert(article.Manufacturer)
+                    ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'.");
 
-                if (manufacturer == null)
-                {
-                    connection.RollbackTransaction();
-                    pageModel.PutMessage(ScreenMessageType.Error, $"Could not create manufacturer '{article.Manufacturer.Name}'.");
-                    return;
-                }
+                if (Article.Insert(article, manufacturer, typeId) == null)
+                    throw new DbException($"Could not create article '{article.PartNumber}'.");
+            }
 
-                if (!CreateArticle(pageModel, article, manufacturer.Value, typeId))
-                {
-                    connection.RollbackTransaction();
-                    pageModel.PutMessage(ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
-                    return;
-                }
-
+            if(Transactional.TryExecute(pageModel, TransactionalAction))
                 pageModel.PutMessage(ScreenMessageType.Success, $"Successfully imported article '{article.PartNumber}'.");
-                connection.CommitTransaction();
-            }
-            catch
-            {
-                connection.RollbackTransaction();
-                throw;
-            }
         }
 
-        private static bool CreateArticle(BaseErpPageModel pageModel, DataPortalArticle article, Guid manufacturer, Guid type)
-        {
-            if (Article.Insert(article, manufacturer, type) != null)
-                return true;
-
-            pageModel.PutMessage(ScreenMessageType.Error, $"Could not create article '{article.PartNumber}'.");
-            return false;
-        }
 
         private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out DataPortalArticle? article)
         {

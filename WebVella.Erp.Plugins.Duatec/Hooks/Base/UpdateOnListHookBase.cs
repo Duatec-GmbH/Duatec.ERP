@@ -107,9 +107,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         private static bool HandleResponse(BaseErpPageModel pageModel, QueryResponse response)
         {
-            var errors = response.Errors.Select(e => e.Message).Append(response.Message);
             if (!response.Success)
-                pageModel.PutMessage(ScreenMessageType.Error, string.Join(Environment.NewLine, errors));
+                pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
             return response.Success;
         }
     }

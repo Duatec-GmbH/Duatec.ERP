@@ -29,16 +29,13 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             => Record.Find(Entity, id, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}");
 
         public static bool HasAlternatives(Guid id)
-            => Record.Exists(ArticleEquivalent.Entity, ArticleEquivalent.Source, id);
+            => Record.Exists(ArticleAlternative.Entity, ArticleAlternative.Source, id);
 
         public static bool Exists(long eplanId)
             => Record.Exists(Entity, EplanId, eplanId.ToString());
 
         public static bool Exists(string partNumber)
             => Record.Exists(Entity, PartNumber, partNumber);
-
-        public static EntityRecord? Find(string partNumber)
-            => Record.FindBy(Entity, PartNumber, partNumber);
 
         public static Dictionary<string, EntityRecord?> FindMany(params string[] partNumbers)
         {

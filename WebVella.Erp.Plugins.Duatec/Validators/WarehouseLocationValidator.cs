@@ -14,35 +14,26 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private static readonly string _entityPropertyPretty = Text.FancyfySnakeCase(WarehouseLocation.Designation);
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
-        {
-            var designation = record[WarehouseLocation.Designation] as string ?? string.Empty;
-
-            var result = _labelValidator.ValidateOnCreate(designation, WarehouseLocation.Designation);
-            Validate(record, designation, result, null);
-
-            return result;
-        }
+            => Validate(record, null);
 
         public List<ValidationError> ValidateOnUpdate(EntityRecord record)
-        {
-            var id = (Guid)record["id"];
-            var designation = record[WarehouseLocation.Designation] as string ?? string.Empty;
+            => Validate(record, (Guid)record["id"]);
 
-            var result = _labelValidator.ValidateOnUpdate(designation, WarehouseLocation.Designation, id);
-            Validate(record, designation, result, id);
 
-            return result;
-        }
-
-        private static void Validate(EntityRecord record, string designation, List<ValidationError> result, Guid? id)
+        private static List<ValidationError> Validate(EntityRecord record, Guid? id)
         {
             var warehouse = record[WarehouseLocation.Warehouse] as Guid?;
+            var designation = record[WarehouseLocation.Designation] as string ?? string.Empty;
+
+            var result = _labelValidator.Validate(designation, WarehouseLocation.Designation);
 
             if (!warehouse.HasValue)
                 result.Add(new ValidationError(WarehouseLocation.Warehouse, $"Please select a {_warehousePretty}"));
 
             if (result.Count == 0 && WarehouseLocation.Exists(warehouse!.Value, designation, id))
                 result.Add(new ValidationError(WarehouseLocation.Designation, $"{_entityPretty} {_entityPropertyPretty} '{designation}' already exists within selected {_warehousePretty}"));
+
+            return result;
         }
     }
 }
