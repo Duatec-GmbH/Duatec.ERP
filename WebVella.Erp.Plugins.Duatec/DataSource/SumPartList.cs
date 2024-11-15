@@ -3,12 +3,12 @@ using WebVella.Erp.Plugins.Duatec.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
-    internal class SumPartsList : CodeDataSource
+    internal class SumPartList : CodeDataSource
     {
-        public SumPartsList() : base()
+        public SumPartList() : base()
         {
             Id = new Guid("02011d86-63ab-4323-9142-0f6a219f546d");
-            Name = nameof(SumPartsList);
+            Name = nameof(SumPartList);
             Description = "Sum parts list";
             ResultModel = nameof(EntityRecordList);
 

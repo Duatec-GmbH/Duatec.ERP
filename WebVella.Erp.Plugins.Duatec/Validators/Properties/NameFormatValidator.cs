@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties

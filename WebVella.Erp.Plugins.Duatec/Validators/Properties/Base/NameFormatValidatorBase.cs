@@ -1,6 +1,4 @@
-﻿using WebVella.Erp.Exceptions;
-
-namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
+﻿namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
 {
     internal abstract class NameFormatValidatorBase : PropertyValidatorBase
     {

@@ -34,7 +34,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var response = recMan.Find(new EntityQuery(Entity, "*",
                 new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
 
-            return response.Object.Data.SingleOrDefault();
+            return response.Object?.Data?.SingleOrDefault();
         }
 
         public static bool Delete(Guid id)

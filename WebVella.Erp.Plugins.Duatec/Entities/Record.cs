@@ -20,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var response = recMan.Find(new EntityQuery(entity, select,
                 new QueryObject() { FieldName = "id", FieldValue = id, QueryType = QueryType.EQ }));
 
-            return response.Object.Data.SingleOrDefault();
+            return response.Object?.Data?.SingleOrDefault();
         }
 
         public static EntityRecord? FindBy(string entity, string field, object fieldValue, string select = "*")
@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var response = recMan.Find(new EntityQuery(entity, select,
                 new QueryObject() { FieldName = field, FieldValue = fieldValue, QueryType = QueryType.EQ }));
 
-            return response.Object.Data.SingleOrDefault();
+            return response.Object?.Data?.SingleOrDefault();
         }
 
         public static List<EntityRecord> FindManyBy(string entity, string field, object fieldValue, string select = "*")
@@ -38,7 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             var response = recMan.Find(new EntityQuery(entity, select,
                 new QueryObject() { FieldName = field, FieldValue = fieldValue, QueryType = QueryType.EQ }));
 
-            return response.Object.Data;
+            return response.Object?.Data ?? [];
         }
 
         public static Guid? Insert(string entity, EntityRecord rec)

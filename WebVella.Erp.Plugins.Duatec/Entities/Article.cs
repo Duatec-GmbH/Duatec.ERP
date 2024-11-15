@@ -54,8 +54,11 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             foreach (var pn in partNumbers)
                 result[pn] = null;
 
-            foreach (var obj in queryResponse.Object.Data)
-                result[(string)obj[PartNumber]] = obj;
+            if(queryResponse.Object?.Data != null)
+            {
+                foreach (var obj in queryResponse.Object.Data)
+                    result[(string)obj[PartNumber]] = obj;
+            }
 
             return result;
         }

@@ -36,8 +36,11 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             foreach (var sn in shortNames)
                 result[sn] = null;
 
-            foreach (var resObj in response.Object.Data)
-                result[(string)resObj[ShortName]] = resObj;
+            if(response.Object?.Data != null)
+            {
+                foreach (var resObj in response.Object.Data)
+                    result[(string)resObj[ShortName]] = resObj;
+            }
 
             return result;
         }

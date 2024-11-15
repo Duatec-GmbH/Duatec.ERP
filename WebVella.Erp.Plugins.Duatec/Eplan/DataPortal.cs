@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 
