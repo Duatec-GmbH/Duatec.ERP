@@ -268,13 +268,14 @@ namespace WebVella.Erp.Web.Models
 					}
 				}
 				//Convert to MenuItem
-				foreach (var area in sitemap.Areas)
+				foreach (var area in sitemap.Areas.Where(a => a.Weight < 1000))
 				{
-					if (area.Nodes.Count == 0)
+					var nodeCount = area.Nodes.Count(n => n.Weight < 1000);
+					if (nodeCount == 0)
 						continue;
 
 					var areaMenuItem = new MenuItem();
-					if (area.Nodes.Count > 1)
+					if (nodeCount > 1)
 					{
 						var areaLink = $"<a href=\"javascript: void(0)\" title=\"{area.Label}\" data-navclick-handler>";
 						areaLink += $"<span class=\"menu-label\">{area.Label}</span>";
@@ -306,7 +307,7 @@ namespace WebVella.Erp.Web.Models
 							});
 						}
 					}
-					else if (area.Nodes.Count == 1)
+					else if (nodeCount == 1)
 					{
 						var areaLink = $"<a href=\"{area.Nodes[0].Url}\" title=\"{area.Label}\">";
 						areaLink += $"<span class=\"menu-label\">{area.Label}</span>";

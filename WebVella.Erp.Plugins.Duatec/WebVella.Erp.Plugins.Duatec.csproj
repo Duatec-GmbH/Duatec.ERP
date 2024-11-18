@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Hooks\PartLists\Entries\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

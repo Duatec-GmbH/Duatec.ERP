@@ -59,6 +59,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public static class PartList
         {
+            public static class Entry
+            {
+                public const string Create = "part_list_entry_create";
+                public const string Delete = "part_list_entry_delete";
+                public const string Update = "part_list_entry_update";
+            }
+
             public const string Create = "part_list_create";
             public const string Update = "part_list_update";
             public const string Delete = "project_update";

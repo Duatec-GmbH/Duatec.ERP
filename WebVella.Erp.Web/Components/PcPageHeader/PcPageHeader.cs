@@ -155,34 +155,31 @@ namespace WebVella.Erp.Web.Components
                     if (instanceOptions.ShowPageSwitch && currentPage != null && currentSitemapNode != null)
                     {
                         var allPossiblePages = new PageService().GetAll().FindAll(x => x.Type == currentPage.Type
-                            && x.EntityId == currentSitemapNode.EntityId && (x.AppId == null || x.AppId == currentPage.AppId.Value)).ToList();
+                            && x.EntityId == currentSitemapNode.EntityId && (x.AppId == null || x.AppId == currentPage.AppId.Value));
 
                         switch (currentPage.Type)
                         {
                             case PageType.RecordList:
                                 if (currentSitemapNode.EntityListPages != null && currentSitemapNode.EntityListPages.Count > 0)
-                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityListPages.Contains(x.Id) && x.Weight < 1000).ToList();
+                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityListPages.Contains(x.Id) && x.Weight < 1000);
                                 break;
                             case PageType.RecordCreate:
                                 if (currentSitemapNode.EntityCreatePages != null && currentSitemapNode.EntityCreatePages.Count > 0)
-                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityCreatePages.Contains(x.Id) && x.Weight < 1000).ToList();
+                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityCreatePages.Contains(x.Id) && x.Weight < 1000);
                                 break;
                             case PageType.RecordDetails:
                                 if (currentSitemapNode.EntityDetailsPages != null && currentSitemapNode.EntityDetailsPages.Count > 0)
-                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityDetailsPages.Contains(x.Id) && x.Weight < 1000).ToList();
+                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityDetailsPages.Contains(x.Id) && x.Weight < 1000);
                                 break;
                             case PageType.RecordManage:
                                 if (currentSitemapNode.EntityManagePages != null && currentSitemapNode.EntityManagePages.Count > 0)
-                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityManagePages.Contains(x.Id) && x.Weight < 1000).ToList();
+                                    allPossiblePages = allPossiblePages.FindAll(x => currentSitemapNode.EntityManagePages.Contains(x.Id) && x.Weight < 1000);
                                 break;
                             default:
                                 break;
                         }
 
-                        foreach (var page in allPossiblePages)
-                        {
-                            switchItemPages.Add(page);
-                        }
+						switchItemPages.AddRange(allPossiblePages);
                     }
 
                     switchItemPages = switchItemPages.OrderBy(x => x.Weight).ToList();

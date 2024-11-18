@@ -12,18 +12,23 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private static readonly NameFormatValidator _deviceTagValidator = new(PartListEntry.Entity, PartListEntry.DeviceTag);
 
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
-            => Validate(record);
+            => Validate(record, null);
 
 
         public List<ValidationError> ValidateOnUpdate(EntityRecord record)
         {
-            var result = Validate(record);
-            if (record["id"] is not Guid)
+            var result = new List<ValidationError>();
+            if (record["id"] is Guid id)
+                result.AddRange(Validate(record, id));
+            else
+            {
                 result.Add(new ValidationError(string.Empty, $"Part list entry 'id' is required"));
+                result.AddRange(Validate(record, null));
+            }
             return result;
         }
 
-        private static List<ValidationError> Validate(EntityRecord record)
+        private static List<ValidationError> Validate(EntityRecord record, Guid? id)
         {
             var (partList, article, deviceTag) = GetArgs(record);
 
@@ -32,6 +37,9 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
                 result.Add(new ValidationError(PartListEntry.PartList, "Part list entry 'part list' is required"));
             if (!article.HasValue)
                 result.Add(new ValidationError(PartListEntry.Article, "Part list entry 'article' is required"));
+            if (partList.HasValue && article.HasValue && PartListEntry.Exists(partList.Value, article.Value, id))
+                result.Add(new ValidationError(PartListEntry.Article, "Part list entry with the same article already exists within part list"));
+
             return result;
         }
 
