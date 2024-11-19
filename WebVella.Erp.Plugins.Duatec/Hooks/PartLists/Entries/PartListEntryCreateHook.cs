@@ -13,13 +13,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
     [HookAttachment(key: HookKeys.PartList.Entry.Create)]
     internal class PartListEntryCreateHook : IRecordCreatePageHook
     {
+        private const string listArg = "plId";
         private static readonly PartListEntryValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
-            var listId = Guid.Parse(pageModel.Request.Query["plId"]!);
+            var listId = Guid.Parse(pageModel.Request.Query[listArg]!);
 
-            var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?plId={listId}";
+            var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
             pageModel.PutMessage(Web.Models.ScreenMessageType.Success, "Successfully created part list entry");
 
             return pageModel.LocalRedirect(url);
@@ -27,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            if (!pageModel.Request.Query.TryGetValue("plId", out var idVal) || !Guid.TryParse(idVal, out var listId))
+            if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
             record[PartListEntry.PartList] = listId;

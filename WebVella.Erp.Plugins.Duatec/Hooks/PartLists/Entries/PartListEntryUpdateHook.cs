@@ -24,12 +24,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var oldRec = PartListEntry.Find((Guid)record["id"]);
-            var newRec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            record[PartListEntry.PartList] = oldRec![PartListEntry.PartList];
 
             validationErrors.AddRange(_validator.ValidateOnUpdate(record));
 
-            if(validationErrors.Count == 0)
-                newRec[PartListEntry.PartList] = oldRec![PartListEntry.PartList];
             return null;
         }
     }
