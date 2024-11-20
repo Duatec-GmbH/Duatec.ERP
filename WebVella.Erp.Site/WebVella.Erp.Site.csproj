@@ -22,6 +22,10 @@
 		<DocumentationFile></DocumentationFile>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Compile Remove="wwwroot\**\*;node_modules;bower_components" />
 		<Compile Remove="wwwroot\js\**" />
