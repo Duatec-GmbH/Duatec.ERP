@@ -5,7 +5,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 {
     internal static class Record
     {
-        public static bool Exists(string entity, string field, object fieldValue)
+        public static bool Exists(string entity, string field, object? fieldValue)
         {
             var recMan = new RecordManager();
             var response = recMan.Count(new EntityQuery(entity, "*",
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return response.Object?.Data?.SingleOrDefault();
         }
 
-        public static EntityRecord? FindBy(string entity, string field, object fieldValue, string select = "*")
+        public static EntityRecord? FindBy(string entity, string field, object? fieldValue, string select = "*")
         {
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(entity, select,
@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return response.Object?.Data?.SingleOrDefault();
         }
 
-        public static List<EntityRecord> FindManyBy(string entity, string field, object fieldValue, string select = "*")
+        public static List<EntityRecord> FindManyBy(string entity, string field, object? fieldValue, string select = "*")
         {
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(entity, select,

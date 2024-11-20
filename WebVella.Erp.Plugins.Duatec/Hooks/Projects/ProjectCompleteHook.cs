@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Entities;
@@ -19,17 +20,33 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
             if (!pageModel.RecordId.HasValue)
                 return pageModel.BadRequest();
 
-            var stocks = Project.Stocks(pageModel.RecordId.Value);
-            if (stocks.Count == 0)
+            var reservedStocks = Project.Stocks(pageModel.RecordId.Value);
+
+            if (reservedStocks.Count == 0)
                 return null;
 
             void TransactionalAction()
             {
+                var unreservedStocks = Project.Stocks()
+                    .ToDictionary(GetKey, r => r);
+
                 var recMan = new RecordManager();
-                foreach (var rec in stocks)
+                foreach (var reserved in reservedStocks)
                 {
-                    rec[ArticleStock.Project] = null;
-                    var response = recMan.UpdateRecord(ArticleStock.Entity, rec);
+                    QueryResponse response;
+
+                    if(!unreservedStocks.TryGetValue(GetKey(reserved), out var unreserved))
+                    {
+                        reserved[ArticleStock.Project] = null;
+                        response = recMan.UpdateRecord(ArticleStock.Entity, reserved);
+                    }
+                    else
+                    {
+                        var amount = (decimal)unreserved[ArticleStock.Amount] 
+                            + (decimal)reserved[ArticleStock.Amount];
+                        unreserved[ArticleStock.Amount] = amount;
+                        response = recMan.UpdateRecord(ArticleStock.Entity, unreserved);
+                    }
 
                     if (!response.Success)
                         throw new DbException("Could not update entity record");
@@ -43,5 +60,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
             }
             return null;
         }
+
+        private static (Guid ArticleId, Guid LocationId) GetKey(EntityRecord rec)
+            => ((Guid)rec[ArticleStock.Article], (Guid)rec[ArticleStock.WarehouseLocation]);
+
     }
 }

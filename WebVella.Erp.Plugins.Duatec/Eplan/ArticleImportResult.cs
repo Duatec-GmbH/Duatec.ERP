@@ -108,8 +108,12 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         private static ArticleImportState GetArticleState(EplanArticle article, 
             DataPortalArticle? edpArticle, EntityRecord? dbRecord)
         {
-            if (IsValidDbArticle(article, dbRecord))
-                return ArticleImportState.DbArticle;
+            if (IsDbArticle(article, dbRecord))
+            {
+                return (bool)dbRecord![Article.IsBlocked] 
+                    ? ArticleImportState.BlockedArticle 
+                    : ArticleImportState.DbArticle;
+            }
 
             if (IsValidEplanArticle(article, edpArticle))
                 return ArticleImportState.EplanArticle;
@@ -122,17 +126,15 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return edpArticle != null
                 && article.PartNumber == edpArticle.PartNumber
                 && article.TypeNumber == edpArticle.TypeNumber
-                && article.OrderNumber == edpArticle.OrderNumber
-                && !string.IsNullOrWhiteSpace(article.Description);
+                && article.OrderNumber == edpArticle.OrderNumber;
         }
 
-        private static bool IsValidDbArticle(EplanArticle article, EntityRecord? dbArticle)
+        private static bool IsDbArticle(EplanArticle article, EntityRecord? dbArticle)
         {
             return dbArticle != null
                 && article.PartNumber.Equals(dbArticle[Article.PartNumber])
                 && article.TypeNumber.Equals(dbArticle[Article.TypeNumber])
-                && article.OrderNumber.Equals(dbArticle[Article.OrderNumber])
-                && !string.IsNullOrWhiteSpace(article.Description);
+                && article.OrderNumber.Equals(dbArticle[Article.OrderNumber]);
         }
     }
 }

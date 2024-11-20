@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static bool HasReservedStocks(Guid id)
             => Record.Exists(ArticleStock.Entity, ArticleStock.Project, id);
 
-        public static List<EntityRecord> Stocks(Guid id)
+        public static List<EntityRecord> Stocks(Guid? id = null)
             => Record.FindManyBy(ArticleStock.Entity, ArticleStock.Project, id);
     }
 }

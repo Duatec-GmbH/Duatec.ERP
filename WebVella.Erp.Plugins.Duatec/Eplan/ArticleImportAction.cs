@@ -18,6 +18,7 @@
             return state switch
             {
                 ArticleImportState.DbArticle => [NoAction],
+                ArticleImportState.BlockedArticle => [NoAction],
                 ArticleImportState.EplanArticle => [Import, Skip],
                 ArticleImportState.UnknownArticle => [Skip],
                 _ => throw new NotImplementedException($"{state} is not implemented")
@@ -29,6 +30,7 @@
             return state switch
             {
                 ArticleImportState.DbArticle => NoAction,
+                ArticleImportState.BlockedArticle => NoAction,
                 ArticleImportState.EplanArticle => Import,
                 ArticleImportState.UnknownArticle => Skip,
                 _ => throw new NotImplementedException($"{state} is not implemented")
