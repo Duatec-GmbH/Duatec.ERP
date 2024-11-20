@@ -4,14 +4,9 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
     public class DataPortalArticle
     {
-        private DataPortalArticle(
-            long id,
-            DataPortalManufacturer manufacturer,
-            string partNumber,
-            string typeNumber,
-            string orderNumber,
-            string designation,
-            string pictureUrl)
+        private DataPortalArticle(long id, DataPortalManufacturer manufacturer,
+            string partNumber, string typeNumber, string orderNumber,
+            string designation, string pictureUrl)
         {
             EplanId = id;
             Manufacturer = manufacturer;
