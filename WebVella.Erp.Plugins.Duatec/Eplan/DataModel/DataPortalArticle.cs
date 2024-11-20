@@ -57,32 +57,16 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
             var id = long.Parse(data["id"]!.GetValue<string>());
             var manufacturer = GetManufacturer(json);
 
-            LanguageKey? lang = LanguageKeys.Default;
-            var designation = GetDesignation(attributes, lang.Value);
-
-            while(designation == null)
-            {
-                lang = LanguageKeys.FallBackLanguage(lang!.Value);
-                if (!lang.HasValue)
-                    designation = string.Empty;
-                else
-                    designation = GetDesignation(attributes, lang.Value);
-            }
-
-            var partNumber = attributes["part_number"]!.GetValue<string>();
-            var typeNumber = attributes["type_number"]?.GetValue<string>() ?? string.Empty;
-            var orderNumber = attributes["order_number"]?.GetValue<string>() ?? string.Empty;
             var pictureId = data["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
-            var pictureUrl = GetPictureUrl(json, pictureId) ?? string.Empty;
 
             return new DataPortalArticle(
                 id: id,
                 manufacturer: manufacturer,
-                partNumber: partNumber,
-                typeNumber: typeNumber,
-                orderNumber: orderNumber,
-                designation: designation,
-                pictureUrl: pictureUrl);
+                partNumber: attributes["part_number"]!.GetValue<string>(),
+                typeNumber: attributes["type_number"]?.GetValue<string>() ?? string.Empty,
+                orderNumber: attributes["order_number"]?.GetValue<string>() ?? string.Empty,
+                designation: GetDesignation(attributes),
+                pictureUrl: GetPictureUrl(json, pictureId) ?? string.Empty);
         }
 
         private static DataPortalManufacturer GetManufacturer(JsonNode? json)
@@ -120,9 +104,34 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
             return data;
         }
 
-        private static string? GetDesignation(JsonNode attributes, LanguageKey key)
+        private static string GetDesignation(JsonNode attributes)
         {
-            var node = (attributes["designation"] as JsonObject)?[key.ToString()];
+            var result = GetLanguageItem(attributes, "designation");
+            if (string.IsNullOrEmpty(result))
+                return GetLanguageItem(attributes, "description");
+            return result;
+        }
+
+
+        private static string GetLanguageItem(JsonNode attributes, string property)
+        {
+            LanguageKey? lang = LanguageKeys.Default;
+            var designation = GetLanguageItem(attributes, lang.Value, property);
+
+            while (designation == null)
+            {
+                lang = LanguageKeys.FallBackLanguage(lang!.Value);
+                if (!lang.HasValue)
+                    designation = string.Empty;
+                else
+                    designation = GetLanguageItem(attributes, lang.Value, property);
+            }
+            return designation;
+        }
+
+        private static string? GetLanguageItem(JsonNode attributes, LanguageKey key, string property)
+        {
+            var node = (attributes[property] as JsonObject)?[key.ToString()];
             var value = node?.GetValue<string>();
 
             if (!string.IsNullOrEmpty(value))
