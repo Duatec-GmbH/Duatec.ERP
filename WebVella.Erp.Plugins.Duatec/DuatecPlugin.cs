@@ -2,6 +2,7 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Web.Models;
+using WebVella.Erp.Database;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
@@ -10,9 +11,17 @@ namespace WebVella.Erp.Plugins.Duatec
         [JsonProperty(PropertyName = "name")]
         public override string Name { get; protected set; } = "Duatec";
 
+
+        class PluginSettings
+        {
+            [JsonProperty(PropertyName = "version")]
+            public int Version { get; set; }
+        }
+
+
         public override void Initialize(IServiceProvider ServiceProvider)
         {
-            //ProcessPatches();
+            ProcessPatches();
         }
 
         private void ProcessPatches()
@@ -22,6 +31,12 @@ namespace WebVella.Erp.Plugins.Duatec
                 var entMan = new EntityManager();
                 var relMan = new EntityRelationManager();
                 var recMan = new RecordManager();
+
+                var storeSystemSettings = DbContext.Current.SettingsRepository.Read();
+                var systemSettings = new SystemSettings(storeSystemSettings);
+
+                if (systemSettings.Version > 0)
+                    return;
 
 #pragma warning disable
                 // insert difference code within braces here here
