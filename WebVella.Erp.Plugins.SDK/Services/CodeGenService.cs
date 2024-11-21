@@ -116,6 +116,21 @@ namespace WebVella.Erp.Plugins.SDK.Services
                 #region << Process entity >>
 
                 #region << Logic >>
+                foreach (var entity in oldEntityList)
+                {
+                    if (!oldEntityProcessedDictionary.ContainsKey(entity.Id))
+                    {
+                        //// DELETED
+                        /////////////////////////////////////////////////////
+                        changeRow = new MetaChangeModel();
+                        changeRow.Element = "entity";
+                        changeRow.Type = "deleted";
+                        changeRow.Name = entity.Name;
+                        response.Changes.Add(changeRow);
+                        response.Code += DeleteEntityCode(entity);
+                    }
+                }
+
                 foreach (var entity in currentEntityList)
                 {
                     if (!oldEntityDictionary.ContainsKey(entity.Id))
@@ -154,21 +169,6 @@ namespace WebVella.Erp.Plugins.SDK.Services
                         oldEntityProcessedDictionary[entity.Id] = true;
                     }
 
-                }
-
-                foreach (var entity in oldEntityList)
-                {
-                    if (!oldEntityProcessedDictionary.ContainsKey(entity.Id))
-                    {
-                        //// DELETED
-                        /////////////////////////////////////////////////////
-                        changeRow = new MetaChangeModel();
-                        changeRow.Element = "entity";
-                        changeRow.Type = "deleted";
-                        changeRow.Name = entity.Name;
-                        response.Changes.Add(changeRow);
-                        response.Code += DeleteEntityCode(entity);
-                    }
                 }
                 #endregion
 
