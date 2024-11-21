@@ -17,14 +17,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             var id = (Guid)pageModel.TryGetDataSourceProperty<EntityRecord>("Record")["id"];
 
             var entries = PartListEntry.FindMany(id, "id")
-                .Select(r => (Guid)r["id"]);
+                .Select(r => (Guid)r["id"])
+                .ToArray();
 
             QueryResponse TransactionalAction()
             {
                 var recMan = new RecordManager();
-                foreach (var entry in entries)
-                    recMan.DeleteRecord(PartListEntry.Entity, entry);
-
+                recMan.DeleteRecords(PartListEntry.Entity, entries);
                 return recMan.DeleteRecord(PartList.Entity, id);
             }
 

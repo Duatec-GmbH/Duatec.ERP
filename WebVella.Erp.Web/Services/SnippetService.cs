@@ -31,30 +31,8 @@ namespace WebVella.Erp.Web.Services
 		public static ICodeVariable? GetSnippet(string name)
 		{
 			if (!_snippets.TryGetValue(name, out var variable))
-				return LoadSnippet(name);
+				return null;
 			return variable;
-		}
-
-		private static ICodeVariable? LoadSnippet(string name)
-		{
-			if (!name.StartsWith("WebVella.Erp.Plugins"))
-				return null;
-
-			var type = Type.GetType(name);
-			if (type == null)
-				return null;
-
-			var snippet = Activator.CreateInstance(type) as ICodeVariable;
-
-			if (snippet != null)
-			{
-				lock (_snippets)
-				{
-					_snippets.Add(name, snippet);
-				}
-			}
-
-			return snippet;
 		}
 	}
 }

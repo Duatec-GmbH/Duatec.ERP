@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WebVella.Erp.Api.Models
 {
@@ -14,5 +11,17 @@ namespace WebVella.Erp.Api.Models
 
 		[JsonProperty(PropertyName = "object")]
         public QueryResult Object { get; set; }
+
+		public static QueryResponse Error(string message)
+		{
+			QueryResponse response = new QueryResponse
+			{
+				Success = false,
+				Object = null,
+				Timestamp = DateTime.UtcNow
+			};
+			response.Errors.Add(new ErrorModel { Message = message });
+			return response;
+		}
 	}
 }

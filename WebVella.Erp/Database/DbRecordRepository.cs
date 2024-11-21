@@ -198,10 +198,17 @@ namespace WebVella.Erp.Database
 
             EntityRecord outRecord = Find(entityName, id);
             if (outRecord == null)
-                throw new StorageException("There is no record with such id to update.");
+                throw new StorageException("There is no record with such id to delete.");
 
             DbRepository.DeleteRecord(tableName, id);
         }
+
+		public void DeleteMany(string entityName, params Guid[] ids)
+		{
+			string tableName = RECORD_COLLECTION_PREFIX + entityName;
+
+			DbRepository.DeleteRecords(tableName, ids);
+		}
 
         public EntityRecord FindTreeNodeRecord(string entityName, Guid id)
         {

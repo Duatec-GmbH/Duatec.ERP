@@ -604,6 +604,23 @@ namespace WebVella.Erp.Database
 			}
 		}
 
+		public static bool DeleteRecords(string tableName, params Guid[] ids)
+		{
+			using var connection = DbContext.Current.CreateConnection();
+			
+			NpgsqlCommand command = connection.CreateCommand("");
+
+			var parameter = command.CreateParameter();
+			parameter.ParameterName = "ids";
+			parameter.Value = ids;
+			parameter.NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Uuid;
+			command.Parameters.Add(parameter);
+
+			command.CommandText = $"DELETE FROM \"{tableName}\" WHERE id = ANY(@ids)";
+
+			return command.ExecuteNonQuery() > 0;
+		}
+
 		public static bool TableExists(string tableName)
 		{
 			using (var connection = DbContext.Current.CreateConnection())

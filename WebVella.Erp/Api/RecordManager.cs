@@ -17,14 +17,14 @@ namespace WebVella.Erp.Api
 		private const char RELATION_SEPARATOR = '.';
 		private const char RELATION_NAME_RESULT_SEPARATOR = '$';
 
-		private EntityManager entityManager;
-		private EntityRelationManager entityRelationManager;
+		private readonly EntityManager entityManager;
+		private readonly EntityRelationManager entityRelationManager;
 		private DbRelationRepository relationRepository;
 		private List<EntityRelation> relations = null;
 		private bool ignoreSecurity = false;
-		private bool executeHooks = true;
+		private readonly bool executeHooks = true;
+		private readonly DbContext suppliedContext = null;
 
-		private DbContext suppliedContext = null;
 		private DbContext CurrentContext
 		{
 			get
@@ -35,7 +35,6 @@ namespace WebVella.Erp.Api
 					return DbContext.Current;
 			}
 		}
-
 
 		public RecordManager(DbContext currentContext = null, bool ignoreSecurity = false, bool executeHooks = true)
 		{
@@ -206,29 +205,11 @@ namespace WebVella.Erp.Api
 		public QueryResponse CreateRecord(string entityName, EntityRecord record)
 		{
 			if (string.IsNullOrWhiteSpace(entityName))
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Invalid entity name." });
-				return response;
-			}
+				return InvalidEntityName();
 
 			Entity entity = GetEntity(entityName);
 			if (entity == null)
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
-				return response;
-			}
+				return EntityNotFound();
 
 			return CreateRecord(entity, record);
 		}
@@ -237,18 +218,30 @@ namespace WebVella.Erp.Api
 		{
 			Entity entity = GetEntity(entityId);
 			if (entity == null)
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
-				return response;
-			}
+				return EntityNotFound();
 
 			return CreateRecord(entity, record);
+		}
+
+		public QueryResponse UpdateRecord(string entityName, EntityRecord record)
+		{
+			if (string.IsNullOrWhiteSpace(entityName))
+				return InvalidEntityName();
+
+			Entity entity = GetEntity(entityName);
+			if (entity == null)
+				return EntityNotFound();
+
+			return UpdateRecord(entity, record);
+		}
+
+		public QueryResponse UpdateRecord(Guid entityId, EntityRecord record)
+		{
+			Entity entity = GetEntity(entityId);
+			if (entity == null)
+				return EntityNotFound();
+
+			return UpdateRecord(entity, record);
 		}
 
 		public QueryResponse CreateRecord(Entity entity, EntityRecord record)
@@ -901,54 +894,6 @@ namespace WebVella.Erp.Api
 			}
 		}
 
-		public QueryResponse UpdateRecord(string entityName, EntityRecord record)
-		{
-			if (string.IsNullOrWhiteSpace(entityName))
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Invalid entity name." });
-				return response;
-			}
-
-			Entity entity = GetEntity(entityName);
-			if (entity == null)
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
-				return response;
-			}
-
-			return UpdateRecord(entity, record);
-		}
-
-		public QueryResponse UpdateRecord(Guid entityId, EntityRecord record)
-		{
-			Entity entity = GetEntity(entityId);
-			if (entity == null)
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
-				return response;
-			}
-
-			return UpdateRecord(entity, record);
-		}
-
 		public QueryResponse UpdateRecord(Entity entity, EntityRecord record)
 		{
 
@@ -1579,49 +1524,132 @@ namespace WebVella.Erp.Api
 		public QueryResponse DeleteRecord(string entityName, Guid id)
 		{
 			if (string.IsNullOrWhiteSpace(entityName))
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Invalid entity name." });
-				return response;
-			}
-
-			Entity entity = GetEntity(entityName);
-			if (entity == null)
-			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
-				return response;
-			}
-
-			return DeleteRecord(entity, id);
+				return InvalidEntityName();
+			return DeleteRecord(GetEntity(entityName), id);
 		}
 
 		public QueryResponse DeleteRecord(Guid entityId, Guid id)
+			=> DeleteRecord(GetEntity(entityId), id);
+
+		public QueryResponse DeleteRecords(Guid entityId, params Guid[] ids)
+			=> DeleteRecords(GetEntity(entityId), ids);
+		
+		public QueryResponse DeleteRecords(string entityName, params Guid[] ids)
 		{
-			Entity entity = GetEntity(entityId);
+			if (string.IsNullOrWhiteSpace(entityName))
+				return InvalidEntityName();
+			return DeleteRecords(GetEntity(entityName), ids);
+		}
+
+		public QueryResponse DeleteRecords(Entity entity, params Guid[] ids)
+		{
 			if (entity == null)
+				return EntityNotFound();
+
+			var response = new QueryResponse();
+			response.Object = null;
+			response.Success = true;
+			response.Timestamp = DateTime.UtcNow;
+
+			if(ids.Length == 0)
 			{
-				QueryResponse response = new QueryResponse
-				{
-					Success = false,
-					Object = null,
-					Timestamp = DateTime.UtcNow
-				};
-				response.Errors.Add(new ErrorModel { Message = "Entity cannot be found." });
+				response.Success = false;
+				response.Message = "Nothing to delete.";
 				return response;
 			}
 
-			return DeleteRecord(entity, id);
+			try
+			{
+
+				if (!ignoreSecurity)
+				{
+					bool hasPermisstion = SecurityContext.HasEntityPermission(EntityPermission.Delete, entity);
+					if (!hasPermisstion)
+					{
+						response.StatusCode = HttpStatusCode.Forbidden;
+						response.Success = false;
+						response.Message = "Trying to delete record in entity '" + entity.Name + "' with no delete access.";
+						response.Errors.Add(new ErrorModel { Message = "Access denied." });
+						return response;
+					}
+				}
+
+				var storageRecordData = new List<KeyValuePair<string, object>>();
+
+
+				var query = EntityQuery.QueryOR(ids.Select(id => EntityQuery.QueryEQ("id", id)).ToArray());
+				var entityQuery = new EntityQuery(entity.Name, "*", query);
+
+				response = Find(entityQuery);
+				if (response.Object != null && response.Object.Data.Count >= 1)
+				{
+					var entityObj = entityManager.ReadEntities().Object.Single(x => x.Name == entity.Name);
+					var fileFields = entityObj.Fields.Where(x => x.GetFieldType() == FieldType.FileField).ToList();
+
+					var executeHooks = this.executeHooks && RecordHookManager.ContainsAnyHooksForEntity(entity.Name);
+
+					var filesToDelete = new List<string>();
+					foreach(var rec in response.Object.Data)
+					{
+						foreach (var fileField in fileFields)
+						{
+							if (!string.IsNullOrWhiteSpace((string)rec[fileField.Name]))
+								filesToDelete.Add((string)rec[fileField.Name]);
+						}
+
+						if (executeHooks)
+						{
+							var errors = new List<ErrorModel>();
+							RecordHookManager.ExecutePreDeleteRecordHooks(entity.Name, rec, errors);
+							if (errors.Count > 0)
+							{
+								response.Message = errors[0].Message;
+								response.Success = false;
+								response.Object = null;
+								response.Errors = errors;
+								response.Timestamp = DateTime.UtcNow;
+								return response;
+							}
+						}
+					}
+
+					if (filesToDelete.Count > 0)
+					{
+						var dbFileRep = new DbFileRepository();
+						foreach (var filepath in filesToDelete)
+							dbFileRep.Delete(filepath);
+					}
+
+					CurrentContext.RecordRepository.DeleteMany(entity.Name, ids);
+
+					if (executeHooks)
+					{
+						foreach (var rec in response.Object.Data)
+							RecordHookManager.ExecutePostDeleteRecordHooks(entity.Name, rec);
+					}	
+				}
+				else
+				{
+					response.Success = false;
+					response.Message = "No records found to delete.";
+					return response;
+				}
+
+				return response;
+			}
+			catch (Exception e)
+			{
+				response.Success = false;
+				response.Object = null;
+				response.Timestamp = DateTime.UtcNow;
+
+				if (ErpSettings.DevelopmentMode)
+					response.Message = e.Message + e.StackTrace;
+				else
+					response.Message = "The entity record was not update. An internal error occurred!";
+
+				return response;
+			}
 		}
 
 		public QueryResponse DeleteRecord(Entity entity, Guid id)
@@ -1635,11 +1663,7 @@ namespace WebVella.Erp.Api
 			try
 			{
 				if (entity == null)
-				{
-					response.Errors.Add(new ErrorModel { Message = "Invalid entity name." });
-					response.Success = false;
-					return response;
-				}
+					return EntityNotFound();
 
 
 				if (!ignoreSecurity)
@@ -1854,7 +1878,50 @@ namespace WebVella.Erp.Api
 			return response;
 		}
 
-		private object ExtractFieldValue(KeyValuePair<string, object>? fieldValue, Field field, bool encryptPasswordFields = false)
+		private static QueryResponse RecordNotFound()
+			=> QueryResponse.Error("Record not found");
+
+		private static QueryResponse EntityNotFound()
+			=> QueryResponse.Error("Entity cannot be found.");
+
+		private static QueryResponse InvalidEntityName()
+			=> QueryResponse.Error("Invalid entity name.");
+
+		private Entity GetEntity(string entityName)
+			=> entityManager.ReadEntity(entityName).Object;
+
+		private Entity GetEntity(Guid entityId)
+			=> entityManager.ReadEntity(entityId).Object;
+
+		private List<EntityRelation> GetRelations()
+		{
+			relations ??= entityRelationManager.Read().Object ?? [];
+			return relations;
+		}
+
+		private static void SetRecordRequiredFieldsDefaultData(Entity entity, List<KeyValuePair<string, object>> recordData)
+		{
+			if (recordData == null)
+				return;
+
+			if (entity == null)
+				return;
+
+			foreach (var field in entity.Fields)
+			{
+				if (field.Required && !recordData.Any(p => p.Key == field.Name)
+					&& field.GetFieldType() != FieldType.AutoNumberField
+					&& field.GetFieldType() != FieldType.FileField
+					&& field.GetFieldType() != FieldType.ImageField)
+				{
+					var defaultValue = field.GetFieldDefaultValue();
+
+					recordData.Add(new KeyValuePair<string, object>(field.Name, defaultValue));
+				}
+			}
+		}
+
+		private static object ExtractFieldValue(KeyValuePair<string, object>? fieldValue, Field field, bool encryptPasswordFields = false)
 		{
 			if (fieldValue != null && fieldValue.Value.Key != null)
 			{
@@ -2061,49 +2128,6 @@ namespace WebVella.Erp.Api
 			}
 
 			throw new Exception("System Error. A field type is not supported in field value extraction process.");
-		}
-
-		private Entity GetEntity(string entityName)
-		{
-			return entityManager.ReadEntity(entityName).Object;
-		}
-
-		private Entity GetEntity(Guid entityId)
-		{
-			return entityManager.ReadEntity(entityId).Object;
-		}
-
-		private List<EntityRelation> GetRelations()
-		{
-			if (relations == null)
-				relations = entityRelationManager.Read().Object;
-
-			if (relations == null)
-				return new List<EntityRelation>();
-
-			return relations;
-		}
-
-		private void SetRecordRequiredFieldsDefaultData(Entity entity, List<KeyValuePair<string, object>> recordData)
-		{
-			if (recordData == null)
-				return;
-
-			if (entity == null)
-				return;
-
-			foreach (var field in entity.Fields)
-			{
-				if (field.Required && !recordData.Any(p => p.Key == field.Name)
-					&& field.GetFieldType() != FieldType.AutoNumberField
-					&& field.GetFieldType() != FieldType.FileField
-					&& field.GetFieldType() != FieldType.ImageField)
-				{
-					var defaultValue = field.GetFieldDefaultValue();
-
-					recordData.Add(new KeyValuePair<string, object>(field.Name, defaultValue));
-				}
-			}
 		}
 	}
 }

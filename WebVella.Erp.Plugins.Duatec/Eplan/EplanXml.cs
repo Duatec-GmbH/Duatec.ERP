@@ -8,6 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         public static List<EplanArticle> GetArticles(Stream stream)
         {
             return GetParts(XElement.Load(stream))
+                .Where(p => !string.IsNullOrEmpty(p.PartNumber))
                 .DistinctBy(a => (a.PartNumber, a.OrderNumber, a.TypeNumber, a.Description))
                 .Select(EplanArticle.FromPart)
                 .ToList();
