@@ -32,10 +32,12 @@ namespace WebVella.Erp.Plugins.Duatec
                 var relMan = new EntityRelationManager();
                 var recMan = new RecordManager();
 
-                var storeSystemSettings = DbContext.Current.SettingsRepository.Read();
-                var systemSettings = new SystemSettings(storeSystemSettings);
+                var currentPluginSettings = new PluginSettings() { Version = 0 };
+                string jsonData = GetPluginData();
+                if (!string.IsNullOrWhiteSpace(jsonData))
+                    currentPluginSettings = JsonConvert.DeserializeObject<PluginSettings>(jsonData);
 
-                if (systemSettings.Version > 0)
+                if (currentPluginSettings.Version > 0)
                     return;
 
 #pragma warning disable
@@ -26633,6 +26635,9 @@ OFFSET 0
                     #endregion
                 }
 #pragma warning restore
+
+                currentPluginSettings.Version = 1;
+                SavePluginData(JsonConvert.SerializeObject(currentPluginSettings));
             }
         }
     }
