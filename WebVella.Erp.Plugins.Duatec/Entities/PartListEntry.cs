@@ -15,7 +15,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string PartList = "part_list_id";
         public const string Article = "article_id";
         public const string DeviceTag = "device_tag";
-        public const string Count = "count";
+        public const string Amount = "amount";
+        public const string ProvidedAmount = "provided_amount";
 
         public static List<EntityRecord> FindMany(Guid partList, string select = "*")
             => Record.FindManyBy(Entity, PartList, partList, select);

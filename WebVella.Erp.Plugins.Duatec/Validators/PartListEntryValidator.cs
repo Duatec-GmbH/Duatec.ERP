@@ -5,12 +5,10 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    using Args = (Guid? PartList, Guid? Article, string DeviceTag);
+    using Args = (Guid? PartList, Guid? Article, string DeviceTag, decimal Amount, decimal ProvidedAmount);
 
     internal class PartListEntryValidator : IRecordValidator
     {
-        private static readonly NameFormatValidator _deviceTagValidator = new(PartListEntry.Entity, PartListEntry.DeviceTag);
-
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
             => Validate(record, null);
 
@@ -30,15 +28,27 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static List<ValidationError> Validate(EntityRecord record, Guid? id)
         {
-            var (partList, article, deviceTag) = GetArgs(record);
+            var (partList, article, _, amount, providedAmount) = GetArgs(record);
 
-            var result = _deviceTagValidator.Validate(deviceTag, PartListEntry.DeviceTag);
+            var result = new List<ValidationError>();
             if (!partList.HasValue)
                 result.Add(new ValidationError(PartListEntry.PartList, "Part list entry 'part list' is required"));
             if (!article.HasValue)
                 result.Add(new ValidationError(PartListEntry.Article, "Part list entry 'article' is required"));
             if (partList.HasValue && article.HasValue && PartListEntry.Exists(partList.Value, article.Value, id))
                 result.Add(new ValidationError(PartListEntry.Article, "Part list entry with the same article already exists within part list"));
+            if (providedAmount > amount)
+                result.Add(new ValidationError(PartListEntry.ProvidedAmount, "Part list entry provided amount can not be greater than amount"));
+
+            if (article.HasValue)
+            {
+                var type = ArticleType.FromArticle(article.Value);
+                var amountValidator = GetNumberFormatValidator(PartListEntry.Amount, type);
+                var providedAmountValidator = GetNumberFormatValidator(PartListEntry.ProvidedAmount, type);
+
+                result.AddRange(amountValidator.Validate(amount.ToString(), PartListEntry.Amount));
+                result.AddRange(providedAmountValidator.Validate(providedAmount.ToString(), PartListEntry.ProvidedAmount));
+            }
 
             return result;
         }
@@ -47,7 +57,15 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             return (record[PartListEntry.PartList] as Guid?,
                 record[PartListEntry.Article] as Guid?,
-                record[PartListEntry.DeviceTag] as string ?? string.Empty);
+                record[PartListEntry.DeviceTag] as string ?? string.Empty,
+                record[PartListEntry.Amount] as decimal? ?? 0m,
+                record[PartListEntry.ProvidedAmount] as decimal? ?? 0m);
+        }
+
+        private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, EntityRecord? type)
+        {
+            var isInteger = type == null || (bool)type[ArticleType.IsInteger];
+            return new NumberFormatValidator(PartListEntry.Entity, entityProperty, isInteger, true);
         }
     }
 }

@@ -143,7 +143,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             rec[PartListEntry.PartList] = partListId;
             rec[PartListEntry.Article] = articleLookup[group.Key.PartNumber]["id"];
             rec[PartListEntry.DeviceTag] = ListAgg(group);
-            rec[PartListEntry.Count] = group.Count();
+            rec[PartListEntry.Amount] = group.Count();
+            rec[PartListEntry.ProvidedAmount] = 0m;
 
             return rec;
         }

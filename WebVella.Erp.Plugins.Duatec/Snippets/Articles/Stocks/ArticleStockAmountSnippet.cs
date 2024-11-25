@@ -1,28 +1,16 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
-using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
 {
     [Snippet]
-    internal class ArticleStockAmountSnippet : SnippetBase
+    internal class ArticleStockAmountSnippet : ListArticleAmountSnippetBase
     {
-        protected override object? GetValue(BaseErpPageModel pageModel)
-        {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
-            if (rec == null)
-                return null;
-            
-            var amount = rec[ArticleStock.Amount]?.ToString();
-            var article = (rec['$' + ArticleStock.Relations.Article] as List<EntityRecord>)?[0];
-            var type = (article?['$' + Article.Relations.Type] as List<EntityRecord>)?[0];
-            var unit = type?[ArticleType.Unit]?.ToString();
-            var isInteger = type?[ArticleType.IsInteger] is bool b && b;
+        protected override decimal? GetAmount(EntityRecord rowRecord)
+            => rowRecord[ArticleStock.Amount] as decimal?;
 
-            return isInteger
-                ? $"{amount:0} {unit}"
-                : $"{amount:0.00} {unit}";
-        }
+        protected override EntityRecord? GetArticle(EntityRecord rowRecord)
+            => (rowRecord['$' + ArticleStock.Relations.Article] as List<EntityRecord>)?.FirstOrDefault();
     }
 }
