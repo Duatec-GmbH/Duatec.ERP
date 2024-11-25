@@ -55,7 +55,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 
             fsRepository.Delete(filePath);
 
-            var partNumbers = parts.Select(p => p.PartNumber).ToArray();
+            var partNumbers = parts
+                .Select(p => p.PartNumber)
+                .Distinct()
+                .ToArray();
+
             var articleLookup = Article.FindMany(partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))

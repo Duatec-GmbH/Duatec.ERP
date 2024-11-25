@@ -8,7 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         public static List<EplanArticle> GetArticles(Stream stream)
         {
             return GetParts(XElement.Load(stream))
-                .Where(p => !string.IsNullOrEmpty(p.PartNumber))
                 .DistinctBy(a => (a.PartNumber, a.OrderNumber, a.TypeNumber, a.Description))
                 .Select(EplanArticle.FromPart)
                 .ToList();
@@ -24,7 +23,8 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         {
             return All(node)
                 .Where(n => n.Name == "part")
-                .Select(EplanPart.FromXElement);
+                .Select(EplanPart.FromXElement)
+                .Where(p => !string.IsNullOrEmpty(p.PartNumber));
         }
 
         private static IEnumerable<XElement> All(XElement element)
