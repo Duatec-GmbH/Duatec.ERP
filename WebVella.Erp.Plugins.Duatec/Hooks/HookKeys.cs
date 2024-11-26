@@ -28,6 +28,26 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             }
         }
 
+        public static class GoodsReceiving
+        {
+            public static class DeliveryNotes
+            {
+                public const string Create = "delivery_notes_create";
+                public const string Delete = "delivery_notes_delete";
+            }
+
+            public static class Entry
+            {
+                public const string Create = "goods_receiving_entry_create";
+                public const string Delete = "goods_receiving_entry_delete";
+                public const string Update = "goods_receiving_entry_update";
+            }
+
+            public const string Create = "goods_receiving_create";
+            public const string Update = "goods_receiving_update";
+            public const string Delete = "goods_receiving_delete";
+        }
+
         public static class Manufacturer
         {
             public const string Create = "manufacturer_create";
