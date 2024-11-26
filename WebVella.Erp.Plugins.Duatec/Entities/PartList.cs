@@ -36,5 +36,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             return response.Object > 0;
         }
+
+        public static List<EntityRecord> FindMany(Guid projectId)
+            => Record.FindManyBy(Entity, Project, projectId);
     }
 }

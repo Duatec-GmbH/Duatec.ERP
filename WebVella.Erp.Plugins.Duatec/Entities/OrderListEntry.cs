@@ -1,4 +1,6 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Entities
+﻿using WebVella.Erp.Api.Models;
+
+namespace WebVella.Erp.Plugins.Duatec.Entities
 {
     internal class OrderListEntry
     {

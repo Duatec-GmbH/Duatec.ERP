@@ -56,6 +56,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Create = "project_create";
             public const string Update = "project_update";
             public const string Complete = "project_complete";
+            public const string OrderList = "project_order_list";
         }
 
         public static class PartList

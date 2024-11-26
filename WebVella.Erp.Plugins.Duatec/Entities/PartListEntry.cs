@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -44,5 +45,23 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return response.Object > 0;
         }
 
+        public static List<EntityRecord> FindManyByProject(Guid projectId, string select = "*")
+        {
+            var partLists = Entities.PartList.FindMany(projectId)
+                .ToIdArray();
+
+            if (partLists.Length == 0)
+                return [];
+
+            var subQuery = partLists
+                .Select(pl => new QueryObject() { FieldName = PartList, FieldValue = pl, QueryType = QueryType.EQ })
+                .ToList();
+
+            var recMan = new RecordManager();
+            var result = recMan.Find(new EntityQuery(Entity, select,
+                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
+
+            return result?.Object?.Data ?? [];
+        }
     }
 }
