@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Entities;
-using WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries;
+using WebVella.Erp.Plugins.Duatec.Snippets.GoodsReceiving.Entries;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
+namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
 {
-    [HookAttachment(key: HookKeys.PartList.Entry.Delete)]
-    internal class PartListEntryDeleteHook : IPageHook
+    [HookAttachment(key: HookKeys.GoodsReceiving.DeliveryNotes.Delete)]
+    internal class DeliveryNotesDeleteHook : IPageHook
     {
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
@@ -19,11 +20,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
-            if (!pageModel.RecordId.HasValue)
+            if (!Guid.TryParse(pageModel.GetFormValue("id"), out Guid deliveryNoteId))
                 return null;
 
             var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(PartListEntry.Entity, pageModel.RecordId.Value);
+            var response = recMan.DeleteRecord(Entities.DeliveryNotes.Entity, deliveryNoteId);
 
             if (!response.Success)
             {
@@ -32,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
             }
 
             pageModel.DataModel.SetRecord(response.Object.Data.Single());
-            var url = $"{new ReturnToPartListSnippet().Evaluate(pageModel)}";
+            var url = $"{new ReturnToGoodsReceivingSnippet().Evaluate(pageModel)}";
             return pageModel.LocalRedirect(url);
         }
     }
