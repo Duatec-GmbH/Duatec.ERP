@@ -23,10 +23,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
             if (!pageModel.RecordId.HasValue)
                 return null;
 
-            var record = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            record[PartListEntry.PartList] = pageModel.RecordId;
-
             var recMan = new RecordManager();
+            var listId = PartListEntry.Find(pageModel.RecordId.Value)
+                ?[PartListEntry.PartList] as Guid?;
+
             var response = recMan.DeleteRecord(PartListEntry.Entity, pageModel.RecordId.Value);
 
             if (!response.Success)
@@ -34,8 +34,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
                 pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
                 return null;
             }
-            
-            var url = $"{new ReturnToPartListSnippet().Evaluate(pageModel)}";
+
+            var context = pageModel.ErpRequestContext;
+            var url = $"/{context.App.Name}/{context.SitemapArea.Name}/part-lists/r/{listId}/detail";
+
             return pageModel.LocalRedirect(url);
         }
     }
