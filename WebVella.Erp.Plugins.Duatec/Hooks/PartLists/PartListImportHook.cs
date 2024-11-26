@@ -8,7 +8,6 @@ using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
@@ -19,8 +18,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
     [HookAttachment(key: HookKeys.PartList.Import)]
     internal class PartListImportHook : IPageHook
     {
-        private static readonly PartListValidator _validator = new();
-
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
             return null;
@@ -28,13 +25,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
-            var project = pageModel.GetFormValue(PartList.Project);
-            var name = pageModel.GetFormValue(PartList.Name);
-
-            var listRec = ListRecord(project, name);
-            var errors = _validator.ValidateOnCreate(listRec);
-            if (errors.Count > 0)
-                return Error(pageModel, string.Join("; ", errors.Select(e => e.Message)));
+            if (!pageModel.Request.Query.TryGetValue("lId", out var listVal) || !Guid.TryParse(listVal, out var listId))
+                return pageModel.BadRequest();
 
             var filePath = pageModel.GetFormValue("file");
 
@@ -65,22 +57,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);
 
-            var partListId = (Guid)listRec["id"];
             var entries = parts
                 .GroupBy(Key)
-                .Select(g => ListEntryRecord(g, articleLookup!, partListId));
+                .Select(g => ListEntryRecord(g, articleLookup!, listId));
 
             void TransactionalAction()
             {
                 var recMan = new RecordManager();
-
-                var result = recMan.CreateRecord(PartList.Entity, listRec);
-                if (!result.Success)
-                    throw new DbException($"Could not create part list: {result.GetMessage()}");
-
                 foreach(var rec in entries)
                 {
-                    result = recMan.CreateRecord(PartListEntry.Entity, rec);
+                    var result = recMan.CreateRecord(PartListEntry.Entity, rec);
                     if (!result.Success)
                         throw new DbException($"Could not create part list entry: {result.GetMessage()}");
                 }
@@ -90,21 +76,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 return null;
 
             var context = pageModel.ErpRequestContext;
-            var url = $"/{context.App?.Name}/part-lists/part-lists/r/{listRec["id"]}";
+            var url = $"/{context.App?.Name}/part-lists/part-lists/r/{listId}";
             return pageModel.LocalRedirect(url);
-        }
-
-        private static EntityRecord ListRecord(string? project, string? name)
-        {
-            Guid? projectId = Guid.TryParse(project, out var id) && id != Guid.Empty
-                ? id : null;
-
-            var rec = new EntityRecord();
-            rec["id"] = Guid.NewGuid();
-            rec[PartList.Project] = projectId;
-            rec[PartList.Name] = name;
-
-            return rec;
         }
 
         private static IActionResult? Error(BaseErpPageModel pageModel, string message)
@@ -154,7 +127,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             var entries = group
                 .Select(g => g.DeviceTag?.Trim())
                 .Where(t => !string.IsNullOrEmpty(t))
-                .Distinct()
                 .Order();
 
             return string.Join(Environment.NewLine, entries);
