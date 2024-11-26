@@ -81,7 +81,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             return Common.Create(record, pageModel, validationErrors);
         }
 
-        private static IActionResult? PartialMove(EntityRecord record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
+        private static LocalRedirectResult? PartialMove(EntityRecord record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
             var id = (Guid)record["id"];
             var unchanged = ArticleStock.Find(id)!;
