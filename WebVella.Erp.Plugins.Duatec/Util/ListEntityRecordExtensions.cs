@@ -4,7 +4,7 @@ namespace WebVella.Erp.Plugins.Duatec.Util
 {
     internal static class ListEntityRecordExtensions
     {
-        public static Guid[] ToIdArray(this List<EntityRecord> recList)
+        public static Guid[] ToIdArray(this IEnumerable<EntityRecord> recList)
         {
             return recList.Select(r => (Guid)r["id"])
                 .ToArray();

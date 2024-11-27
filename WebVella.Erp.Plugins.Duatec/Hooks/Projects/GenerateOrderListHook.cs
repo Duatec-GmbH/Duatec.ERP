@@ -8,7 +8,6 @@ using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
-using static WebVella.Erp.Plugins.Duatec.Hooks.HookKeys.PartList;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
 {
@@ -21,27 +20,34 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
                 return null;
 
             var projectId = pageModel.RecordId.Value;
-
             var listRec = GetOrAddOrderList(projectId);
-
-            var oldEntryInfos = OrderList.Entries((Guid)listRec["id"])
-                .GroupBy(r => (Guid)r[OrderListEntry.Article])
-                .ToDictionary(g => g.Key, g => new { Total = g.Sum(r => (decimal)r[OrderListEntry.Amount]), Records = g.ToArray() });
+            var listId = (Guid)listRec["id"];
 
             var orderListEntries = PartListEntry.FindManyByProject(projectId)
                 .GroupBy(pl => (Guid)pl[PartListEntry.Article])
-                .Select(g => RecordFromGroup(g, projectId))
+                .Select(g => OrderListEntryFromPartListEntryGroup(g, listId))
                 .ToList();
-
-            if (orderListEntries.Count == 0)
-                return null;
 
             void TransactionalAction()
             {
                 var recMan = new RecordManager();
+                DeleteOldEntriesFromPartList(recMan, listId);
+                if (orderListEntries.Count == 0)
+                    return;
+
+                var oldEntryInfos = OrderList.Entries(listId)
+                    .GroupBy(r => (Guid)r[OrderListEntry.Article])
+                    .ToDictionary(g => g.Key, g => new
+                    {
+                        Total = g.Sum(r => (decimal)r[OrderListEntry.Amount]),
+                        Records = g.ToArray()
+                    });
+
                 foreach(var entry in orderListEntries)
                 {
-                    if (!oldEntryInfos.TryGetValue((Guid)entry[OrderListEntry.Article], out var entryInfo))
+                    var articleId = (Guid)entry[OrderListEntry.Article];
+
+                    if (!oldEntryInfos.TryGetValue(articleId, out var entryInfo))
                         CreateEntry(recMan, entry);
                     else
                     {
@@ -49,45 +55,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
                         var diff = curAmount - entryInfo.Total;
 
                         if (diff > 0)
-                        {
-                            var notOrdered = entryInfo.Records
-                                .FirstOrDefault(r => r[OrderListEntry.Order] == null);
-
-                            if (notOrdered == null)
-                            {
-                                entry[OrderListEntry.Amount] = diff;
-                                CreateEntry(recMan, entry);
-                            }
-                            else
-                            {
-                                notOrdered[OrderListEntry.Amount] = (decimal)notOrdered[OrderListEntry.Amount] + diff;
-                                UpdateEntry(recMan, notOrdered);
-                            }
-                        }
+                            IncreaseDemand(recMan, entry, diff, entryInfo.Records);
                         else if (diff < 0)
-                        {
-                            var notOrdered = entryInfo.Records
-                                .FirstOrDefault(r => r[OrderListEntry.Order] == null);
-
-                            if(notOrdered != null)
-                            {
-                                var amount = (decimal)notOrdered[OrderListEntry.Amount];
-
-                                if (amount + diff > 0)
-                                {
-                                    notOrdered[OrderListEntry.Amount] = amount + diff;
-                                    var response = recMan.UpdateRecord(PartListEntry.Entity, notOrdered);
-                                    if (!response.Success)
-                                        throw new DbException(response.GetMessage());
-                                    break;
-                                }
-                                else
-                                {
-                                    DeleteEntry(recMan, notOrdered);
-                                    break;
-                                }
-                            }
-                        }
+                            ReduceDemand(recMan, diff, entryInfo.Records);
                     }
                 }
             }
@@ -96,35 +66,89 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
             return null;
         }
 
+        private static void DeleteOldEntriesFromPartList(RecordManager recMan, Guid listId)
+        {
+            var entries = OrderListEntry.FindMany(listId, "id");
+
+            var toDelete = entries
+                .Where(r => (bool)r[OrderListEntry.IsFromPartList] && r[OrderListEntry.Order] == null)
+                .ToIdArray();
+
+            if (toDelete.Length > 0)
+            {
+                var response = recMan.DeleteRecords(OrderListEntry.Entity, toDelete);
+                if (!response.Success)
+                    throw new DbException(response.GetMessage());
+            }
+        }
+
+        private static void IncreaseDemand(RecordManager recMan, EntityRecord entry, decimal diff, IEnumerable<EntityRecord> demandEntries)
+        {
+            var notOrdered = demandEntries
+                .SingleOrDefault(r => r[OrderListEntry.Order] == null && (bool)r[OrderListEntry.IsFromPartList]);
+
+            if (notOrdered == null)
+            {
+                entry[OrderListEntry.Amount] = diff;
+                CreateEntry(recMan, entry);
+            }
+            else
+            {
+                notOrdered[OrderListEntry.Amount] = (decimal)notOrdered[OrderListEntry.Amount] + diff;
+                UpdateEntry(recMan, notOrdered);
+            }
+        }
+
+        private static void ReduceDemand(RecordManager recMan, decimal diff, IEnumerable<EntityRecord> demandEntries)
+        {
+            var notOrdered = demandEntries
+                .SingleOrDefault(r => r[OrderListEntry.Order] == null && (bool)r[OrderListEntry.IsFromPartList]);
+
+            if (notOrdered == null)
+                return;
+
+            var demand = (decimal)notOrdered[OrderListEntry.Amount];
+
+            if (demand + diff <= 0)
+                DeleteEntry(recMan, notOrdered);
+            else
+            {
+                notOrdered[OrderListEntry.Amount] = demand + diff;
+                UpdateEntry(recMan, notOrdered);
+            }
+        }
+
         private static void CreateEntry(RecordManager recMan, EntityRecord rec)
         {
-            var response = recMan.CreateRecord(PartListEntry.Entity, rec);
+            var response = recMan.CreateRecord(OrderListEntry.Entity, rec);
             if (!response.Success)
                 throw new DbException(response.GetMessage());
         }
 
         private static void DeleteEntry(RecordManager recMan, EntityRecord rec)
         {
-            var response = recMan.DeleteRecord(PartListEntry.Entity, (Guid)rec["id"]);
+            var response = recMan.DeleteRecord(OrderListEntry.Entity, (Guid)rec["id"]);
             if (!response.Success)
                 throw new DbException(response.GetMessage());
         }
 
         private static void UpdateEntry(RecordManager recMan, EntityRecord rec)
         {
-            var response = recMan.UpdateRecord(PartListEntry.Entity, rec);
+            var response = recMan.UpdateRecord(OrderListEntry.Entity, rec);
             if (!response.Success)
                 throw new DbException(response.GetMessage());
         }
 
-        private static EntityRecord RecordFromGroup(IGrouping<Guid, EntityRecord> grouping, Guid orderList)
+        private static EntityRecord OrderListEntryFromPartListEntryGroup(IGrouping<Guid, EntityRecord> grouping, Guid orderList)
         {
             var rec = new EntityRecord();
+            rec["id"] = Guid.NewGuid();
             rec[OrderListEntry.Order] = null;
             rec[OrderListEntry.Article] = grouping.Key;
             rec[OrderListEntry.OrderList] = orderList;
+            rec[OrderListEntry.IsFromPartList] = true;
             rec[OrderListEntry.Amount] = grouping
-                .Sum(g => (decimal)g[PartListEntry.Amount]);
+                .Sum(g => Math.Max(0m, (decimal)g[PartListEntry.Amount] - (decimal)g[PartListEntry.ProvidedAmount]));
             return rec;
         }
 

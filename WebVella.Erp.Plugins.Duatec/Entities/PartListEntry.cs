@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Util;
+using static WebVella.Erp.Plugins.Duatec.Hooks.HookKeys;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -36,6 +37,37 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             {
                 subQueries.Add(new() { QueryType = QueryType.NOT, 
                     SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }] });
+            }
+
+            var recMan = new RecordManager();
+            var response = recMan.Count(new EntityQuery(Entity, "id",
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
+
+            return response.Object > 0;
+        }
+
+        public static bool ExistsByProject(Guid project, Guid article, Guid? excluded = null)
+        {
+            var partListQuery = Entities.PartList.FindMany(project)
+                .Select(r => new QueryObject() { FieldName = PartList, FieldValue = (Guid)r["id"], QueryType = QueryType.EQ })
+                .ToList();
+
+            if (partListQuery.Count == 0)
+                return false;
+
+            var subQueries = new List<QueryObject>()
+            {
+                new() { QueryType = QueryType.OR, SubQueries = partListQuery },
+                new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }
+            };
+
+            if (excluded.HasValue)
+            {
+                subQueries.Add(new()
+                {
+                    QueryType = QueryType.NOT,
+                    SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }]
+                });
             }
 
             var recMan = new RecordManager();

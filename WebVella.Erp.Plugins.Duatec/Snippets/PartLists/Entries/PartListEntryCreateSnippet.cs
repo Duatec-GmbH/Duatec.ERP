@@ -1,5 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Hooks;
-using WebVella.Erp.Plugins.Duatec.Snippets.Base;
+﻿using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries

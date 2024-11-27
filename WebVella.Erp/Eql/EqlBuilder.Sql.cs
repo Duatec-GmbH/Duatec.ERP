@@ -894,11 +894,12 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 			foreach (var relNode in relationsUsedInWhere)
 			{
 				var suffix = string.Empty;
+				var lastAlias = string.Empty;
 
 				for(var i = 0; i < relNode.Relations.Count; i++)
 				{
 					if (i > 0 && suffix != "_tar_org")
-						throw new EqlException(new EqlError { Message = "Invalid nested relation in ORDER clause" });
+						throw new EqlException(new EqlError { Message = "Invalid nested relation" });
 
 					var relationInfo = relNode.Relations[i];
 					var relation = allRelations.SingleOrDefault(x => x.Name == relationInfo.Name)
@@ -910,8 +911,12 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 						suffix = "_tar_org";
 
 					var relationAlias = relation.Name + suffix;
+
 					if (aliases.Contains(relationAlias))
+					{
+						lastAlias = relationAlias;
 						continue;
+					}
 
 					aliases.Add(relationAlias);
 
@@ -977,7 +982,7 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 										relationAlias,
 										relationAlias,
 										relation.OriginFieldName,
-										$"{relation.TargetEntityName}_tar_org",
+										lastAlias,
 										relation.TargetFieldName);
 								}
 								else
@@ -1058,6 +1063,8 @@ LEFT OUTER JOIN  {0} {1} ON {2}.{3} = {4}.{5}";
 									targetJoinAlias, /*.*/ relation.TargetFieldName);
 						}
 					}
+
+					lastAlias = relationAlias;
 				}
 			}
 			return relationJoinSql;
