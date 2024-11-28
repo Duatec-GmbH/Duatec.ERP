@@ -1,24 +1,22 @@
-﻿
-using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 {
-    internal abstract class ListArticleAmountSnippetBase : SnippetBase
+    internal abstract class ArticleAmountSnippetBase : SnippetBase
     {
-        protected abstract decimal? GetAmount(EntityRecord rowRecord);
+        protected abstract EntityRecord? GetArticle(BaseErpPageModel pageModel);
 
-        protected abstract EntityRecord? GetArticle(EntityRecord rowRecord);
+        protected abstract decimal? GetAmount(BaseErpPageModel pageModel);
 
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
-            if (rec == null)
+            var article = GetArticle(pageModel);
+            if (article == null)
                 return null;
 
-            var amount = GetAmount(rec)?.ToString();
-            var article = GetArticle(rec);
+            var amount = GetAmount(pageModel) ?? 0m;
             var type = (article?['$' + Article.Relations.Type] as List<EntityRecord>)?.FirstOrDefault();
             var unit = type?[ArticleType.Unit]?.ToString();
             var isInteger = type?[ArticleType.IsInteger] is bool b && b;

@@ -17,7 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string OrderList = "order_list_id";
         public const string Order = "order_id";
         public const string Amount = "amount";
-        public const string IsFromPartList = "is_from_part_list";
 
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);

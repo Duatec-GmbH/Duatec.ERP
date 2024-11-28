@@ -69,9 +69,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
         private static void DeleteOldEntriesFromPartList(RecordManager recMan, Guid listId)
         {
             var entries = OrderListEntry.FindMany(listId, "id");
-
             var toDelete = entries
-                .Where(r => (bool)r[OrderListEntry.IsFromPartList] && r[OrderListEntry.Order] == null)
+                .Where(r => r[OrderListEntry.Order] == null)
                 .ToIdArray();
 
             if (toDelete.Length > 0)
@@ -85,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
         private static void IncreaseDemand(RecordManager recMan, EntityRecord entry, decimal diff, IEnumerable<EntityRecord> demandEntries)
         {
             var notOrdered = demandEntries
-                .SingleOrDefault(r => r[OrderListEntry.Order] == null && (bool)r[OrderListEntry.IsFromPartList]);
+                .SingleOrDefault(r => r[OrderListEntry.Order] == null);
 
             if (notOrdered == null)
             {
@@ -102,7 +101,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
         private static void ReduceDemand(RecordManager recMan, decimal diff, IEnumerable<EntityRecord> demandEntries)
         {
             var notOrdered = demandEntries
-                .SingleOrDefault(r => r[OrderListEntry.Order] == null && (bool)r[OrderListEntry.IsFromPartList]);
+                .SingleOrDefault(r => r[OrderListEntry.Order] == null);
 
             if (notOrdered == null)
                 return;
@@ -146,7 +145,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
             rec[OrderListEntry.Order] = null;
             rec[OrderListEntry.Article] = grouping.Key;
             rec[OrderListEntry.OrderList] = orderList;
-            rec[OrderListEntry.IsFromPartList] = true;
             rec[OrderListEntry.Amount] = grouping
                 .Sum(g => Math.Max(0m, (decimal)g[PartListEntry.Amount] - (decimal)g[PartListEntry.ProvidedAmount]));
             return rec;

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Web.Service;
 using WebVella.Erp.Web.Services;
@@ -471,6 +472,16 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		private static (Guid EntityId, string FieldName, string SourceField) OtherSideOfRelation(EntityRelation rel, Entity entity)
+		{
+			if (rel.TargetEntityId == entity.Id)
+				return (rel.OriginEntityId, rel.OriginFieldName, rel.TargetFieldName);
+			if (rel.OriginEntityId == entity.Id)
+				return (rel.TargetEntityId, rel.TargetFieldName, rel.OriginFieldName);
+
+			throw new PropertyDoesNotExistException($"Relation '{rel.Name}' does not touch entity '{entity.Name}'");
+		}
+
 		public object GetProperty(string propName)
 		{
 			//Stopwatch sw = new Stopwatch();
@@ -518,8 +529,66 @@ namespace WebVella.Erp.Web.Models
 				if (parentPropName == "Record")
 				{
 					var testName = propName.Trim().Substring(7); //cut the Record. in front
-					if (pName != testName && currentPropDict.ContainsKey(testName))
-						return currentPropDict[testName].Value;
+					if (pName != testName)
+					{
+						if(currentPropDict.TryGetValue(testName, out var mpv))
+							return mpv.Value;
+						else if (ppName.StartsWith('$'))
+						{
+							var entity = Properties["Entity"].Value as Entity;
+							var result = Properties["Record"].Value;
+
+							foreach (var access in completePropChain.Skip(1))
+							{
+								if (access.StartsWith('$'))
+								{
+									if (result is not EntityRecord rec)
+										throw new PropertyDoesNotExistException($"Property not found");
+
+									var relName = access[1..];
+									var relResponse = relMan.Read(relName);
+
+									if (!relResponse.Success || relResponse.Object == null)
+										throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
+
+									var (entityId, fieldName, sourceFieldName) = OtherSideOfRelation(relResponse.Object, entity);
+									var fieldValue = rec[sourceFieldName];
+
+									var nextEntity = entMan.ReadEntity(entityId)?.Object
+										?? throw new PropertyDoesNotExistException($"Invalid relation '{relName}'");
+
+									var response = new RecordManager()
+										.Find(new EntityQuery(nextEntity.Name, "*", new QueryObject() { FieldName = fieldName, FieldValue = fieldValue, QueryType = QueryType.EQ }));
+
+									if (!response.Success || response.Object.Data == null)
+										throw new PropertyDoesNotExistException(response.Message);
+
+									result = response.Object.Data;
+									entity = nextEntity;
+								}
+								else if (access.StartsWith('[') && access.EndsWith(']'))
+								{
+									if (result is not List<EntityRecord> records)
+										throw new PropertyDoesNotExistException("Property not found");
+
+									var idx = int.Parse(access[1..(access.Length - 1)].Trim());
+									if (idx >= records.Count)
+										return null;
+									result = records[idx];
+								}
+								else if(result is EntityRecord rec)
+								{
+									result = rec[access];
+								}
+								else
+								{
+									throw new PropertyDoesNotExistException($"Property not found");
+								}
+							}
+							return result;
+						}
+					}
+						
 				}
 
 				//try to get property with full key (after http post object are entered with no . split

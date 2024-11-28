@@ -5,9 +5,9 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
 {
     [Snippet]
-    internal class OrderListEntryAmountSnippet : OrderListEntryAmountSnippetBase
+    internal class OrderListEntryDetailAmountSnippet : OrderListEntryAmountSnippetBase
     {
         protected override EntityRecord? Record(BaseErpPageModel pageModel)
-            => pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
     }
 }

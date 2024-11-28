@@ -1,16 +1,20 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries
 {
     [Snippet]
-    internal class PartListEntryAmountSnippet : ListArticleAmountSnippetBase
+    internal class PartListEntryAmountSnippet : ArticleAmountSnippetBase
     {
-        protected override decimal? GetAmount(EntityRecord rowRecord)
-            => rowRecord[PartListEntry.Amount] as decimal?;
+        protected override decimal? GetAmount(BaseErpPageModel pageModel)
+            => Record(pageModel)?[PartListEntry.Amount] as decimal?;
 
-        protected override EntityRecord? GetArticle(EntityRecord rowRecord)
-            => (rowRecord['$' + PartListEntry.Relations.Article] as List<EntityRecord>)?.FirstOrDefault();
+        protected override EntityRecord? GetArticle(BaseErpPageModel pageModel)
+            => (Record(pageModel)?['$' + PartListEntry.Relations.Article] as List<EntityRecord>)?.FirstOrDefault();
+
+        private static EntityRecord? Record(BaseErpPageModel pageModel)
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
     }
 }
