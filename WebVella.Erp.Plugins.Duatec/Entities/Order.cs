@@ -19,6 +19,25 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         internal static List<EntityRecord> FindManyByProject(Guid project)
             => Record.FindManyBy(Entity, Project, project);
 
+        internal static List<EntityRecord> FindManyByProjectAndArticle(Guid project, Guid article)
+        {
+            var entries = OrderEntry.FindManyByProjectAndArticle(project, article);
+            if (entries.Count == 0)
+                return [];
+
+            var subQuery = entries
+                .Select(r => (Guid)r[OrderEntry.Order])
+                .Distinct()
+                .Select(id => new QueryObject() { FieldName = "id", FieldValue = id, QueryType = QueryType.EQ })
+                .ToList();
+
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(Entity, "*",
+                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
+
+            return response.Object?.Data ?? [];
+        }
+
 
         public static int GetMissingArticleCount(Guid orderId, Guid articleId)
         {

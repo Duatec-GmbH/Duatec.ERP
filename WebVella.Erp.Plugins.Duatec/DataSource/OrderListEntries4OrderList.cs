@@ -1,6 +1,9 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -44,8 +47,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
     $order_list_entry_article.*, 
     $order_list_entry_article.$article_article_type.*, 
     $order_list_entry_article.$article_manufacturer.name, 
-    $order_list_entry_order_list.*,
-    $order_list_entry_order.*
+    $order_list_entry_order_list.*
 FROM order_list_entry
 WHERE order_list_id = @orderListId
     AND (@partNumber = null OR $order_list_entry_article.part_number ~* @partNumber)
@@ -53,7 +55,6 @@ WHERE order_list_id = @orderListId
     AND (@orderNumber = null OR $order_list_entry_article.order_number ~* @orderNumber)
     AND (@designation = null OR $order_list_entry_article.designation ~* @designation)
     AND (@manufacturer = null OR $order_list_entry_article.$article_manufacturer.name ~* @manufacturer)
-    AND (@order = null OR $order_list_entry_order.order_number ~* @order)
 ORDER BY $order_list_entry_article.part_number";
 
 
@@ -63,42 +64,67 @@ ORDER BY $order_list_entry_article.part_number";
                 new EqlParameter("typeNumber", typeNumber),
                 new EqlParameter("orderNumber", orderNumber),
                 new EqlParameter("designation", designation),
-                new EqlParameter("manufacturer", manufacturer),
-                new EqlParameter("order", order));
+                new EqlParameter("manufacturer", manufacturer));
 
             var queryResult = command.Execute();
             if (queryResult.Count == 0)
                 return queryResult;
 
             var projectId = GetProjectId(queryResult[0]);
-            var orderedAmountLookup = OrderEntry.FindManyByProject(projectId)
+
+            var projectOrderEntries = OrderEntry.FindManyByProject(projectId);
+            var orderEntries = Order.FindManyByProject(projectId)
+                .ToDictionary(r => (Guid)r["id"], r => r);
+
+            var orderedAmountLookup = projectOrderEntries
                 .GroupBy(r => (Guid)r[OrderEntry.Article])
                 .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[OrderEntry.Amount]));
 
-            // TODO replace with goods received
-            var receivedAmountLookup = new Dictionary<Guid, decimal>();
+            var receivedAmountLookup = GoodsReceivingEntry.FindManyByProject(projectId)
+                .GroupBy(r => (Guid)r[GoodsReceivingEntry.Article])
+                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[GoodsReceivingEntry.Amount]));
+
+            var ordersLookup = projectOrderEntries
+                .GroupBy(r => (Guid)r[OrderEntry.Article])
+                .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[(Guid)r[OrderEntry.Order]]).ToList());
 
 
-            var result = new EntityRecordList();
-
-            if (string.IsNullOrEmpty(state))
+            foreach (var rec in queryResult)
             {
-                result.AddRange(queryResult.Skip((page - 1) * pageSize).Take(pageSize));
-                foreach (var rec in result)
-                    SetState(rec, orderedAmountLookup, receivedAmountLookup);
-                result.TotalCount = queryResult.TotalCount;
+                SetState(rec, orderedAmountLookup, receivedAmountLookup);
+                SetOrders(rec, ordersLookup);
             }
-            else
+
+            List<EntityRecord> filtered = queryResult;
+
+            if (!string.IsNullOrEmpty(state))
             {
-                foreach (var rec in queryResult)
-                    SetState(rec, orderedAmountLookup, receivedAmountLookup);
-                var filtered = queryResult
+                filtered = filtered
                     .Where(r => ((string)r["state"]).Contains(state, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-                result.AddRange(filtered.Skip((page - 1) * pageSize).Take(pageSize));
-                result.TotalCount = filtered.Length;
+                    .ToList();
             }
+
+            if (!string.IsNullOrEmpty(order))
+            {
+                filtered = filtered
+                    .Where(r => ((string)r["order"]).Contains(order, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            
+            var result = new EntityRecordList();
+            result.AddRange(filtered.Skip((page - 1) * pageSize).Take(pageSize));
+            result.TotalCount = filtered.Count;
+
             return result;
+        }
+
+        private static void SetOrders(EntityRecord rec, Dictionary<Guid, List<EntityRecord>> ordersLookup)
+        {
+            var article = (Guid)rec[OrderListEntry.Article];
+            if (!ordersLookup.TryGetValue(article, out var orders))
+                rec["order"] = string.Empty;
+            else
+                rec["order"] = string.Join("<br/>", orders.Select(r => r[Order.Number]));
         }
 
         private static void SetState(EntityRecord rec, Dictionary<Guid, decimal> orderedAmountLookup, Dictionary<Guid, decimal> receivedAmountLookup)
@@ -117,15 +143,14 @@ ORDER BY $order_list_entry_article.part_number";
 
                 if (receivedAmount >= demand)
                     state = "Complete";
-                else
+                else  
                 {
                     var type = GetType(rec);
                     var isInt = (bool)type[ArticleType.IsInteger];
                     var unit = type[ArticleType.Unit]?.ToString();
 
-                    state = $"Partial<br/>" +
-                        $"ordered: {FormatAmount(orderedAmount, isInt, unit)}<br/>" +
-                        $"received: {FormatAmount(receivedAmount, isInt, unit)}";
+                    state = $"Ordered: {FormatAmount(orderedAmount, isInt, unit)}<br/>" +
+                        $"Received: {FormatAmount(receivedAmount, isInt, unit)}";
                 }
             }
             rec["state"] = state;
@@ -135,7 +160,11 @@ ORDER BY $order_list_entry_article.part_number";
             => (Guid)((List<EntityRecord>)rec[$"${OrderListEntry.Relations.OrderList}"])[0][OrderList.Project];
 
         private static EntityRecord GetType(EntityRecord rec)
-            => ((List<EntityRecord>)((List<EntityRecord>)rec[$"${OrderListEntry.Relations.Article}"])[0][Article.Relations.Type])[0];
+        {
+            var article = ((List<EntityRecord>)rec[$"${OrderListEntry.Relations.Article}"])[0];
+            var type = ((List<EntityRecord>)article[$"${Article.Relations.Type}"])[0];
+            return type;
+        }
 
         private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)
         {

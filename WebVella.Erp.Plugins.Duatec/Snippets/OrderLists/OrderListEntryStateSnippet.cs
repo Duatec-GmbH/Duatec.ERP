@@ -1,7 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
@@ -11,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var rec = GetRecord(pageModel);
+            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
             if (rec == null) 
                 return null;
 
@@ -30,29 +29,22 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
                 .Aggregate(0m, (sum, r) => sum += Math.Max(0, (decimal)r[OrderEntry.Amount]));
 
             if (orderedAmount == 0)
-                return "not ordered";
+                return "Not ordered";
 
-            // TODO replace with googs income
-            var receivedAmount = 0m;
+            var receivedAmount = GoodsReceivingEntry.FindManyByProject(project)
+                .Aggregate(0m, (sum, r) => sum += Math.Max(0, (decimal)r[GoodsReceivingEntry.Amount]));
 
-            return $"ordered: {FormatAmount(orderedAmount, isInt, unit)}<br/>" +
-                $"received: {FormatAmount(receivedAmount, isInt, unit)}";
+            if (receivedAmount >= demand)
+                return "Complete";
+
+            return $"Ordered: {FormatAmount(orderedAmount, isInt, unit)}<br/>" +
+                $"Received: {FormatAmount(receivedAmount, isInt, unit)}";
         }
 
         private static string FormatAmount(decimal amount, bool isInt, string? unit)
         {
             return isInt ? $"{amount:0} {unit}"
                 : $"{amount:0.00} {unit}";
-        }
-
-        private static EntityRecord? GetRecord(BaseErpPageModel pageModel)
-        {
-            if (string.IsNullOrEmpty(pageModel.CurrentUrl))
-                return null;
-            Try.Get(() => pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord"), out var rec);
-            if (rec == null)
-                Try.Get(() => pageModel.TryGetDataSourceProperty<EntityRecord>("Record"), out rec);
-            return rec;
         }
     }
 }

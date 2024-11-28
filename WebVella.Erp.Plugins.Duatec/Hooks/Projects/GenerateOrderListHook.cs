@@ -20,8 +20,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
                 return null;
 
             var projectId = pageModel.RecordId.Value;
-            var listRec = GetOrAddOrderList(projectId);
-            var listId = (Guid)listRec["id"];
+            Guid listId;
+
+            if (pageModel.TryGetDataSourceProperty<Entity>("Entity")?.Name == Project.Entity)
+                listId = (Guid)GetOrAddOrderList(projectId)["id"];
+            else
+            {
+                listId = pageModel.RecordId.Value;
+                projectId = (Guid)OrderList.Find(listId)![OrderList.Project];
+            }
 
             var orderListEntries = PartListEntry.FindManyByProject(projectId)
                 .GroupBy(pl => (Guid)pl[PartListEntry.Article])
@@ -33,10 +40,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
                 var recMan = new RecordManager();
                 DeleteOldEntriesFromPartList(recMan, listId);
                 if (orderListEntries.Count == 0)
-                {
-                    recMan.DeleteRecord(OrderList.Entity, listId);
                     return;
-                }
 
                 var oldEntryInfos = OrderList.Entries(listId)
                     .GroupBy(r => (Guid)r[OrderListEntry.Article])

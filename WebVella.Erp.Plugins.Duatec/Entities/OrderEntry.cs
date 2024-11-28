@@ -28,5 +28,28 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             return response.Object?.Data ?? [];
         }
+
+        internal static List<EntityRecord> FindManyByProjectAndArticle(Guid project, Guid article)
+        {
+            var orderIdQueries = Entities.Order.FindManyByProject(project)
+                .Select(o => new QueryObject() { QueryType = QueryType.EQ, FieldName = Order, FieldValue = (Guid)o["id"] })
+                .ToList();
+
+            var orderQuery = new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = orderIdQueries
+            };
+
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(Entity, "*",
+                new QueryObject() 
+                { 
+                    QueryType = QueryType.AND, 
+                    SubQueries = [orderQuery, new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }] 
+                }));
+
+            return response.Object?.Data ?? [];
+        }
     }
 }
