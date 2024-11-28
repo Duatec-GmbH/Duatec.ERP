@@ -21,6 +21,24 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id);
 
+        public static List<EntityRecord> FindMany(Guid articleId)
+            => Record.FindManyBy(Entity, Article, articleId);
+
+        public static List<EntityRecord> FindMany(Guid articleId, Guid? projectId)
+        {
+            var subQueries = new List<QueryObject>()
+            {
+                new() { FieldName = Article, FieldValue = articleId, QueryType = QueryType.EQ },
+                new() { FieldName = Project, FieldValue = projectId, QueryType = QueryType.EQ },
+            };
+
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(Entity, "*",
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
+
+            return response.Object?.Data ?? [];
+        }
+
         public static EntityRecord? Find(Guid articleId, Guid locationId, Guid? projectId)
         {
             var subQueries = new List<QueryObject>()

@@ -33,7 +33,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
                 var recMan = new RecordManager();
                 DeleteOldEntriesFromPartList(recMan, listId);
                 if (orderListEntries.Count == 0)
+                {
+                    recMan.DeleteRecord(OrderList.Entity, listId);
                     return;
+                }
 
                 var oldEntryInfos = OrderList.Entries(listId)
                     .GroupBy(r => (Guid)r[OrderListEntry.Article])
@@ -68,8 +71,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
 
         private static void DeleteOldEntriesFromPartList(RecordManager recMan, Guid listId)
         {
-            var entries = OrderListEntry.FindMany(listId, "id");
-            var toDelete = entries
+            var toDelete = OrderListEntry.FindMany(listId)
                 .Where(r => r[OrderListEntry.Order] == null)
                 .ToIdArray();
 
