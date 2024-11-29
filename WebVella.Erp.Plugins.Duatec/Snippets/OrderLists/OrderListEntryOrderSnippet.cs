@@ -10,21 +10,19 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            // TODO
+            var result = new EntityRecordList();
 
             var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            if (rec == null)
-                return null;
+            if (rec != null)
+            {
+                var listId = (Guid)rec[OrderListEntry.OrderList];
+                var projectId = (Guid)OrderList.Find(listId)![OrderList.Project];
+                var articleId = (Guid)rec[OrderEntry.Article];
 
-            var listId = (Guid)rec[OrderListEntry.OrderList];
-            var projectId = (Guid)OrderList.Find(listId)![OrderList.Project];
-            var articleId = (Guid)rec[OrderEntry.Article];
+                result.AddRange(Order.FindManyByProjectAndArticle(projectId, articleId));
+            }
 
-            var orders = Order.FindManyByProjectAndArticle(projectId, articleId);
-            if (orders.Count == 0)
-                return string.Empty;
-
-            return string.Join("<br/>", orders.Select(o => o[Order.Number]));
+            return result;
         }
     }
 }

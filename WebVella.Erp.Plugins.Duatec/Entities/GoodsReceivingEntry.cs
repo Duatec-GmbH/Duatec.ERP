@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Eql;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -30,6 +31,19 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
                 new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
 
             return response.Object?.Data ?? [];
+        }
+
+        public static List<EntityRecord> FindManyByProjectAndArticle(Guid projectId, Guid articleId)
+        {
+            var query = @$"SELECT * FROM {Entity} 
+WHERE {Article} = @articleId 
+AND ${Relations.GoodsReceiving}.${Entities.GoodsReceiving.Relations.Order}.${Order.Relations.Project}.id = @projectId";
+
+            var command = new EqlCommand(query,
+                new EqlParameter("articleId", articleId),
+                new EqlParameter("projectId", projectId));
+
+            return command.Execute();
         }
 
         public static EntityRecord? Find(Guid id)

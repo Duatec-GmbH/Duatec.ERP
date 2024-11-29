@@ -28,7 +28,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = "pageSize", Type = "int", Value = "10" });
         }
 
-
         public override object Execute(Dictionary<string, object> arguments)
         {
             var orderListId = arguments["orderListId"] as Guid?;
@@ -91,8 +90,8 @@ ORDER BY $order_list_entry_article.part_number";
 
             foreach (var rec in queryResult)
             {
-                SetState(rec, orderedAmountLookup, receivedAmountLookup);
                 SetOrders(rec, ordersLookup);
+                SetDynamicFields(rec, orderedAmountLookup, receivedAmountLookup);
             }
 
             List<EntityRecord> filtered = queryResult;
@@ -127,33 +126,23 @@ ORDER BY $order_list_entry_article.part_number";
                 rec["order"] = string.Join("<br/>", orders.Select(r => r[Order.Number]));
         }
 
-        private static void SetState(EntityRecord rec, Dictionary<Guid, decimal> orderedAmountLookup, Dictionary<Guid, decimal> receivedAmountLookup)
+        private static void SetDynamicFields(EntityRecord rec, Dictionary<Guid, decimal> orderedAmountLookup, Dictionary<Guid, decimal> receivedAmountLookup)
         {
             var article = (Guid)rec[OrderListEntry.Article];
 
             var orderedAmount = GetAmount(orderedAmountLookup, article);
-            string state;
+            var receivedAmount = GetAmount(receivedAmountLookup, article);
 
-            if (orderedAmount == 0m)
-                state = "Not ordered";
-            else
-            {
-                var demand = (decimal)rec[OrderListEntry.Amount];
-                var receivedAmount = GetAmount(receivedAmountLookup, article);
+            var type = GetType(rec);
+            var isInt = (bool)type[ArticleType.IsInteger];
+            var unit = type[ArticleType.Unit]?.ToString();
 
-                if (receivedAmount >= demand)
-                    state = "Complete";
-                else  
-                {
-                    var type = GetType(rec);
-                    var isInt = (bool)type[ArticleType.IsInteger];
-                    var unit = type[ArticleType.Unit]?.ToString();
+            rec["ordered"] = FormatAmount(orderedAmount, isInt, unit);
+            rec["received"] = FormatAmount(receivedAmount, isInt, unit);
 
-                    state = $"Ordered: {FormatAmount(orderedAmount, isInt, unit)}<br/>" +
-                        $"Received: {FormatAmount(receivedAmount, isInt, unit)}";
-                }
-            }
-            rec["state"] = state;
+            // TODO
+            rec["state"] = string.Empty;
+            rec["from_inventory"] = string.Empty;
         }
 
         private static Guid GetProjectId(EntityRecord rec)

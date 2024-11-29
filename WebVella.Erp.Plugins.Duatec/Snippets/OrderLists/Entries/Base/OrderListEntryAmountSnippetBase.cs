@@ -7,12 +7,10 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries.Base
 {
     internal abstract class OrderListEntryAmountSnippetBase : ArticleAmountSnippetBase
     {
-        protected abstract EntityRecord? Record(BaseErpPageModel pageModel);
-
-        protected override decimal? GetAmount(BaseErpPageModel pageModel)
-            => Record(pageModel)?[OrderListEntry.Amount] as decimal?;
-
         protected override EntityRecord? GetArticle(BaseErpPageModel pageModel)
-            => (Record(pageModel)?['$' + OrderListEntry.Relations.Article] as List<EntityRecord>)?.FirstOrDefault();
+            => GetDataSourcePropertyFromRecord(pageModel, $"${OrderListEntry.Relations.Article}[0]") as EntityRecord;
+
+        protected override EntityRecord? GetArticleType(BaseErpPageModel pageModel)
+            => GetDataSourcePropertyFromRecord(pageModel, $"${OrderListEntry.Relations.Article}[0].${Article.Relations.Type}[0]") as EntityRecord;
     }
 }

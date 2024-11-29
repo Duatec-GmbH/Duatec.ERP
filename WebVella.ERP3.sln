@@ -39,7 +39,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Plugins.Duatec.Test", "WebVella.Erp.Plugins.Duatec.Test\WebVella.Erp.Plugins.Duatec.Test.csproj", "{544579D5-581D-44E5-A896-72DE33397AA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.Erp.Test", "WebVella.Erp.Test\WebVella.Erp.Test.csproj", "{5AB125EE-D287-465C-A357-5AA06AE25D41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebVella.Erp.Test", "WebVella.Erp.Test\WebVella.Erp.Test.csproj", "{5AB125EE-D287-465C-A357-5AA06AE25D41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
