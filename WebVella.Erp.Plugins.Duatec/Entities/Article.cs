@@ -28,6 +28,9 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static EntityRecord? Find(Guid id)
             => Record.Find(Entity, id, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}");
 
+        public static EntityRecord? FindByPartNumber(string partNumber)
+            => Record.FindBy(Entity, PartNumber, partNumber);
+
         public static bool HasAlternatives(Guid id)
             => Record.Exists(ArticleAlternative.Entity, ArticleAlternative.Source, id);
 
@@ -38,37 +41,10 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             => Record.Exists(Entity, PartNumber, partNumber);
 
         public static Dictionary<string, EntityRecord?> FindMany(params string[] partNumbers)
-        {
-            if (partNumbers.Length == 0)
-                return [];
+            => Record.FindManyByUniqueArgs(Entity, PartNumber, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}", partNumbers);
 
-            var recMan = new RecordManager();
-            var subQuery = partNumbers
-                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = PartNumber, FieldValue = pn })
-                .ToList();
-
-            var queryResponse = recMan.Find(new EntityQuery(Entity, $"*, ${Relations.Manufacturer}.{Manufacturer.Name}",
-                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
-
-            var result = new Dictionary<string, EntityRecord?>(partNumbers.Length);
-            foreach (var pn in partNumbers)
-                result[pn] = null;
-
-            if(queryResponse.Object?.Data != null)
-            {
-                foreach (var obj in queryResponse.Object.Data)
-                    result[(string)obj[PartNumber]] = obj;
-            }
-
-            return result;
-        }
-
-        public static async Task<Dictionary<string, EntityRecord?>> FindManyAsync(params string[] partNumbers)
-        {
-            var t = new Task<Dictionary<string, EntityRecord?>>(() => FindMany(partNumbers));
-            t.Start();
-            return await t;
-        }
+        public static Dictionary<Guid, EntityRecord?> FindMany(params Guid[] ids)
+            => Record.FindManyByUniqueArgs(Entity, "id", $"*, ${Relations.Manufacturer}.{Manufacturer.Name}", ids);
 
         public static Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
         {

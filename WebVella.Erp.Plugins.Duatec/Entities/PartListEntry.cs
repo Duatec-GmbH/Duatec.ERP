@@ -1,7 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Util;
-using static WebVella.Erp.Plugins.Duatec.Hooks.HookKeys;
 
 namespace WebVella.Erp.Plugins.Duatec.Entities
 {
@@ -79,21 +78,46 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static List<EntityRecord> FindManyByProject(Guid projectId, string select = "*")
         {
-            var partLists = Entities.PartList.FindMany(projectId)
-                .ToIdArray();
+            var subQuery = GetPartListsQuery(projectId);
 
-            if (partLists.Length == 0)
+            if (subQuery.Count == 0)
                 return [];
-
-            var subQuery = partLists
-                .Select(pl => new QueryObject() { FieldName = PartList, FieldValue = pl, QueryType = QueryType.EQ })
-                .ToList();
 
             var recMan = new RecordManager();
             var result = recMan.Find(new EntityQuery(Entity, select,
                 new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
 
             return result?.Object?.Data ?? [];
+        }
+
+        public static List<EntityRecord> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
+        {
+            var listsSubQuery = GetPartListsQuery(projectId);
+            if (listsSubQuery.Count == 0)
+                return [];
+
+            var listsQuery = new QueryObject() { QueryType = QueryType.OR, SubQueries = listsSubQuery };
+            var articleQuery = new QueryObject() { QueryType = QueryType.EQ, FieldName = Article, FieldValue = articleId };
+
+
+            var recMan = new RecordManager();
+            var result = recMan.Find(new EntityQuery(Entity, select,
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = [ articleQuery, listsQuery ] }));
+
+            return result?.Object?.Data ?? [];
+        }
+
+        private static List<QueryObject> GetPartListsQuery(Guid projectId)
+        {
+            var partListIds = Entities.PartList.FindMany(projectId)
+                .ToIdArray();
+
+            if (partListIds.Length == 0)
+                return [];
+
+            return partListIds
+                .Select(id => new QueryObject() { FieldName = PartList, FieldValue = id, QueryType = QueryType.EQ })
+                .ToList();
         }
     }
 }

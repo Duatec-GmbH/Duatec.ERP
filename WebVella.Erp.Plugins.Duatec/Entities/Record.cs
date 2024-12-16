@@ -59,5 +59,32 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             return recMan.DeleteRecord(entity, id).Success;
         }
+
+        public static Dictionary<T, EntityRecord?> FindManyByUniqueArgs<T>(string entity, string fieldName, string select = "*", params T[] args) 
+            where T : notnull
+        {
+            if (args.Length == 0)
+                return [];
+
+            var recMan = new RecordManager();
+            var subQuery = args
+                .Select(id => new QueryObject() { QueryType = QueryType.EQ, FieldName = fieldName, FieldValue = id })
+                .ToList();
+
+            var queryResponse = recMan.Find(new EntityQuery(entity, select,
+                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
+
+            var result = new Dictionary<T, EntityRecord?>(args.Length);
+            foreach (var key in args)
+                result[key] = null;
+
+            if (queryResponse.Object?.Data != null)
+            {
+                foreach (var obj in queryResponse.Object.Data)
+                    result[(T)obj[fieldName]] = obj;
+            }
+
+            return result;
+        }
     }
 }

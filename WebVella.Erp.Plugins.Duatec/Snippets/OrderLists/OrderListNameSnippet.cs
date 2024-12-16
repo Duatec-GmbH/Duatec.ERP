@@ -10,8 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            if (rec?[OrderList.Project] is not Guid id || Project.Find(id) is not EntityRecord project)
+            if (!pageModel.RecordId.HasValue || Project.Find(pageModel.RecordId.Value) is not EntityRecord project)
                 return null;
 
             return $"{project[Project.Number]} - Order List";

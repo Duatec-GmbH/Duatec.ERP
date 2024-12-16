@@ -18,5 +18,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
                 return null;
             return Find(id);
         }
+
+        internal static Dictionary<Guid, EntityRecord?> FindMany(params Guid[] ids)
+            => Record.FindManyByUniqueArgs(Entity, "id", "*", ids);
     }
 }

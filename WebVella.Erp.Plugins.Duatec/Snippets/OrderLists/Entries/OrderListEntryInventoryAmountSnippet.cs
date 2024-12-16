@@ -5,9 +5,9 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
 {
     [Snippet]
-    internal class OrderListEntryReceivedAmountSnippet : OrderListEntryAmountSnippetBase
+    internal class OrderListEntryInventoryAmountSnippet : OrderListEntryAmountSnippetBase
     {
         protected override decimal? GetAmount(BaseErpPageModel pageModel)
-            => GetDataSourcePropertyFromRecord(pageModel, OrderListEntry.ReceivedAmount) as decimal?;
+            => GetDataSourcePropertyFromRecord(pageModel, OrderListEntry.InventoryAmount) as decimal?;
     }
 }
