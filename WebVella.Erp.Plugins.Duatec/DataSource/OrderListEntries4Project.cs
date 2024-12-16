@@ -189,7 +189,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var articles = article == null ? [] : new List<EntityRecord>() { article };
             var amount = group.Sum(r => (decimal)r[PartListEntry.Amount]);
 
-            rec["id"] = Guid.NewGuid();
+            rec["id"] = articleId;
             rec[OrderListEntry.Project] = (Guid)project["id"];
             rec[OrderListEntry.Article] = articleId;
 
