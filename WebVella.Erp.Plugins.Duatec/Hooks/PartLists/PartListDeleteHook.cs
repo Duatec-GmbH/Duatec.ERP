@@ -15,7 +15,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
     {
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {
-            var id = (Guid)pageModel.TryGetDataSourceProperty<EntityRecord>("Record")["id"];
+            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            var id = (Guid)rec["id"];
+            var projectId = (Guid)rec[PartList.Project];
 
             QueryResponse TransactionalAction()
             {
@@ -26,7 +28,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 recMan.DeleteRecords(PartListEntry.Entity, entries);
                 return recMan.DeleteRecord(PartList.Entity, id);
             }
-            return Transactional.Delete(pageModel, TransactionalAction);
+            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{projectId}";
+
+            return Transactional.Delete(pageModel, TransactionalAction, returnUrl);
         }
     }
 }

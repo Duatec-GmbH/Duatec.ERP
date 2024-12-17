@@ -17,7 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public const string Article = "article_id";
         public const string DeviceTag = "device_tag";
         public const string Amount = "amount";
-        public const string ProvidedAmount = "provided_amount";
 
         public static List<EntityRecord> FindMany(Guid partList, string select = "*")
             => Record.FindManyBy(Entity, PartList, partList, select);
@@ -45,40 +44,18 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return response.Object > 0;
         }
 
-        public static bool ExistsByProject(Guid project, Guid article, Guid? excluded = null)
+        public static bool Exists(Guid partList)
         {
-            var partListQuery = Entities.PartList.FindMany(project)
-                .Select(r => new QueryObject() { FieldName = PartList, FieldValue = (Guid)r["id"], QueryType = QueryType.EQ })
-                .ToList();
-
-            if (partListQuery.Count == 0)
-                return false;
-
-            var subQueries = new List<QueryObject>()
-            {
-                new() { QueryType = QueryType.OR, SubQueries = partListQuery },
-                new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }
-            };
-
-            if (excluded.HasValue)
-            {
-                subQueries.Add(new()
-                {
-                    QueryType = QueryType.NOT,
-                    SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }]
-                });
-            }
-
             var recMan = new RecordManager();
             var response = recMan.Count(new EntityQuery(Entity, "id",
-                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
+                new QueryObject() { QueryType = QueryType.EQ, FieldName = PartList, FieldValue = partList }));
 
             return response.Object > 0;
         }
 
-        public static List<EntityRecord> FindManyByProject(Guid projectId, string select = "*")
+        public static List<EntityRecord> FindManyByProject(Guid projectId, bool? isActive = null, string select = "*")
         {
-            var subQuery = GetPartListsQuery(projectId);
+            var subQuery = GetPartListsQuery(projectId, isActive);
 
             if (subQuery.Count == 0)
                 return [];
@@ -90,9 +67,9 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return result?.Object?.Data ?? [];
         }
 
-        public static List<EntityRecord> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
+        public static List<EntityRecord> FindManyByProjectAndArticle(Guid projectId, Guid articleId, bool? isActive = null, string select = "*")
         {
-            var listsSubQuery = GetPartListsQuery(projectId);
+            var listsSubQuery = GetPartListsQuery(projectId, isActive);
             if (listsSubQuery.Count == 0)
                 return [];
 
@@ -107,11 +84,13 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return result?.Object?.Data ?? [];
         }
 
-        private static List<QueryObject> GetPartListsQuery(Guid projectId)
+        private static List<QueryObject> GetPartListsQuery(Guid projectId, bool? isActive)
         {
-            var partListIds = Entities.PartList.FindMany(projectId)
-                .ToIdArray();
+            IEnumerable<EntityRecord> partLists = Entities.PartList.FindMany(projectId);
+            if (isActive.HasValue)
+                partLists = partLists.Where(r => isActive.Value == (bool)r[Entities.PartList.IsActive]);
 
+            var partListIds = partLists.ToIdArray();
             if (partListIds.Length == 0)
                 return [];
 

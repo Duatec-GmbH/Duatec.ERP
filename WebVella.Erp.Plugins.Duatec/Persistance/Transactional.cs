@@ -8,7 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance
 {
     internal static class Transactional
     {
-        public static LocalRedirectResult Delete(BaseErpPageModel pageModel, Func<QueryResponse> deleteAction)
+        public static LocalRedirectResult Delete(BaseErpPageModel pageModel, Func<QueryResponse> deleteAction, string? returnUrl = null)
         {
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();
@@ -23,7 +23,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance
                 else
                 {
                     connection.CommitTransaction();
-                    return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
+                    if(string.IsNullOrEmpty(returnUrl))
+                        return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
+                    return pageModel.LocalRedirect(returnUrl);
                 }
             }
             catch(Exception ex)

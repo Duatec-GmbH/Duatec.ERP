@@ -5,7 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    using Args = (string Name, Guid? Project);
+    using Args = (string Name, Guid? Project, bool IsActive);
 
     internal class PartListValidator : IRecordValidator
     {
@@ -42,7 +42,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private static Args GetArgs(EntityRecord record)
         {
             return (record[PartList.Name] as string ?? string.Empty,
-                record[PartList.Project] as Guid?);
+                record[PartList.Project] as Guid?,
+                record[PartList.IsActive] as bool? ?? false);
         }
 
         private static List<ValidationError> ValidateFormat(EntityRecord record)

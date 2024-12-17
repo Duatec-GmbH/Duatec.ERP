@@ -5,7 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    using Args = (Guid? PartList, Guid? Article, string DeviceTag, decimal Amount, decimal ProvidedAmount);
+    using Args = (Guid? PartList, Guid? Article, string DeviceTag, decimal Amount);
 
     internal class PartListEntryValidator : IRecordValidator
     {
@@ -28,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static List<ValidationError> Validate(EntityRecord record, Guid? id)
         {
-            var (partList, article, _, amount, providedAmount) = GetArgs(record);
+            var (partList, article, _, amount) = GetArgs(record);
 
             var result = new List<ValidationError>();
             if (!partList.HasValue)
@@ -37,17 +37,13 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
                 result.Add(new ValidationError(PartListEntry.Article, "Part list entry 'article' is required"));
             if (partList.HasValue && article.HasValue && PartListEntry.Exists(partList.Value, article.Value, id))
                 result.Add(new ValidationError(PartListEntry.Article, "Part list entry with the same article already exists within part list"));
-            if (providedAmount > amount)
-                result.Add(new ValidationError(PartListEntry.ProvidedAmount, "Part list entry provided amount can not be greater than amount"));
 
             if (article.HasValue)
             {
                 var type = ArticleType.FromArticle(article.Value);
                 var amountValidator = GetNumberFormatValidator(PartListEntry.Amount, type);
-                var providedAmountValidator = GetNumberFormatValidator(PartListEntry.ProvidedAmount, type);
 
                 result.AddRange(amountValidator.Validate(amount.ToString(), PartListEntry.Amount));
-                result.AddRange(providedAmountValidator.Validate(providedAmount.ToString(), PartListEntry.ProvidedAmount));
             }
 
             return result;
@@ -58,8 +54,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             return (record[PartListEntry.PartList] as Guid?,
                 record[PartListEntry.Article] as Guid?,
                 record[PartListEntry.DeviceTag] as string ?? string.Empty,
-                record[PartListEntry.Amount] as decimal? ?? 0m,
-                record[PartListEntry.ProvidedAmount] as decimal? ?? 0m);
+                record[PartListEntry.Amount] as decimal? ?? 0m);
         }
 
         private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, EntityRecord? type)

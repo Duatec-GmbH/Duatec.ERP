@@ -15,7 +15,12 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists
                 return null;
 
             var project = Project.Find((Guid)rec[PartList.Project]);
-            return $"{project?[Project.Number]} - {rec[PartList.Name]}";
+            var isActive = (bool)rec[PartList.IsActive];
+
+            var result = $"{project?[Project.Number]} - {rec[PartList.Name]}";
+            if (!isActive)
+                result += " (Not Active)";
+            return result;
         }
     }
 }

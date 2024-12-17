@@ -129,8 +129,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var inventoryAmountLookup = new Dictionary<Guid, decimal>();
 
             var partListEntries = !Article.HasValue
-                ? PartListEntry.FindManyByProject(projectId)
-                : PartListEntry.FindManyByProjectAndArticle(projectId, Article.Value);
+                ? PartListEntry.FindManyByProject(projectId, true)
+                : PartListEntry.FindManyByProjectAndArticle(projectId, Article.Value, true);
 
             var articleLookup = GetArticleLookup(partListEntries);
 
