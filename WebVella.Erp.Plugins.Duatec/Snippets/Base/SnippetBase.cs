@@ -12,6 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
             }
             catch (Exception ex)
             {
+                if (pageModel.PageContext?.HttpContext == null)
+                    return null;
                 return "Error: " + ex.Message;
             }
         }

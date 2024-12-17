@@ -24,6 +24,9 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         public static List<EntityRecord> FindMany(Guid articleId)
             => Record.FindManyBy(Entity, Article, articleId);
 
+        public static List<EntityRecord> FindManyByProject(Guid? projectId)
+            => Record.FindManyBy(Entity, Project, projectId);
+
         public static List<EntityRecord> FindMany(Guid articleId, Guid? projectId)
         {
             var subQueries = new List<QueryObject>()

@@ -125,8 +125,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(r => (Guid)r[OrderEntry.Article])
                 .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[(Guid)r[OrderEntry.Order]]).ToList());
 
-            // TODO
-            var inventoryAmountLookup = new Dictionary<Guid, decimal>();
+            var inventoryAmountLookup = ArticleStockReservationEntry.FindManyByProject(projectId)
+                .GroupBy(r => (Guid)r[ArticleStockReservationEntry.Article])
+                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[ArticleStockReservationEntry.Amount]));
 
             var partListEntries = !Article.HasValue
                 ? PartListEntry.FindManyByProject(projectId, true)
@@ -136,7 +137,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             return partListEntries
                 .GroupBy(ple => (Guid)ple[PartListEntry.Article])
-                .Select(g => RecordFromGroup(g, project, articleLookup, ordersLookup, orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
+                .Select(g => RecordFromGroup(g, project, 
+                    articleLookup, ordersLookup, 
+                    orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
                 .OrderBy(r => GetArticle(r)[Entities.Article.PartNumber].ToString());
         }
 

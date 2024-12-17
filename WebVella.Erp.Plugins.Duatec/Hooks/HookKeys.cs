@@ -25,6 +25,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Create = "article_stock_create";
                 public const string Update = "article_stock_update";
                 public const string Move = "article_stock_move";
+
+                public static class Reservations
+                {
+                    public const string MassReservation = "article_stock_reservation_mass_reservation";
+                }
             }
         }
 
@@ -92,18 +97,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Update = "part_list_update";
             public const string Delete = "part_list_delete";
             public const string Import = "part_list_file_import";
-        }
-
-        public static class OrderList
-        {
-            public static class Entry
-            {
-                public const string Create = "order_list_entry_create";
-                public const string Delete = "order_list_entry_delete";
-                public const string Update = "order_list_entry_update";
-            }
-
-            public const string Delete = "order_list_delete";
         }
     }
 }
