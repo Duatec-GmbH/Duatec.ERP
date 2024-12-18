@@ -1,13 +1,13 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Args = (string Name, string Number);
 
-    internal class ProjectValidator : IRecordValidator
+    internal class ProjectValidator : IRecordValidator<EntityRecord>
     {
         private static readonly NameFormatValidator _nameValidator = new(Project.Entity, Project.Name);
         private static readonly ProjectNumberValidator _numberValidator = new();

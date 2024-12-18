@@ -1,55 +1,60 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
-using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.Erp.Web.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Database;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
     internal static class Common
     {
-        public static void RoundAmount(EntityRecord record)
+        public static void RoundAmount(InventoryEntry record)
+            => record.Amount = Math.Round(record.Amount, 2);
+
+        public static void PartialMove(InventoryEntry record)
         {
-            var amount = (decimal)record[ArticleStock.Amount];
-            amount = Math.Round(amount, 2);
-            record[ArticleStock.Amount] = amount;
+            var repo = new InventoryRepository();
+
+            var unchanged = repo.Find(record.Id!.Value)!;
+            unchanged.Amount -= record.Amount;
+            RoundAmount(unchanged);
+
+            if (!new RecordManager().UpdateRecord(InventoryEntry.Entity, unchanged).Success)
+                throw new DbException("Could not update article stock entry");
+
+            record.Id = null;
+            Create(record);
         }
 
-        public static IActionResult? Create(EntityRecord record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
+        public static void CompleteMove(InventoryEntry record)
         {
-            var article = (Guid)record[ArticleStock.Article];
-            var location = (Guid)record[ArticleStock.WarehouseLocation];
-            var project = record[ArticleStock.Project] as Guid?;
-            var amount = (decimal)record[ArticleStock.Amount];
+            var repo = new InventoryRepository();
 
-            var rec = ArticleStock.Find(article, location, project);
+            if (!repo.Delete(record.Id!.Value))
+                throw new DbException("Could not delete article stock entry");
+
+            record.Id = null;
+            Create(record);
+        }
+
+        public static void Create(InventoryEntry record)
+        {
+            var repo = new InventoryRepository();
+
+            var rec = repo.Find(record.Article, record.WarehouseLocation, record.Project);
             var recMan = new RecordManager();
-
-            ValidationError? error = null;
-            Guid pageId;
 
             if (rec == null)
             {
-                record["id"] = Guid.NewGuid();
-                if (!recMan.CreateRecord(ArticleStock.Entity, record).Success)
-                    error = new(string.Empty, "Could not create record");
-                pageId = (Guid)record["id"];
+                record.Id = Guid.NewGuid();
+                if (!recMan.CreateRecord(InventoryEntry.Entity, record).Success)
+                    throw new DbException("Could not create article stock entry");
             }
             else
             {
-                rec[ArticleStock.Amount] = (decimal)rec[ArticleStock.Amount] + amount;
-                if (!recMan.UpdateRecord(ArticleStock.Entity, rec).Success)
-                    error = new(string.Empty, "Could not update record");
-                pageId = (Guid)rec["id"];
+                rec.Amount += record.Amount;
+                if (!recMan.UpdateRecord(InventoryEntry.Entity, rec).Success)
+                    throw new DbException("Could not update article stock entry");
             }
-
-            if (error == null)
-                return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, pageId));
-
-            validationErrors.Add(error);
-            return null;
         }
     }
 }

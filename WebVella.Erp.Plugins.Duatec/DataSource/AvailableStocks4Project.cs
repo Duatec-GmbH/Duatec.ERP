@@ -1,10 +1,16 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class AvailableStocks4Project : CodeDataSource
     {
+        public static class Parameter
+        {
+            public const string Project = "project";
+        }
+
         public AvailableStocks4Project() : base()
         {
             Id = new Guid("151d911a-f2fd-4cd5-95c6-ea6e8eb2a66a");
@@ -12,18 +18,18 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "List of all available stocks for given project";
             ResultModel = nameof(EntityRecordList);
 
-            Parameters.Add(new() { Name = "project", Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Parameter.Project, Type = "guid", Value = "null" });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
-            var projectId = arguments["project"] as Guid?;
+            var projectId = arguments[Parameter.Project] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
             var demandLookup = GetDemandLookup(projectId.Value);
-            var stocks = ArticleStock.FindManyByProject(null)
-                .Where(r => demandLookup.ContainsKey((Guid)r[ArticleStock.Article]))
+            var stocks = new InventoryRepository().FindManyByProject(null)
+                .Where(r => demandLookup.ContainsKey(r.Article))
                 .ToArray();
 
             if (stocks.Length == 0)
@@ -31,9 +37,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var articleLookup = GetArticleLookup(stocks);
             var records = stocks
-                .GroupBy(s => (Guid)s[ArticleStock.Article])
+                .GroupBy(s => (Guid)s[InventoryEntry.Fields.Article])
                 .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
-                .OrderBy(r => GetArticle(r)[Article.PartNumber]);
+                .OrderBy(r => GetArticle(r)[Article.Fields.PartNumber]);
 
             var result = new EntityRecordList();
             result.AddRange(records);
@@ -70,51 +76,30 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static Dictionary<Guid, EntityRecord?> GetArticleLookup(EntityRecord[] stocks)
+        private static Dictionary<Guid, Article?> GetArticleLookup(InventoryEntry[] stocks)
         {
             var articleIds = stocks
-                .Select(r => (Guid)r[ArticleStock.Article])
+                .Select(r => r.Article)
                 .Distinct()
                 .ToArray();
 
-            var articleLookup = Article.FindMany(articleIds);
-
-            var typeIds = articleLookup.Values
-                .Where(v => v != null)
-                .Select(r => (Guid)r![Article.Type])
-                .Distinct()
-                .ToArray();
-
-            var typeLookup = ArticleType.FindMany(typeIds);
-
-            foreach(var rec in articleLookup.Values.Where(v => v != null))
-            {
-                var typeId = (Guid)rec![Article.Type];
-                var list = new List<EntityRecord>();
-
-                if (typeLookup.TryGetValue(typeId, out var type) && type != null)
-                    list.Add(type);
-
-                rec[$"${Article.Relations.Type}"] = list;
-            }
-
-            return articleLookup;
+            return new ArticleRepository().FindManyWithTypes(articleIds);
         }
 
         private static EntityRecord RecordFromGroup(
-            IGrouping<Guid, EntityRecord> g, 
-            Dictionary<Guid, EntityRecord?> articleLookup, 
+            IGrouping<Guid, InventoryEntry> g, 
+            Dictionary<Guid, Article?> articleLookup, 
             Dictionary<Guid, decimal> demandLookup)
         {
             var articleId = g.Key;
             var demand = demandLookup[articleId];
 
-            var rec = new EntityRecord();
-            var available = g.Sum(r => (decimal)r[ArticleStock.Amount]);
+            var available = g.Sum(r => r.Amount);
             var articles = new List<EntityRecord>();
             if (articleLookup[articleId] is EntityRecord article)
                 articles.Add(article);
 
+            var rec = new EntityRecord();
             rec["id"] = articleId;
             rec[$"${ArticleStockReservationEntry.Relations.Article}"] = articles;
             rec["available"] = available;

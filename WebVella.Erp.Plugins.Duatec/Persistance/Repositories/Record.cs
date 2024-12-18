@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal static class Record
     {
@@ -60,7 +60,23 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             return recMan.DeleteRecord(entity, id).Success;
         }
 
-        public static Dictionary<T, EntityRecord?> FindManyByUniqueArgs<T>(string entity, string fieldName, string select = "*", params T[] args) 
+        internal static EntityRecord? FindByQuery(string entity, QueryObject query, string select = "*")
+        {
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(entity, select, query));
+
+            return response.Object?.Data?.SingleOrDefault();
+        }
+
+        internal static List<EntityRecord> FindManyByQuery(string entity, QueryObject query, string select = "*")
+        {
+            var recMan = new RecordManager();
+            var response = recMan.Find(new EntityQuery(entity, select, query));
+
+            return response.Object?.Data ?? [];
+        }
+
+        public static Dictionary<T, EntityRecord?> FindManyByUniqueArgs<T>(string entity, string fieldName, string select = "*", params T[] args)
             where T : notnull
         {
             if (args.Length == 0)

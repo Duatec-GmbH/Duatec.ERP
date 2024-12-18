@@ -1,7 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public static class WarehouseLocation
     {
@@ -22,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             };
 
             var recMan = new RecordManager();
-            var response = recMan.Count(new EntityQuery(Entity, "*", 
+            var response = recMan.Count(new EntityQuery(Entity, "*",
                 new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
 
             return response.Object > 0;

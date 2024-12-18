@@ -5,7 +5,7 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
@@ -21,17 +21,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = _articleValidator.ValidateOnCreate(record);
+            var entry = new Article(record);
+
+            var errors = _articleValidator.ValidateOnCreate(entry);
             validationErrors.AddRange(errors);
 
             if (errors.Count > 0)
                 return null;
 
-            var shortName = (string)record[Article.PartNumber];
+            var shortName = entry.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
 
             var manufacturerId = Manufacturer.FindId(shortName)!.Value;
-            record[Article.ManufacturerId] = manufacturerId;
+            entry.Manufacturer = manufacturerId;
 
             return null;
         }

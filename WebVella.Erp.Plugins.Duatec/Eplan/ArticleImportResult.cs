@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan
 {
@@ -41,8 +42,10 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             if (eplanArticles.Count == 0)
                 return [];
 
+            var repo = new ArticleRepository();
+
             var partNumbers = GetPartNumbers(eplanArticles);
-            var dbArticles = Article.FindMany(partNumbers);
+            var dbArticles = repo.FindMany(partNumbers);
             var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);
@@ -54,7 +57,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
 
                 var importState = GetArticleState(article, edpArticle, dbArticle);
                 var typeId = dbArticle != null
-                    ? (Guid)dbArticle[Article.Type]
+                    ? (Guid)dbArticle[Article.Fields.Type]
                     : Article.DefaultType;
 
                 var importResult = new ArticleImportResult(
@@ -86,7 +89,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return result;
         }
 
-        private static Dictionary<string, DataPortalArticle?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, EntityRecord?> dbArticles)
+        private static Dictionary<string, DataPortalArticle?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, Article?> dbArticles)
         {
             var result = partNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticle?));
 
@@ -110,7 +113,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         {
             if (IsDbArticle(article, dbRecord))
             {
-                return (bool)dbRecord![Article.IsBlocked] 
+                return (bool)dbRecord![Article.Fields.IsBlocked] 
                     ? ArticleImportState.BlockedArticle 
                     : ArticleImportState.DbArticle;
             }
@@ -132,9 +135,9 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         private static bool IsDbArticle(EplanArticle article, EntityRecord? dbArticle)
         {
             return dbArticle != null
-                && article.PartNumber.Equals(dbArticle[Article.PartNumber])
-                && article.TypeNumber.Equals(dbArticle[Article.TypeNumber])
-                && article.OrderNumber.Equals(dbArticle[Article.OrderNumber]);
+                && article.PartNumber.Equals(dbArticle[Article.Fields.PartNumber])
+                && article.TypeNumber.Equals(dbArticle[Article.Fields.TypeNumber])
+                && article.OrderNumber.Equals(dbArticle[Article.Fields.OrderNumber]);
         }
     }
 }

@@ -2,7 +2,7 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {

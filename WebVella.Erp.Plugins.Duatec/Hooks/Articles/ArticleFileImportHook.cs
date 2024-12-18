@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -38,9 +39,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         private static bool TryGetArticleImportInfo(BaseErpPageModel pageModel, out List<ArticleImportInfo> importInfos)
         {
-            var partNumbers = pageModel.GetFormValues(Article.PartNumber);
+            var partNumbers = pageModel.GetFormValues(Article.Fields.PartNumber);
             var actions = pageModel.GetFormValues("action");
-            var typeStrings = pageModel.GetFormValues(Article.Type);
+            var typeStrings = pageModel.GetFormValues(Article.Fields.Type);
 
             importInfos = new List<ArticleImportInfo>(partNumbers.Length);
 
@@ -72,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                         ?? Manufacturer.Insert(article.Manufacturer)
                         ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
 
-                    if (Article.Insert(article, manufacturer, types[article.PartNumber]) == null)
+                    if (new ArticleRepository().Insert(article, manufacturer, types[article.PartNumber]) == null)
                         throw new DbException($"Could not create article '{article.PartNumber}'.");
                 }
             }

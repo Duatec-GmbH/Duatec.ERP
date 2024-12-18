@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries.Base;
 using WebVella.Erp.Web.Models;
 

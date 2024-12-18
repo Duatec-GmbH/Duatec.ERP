@@ -3,10 +3,11 @@ using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -52,7 +53,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 .Distinct()
                 .ToArray();
 
-            var articleLookup = Article.FindMany(partNumbers);
+            var articleRepo = new ArticleRepository();
+            var articleLookup = articleRepo.FindMany(partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);
@@ -86,7 +88,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             return null;
         }
 
-        private static IActionResult? Error(BaseErpPageModel pageModel, Dictionary<string, EntityRecord?> articleLookup)
+        private static IActionResult? Error(BaseErpPageModel pageModel, Dictionary<string, Article?> articleLookup)
         {
             var partNumbers = articleLookup
                 .Where(kp => kp.Value == null)
@@ -108,7 +110,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             => (part.PartNumber, part.TypeNumber, part.OrderNumber, part.Description);
         
 
-        private static EntityRecord ListEntryRecord(IGrouping<Key, EplanPart> group, Dictionary<string, EntityRecord> articleLookup, Guid partListId)
+        private static EntityRecord ListEntryRecord(IGrouping<Key, EplanPart> group, Dictionary<string, Article> articleLookup, Guid partListId)
         {
             var rec = new EntityRecord();
 

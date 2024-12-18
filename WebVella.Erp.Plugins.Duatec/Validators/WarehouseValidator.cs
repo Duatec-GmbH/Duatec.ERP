@@ -1,11 +1,11 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class WareHouseValidator : IRecordValidator
+    internal class WareHouseValidator : IRecordValidator<EntityRecord>
     {
         private static readonly NameUniqueValidator _labelValidator = new(Warehouse.Entity, Warehouse.Designation);
 

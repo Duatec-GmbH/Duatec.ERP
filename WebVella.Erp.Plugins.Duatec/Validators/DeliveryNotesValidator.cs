@@ -1,12 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Args = (Guid? GoodsReceiving, object? DeliveryNote);
 
-    internal class DeliveryNotesValidator : IRecordValidator
+    internal class DeliveryNotesValidator : IRecordValidator<EntityRecord>
     {
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
             => Validate(record, null);

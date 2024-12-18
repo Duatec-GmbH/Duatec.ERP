@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
 {

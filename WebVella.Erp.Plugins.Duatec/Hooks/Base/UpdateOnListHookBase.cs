@@ -9,7 +9,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    public abstract class UpdateOnListHookBase : IPageHook
+    public abstract class UpdateOnListHookBase<T> : IPageHook where T : EntityRecord
     {
         protected virtual string IdParameter => "hId";
 
@@ -19,9 +19,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         protected abstract string LabelProperty { get; }
 
-        protected abstract IRecordValidator Validator { get; }
+        protected abstract IRecordValidator<T> Validator { get; }
 
-        protected abstract EntityRecord CreateRecord(BaseErpPageModel pageModel);
+        protected abstract T CreateRecord(BaseErpPageModel pageModel);
 
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             return pageModel.LocalRedirect(url);
         }
 
-        private bool UpdateSucceeds(BaseErpPageModel pageModel, EntityRecord rec, StringValues idVal)
+        private bool UpdateSucceeds(BaseErpPageModel pageModel, T rec, StringValues idVal)
         {
             if (!Guid.TryParse(idVal, out var id))
             {
@@ -66,7 +66,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             return success;
         }
 
-        private bool CreateSucceeds(BaseErpPageModel pageModel, EntityRecord rec)
+        private bool CreateSucceeds(BaseErpPageModel pageModel, T rec)
         {
             var success = RecordIsValidCreate(pageModel, rec) && TryCreate(pageModel, rec);
 
@@ -75,7 +75,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             return success;
         }
 
-        private bool TryCreate(BaseErpPageModel pageModel, EntityRecord rec)
+        private bool TryCreate(BaseErpPageModel pageModel, T rec)
         {
             rec["id"] = Guid.NewGuid();
             var response = new RecordManager().CreateRecord(Entity, rec);
@@ -85,21 +85,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             return result;
         }
 
-        private bool RecordIsValidCreate(BaseErpPageModel pageModel, EntityRecord rec)
+        private bool RecordIsValidCreate(BaseErpPageModel pageModel, T rec)
         {
             pageModel.Validation.Errors ??= [];
             pageModel.Validation.Errors.AddRange(Validator.ValidateOnCreate(rec));
             return pageModel.Validation.Errors.Count == 0;
         }
 
-        private bool RecordIsValidUpdate(BaseErpPageModel pageModel, EntityRecord rec)
+        private bool RecordIsValidUpdate(BaseErpPageModel pageModel, T rec)
         {
             pageModel.Validation.Errors ??= [];
             pageModel.Validation.Errors.AddRange(Validator.ValidateOnUpdate(rec));
             return pageModel.Validation.Errors.Count == 0;
         } 
 
-        private bool TryUpdate(BaseErpPageModel pageModel, EntityRecord rec)
+        private bool TryUpdate(BaseErpPageModel pageModel, T rec)
         {
             var response = new RecordManager().UpdateRecord(Entity, rec);
             return HandleResponse(pageModel, response);

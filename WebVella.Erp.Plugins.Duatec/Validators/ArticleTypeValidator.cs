@@ -1,35 +1,29 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ArticleTypeValidator : IRecordValidator
+    internal class ArticleTypeValidator : IRecordValidator<ArticleType>
     {
-        private static readonly NameUniqueValidator _labelValidator = new(ArticleType.Entity, ArticleType.Label);
-        private static readonly NameFormatValidator _unitValidator = new(ArticleType.Entity, ArticleType.Unit);
+        private static readonly NameUniqueValidator _labelValidator = new(ArticleType.Entity, ArticleType.Fields.Label);
+        private static readonly NameFormatValidator _unitValidator = new(ArticleType.Entity, ArticleType.Fields.Unit);
 
-        public List<ValidationError> ValidateOnCreate(EntityRecord record)
+        public List<ValidationError> ValidateOnCreate(ArticleType record)
         {
-            var label = record[ArticleType.Label] as string ?? string.Empty;
-            var unit = record[ArticleType.Unit] as string ?? string.Empty;
-
-            var result = _labelValidator.ValidateOnCreate(label, ArticleType.Label);
-            var unitErrors = _unitValidator.Validate(unit, ArticleType.Unit);
+            var result = _labelValidator.ValidateOnCreate(record.Label, ArticleType.Fields.Label);
+            var unitErrors = _unitValidator.Validate(record.Unit, ArticleType.Fields.Unit);
 
             result.AddRange(unitErrors);
             return result;
         }
 
-        public List<ValidationError> ValidateOnUpdate(EntityRecord record)
+        public List<ValidationError> ValidateOnUpdate(ArticleType record)
         {
-            var id = (Guid)record["id"];
-            var label = record[ArticleType.Label] as string ?? string.Empty;
-            var unit = record[ArticleType.Unit] as string ?? string.Empty;
+            var id = record.Id!.Value;
 
-            var result = _labelValidator.ValidateOnUpdate(label, ArticleType.Label, id);
-            var unitErrors = _unitValidator.Validate(unit, ArticleType.Unit);
+            var result = _labelValidator.ValidateOnUpdate(record.Label, ArticleType.Fields.Label, id);
+            var unitErrors = _unitValidator.Validate(record.Unit, ArticleType.Fields.Unit);
 
             result.AddRange(unitErrors);
             return result;

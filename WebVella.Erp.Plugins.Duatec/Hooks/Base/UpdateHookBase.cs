@@ -7,9 +7,11 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    internal abstract class UpdateHookBase : IRecordManagePageHook
+    internal abstract class UpdateHookBase<T> : IRecordManagePageHook where T : EntityRecord
     {
-        protected abstract IRecordValidator Validator { get; }
+        protected abstract IRecordValidator<T> Validator { get; }
+
+        protected abstract T WrapRecord(EntityRecord record);
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
@@ -18,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = Validator.ValidateOnUpdate(record);
+            var errors = Validator.ValidateOnUpdate(WrapRecord(record));
             validationErrors.AddRange(errors);
 
             return null;

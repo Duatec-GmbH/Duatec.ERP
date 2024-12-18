@@ -7,9 +7,11 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    internal abstract class CreateHookBase : IRecordCreatePageHook
+    internal abstract class CreateHookBase<T> : IRecordCreatePageHook where T : EntityRecord
     {
-        protected abstract IRecordValidator Validator { get; }
+        protected abstract IRecordValidator<T> Validator { get; }
+
+        protected abstract T WrapRecord(EntityRecord rec);
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
@@ -18,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = Validator.ValidateOnCreate(record);
+            var errors = Validator.ValidateOnCreate(WrapRecord(record));
             validationErrors.AddRange(errors);
 
             return null;

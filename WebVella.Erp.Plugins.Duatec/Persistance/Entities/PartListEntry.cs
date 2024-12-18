@@ -1,8 +1,9 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal static class PartListEntry
     {
@@ -33,8 +34,11 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             };
             if (excluded.HasValue)
             {
-                subQueries.Add(new() { QueryType = QueryType.NOT, 
-                    SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }] });
+                subQueries.Add(new()
+                {
+                    QueryType = QueryType.NOT,
+                    SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }]
+                });
             }
 
             var recMan = new RecordManager();
@@ -79,7 +83,7 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             var recMan = new RecordManager();
             var result = recMan.Find(new EntityQuery(Entity, select,
-                new QueryObject() { QueryType = QueryType.AND, SubQueries = [ articleQuery, listsQuery ] }));
+                new QueryObject() { QueryType = QueryType.AND, SubQueries = [articleQuery, listsQuery] }));
 
             return result?.Object?.Data ?? [];
         }

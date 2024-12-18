@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public static class DeliveryNotes
     {

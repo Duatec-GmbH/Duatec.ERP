@@ -1,5 +1,5 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
-using WebVella.Erp.Plugins.Duatec.Hooks;
+﻿using WebVella.Erp.Plugins.Duatec.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base.HookCalls;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers

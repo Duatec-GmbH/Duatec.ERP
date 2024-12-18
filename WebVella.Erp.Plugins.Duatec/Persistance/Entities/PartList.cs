@@ -1,7 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal class PartList
     {
@@ -31,8 +32,12 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             };
             if (excludedId.HasValue)
             {
-                subQueries.Add(new() { QueryType = QueryType.NOT, SubQueries = 
-                    [ new() { QueryType = QueryType.EQ, FieldName = "id", FieldValue = excludedId.Value }] });
+                subQueries.Add(new()
+                {
+                    QueryType = QueryType.NOT,
+                    SubQueries =
+                    [new() { QueryType = QueryType.EQ, FieldName = "id", FieldValue = excludedId.Value }]
+                });
             }
 
             var recMan = new RecordManager();

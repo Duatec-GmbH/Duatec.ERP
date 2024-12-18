@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks.Reservations.Entries

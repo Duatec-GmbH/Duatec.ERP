@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Manufacturer.ShortName);
 
         public PartNumberUniqueValidator() 
-            : base(Article.Entity, Article.PartNumber)
+            : base(Article.Entity, Article.Fields.PartNumber)
         { }
 
         public override List<ValidationError> ValidateOnCreate(string value, string formField)

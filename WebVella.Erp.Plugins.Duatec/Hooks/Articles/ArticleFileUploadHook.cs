@@ -2,8 +2,8 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -70,11 +70,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             var rec = new EntityRecord();
 
-            rec[Article.PartNumber] = article.PartNumber;
-            rec[Article.OrderNumber] = article.OrderNumber;
-            rec[Article.TypeNumber] = article.TypeNumber;
-            rec[Article.Designation] = article.Designation;
-            rec[Article.Type] = article.Type;
+            rec[Article.Fields.PartNumber] = article.PartNumber;
+            rec[Article.Fields.OrderNumber] = article.OrderNumber;
+            rec[Article.Fields.TypeNumber] = article.TypeNumber;
+            rec[Article.Fields.Designation] = article.Designation;
+            rec[Article.Fields.Type] = article.Type;
             rec["import_state"] = article.ImportState;
             rec["action"] = article.Action;
             rec["available_actions"] = GetAvailableActions(article.AvailableActions);

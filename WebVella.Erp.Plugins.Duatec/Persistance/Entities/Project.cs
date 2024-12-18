@@ -1,8 +1,9 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public static class Project
     {
@@ -17,10 +18,10 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
             => Record.Exists(Entity, "id", id);
 
         public static bool HasReservedStocks(Guid id)
-            => Record.Exists(ArticleStock.Entity, ArticleStock.Project, id);
+            => Record.Exists(InventoryEntry.Entity, InventoryEntry.Fields.Project, id);
 
         public static List<EntityRecord> Stocks(Guid? id = null)
-            => Record.FindManyBy(ArticleStock.Entity, ArticleStock.Project, id);
+            => Record.FindManyBy(InventoryEntry.Entity, InventoryEntry.Fields.Project, id);
 
         public static void UnreserveStocks(Guid id)
         {
@@ -41,15 +42,15 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
                 if (!unreservedStocks.TryGetValue(GetKey(reserved), out var unreserved))
                 {
-                    reserved[ArticleStock.Project] = null;
-                    response = recMan.UpdateRecord(ArticleStock.Entity, reserved);
+                    reserved[InventoryEntry.Fields.Project] = null;
+                    response = recMan.UpdateRecord(InventoryEntry.Entity, reserved);
                 }
                 else
                 {
-                    var amount = (decimal)unreserved[ArticleStock.Amount]
-                        + (decimal)reserved[ArticleStock.Amount];
-                    unreserved[ArticleStock.Amount] = amount;
-                    response = recMan.UpdateRecord(ArticleStock.Entity, unreserved);
+                    var amount = (decimal)unreserved[InventoryEntry.Fields.Amount]
+                        + (decimal)reserved[InventoryEntry.Fields.Amount];
+                    unreserved[InventoryEntry.Fields.Amount] = amount;
+                    response = recMan.UpdateRecord(InventoryEntry.Entity, unreserved);
                 }
 
                 if (!response.Success)
@@ -58,6 +59,6 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
         }
 
         private static (Guid ArticleId, Guid LocationId) GetKey(EntityRecord rec)
-            => ((Guid)rec[ArticleStock.Article], (Guid)rec[ArticleStock.WarehouseLocation]);
+            => ((Guid)rec[InventoryEntry.Fields.Article], (Guid)rec[InventoryEntry.Fields.WarehouseLocation]);
     }
 }

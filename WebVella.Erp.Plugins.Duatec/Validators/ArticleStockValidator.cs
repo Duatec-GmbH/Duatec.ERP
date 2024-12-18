@@ -1,52 +1,51 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ArticleStockValidator : IRecordValidator
+    internal class ArticleStockValidator : IRecordValidator<InventoryEntry>
     {
-        public List<ValidationError> ValidateOnCreate(EntityRecord record)
+        public List<ValidationError> ValidateOnCreate(InventoryEntry record)
             => Validate(record);
 
-        public List<ValidationError> ValidateOnUpdate(EntityRecord record)
+        public List<ValidationError> ValidateOnUpdate(InventoryEntry record)
             => Validate(record);
 
-        private static List<ValidationError> Validate(EntityRecord record)
+        private static List<ValidationError> Validate(InventoryEntry record)
         {
             var result = new List<ValidationError>();
 
-            var article = record[ArticleStock.Article] as Guid?;
-            var location = record[ArticleStock.WarehouseLocation] as Guid?;
+            var article = record.Article;
+            var location = record.WarehouseLocation;
 
-            var amount = record[ArticleStock.Amount]?.ToString() ?? "0";
+            var amount = record.Amount.ToString();
             NumberFormatValidator amountValidator;
 
-            if (!location.HasValue)
-                result.Add(new ValidationError(ArticleStock.WarehouseLocation, "Warehouse location is required"));
-            if (article.HasValue)
-                amountValidator = GetAmountValidator(article.Value);
+            if (location == Guid.Empty)
+                result.Add(new ValidationError(InventoryEntry.Fields.WarehouseLocation, "Warehouse location is required"));
+            if (article != Guid.Empty)
+                amountValidator = GetAmountValidator(article);
             else
             {
-                result.Add(new ValidationError(ArticleStock.Article, "Article is required"));
+                result.Add(new ValidationError(InventoryEntry.Fields.Article, "Article is required"));
                 amountValidator = GetDefaultAmountValidator();
             }
 
-            result.AddRange(amountValidator.Validate(amount, ArticleStock.Amount));
+            result.AddRange(amountValidator.Validate(amount, InventoryEntry.Fields.Amount));
 
             return result;
         }
 
         private static NumberFormatValidator GetAmountValidator(Guid article)
         {
-            var isInteger = (bool)ArticleType.Find((Guid)Article.Find(article)![Article.Type])
-                ![ArticleType.IsInteger];
-
-            return new (ArticleStock.Entity, ArticleStock.Amount, isInteger, true, false);
+            var type = new ArticleRepository().FindTypeByArticleId(article);
+            var isInteger = type?.IsInteger is true;
+            return new (InventoryEntry.Entity, InventoryEntry.Fields.Amount, isInteger, true, false);
         }
 
         private static NumberFormatValidator GetDefaultAmountValidator()
-            => new (ArticleStock.Entity, ArticleStock.Amount, true, true, false);
+            => new (InventoryEntry.Entity, InventoryEntry.Fields.Amount, true, true, false);
     }
 }

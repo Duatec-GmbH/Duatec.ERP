@@ -2,7 +2,6 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.GoodsReceiving.Entries;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
@@ -24,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
                 return null;
 
             var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(Entities.DeliveryNotes.Entity, deliveryNoteId);
+            var response = recMan.DeleteRecord(Persistance.Entities.DeliveryNotes.Entity, deliveryNoteId);
 
             if (!response.Success)
             {

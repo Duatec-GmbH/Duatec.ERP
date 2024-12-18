@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Entities;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Types
@@ -12,6 +12,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Types
 
         protected override string DataSourceProperty => "RowRecord";
 
-        protected override string RecordProperty => ArticleType.IsInteger;
+        protected override string RecordProperty => ArticleType.Fields.IsInteger;
     }
 }

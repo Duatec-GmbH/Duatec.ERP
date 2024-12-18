@@ -1,13 +1,14 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Args = (Guid? PartList, Guid? Article, string DeviceTag, decimal Amount);
 
-    internal class PartListEntryValidator : IRecordValidator
+    internal class PartListEntryValidator : IRecordValidator<EntityRecord>
     {
         public List<ValidationError> ValidateOnCreate(EntityRecord record)
             => Validate(record, null);
@@ -40,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             if (article.HasValue)
             {
-                var type = ArticleType.FromArticle(article.Value);
+                var type = new ArticleRepository().FindTypeByArticleId(article.Value);
                 var amountValidator = GetNumberFormatValidator(PartListEntry.Amount, type);
 
                 result.AddRange(amountValidator.Validate(amount.ToString(), PartListEntry.Amount));
@@ -57,9 +58,9 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
                 record[PartListEntry.Amount] as decimal? ?? 0m);
         }
 
-        private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, EntityRecord? type)
+        private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, ArticleType? type)
         {
-            var isInteger = type == null || (bool)type[ArticleType.IsInteger];
+            var isInteger = type?.IsInteger is true;
             return new NumberFormatValidator(PartListEntry.Entity, entityProperty, isInteger, true);
         }
     }

@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public static class OrderEntry
     {
@@ -43,10 +43,10 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(Entity, "*",
-                new QueryObject() 
-                { 
-                    QueryType = QueryType.AND, 
-                    SubQueries = [orderQuery, new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }] 
+                new QueryObject()
+                {
+                    QueryType = QueryType.AND,
+                    SubQueries = [orderQuery, new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }]
                 }));
 
             return response.Object?.Data ?? [];

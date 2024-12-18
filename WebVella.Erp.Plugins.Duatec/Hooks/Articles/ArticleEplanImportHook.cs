@@ -2,10 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -28,8 +29,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             return pageModel.RedirectToPage();
         }
 
-        public static void Import(BaseErpPageModel pageModel, string partNumber, string type)
+        private static void Import(BaseErpPageModel pageModel, string partNumber, string type)
         {
+            var repo = new ArticleRepository();
+
             if (string.IsNullOrEmpty(partNumber))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, $"Please enter an article part number.");
@@ -42,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return;
             }
 
-            if(!Guid.TryParse(type, out var typeId) || ArticleType.Find(typeId) == null)
+            if(!Guid.TryParse(type, out var typeId) || repo.FindType(typeId) == null)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, $"Type with id '{type}' does not exist.");
                 return;
@@ -57,7 +60,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                     ?? Manufacturer.Insert(article.Manufacturer)
                     ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'.");
 
-                if (Article.Insert(article, manufacturer, typeId) == null)
+                if (repo.Insert(article, manufacturer, typeId) == null)
                     throw new DbException($"Could not create article '{article.PartNumber}'.");
             }
 
@@ -68,13 +71,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out DataPortalArticle? article)
         {
+            var repo = new ArticleRepository();
             article = DataPortal.GetArticleByPartNumber(partNumber);
 
             if (article == null)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
-            else if (Article.Exists(article.PartNumber))
+            else if (repo.Exists(article.PartNumber))
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' already exists in the data base.");
-            else if (Article.Exists(article.EplanId))
+            else if (repo.Exists(article.EplanId))
                 pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");
             else return true;
 

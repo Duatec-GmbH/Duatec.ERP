@@ -1,12 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class WarehouseLocationValidator : IRecordValidator
+    internal class WarehouseLocationValidator : IRecordValidator<EntityRecord>
     {
         private static readonly NameFormatValidator _labelValidator = new(Warehouse.Entity, Warehouse.Designation);
         private static readonly string _warehousePretty = Text.FancyfySnakeCase(Warehouse.Entity);

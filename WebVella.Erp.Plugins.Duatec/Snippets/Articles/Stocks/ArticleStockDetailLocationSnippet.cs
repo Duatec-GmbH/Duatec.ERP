@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -11,10 +11,15 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
             var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            if (rec?[ArticleStock.WarehouseLocation] is not Guid locationId)
+            if (rec == null)
                 return null;
 
-            var location = WarehouseLocation.Find(locationId);
+            var entry = new InventoryEntry(rec);
+
+            if (entry?.WarehouseLocation == null)
+                return null;
+
+            var location = WarehouseLocation.Find(entry.WarehouseLocation);
             if (location?[WarehouseLocation.Warehouse] is not Guid warehouseId)
                 return null;
 

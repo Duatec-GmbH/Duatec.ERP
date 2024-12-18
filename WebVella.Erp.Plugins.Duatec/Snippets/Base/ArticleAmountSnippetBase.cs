@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Models;
 
@@ -7,9 +7,9 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 {
     internal abstract class ArticleAmountSnippetBase : SnippetBase
     {
-        protected abstract EntityRecord? GetArticle(BaseErpPageModel pageModel);
+        protected abstract Article? GetArticle(BaseErpPageModel pageModel);
 
-        protected abstract EntityRecord? GetArticleType(BaseErpPageModel pageModel);
+        protected abstract ArticleType? GetArticleType(BaseErpPageModel pageModel);
 
         protected abstract decimal? GetAmount(BaseErpPageModel pageModel);
 
@@ -21,12 +21,10 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Base
 
             var amount = GetAmount(pageModel) ?? 0m;
             var type = GetArticleType(pageModel);
-            var unit = type?[ArticleType.Unit]?.ToString();
-            var isInteger = type?[ArticleType.IsInteger] is bool b && b;
 
-            return isInteger
-                ? $"{amount:0} {unit}"
-                : $"{amount:0.00} {unit}";
+            return type?.IsInteger is true
+                ? $"{amount:0} {type?.Unit}"
+                : $"{amount:0.00} {type?.Unit}";
         }
 
         protected static object? GetDataSourcePropertyFromRecord(BaseErpPageModel pageModel, string path)

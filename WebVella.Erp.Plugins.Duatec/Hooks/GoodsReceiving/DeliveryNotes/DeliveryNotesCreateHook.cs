@@ -2,7 +2,6 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
@@ -31,7 +30,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            record[Entities.DeliveryNotes.GoodsReceiving] = listId;
+            record[Persistance.Entities.DeliveryNotes.GoodsReceiving] = listId;
 
             validationErrors.AddRange(_validator.ValidateOnCreate(record));
             return null;

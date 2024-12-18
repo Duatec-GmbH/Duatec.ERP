@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
-namespace WebVella.Erp.Plugins.Duatec.Entities
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal class ArticleStockReservation
     {
@@ -14,5 +15,8 @@ namespace WebVella.Erp.Plugins.Duatec.Entities
 
         public static List<EntityRecord> FindMany(Guid projectId, string select = "*")
             => Record.FindManyBy(Entity, Project, projectId, select);
+
+        internal static EntityRecord? FindByProject(Guid projectId)
+            => Record.FindBy(Entity, Project, projectId);
     }
 }

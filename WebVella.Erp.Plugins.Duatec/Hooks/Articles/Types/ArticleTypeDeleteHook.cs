@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
 {
@@ -10,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
         protected override string Entity => ArticleType.Entity;
 
         protected override string? RecordLabel(Guid id)
-            => ArticleType.Find(id)?[ArticleType.Label] as string;
+            => new ArticleRepository().FindType(id)?.Label;
     }
 }

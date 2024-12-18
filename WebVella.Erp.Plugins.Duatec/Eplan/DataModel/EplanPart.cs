@@ -1,7 +1,7 @@
 ﻿using System.Xml.Linq;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
@@ -110,7 +110,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 
             var recMan = new RecordManager();
             var subQuery = partNumbers
-                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = Article.PartNumber, FieldValue = pn })
+                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = Article.Fields.PartNumber, FieldValue = pn })
                 .ToList();
 
             var queryResponse = recMan.Find(new EntityQuery(Article.Entity, $"*, ${Article.Relations.Manufacturer}.{Manufacturer.Name}",
@@ -121,7 +121,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
                 result[pn] = null;
 
             foreach (var obj in queryResponse.Object.Data)
-                result[(string)obj[Article.PartNumber]] = obj;
+                result[(string)obj[Article.Fields.PartNumber]] = obj;
 
             return result;
         }

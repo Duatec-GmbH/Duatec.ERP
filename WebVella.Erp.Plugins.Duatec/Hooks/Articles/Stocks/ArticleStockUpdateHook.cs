@@ -2,7 +2,8 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
@@ -22,23 +23,26 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var id = (Guid)record["id"];
+            var repo = new InventoryRepository();
 
-            if (record[ArticleStock.Amount] is null || record[ArticleStock.Amount] is decimal d && d == 0)
+            var modified = new InventoryEntry(record);
+            var id = modified.Id!.Value;
+
+            if (modified.Amount == 0)
             {
-                if (ArticleStock.Delete(id))
+                if (repo.Delete(id))
                     return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
 
                 validationErrors.Add(new ValidationError(string.Empty, "Could not delete record"));
                 return null;
             }
 
-            var entry = ArticleStock.Find(id)!;
-            record[ArticleStock.Article] = entry[ArticleStock.Article];
-            record[ArticleStock.Project] = entry[ArticleStock.Project];
-            record[ArticleStock.WarehouseLocation] = entry[ArticleStock.WarehouseLocation];
+            var unmodified = repo.Find(id)!;
+            modified.Article = unmodified.Article;
+            modified.Project = unmodified.Project;
+            modified.WarehouseLocation = unmodified.WarehouseLocation;
 
-            validationErrors.AddRange(_validator.ValidateOnUpdate(record));
+            validationErrors.AddRange(_validator.ValidateOnUpdate(modified));
 
             return null;
         }

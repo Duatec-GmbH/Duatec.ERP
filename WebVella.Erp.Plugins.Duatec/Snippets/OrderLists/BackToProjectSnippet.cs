@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
             var appName = pageModel.ErpRequestContext.App.Name;
             var area = pageModel.ErpRequestContext?.SitemapArea?.Name;
 
-            return $"{appName}/{area}/projects/r/{id}";
+            return $"/{appName}/{area}/projects/r/{id}";
         }
     }
 }

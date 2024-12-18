@@ -2,8 +2,8 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 
@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving
             {
                 var recMan = new RecordManager();
                 recMan.DeleteRecords(GoodsReceivingEntry.Entity, entries);
-                return recMan.DeleteRecord(Entities.GoodsReceiving.Entity, id);
+                return recMan.DeleteRecord(Persistance.Entities.GoodsReceiving.Entity, id);
             }
 
             return Transactional.Delete(pageModel, TransactionalAction);
