@@ -57,15 +57,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .ToArray();
 
             var articleRepo = new ArticleRepository();
+            var inventoryRepo = new InventoryRepository();
 
             var articleLookup = articleRepo.FindManyWithTypes(partNumbersToProcess);
             var demandLookup = GetDemandLookup(projectId, articleLookup);
             var inventoryLookup = GetInventoryLookup(projectId, articleLookup);
-            var reservationsLookup = ArticleStockReservationEntry
+            var reservationsLookup = InventoryReservationEntry
                 .FindManyByProjectAndArticle(projectId, partNumbersToProcess);
 
 
-            var list = ArticleStockReservation.FindByProject(projectId);
+            var list = inventoryRepo.FindReservationListByProject(projectId);
 
             void TransactionalAction()
             {
@@ -116,39 +117,39 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             return ReturnToProject(pageModel);
         }
 
-        private static EntityRecord CreateList(Guid projectId)
+        private static InventoryReservationList CreateList(Guid projectId)
         {
-            var list = new EntityRecord();
-            list["id"] = Guid.NewGuid();
-            list[ArticleStockReservation.Project] = projectId;
+            var list = new InventoryReservationList();
+            list.Id = Guid.NewGuid();
+            list.Project = projectId;
 
-            return TryCreate(ArticleStockReservation.Entity, list);
+            return TryCreate(InventoryReservationList.Entity, list);
         }
 
         private static EntityRecord CreateNewEntry(Guid listId, Guid articleId, decimal amount)
         {
             var rec = new EntityRecord();
             rec["id"] = Guid.NewGuid();
-            rec[ArticleStockReservationEntry.ArticleStockReservation] = listId;
-            rec[ArticleStockReservationEntry.Article] = articleId;
-            rec[ArticleStockReservationEntry.Amount] = amount;
+            rec[InventoryReservationEntry.ArticleStockReservation] = listId;
+            rec[InventoryReservationEntry.Article] = articleId;
+            rec[InventoryReservationEntry.Amount] = amount;
 
-            return TryCreate(ArticleStockReservationEntry.Entity, rec);
+            return TryCreate(InventoryReservationEntry.Entity, rec);
         }
 
         private static EntityRecord IncreaseAmount(EntityRecord rec, decimal amount)
         {
-            rec[ArticleStockReservationEntry.Amount] = amount + (decimal)rec[ArticleStockReservationEntry.Amount];
-            return TryCreate(ArticleStockReservationEntry.Entity, rec);
+            rec[InventoryReservationEntry.Amount] = amount + (decimal)rec[InventoryReservationEntry.Amount];
+            return TryCreate(InventoryReservationEntry.Entity, rec);
         }
 
-        private static EntityRecord TryCreate(string entity, EntityRecord rec)
+        private static T TryCreate<T>(string entity, T rec) where T : EntityRecord
         {
             var recMan = new RecordManager();
             var response = recMan.CreateRecord(entity, rec);
 
             if (!response.Success)
-                throw new DbException("Could not create inventory reservation list");
+                throw new DbException("Could not create record");
             return rec;
         }
 
@@ -175,7 +176,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static void Validate(decimal amount, ArticleType type)
         {
             var isInt = type.IsInteger;
-            var errors = new NumberFormatValidator(ArticleStockReservationEntry.Entity, ArticleStockReservationEntry.Amount, isInt, true)
+            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Amount, isInt, true)
                 .Validate(amount.ToString(), string.Empty);
 
             if (errors.Count > 0)

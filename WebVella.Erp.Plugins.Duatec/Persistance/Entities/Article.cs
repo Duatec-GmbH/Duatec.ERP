@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public class Article : EntityRecordWrapper
+    public class Article : TypedEntityRecord
     {
         public const string Entity = "article";
 

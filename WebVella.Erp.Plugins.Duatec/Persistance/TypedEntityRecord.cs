@@ -2,12 +2,12 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance
 {
-    public abstract class EntityRecordWrapper : EntityRecord
+    public abstract class TypedEntityRecord : EntityRecord
     {
-        public EntityRecordWrapper() 
+        public TypedEntityRecord() 
             : base() { }
 
-        public EntityRecordWrapper(EntityRecord record) 
+        public TypedEntityRecord(EntityRecord record) 
             : base() { Properties = record.Properties; }
 
         public Guid? Id

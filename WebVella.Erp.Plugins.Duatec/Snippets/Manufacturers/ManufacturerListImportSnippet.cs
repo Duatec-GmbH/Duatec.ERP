@@ -11,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 
         protected override string IdParameter => "hEplanId";
 
-        protected override string IdProperty => Manufacturer.EplanId;
+        protected override string IdProperty => Company.EplanId;
     }
 }

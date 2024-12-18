@@ -7,7 +7,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         private static readonly ShortNameFormatValidator _formatValidator = new();
 
         public ShortNameUniqueValidator()
-            : base(Manufacturer.Entity, Manufacturer.ShortName)
+            : base(Company.Entity, Company.ShortName)
         { }
 
         protected override bool CharIsAllowed(char c)

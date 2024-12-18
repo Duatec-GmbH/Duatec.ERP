@@ -7,6 +7,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks.Reservations.Entr
     internal class ArticleStockReservationEntryAmountSnippet : ArticleStockReservationEntryAmountSnippetBase
     {
         protected override decimal? GetAmount(BaseErpPageModel pageModel)
-            => GetRecord(pageModel)?[ArticleStockReservationEntry.Amount] as decimal?;
+            => GetRecord(pageModel)?[InventoryReservationEntry.Amount] as decimal?;
     }
 }

@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks.Reservations.Entr
             var rec = GetRecord(pageModel);
             if (rec == null)
                 return null;
-            return Article.Create((rec[$"${ArticleStockReservationEntry.Relations.Article}"] as List<EntityRecord>)?.FirstOrDefault());
+            return Article.Create((rec[$"${InventoryReservationEntry.Relations.Article}"] as List<EntityRecord>)?.FirstOrDefault());
         }
 
         protected override ArticleType? GetArticleType(BaseErpPageModel pageModel)

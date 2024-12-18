@@ -108,7 +108,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return records;
 
             return records
-                .Where(r => GetManufacturer(r)[Manufacturer.Name].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                .Where(r => GetManufacturer(r)[Company.Name].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
         }
 
         private static IEnumerable<EntityRecord> ApplyStateFilter(string? filterValue, IEnumerable<EntityRecord> records)
@@ -140,9 +140,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(r => (Guid)r[OrderEntry.Article])
                 .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[(Guid)r[OrderEntry.Order]]).ToList());
 
-            var inventoryAmountLookup = ArticleStockReservationEntry.FindManyByProject(projectId)
-                .GroupBy(r => (Guid)r[ArticleStockReservationEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[ArticleStockReservationEntry.Amount]));
+            var inventoryAmountLookup = InventoryReservationEntry.FindManyByProject(projectId)
+                .GroupBy(r => (Guid)r[InventoryReservationEntry.Article])
+                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[InventoryReservationEntry.Amount]));
 
             var partListEntries = !ArticleId.HasValue
                 ? PartListEntry.FindManyByProject(projectId, true)

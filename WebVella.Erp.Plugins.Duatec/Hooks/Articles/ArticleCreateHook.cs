@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             var shortName = entry.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
 
-            var manufacturerId = Manufacturer.FindId(shortName)!.Value;
+            var manufacturerId = Company.FindId(shortName)!.Value;
             entry.Manufacturer = manufacturerId;
 
             return null;

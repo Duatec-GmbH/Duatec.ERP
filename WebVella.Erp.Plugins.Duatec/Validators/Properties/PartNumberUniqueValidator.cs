@@ -8,8 +8,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
     internal class PartNumberUniqueValidator : NameUniqueValidator
     {
         private static readonly ShortNameFormatValidator _shortNameValidator = new();
-        private static readonly string _manufacturer = Text.FancyfySnakeCase(Manufacturer.Entity);
-        private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Manufacturer.ShortName);
+        private static readonly string _manufacturer = Text.FancyfySnakeCase(Company.Entity);
+        private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Company.ShortName);
 
         public PartNumberUniqueValidator() 
             : base(Article.Entity, Article.Fields.PartNumber)
@@ -44,7 +44,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && !Manufacturer.FindId(shortName).HasValue)
+                    if (shortNameErrors.Count == 0 && !Company.FindId(shortName).HasValue)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
                     if (DataPortal.GetArticleByPartNumber(value) != null)

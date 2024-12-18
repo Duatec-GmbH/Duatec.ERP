@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             if (!pageModel.RecordId.HasValue)
                 return false;
 
-            return ArticleStockReservation.FindMany(pageModel.RecordId.Value).Count > 0;
+            return InventoryReservationList.FindMany(pageModel.RecordId.Value).Count > 0;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    internal class InventoryEntry : EntityRecordWrapper
+    internal class InventoryEntry : TypedEntityRecord
     {
         public const string Entity = "article_stock";
 

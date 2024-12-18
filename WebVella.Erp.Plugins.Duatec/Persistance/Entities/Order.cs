@@ -1,71 +1,49 @@
-﻿using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+﻿using WebVella.Erp.Api.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public static class Order
+    public class Order : TypedEntityRecord
     {
+        public const string Entity = "order";
+
         public static class Relations
         {
             public const string Supplier = "order_supplier";
             public const string Project = "order_project";
         }
 
-        public const string Entity = "order";
-        public const string Supplier = "supplier_id";
-        public const string Number = "order_number";
-        public const string Project = "project_id";
-
-        internal static List<EntityRecord> FindManyByProject(Guid project)
-            => Record.FindManyBy(Entity, Project, project);
-
-        internal static List<EntityRecord> FindManyByProjectAndArticle(Guid project, Guid article)
+        public static class Fields
         {
-            var entries = OrderEntry.FindManyByProjectAndArticle(project, article);
-            if (entries.Count == 0)
-                return [];
-
-            var subQuery = entries
-                .Select(r => (Guid)r[OrderEntry.Order])
-                .Distinct()
-                .Select(id => new QueryObject() { FieldName = "id", FieldValue = id, QueryType = QueryType.EQ })
-                .ToList();
-
-            var recMan = new RecordManager();
-            var response = recMan.Find(new EntityQuery(Entity, "*",
-                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
-
-            return response.Object?.Data ?? [];
+            public const string Supplier = "supplier_id";
+            public const string Number = "order_number";
+            public const string Project = "project_id";
         }
 
+        public Order(EntityRecord record)
+            : base(record) { }
 
-        public static int GetMissingArticleCount(Guid orderId, Guid articleId)
+        public Order()
+            : base() { }
+
+        public static Order? Create(EntityRecord? record)
+            => record == null ? null : new Order(record);
+
+        public Guid Supplier
         {
-            var recMan = new RecordManager();
+            get => TryGet<Guid>(Fields.Supplier);
+            set => Properties[Fields.Supplier] = value;
+        }
 
-            var query = new QueryObject
-            {
-                QueryType = QueryType.AND,
-                SubQueries =
-                [
-                    new QueryObject
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = OrderEntry.Order,
-                        FieldValue = orderId,
-                    },
-                    new QueryObject
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = OrderEntry.Article,
-                        FieldValue = articleId,
-                    }
-                ],
-            };
+        public string Number
+        {
+            get => TryGet(Fields.Number, string.Empty);
+            set => Properties[Fields.Number] = value;
+        }
 
-            var entity = recMan.Find(new EntityQuery(OrderEntry.Entity, "amount", query: query)).Object?.Data.SingleOrDefault();
-            return (int)(entity?["amount"] as decimal? ?? 0);
+        public Guid Project
+        {
+            get => TryGet<Guid>(Fields.Project);
+            set => Properties[Fields.Project] = value;
         }
     }
 }

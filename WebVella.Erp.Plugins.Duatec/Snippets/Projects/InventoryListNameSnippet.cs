@@ -21,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
                 if (rec == null)
                     return null;
 
-                number = Project.Find((Guid)rec[ArticleStockReservation.Project])?[Project.Number];
+                number = Project.Find((Guid)rec[InventoryReservationList.Project])?[Project.Number];
             }
 
             return Result(number);

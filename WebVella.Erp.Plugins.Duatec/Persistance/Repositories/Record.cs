@@ -60,6 +60,14 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return recMan.DeleteRecord(entity, id).Success;
         }
 
+        internal static bool ExistsByQuery(string entity, QueryObject query)
+        {
+            var recMan = new RecordManager();
+            var response = recMan.Count(new EntityQuery(entity, "*", query));
+
+            return response.Object > 0;
+        }
+
         internal static EntityRecord? FindByQuery(string entity, QueryObject query, string select = "*")
         {
             var recMan = new RecordManager();

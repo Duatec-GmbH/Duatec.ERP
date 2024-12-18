@@ -15,16 +15,16 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
             if (rec == null)
                 return false;
 
-            var id = $"{rec[Manufacturer.EplanId]}";
-            var shortName = $"{rec[Manufacturer.ShortName]}";
-            var name = $"{rec[Manufacturer.Name]}";
+            var id = $"{rec[Company.EplanId]}";
+            var shortName = $"{rec[Company.ShortName]}";
+            var name = $"{rec[Company.Name]}";
 
             if (!long.TryParse(id, out var eplanId) || string.IsNullOrEmpty(shortName) || string.IsNullOrEmpty(name))
                 return false;
 
             var dto = new DataPortalManufacturer(eplanId, shortName, name, null, null);
 
-            return Manufacturer.CanBeImported(dto);
+            return Company.CanBeImported(dto);
         }
     }
 }

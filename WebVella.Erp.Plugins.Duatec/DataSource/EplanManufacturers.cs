@@ -48,11 +48,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             {
                 result.Add(new EntityRecord()
                 {
-                    [Manufacturer.EplanId] = m.EplanId.ToString(),
-                    [Manufacturer.Name] = m.Name,
-                    [Manufacturer.ShortName] = m.ShortName,
-                    [Manufacturer.WebsiteUrl] = m.WebsiteUrl,
-                    [Manufacturer.LogoUrl] = m.LogoUrl,
+                    [Company.EplanId] = m.EplanId.ToString(),
+                    [Company.Name] = m.Name,
+                    [Company.ShortName] = m.ShortName,
+                    [Company.WebsiteUrl] = m.WebsiteUrl,
+                    [Company.LogoUrl] = m.LogoUrl,
                 });
             }
             return result;

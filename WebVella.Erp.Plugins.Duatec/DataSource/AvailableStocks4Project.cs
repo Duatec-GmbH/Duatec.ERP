@@ -57,9 +57,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(oe => (Guid)oe[OrderEntry.Article])
                 .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[OrderEntry.Amount]));
 
-            var inventoryLookup = ArticleStockReservationEntry.FindManyByProject(projectId)
-                .GroupBy(asre => (Guid)asre[ArticleStockReservationEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[ArticleStockReservationEntry.Amount]));
+            var inventoryLookup = InventoryReservationEntry.FindManyByProject(projectId)
+                .GroupBy(asre => (Guid)asre[InventoryReservationEntry.Article])
+                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[InventoryReservationEntry.Amount]));
 
             var result = new Dictionary<Guid, decimal>(demandLookup.Count);
 
@@ -101,16 +101,16 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var rec = new EntityRecord();
             rec["id"] = articleId;
-            rec[$"${ArticleStockReservationEntry.Relations.Article}"] = articles;
+            rec[$"${InventoryReservationEntry.Relations.Article}"] = articles;
             rec["available"] = available;
             rec["demand"] = demand;
-            rec[ArticleStockReservationEntry.Amount] = Math.Min(available, demand);
+            rec[InventoryReservationEntry.Amount] = Math.Min(available, demand);
             rec["auto_reserve"] = true;
 
             return rec;
         }
 
         private static EntityRecord GetArticle(EntityRecord rec)
-            => ((List<EntityRecord>)rec[$"${ArticleStockReservationEntry.Relations.Article}"])[0];
+            => ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
     }
 }

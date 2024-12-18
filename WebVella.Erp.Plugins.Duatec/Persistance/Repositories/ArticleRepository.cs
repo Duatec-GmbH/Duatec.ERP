@@ -6,11 +6,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class ArticleRepository : RepositoryBase<Article>
     {
-        private const string ManufacturerSelect = $"*, ${Article.Relations.Manufacturer}.{Manufacturer.Name}";
+        private const string ManufacturerSelect = $"*, ${Article.Relations.Manufacturer}.{Company.Name}";
 
         public override string Entity => Article.Entity;
 
-        protected override Article? CreateResult(EntityRecord? record)
+        protected override Article? MapToTypedRecord(EntityRecord? record)
              => Article.Create(record);
 
         public Article? Find(Guid id)

@@ -113,7 +113,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
                 .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = Article.Fields.PartNumber, FieldValue = pn })
                 .ToList();
 
-            var queryResponse = recMan.Find(new EntityQuery(Article.Entity, $"*, ${Article.Relations.Manufacturer}.{Manufacturer.Name}",
+            var queryResponse = recMan.Find(new EntityQuery(Article.Entity, $"*, ${Article.Relations.Manufacturer}.{Company.Name}",
                 new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
 
             var result = new Dictionary<string, EntityRecord?>(partNumbers.Length);

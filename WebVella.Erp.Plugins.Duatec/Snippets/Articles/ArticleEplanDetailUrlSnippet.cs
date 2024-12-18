@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
 
             var partNumber = rec[Article.Fields.PartNumber]?.ToString();
             var eplanId = rec[Article.Fields.EplanId]?.ToString();
-            var manufacturer = Manufacturer.Find((Guid)rec[Article.Fields.Manufacturer])?[Manufacturer.Name]?.ToString();
+            var manufacturer = Company.Find((Guid)rec[Article.Fields.Manufacturer])?[Company.Name]?.ToString();
 
             if (string.IsNullOrEmpty(partNumber) || string.IsNullOrEmpty(eplanId) || string.IsNullOrEmpty(manufacturer))
                 return null;

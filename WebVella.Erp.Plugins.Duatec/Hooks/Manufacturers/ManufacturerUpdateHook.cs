@@ -21,8 +21,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var oldRec = Manufacturer.Find((Guid)record["id"]);
-            record[Manufacturer.EplanId] = oldRec![Manufacturer.EplanId];
+            var oldRec = Company.Find((Guid)record["id"]);
+            record[Company.EplanId] = oldRec![Company.EplanId];
 
             var errors = _validator.ValidateOnUpdate(record);
             validationErrors.AddRange(errors);
