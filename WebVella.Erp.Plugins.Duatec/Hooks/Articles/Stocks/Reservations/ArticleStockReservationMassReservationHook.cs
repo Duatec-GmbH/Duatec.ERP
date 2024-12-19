@@ -5,7 +5,6 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Snippets.OrderLists;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
@@ -40,7 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 return pageModel.BadRequest();
 
             var projectId = pageModel.RecordId.Value;
-            if (!Project.Exists(projectId))
+            if (!Repository.Project.Exists(projectId))
                 return pageModel.BadRequest();
 
             var data = new List<(string PartNumber, decimal Amount, bool PerformReserve)>(partNumbers.Length);
@@ -56,17 +55,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(v => v.PartNumber)
                 .ToArray();
 
-            var articleRepo = new ArticleRepository();
-            var inventoryRepo = new InventoryRepository();
-
-            var articleLookup = articleRepo.FindManyWithTypes(partNumbersToProcess);
+            var articleLookup = Repository.Article.FindManyWithTypes(partNumbersToProcess);
             var demandLookup = GetDemandLookup(projectId, articleLookup);
             var inventoryLookup = GetInventoryLookup(projectId, articleLookup);
-            var reservationsLookup = InventoryReservationEntry
-                .FindManyByProjectAndArticle(projectId, partNumbersToProcess);
+            var reservationsLookup = Repository.Inventory.FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);
 
-
-            var list = inventoryRepo.FindReservationListByProject(projectId);
+            var list = Repository.Inventory.FindReservationListByProject(projectId);
 
             void TransactionalAction()
             {
@@ -119,31 +113,34 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
 
         private static InventoryReservationList CreateList(Guid projectId)
         {
-            var list = new InventoryReservationList();
-            list.Id = Guid.NewGuid();
-            list.Project = projectId;
+            var list = new InventoryReservationList
+            {
+                Id = Guid.NewGuid(),
+                Project = projectId
+            };
 
-            return TryCreate(InventoryReservationList.Entity, list);
+            return Create(InventoryReservationList.Entity, list);
         }
 
-        private static EntityRecord CreateNewEntry(Guid listId, Guid articleId, decimal amount)
+        private static InventoryReservationEntry CreateNewEntry(Guid listId, Guid articleId, decimal amount)
         {
-            var rec = new EntityRecord();
-            rec["id"] = Guid.NewGuid();
-            rec[InventoryReservationEntry.ArticleStockReservation] = listId;
-            rec[InventoryReservationEntry.Article] = articleId;
-            rec[InventoryReservationEntry.Amount] = amount;
-
-            return TryCreate(InventoryReservationEntry.Entity, rec);
+            var rec = new InventoryReservationEntry()
+            {
+                Id = Guid.NewGuid(),
+                InventoryReservationList = listId,
+                Article = articleId,
+                Amount = amount
+            };
+            return Create(InventoryReservationEntry.Entity, rec);
         }
 
-        private static EntityRecord IncreaseAmount(EntityRecord rec, decimal amount)
+        private static InventoryReservationEntry IncreaseAmount(InventoryReservationEntry rec, decimal amount)
         {
-            rec[InventoryReservationEntry.Amount] = amount + (decimal)rec[InventoryReservationEntry.Amount];
-            return TryCreate(InventoryReservationEntry.Entity, rec);
+            rec.Amount += amount;
+            return Create(InventoryReservationEntry.Entity, rec);
         }
 
-        private static T TryCreate<T>(string entity, T rec) where T : EntityRecord
+        private static T Create<T>(string entity, T rec) where T : EntityRecord
         {
             var recMan = new RecordManager();
             var response = recMan.CreateRecord(entity, rec);
@@ -176,8 +173,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static void Validate(decimal amount, ArticleType type)
         {
             var isInt = type.IsInteger;
-            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Amount, isInt, true)
-                .Validate(amount.ToString(), string.Empty);
+            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.Amount, isInt, true)
+                .Validate(amount, string.Empty);
 
             if (errors.Count > 0)
                 throw new DbException(string.Join(Environment.NewLine, errors.Select(e => e.Message)));

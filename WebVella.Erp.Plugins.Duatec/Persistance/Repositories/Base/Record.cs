@@ -1,11 +1,11 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {
     internal static class Record
     {
-        public static bool Exists(string entity, string field, object? fieldValue)
+        internal static bool Exists(string entity, string field, object? fieldValue)
         {
             var recMan = new RecordManager();
             var response = recMan.Count(new EntityQuery(entity, "*",
@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return response.Object > 0;
         }
 
-        public static EntityRecord? Find(string entity, Guid id, string select = "*")
+        internal static EntityRecord? Find(string entity, Guid id, string select = "*")
         {
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(entity, select,
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return response.Object?.Data?.SingleOrDefault();
         }
 
-        public static EntityRecord? FindBy(string entity, string field, object? fieldValue, string select = "*")
+        internal static EntityRecord? FindBy(string entity, string field, object? fieldValue, string select = "*")
         {
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(entity, select,
@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return response.Object?.Data?.SingleOrDefault();
         }
 
-        public static List<EntityRecord> FindManyBy(string entity, string field, object? fieldValue, string select = "*")
+        internal static List<EntityRecord> FindManyBy(string entity, string field, object? fieldValue, string select = "*")
         {
             var recMan = new RecordManager();
             var response = recMan.Find(new EntityQuery(entity, select,
@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return response.Object?.Data ?? [];
         }
 
-        public static Guid? Insert(string entity, EntityRecord rec)
+        internal static Guid? Insert(string entity, EntityRecord rec)
         {
             var recMan = new RecordManager();
             var id = Guid.NewGuid();
@@ -53,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 ? id : null;
         }
 
-        public static bool Delete(string entity, Guid id)
+        internal static bool Delete(string entity, Guid id)
         {
             var recMan = new RecordManager();
 
@@ -109,6 +109,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             }
 
             return result;
+        }
+
+        internal static bool Update(string entity, EntityRecord record)
+        {
+            var recMan = new RecordManager();
+            return recMan.UpdateRecord(entity, record).Success;
         }
     }
 }

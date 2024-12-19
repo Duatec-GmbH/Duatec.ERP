@@ -1,7 +1,4 @@
 ﻿using System.Xml.Linq;
-using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
 {
@@ -101,29 +98,6 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
                 return string.Empty;
 
             return value[idx..end];
-        }
-
-        public static Dictionary<string, EntityRecord?> FindMany(params string[] partNumbers)
-        {
-            if (partNumbers.Length == 0)
-                return [];
-
-            var recMan = new RecordManager();
-            var subQuery = partNumbers
-                .Select(pn => new QueryObject() { QueryType = QueryType.EQ, FieldName = Article.Fields.PartNumber, FieldValue = pn })
-                .ToList();
-
-            var queryResponse = recMan.Find(new EntityQuery(Article.Entity, $"*, ${Article.Relations.Manufacturer}.{Company.Name}",
-                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
-
-            var result = new Dictionary<string, EntityRecord?>(partNumbers.Length);
-            foreach (var pn in partNumbers)
-                result[pn] = null;
-
-            foreach (var obj in queryResponse.Object.Data)
-                result[(string)obj[Article.Fields.PartNumber]] = obj;
-
-            return result;
         }
     }
 }

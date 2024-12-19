@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
@@ -23,18 +24,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             var entry = new Article(record);
 
-            var errors = _articleValidator.ValidateOnCreate(entry);
-            validationErrors.AddRange(errors);
-
-            if (errors.Count > 0)
+            validationErrors.AddRange(_articleValidator.ValidateOnCreate(entry));
+            if (validationErrors.Count > 0)
                 return null;
 
             var shortName = entry.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
 
-            var manufacturerId = Company.FindId(shortName)!.Value;
-            entry.Manufacturer = manufacturerId;
-
+            entry.Manufacturer = Repository.Company.FindByShortName(shortName)!.Id!.Value;
             return null;
         }
     }

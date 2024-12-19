@@ -1,48 +1,43 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
+using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
-    internal class NumberFormatValidator : PropertyValidatorBase
+    internal class NumberFormatValidator
     {
+        protected readonly string _entity;
+        protected readonly string _entityProperty;
+        protected readonly string _entityPretty;
+        protected readonly string _entityPropertyPretty;
         protected readonly bool _isInteger;
         protected readonly bool _mustBePositive;
         protected readonly bool _zeroAllowed;
 
         public NumberFormatValidator(string entity, string entityProperty, bool isInteger = false, bool mustBePositive = false, bool zeroAllowed = true)
-            : base(entity, entityProperty)
         {
+            _entity = entity;
+            _entityProperty = entityProperty;
             _isInteger = isInteger;
             _mustBePositive = mustBePositive;
             _zeroAllowed = zeroAllowed;
+
+            _entityPretty = Text.FancyfySnakeCaseStartWithUpper(entity);
+            _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
         }
 
-        protected override bool CharIsAllowed(char c)
+        public List<ValidationError> Validate(decimal value, string formField = "")
         {
-            return c >= '0' && c <= '9'
-                || c == '+'
-                || c == '.'
-                || c == ','
-                || c == '-';
-        }
+            if (value == decimal.MinValue)
+                return [new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be empty")];
 
-        public List<ValidationError> Validate(string value, string formField)
-        {
-            var result = base.ValidateFormat(value, formField);
-
-            if (!decimal.TryParse(value, out var number))
-                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} is not a number"));
-
-            if(result.Count == 0)
-            {
-                if (_isInteger && number % 1 != 0)
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} is expected to be an integer"));
-
-                if (number == 0 && !_zeroAllowed)
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be positive"));
-                if (number < 0 && _mustBePositive)
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be negative"));
-            }
+            var result = new List<ValidationError>();
+            if (_isInteger && value % 1 != 0)
+                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} is expected to be an integer"));
+            if (value == 0 && !_zeroAllowed)
+                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must be positive"));
+            if (value < 0 && _mustBePositive)
+                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be negative"));
+            
             return result;
         }
     }

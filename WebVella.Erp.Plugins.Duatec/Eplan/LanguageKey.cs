@@ -12,7 +12,7 @@
 
         public static LanguageKey English => LanguageKey.en_US;
 
-        public static LanguageKey German = LanguageKey.de_DE;
+        public static LanguageKey German => LanguageKey.de_DE;
 
         public static LanguageKey[] All => (LanguageKey[])Enum.GetValues(typeof(LanguageKey));
 

@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
@@ -19,8 +19,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             var article = record.Article;
             var location = record.WarehouseLocation;
+            var amount = record.Amount;
 
-            var amount = record.Amount.ToString();
             NumberFormatValidator amountValidator;
 
             if (location == Guid.Empty)
@@ -40,7 +40,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static NumberFormatValidator GetAmountValidator(Guid article)
         {
-            var type = new ArticleRepository().FindTypeByArticleId(article);
+            var type = Repository.Article.FindTypeByArticleId(article);
             var isInteger = type?.IsInteger is true;
             return new (InventoryEntry.Entity, InventoryEntry.Fields.Amount, isInteger, true, false);
         }

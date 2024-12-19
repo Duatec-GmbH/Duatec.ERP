@@ -3,7 +3,6 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
@@ -13,13 +12,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
     [HookAttachment(key: HookKeys.Article.Update)]
     internal class ArticleUpdateHook : IRecordManagePageHook
     {
-        private static readonly ArticleRepository _repo = new();
-
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
             var recordId = (Guid)record["id"];
 
-            var oldAlternatives = _repo.FindAlternativeIds(recordId);
+            var oldAlternatives = Repository.Article.FindAlternativeIds(recordId);
             var currentAlternatives = pageModel.GetFormValue("equivalents")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Guid.Parse)
@@ -39,10 +36,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             void TransactionalAction()
             {
                 foreach (var id in toDelete)
-                    _repo.DeleteAlternativeMapping(recordId, id);
+                    Repository.Article.DeleteAlternativeMapping(recordId, id);
 
                 foreach (var id in toAdd)
-                    _repo.InsertAlternativeMapping(recordId, id);
+                    Repository.Article.InsertAlternativeMapping(recordId, id);
             }
 
             Transactional.TryExecute(pageModel, TransactionalAction);

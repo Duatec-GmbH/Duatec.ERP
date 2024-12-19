@@ -1,21 +1,27 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public static class Warehouse
+    public class Warehouse : TypedEntityRecord
     {
         public const string Entity = "warehouse";
-        public const string Designation = "designation";
 
-        public static EntityRecord? Find(Guid id)
-            => Record.Find(Entity, id);
-
-        public static EntityRecord? FromWarehouseLocation(Guid warehouseLocationId)
+        public static class Fields
         {
-            if (WarehouseLocation.Find(warehouseLocationId)?[WarehouseLocation.Warehouse] is not Guid id)
-                return null;
-            return Find(id);
+            public const string Designation = "designation";
+        }
+
+        public Warehouse(EntityRecord? record = null)
+            : base(record) { }
+
+        public static Warehouse? Create(EntityRecord? record)
+            => record == null ? null : new Warehouse(record);
+
+        public string Designation
+        {
+            get => TryGet(Fields.Designation, string.Empty);
+            set => Properties[Fields.Designation] = value;
         }
     }
 }

@@ -1,61 +1,45 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    using Args = (Guid? PartList, Guid? Article, string DeviceTag, decimal Amount);
-
-    internal class PartListEntryValidator : IRecordValidator<EntityRecord>
+    internal class PartListEntryValidator : IRecordValidator<PartListEntry>
     {
-        public List<ValidationError> ValidateOnCreate(EntityRecord record)
+        public List<ValidationError> ValidateOnCreate(PartListEntry record)
             => Validate(record, null);
 
-
-        public List<ValidationError> ValidateOnUpdate(EntityRecord record)
+        public List<ValidationError> ValidateOnUpdate(PartListEntry record)
         {
             var result = new List<ValidationError>();
-            if (record["id"] is Guid id)
-                result.AddRange(Validate(record, id));
-            else
-            {
+            if (!record.Id.HasValue)
                 result.Add(new ValidationError(string.Empty, $"Part list entry 'id' is required"));
-                result.AddRange(Validate(record, null));
-            }
+
+            result.AddRange(Validate(record, record.Id));
             return result;
         }
 
-        private static List<ValidationError> Validate(EntityRecord record, Guid? id)
+        private static List<ValidationError> Validate(PartListEntry record, Guid? id)
         {
-            var (partList, article, _, amount) = GetArgs(record);
-
             var result = new List<ValidationError>();
-            if (!partList.HasValue)
-                result.Add(new ValidationError(PartListEntry.PartList, "Part list entry 'part list' is required"));
-            if (!article.HasValue)
-                result.Add(new ValidationError(PartListEntry.Article, "Part list entry 'article' is required"));
-            if (partList.HasValue && article.HasValue && PartListEntry.Exists(partList.Value, article.Value, id))
-                result.Add(new ValidationError(PartListEntry.Article, "Part list entry with the same article already exists within part list"));
+            if (record.PartList == Guid.Empty)
+                result.Add(new ValidationError(PartListEntry.Fields.PartList, "Part list entry 'part list' is required"));
+            if (record.Article == Guid.Empty)
+                result.Add(new ValidationError(PartListEntry.Fields.Article, "Part list entry 'article' is required"));
 
-            if (article.HasValue)
+            if (result.Count == 0 && Repository.PartList.EntryExistsWithinList(record.PartList, record.Article, id))
+                result.Add(new ValidationError(PartListEntry.Fields.Article, "Part list entry with the same article already exists within part list"));
+
+            if (record.Article != Guid.Empty)
             {
-                var type = new ArticleRepository().FindTypeByArticleId(article.Value);
-                var amountValidator = GetNumberFormatValidator(PartListEntry.Amount, type);
+                var type = Repository.Article.FindTypeByArticleId(record.Article);
+                var amountValidator = GetNumberFormatValidator(PartListEntry.Fields.Amount, type);
 
-                result.AddRange(amountValidator.Validate(amount.ToString(), PartListEntry.Amount));
+                result.AddRange(amountValidator.Validate(record.Amount, PartListEntry.Fields.Amount));
             }
 
             return result;
-        }
-
-        private static Args GetArgs(EntityRecord record)
-        {
-            return (record[PartListEntry.PartList] as Guid?,
-                record[PartListEntry.Article] as Guid?,
-                record[PartListEntry.DeviceTag] as string ?? string.Empty,
-                record[PartListEntry.Amount] as decimal? ?? 0m);
         }
 
         private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, ArticleType? type)

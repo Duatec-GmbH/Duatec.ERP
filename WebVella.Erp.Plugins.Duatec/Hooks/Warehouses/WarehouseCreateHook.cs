@@ -13,9 +13,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
         {
-            var rec = new EntityRecord();
-            rec[Warehouse.Designation] = string.Empty;
-            return rec;
+            return new Warehouse()
+            {
+                Designation = string.Empty
+            };
         }
     }
 }

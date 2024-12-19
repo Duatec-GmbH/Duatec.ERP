@@ -1,12 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class AvailableStocks4Project : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string Project = "project";
         }
@@ -18,17 +18,17 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "List of all available stocks for given project";
             ResultModel = nameof(EntityRecordList);
 
-            Parameters.Add(new() { Name = Parameter.Project, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
-            var projectId = arguments[Parameter.Project] as Guid?;
+            var projectId = arguments[Arguments.Project] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
             var demandLookup = GetDemandLookup(projectId.Value);
-            var stocks = new InventoryRepository().FindManyByProject(null)
+            var stocks = Repository.Inventory.FindManyByProject(null)
                 .Where(r => demandLookup.ContainsKey(r.Article))
                 .ToArray();
 
@@ -49,17 +49,17 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static Dictionary<Guid, decimal> GetDemandLookup(Guid projectId)
         {
-            var demandLookup = PartListEntry.FindManyByProject(projectId)
-                .GroupBy(ple => (Guid)ple[PartListEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[PartListEntry.Amount]));
+            var demandLookup = Repository.PartList.FindManyEntriesByProject(projectId, true)
+                .GroupBy(ple => ple.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var orderedLookup = OrderEntry.FindManyByProject(projectId)
-                .GroupBy(oe => (Guid)oe[OrderEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[OrderEntry.Amount]));
+            var orderedLookup = Repository.Order.FindManyEntriesByProject(projectId)
+                .GroupBy(oe => oe.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var inventoryLookup = InventoryReservationEntry.FindManyByProject(projectId)
-                .GroupBy(asre => (Guid)asre[InventoryReservationEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[InventoryReservationEntry.Amount]));
+            var inventoryLookup = Repository.Inventory.FindManyByProject(projectId)
+                .GroupBy(ie => ie.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var result = new Dictionary<Guid, decimal>(demandLookup.Count);
 
@@ -83,7 +83,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .Distinct()
                 .ToArray();
 
-            return new ArticleRepository().FindManyWithTypes(articleIds);
+            return Repository.Article.FindManyWithTypes(articleIds);
         }
 
         private static EntityRecord RecordFromGroup(
@@ -104,13 +104,16 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             rec[$"${InventoryReservationEntry.Relations.Article}"] = articles;
             rec["available"] = available;
             rec["demand"] = demand;
-            rec[InventoryReservationEntry.Amount] = Math.Min(available, demand);
+            rec[InventoryReservationEntry.Fields.Amount] = Math.Min(available, demand);
             rec["auto_reserve"] = true;
 
             return rec;
         }
 
-        private static EntityRecord GetArticle(EntityRecord rec)
-            => ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
+        private static Article GetArticle(EntityRecord rec)
+        {
+            var article = ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
+            return new Article(article);
+        }
     }
 }

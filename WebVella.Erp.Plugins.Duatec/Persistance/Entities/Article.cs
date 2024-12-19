@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
@@ -27,10 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
 
-        public Article() 
-            : base() { }
-
-        public Article(EntityRecord record) 
+        public Article(EntityRecord? record = null) 
             : base(record) { }
 
         public static Article? Create(EntityRecord? record)

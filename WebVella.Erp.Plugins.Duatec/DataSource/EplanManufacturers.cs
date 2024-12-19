@@ -6,7 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class EplanManufacturers : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string ShortName = "shortName";
             public const string Name = "name";
@@ -21,19 +21,19 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "List of all manufacturers from EPLAN Data Portal";
             ResultModel = "EntityRecordList";
 
-            Parameters.Add(new DataSourceParameter { Name = Parameter.ShortName, Type = "text", Value = "null" });
-            Parameters.Add(new DataSourceParameter { Name = Parameter.Name, Type = "text", Value = "null" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.ShortName, Type = "text", Value = "null" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.Name, Type = "text", Value = "null" });
 
-            Parameters.Add(new DataSourceParameter { Name = Parameter.Page, Type = "int", Value = "1" });
-            Parameters.Add(new DataSourceParameter { Name = Parameter.PageSize, Type = "int", Value = "10" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.Page, Type = "int", Value = "1" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
-            var page = (int)arguments[Parameter.Page];
-            var pageSize = (int)arguments[Parameter.PageSize];
-            var shortName = (string?)arguments[Parameter.ShortName];
-            var name = (string?)arguments[Parameter.Name];
+            var page = (int)arguments[Arguments.Page];
+            var pageSize = (int)arguments[Arguments.PageSize];
+            var shortName = (string?)arguments[Arguments.ShortName];
+            var name = (string?)arguments[Arguments.Name];
 
             var comparison = StringComparison.OrdinalIgnoreCase;
             var manufacturers = DataPortal.GetManufacturers()
@@ -46,13 +46,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             foreach (var m in manufacturers.Skip((page -1) * pageSize).Take(pageSize))
             {
-                result.Add(new EntityRecord()
+                result.Add(new Company()
                 {
-                    [Company.EplanId] = m.EplanId.ToString(),
-                    [Company.Name] = m.Name,
-                    [Company.ShortName] = m.ShortName,
-                    [Company.WebsiteUrl] = m.WebsiteUrl,
-                    [Company.LogoUrl] = m.LogoUrl,
+                    EplanId = m.EplanId.ToString(),
+                    Name = m.Name,
+                    ShortName = m.ShortName,
+                    WebsiteUrl = m.WebsiteUrl,
+                    LogoUrl = m.LogoUrl,
                 });
             }
             return result;

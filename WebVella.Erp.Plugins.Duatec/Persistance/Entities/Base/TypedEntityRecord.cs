@@ -1,14 +1,14 @@
 ﻿using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Persistance
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base
 {
     public abstract class TypedEntityRecord : EntityRecord
     {
-        public TypedEntityRecord() 
-            : base() { }
-
-        public TypedEntityRecord(EntityRecord record) 
-            : base() { Properties = record.Properties; }
+        public TypedEntityRecord(EntityRecord? record = null)
+        {
+            if (record != null)
+                Properties = record.Properties;
+        }
 
         public Guid? Id
         {

@@ -1,37 +1,36 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class WarehouseLocationValidator : IRecordValidator<EntityRecord>
+    internal class WarehouseLocationValidator : IRecordValidator<WarehouseLocation>
     {
-        private static readonly NameFormatValidator _labelValidator = new(Warehouse.Entity, Warehouse.Designation);
+        private static readonly NameFormatValidator _labelValidator = new(Warehouse.Entity, Warehouse.Fields.Designation);
         private static readonly string _warehousePretty = Text.FancyfySnakeCase(Warehouse.Entity);
         private static readonly string _entityPretty = Text.FancyfySnakeCaseStartWithUpper(WarehouseLocation.Entity);
-        private static readonly string _entityPropertyPretty = Text.FancyfySnakeCase(WarehouseLocation.Designation);
+        private static readonly string _entityPropertyPretty = Text.FancyfySnakeCase(WarehouseLocation.Fields.Designation);
 
-        public List<ValidationError> ValidateOnCreate(EntityRecord record)
+        public List<ValidationError> ValidateOnCreate(WarehouseLocation record)
             => Validate(record, null);
 
-        public List<ValidationError> ValidateOnUpdate(EntityRecord record)
-            => Validate(record, (Guid)record["id"]);
+        public List<ValidationError> ValidateOnUpdate(WarehouseLocation record)
+            => Validate(record, record.Id!.Value);
 
-
-        private static List<ValidationError> Validate(EntityRecord record, Guid? id)
+        private static List<ValidationError> Validate(WarehouseLocation record, Guid? id)
         {
-            var warehouse = record[WarehouseLocation.Warehouse] as Guid?;
-            var designation = record[WarehouseLocation.Designation] as string ?? string.Empty;
+            var result = _labelValidator.Validate(record.Designation, WarehouseLocation.Fields.Designation);
 
-            var result = _labelValidator.Validate(designation, WarehouseLocation.Designation);
+            if (record.Warehouse == Guid.Empty)
+                result.Add(new ValidationError(WarehouseLocation.Fields.Warehouse, $"Please select a {_warehousePretty}"));
 
-            if (!warehouse.HasValue)
-                result.Add(new ValidationError(WarehouseLocation.Warehouse, $"Please select a {_warehousePretty}"));
-
-            if (result.Count == 0 && WarehouseLocation.Exists(warehouse!.Value, designation, id))
-                result.Add(new ValidationError(WarehouseLocation.Designation, $"{_entityPretty} {_entityPropertyPretty} '{designation}' already exists within selected {_warehousePretty}"));
+            if (result.Count == 0 && Repository.Warehouse.EntryExistsWithinWarehouse(record.Warehouse, record.Designation, id))
+            {
+                var message = $"{_entityPretty} {_entityPropertyPretty} '{record.Designation}' already exists within selected {_warehousePretty}";
+                result.Add(new ValidationError(WarehouseLocation.Fields.Designation, message));
+            }
 
             return result;
         }

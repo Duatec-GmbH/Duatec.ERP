@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
@@ -40,10 +40,10 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             if (article.HasValue)
             {
-                var type = new ArticleRepository().FindTypeByArticleId(article.Value);
+                var type = Repository.Article.FindTypeByArticleId(article.Value);
                 var amountValidator = GetNumberFormatValidator(GoodsReceivingEntry.Amount, type);
 
-                result.AddRange(amountValidator.Validate(amount.ToString(), GoodsReceivingEntry.Amount));
+                result.AddRange(amountValidator.Validate(amount, GoodsReceivingEntry.Amount));
             }
 
             return result;

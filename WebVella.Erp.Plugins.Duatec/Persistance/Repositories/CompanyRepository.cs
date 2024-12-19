@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -14,6 +15,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public Dictionary<string, Company?> FindManyByShortName(params string[] shortNames)
             => FindManyByUniqueArgs(Company.Fields.ShortName, "*", shortNames);
+
+        public Company? FindByShortName(string shortName)
+            => FindBy(Company.Fields.ShortName, shortName);
 
         public Guid? Insert(DataPortalManufacturer manufacturer)
         {

@@ -5,7 +5,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
     internal class ProjectNumberValidator : NameUniqueValidator
     {
         public ProjectNumberValidator() 
-            : base(Project.Entity, Project.Number)
+            : base(Project.Entity, Project.Fields.Number)
         { }
 
         protected override bool CharIsAllowed(char c)

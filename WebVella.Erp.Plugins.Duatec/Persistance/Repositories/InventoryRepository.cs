@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -9,13 +10,14 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public override string Entity => InventoryEntry.Entity;
 
         protected override InventoryEntry? MapToTypedRecord(EntityRecord? record)
-            => record == null ? null : new InventoryEntry(record);
+            => InventoryEntry.Create(record);
 
         public List<InventoryEntry> FindManyByArticle(Guid articleId)
             => FindManyBy(InventoryEntry.Fields.Article, articleId);
 
         public List<InventoryEntry> FindManyByProject(Guid? projectId)
             => FindManyBy(InventoryEntry.Fields.Project, projectId);
+
 
         public List<InventoryEntry> FindManyByArticleAndProject(Guid articleId, Guid? projectId, string select = "*")
         {

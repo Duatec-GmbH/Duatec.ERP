@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
@@ -19,11 +20,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Amount = "amount";
         }
 
-        public InventoryReservationEntry(EntityRecord record)
+        public InventoryReservationEntry(EntityRecord? record = null)
             : base(record) { }
-
-        public InventoryReservationEntry()
-            : base() { }
 
         public static InventoryReservationEntry? Create(EntityRecord? record)
             => record == null ? null : new InventoryReservationEntry(record);
@@ -42,7 +40,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public decimal Amount
         {
-            get => TryGet<decimal>(Fields.Amount);
+            get => TryGet(Fields.Amount, decimal.MinValue);
             set => Properties[Fields.Amount] = value;
         }
     }

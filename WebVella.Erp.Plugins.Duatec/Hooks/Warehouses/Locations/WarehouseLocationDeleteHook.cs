@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
@@ -10,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
         protected override string Entity => WarehouseLocation.Entity;
 
         protected override string? RecordLabel(Guid id)
-            => WarehouseLocation.Find(id)?[WarehouseLocation.Designation] as string;
+            => Repository.Warehouse.Find(id)?.Designation;
     }
 }

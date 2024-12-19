@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Eplan
 {
@@ -42,10 +42,8 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             if (eplanArticles.Count == 0)
                 return [];
 
-            var repo = new ArticleRepository();
-
             var partNumbers = GetPartNumbers(eplanArticles);
-            var dbArticles = repo.FindMany(partNumbers);
+            var dbArticles = Repository.Article.FindMany(partNumbers);
             var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);

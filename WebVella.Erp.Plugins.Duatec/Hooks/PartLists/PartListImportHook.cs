@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -53,8 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 .Distinct()
                 .ToArray();
 
-            var articleRepo = new ArticleRepository();
-            var articleLookup = articleRepo.FindMany(partNumbers);
+            var articleLookup = Repository.Article.FindMany(partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);
@@ -65,12 +61,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 
             void TransactionalAction()
             {
-                var recMan = new RecordManager();
                 foreach(var rec in entries)
                 {
-                    var result = recMan.CreateRecord(PartListEntry.Entity, rec);
-                    if (!result.Success)
-                        throw new DbException($"Could not create part list entry: {result.GetMessage()}");
+                    if (!Repository.PartList.Insert(rec).HasValue)
+                        throw new DbException($"Could not create part list entries");
                 }
             }
 
@@ -110,17 +104,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             => (part.PartNumber, part.TypeNumber, part.OrderNumber, part.Description);
         
 
-        private static EntityRecord ListEntryRecord(IGrouping<Key, EplanPart> group, Dictionary<string, Article> articleLookup, Guid partListId)
+        private static PartListEntry ListEntryRecord(IGrouping<Key, EplanPart> group, Dictionary<string, Article> articleLookup, Guid partListId)
         {
-            var rec = new EntityRecord();
-
-            rec["id"] = Guid.NewGuid();
-            rec[PartListEntry.PartList] = partListId;
-            rec[PartListEntry.Article] = articleLookup[group.Key.PartNumber]["id"];
-            rec[PartListEntry.DeviceTag] = ListAgg(group);
-            rec[PartListEntry.Amount] = group.Count();
-
-            return rec;
+            return new PartListEntry()
+            {
+                Id = Guid.NewGuid(),
+                PartList = partListId,
+                Article = articleLookup[group.Key.PartNumber].Id!.Value,
+                DeviceTag = ListAgg(group),
+                Amount = group.Count()
+            };
         }
 
         private static string ListAgg(IGrouping<Key, EplanPart> group)

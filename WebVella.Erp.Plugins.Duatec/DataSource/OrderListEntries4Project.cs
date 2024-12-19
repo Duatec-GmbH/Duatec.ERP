@@ -1,12 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class OrderListEntries4Project : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string Project = "project";
             public const string PartNumber = "partNumber";
@@ -18,6 +18,27 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string State = "state";
             public const string Page = "page";
             public const string PageSize = "pageSize";
+        }
+
+        public static class Record
+        {
+            public static class Relations
+            {
+                public const string Project = "order_list_entry_project";
+                public const string Article = "order_list_entry_article";
+                public const string Order = "order_list_entry_order";
+            }
+
+            public static class Fields
+            {
+                public const string Project = "project_id";
+                public const string Article = "article_id";
+                public const string Demand = "demand";
+                public const string OrderedAmount = "ordered_amount";
+                public const string ReceivedAmount = "received_amount";
+                public const string InventoryAmount = "inventory_amount";
+                public const string State = "state";
+            }
         }
 
         public OrderListEntries4Project(Guid articleId)
@@ -33,37 +54,37 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "List of all order list entries for given project";
             ResultModel = nameof(EntityRecordList);
 
-            Parameters.Add(new() { Name = Parameter.Project, Type = "guid", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.PartNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.TypeNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.OrderNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.Designation, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.Manufacturer, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.Order, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.State, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.Page, Type = "int", Value = "1" });
-            Parameters.Add(new() { Name = Parameter.PageSize, Type = "int", Value = "10" });
+            Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.PartNumber, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.TypeNumber, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Order, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.State, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
+            Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
 
         public Guid? ArticleId { get; }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
-            var projectId = arguments[Parameter.Project] as Guid?;
+            var projectId = arguments[Arguments.Project] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
             var records = GetRecords(projectId.Value);
 
-            var partNumber = arguments[Parameter.PartNumber]?.ToString();
-            var typeNumber = arguments[Parameter.TypeNumber]?.ToString();
-            var orderNumber = arguments[Parameter.OrderNumber]?.ToString();
-            var designation = arguments[Parameter.Designation]?.ToString();
-            var manufacturer = arguments[Parameter.Manufacturer]?.ToString();
-            var order = arguments[Parameter.Order]?.ToString();
-            var state = arguments[Parameter.State]?.ToString();
-            var page = (int)arguments[Parameter.Page];
-            var pageSize = (int)arguments[Parameter.PageSize];
+            var partNumber = arguments[Arguments.PartNumber]?.ToString();
+            var typeNumber = arguments[Arguments.TypeNumber]?.ToString();
+            var orderNumber = arguments[Arguments.OrderNumber]?.ToString();
+            var designation = arguments[Arguments.Designation]?.ToString();
+            var manufacturer = arguments[Arguments.Manufacturer]?.ToString();
+            var order = arguments[Arguments.Order]?.ToString();
+            var state = arguments[Arguments.State]?.ToString();
+            var page = (int)arguments[Arguments.Page];
+            var pageSize = (int)arguments[Arguments.PageSize];
 
             records = ApplyArticleFilter(partNumber, Article.Fields.PartNumber, records);
             records = ApplyArticleFilter(typeNumber, Article.Fields.TypeNumber, records);
@@ -93,13 +114,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static IEnumerable<EntityRecord> ApplyOrderFilter(string? filterValue, IEnumerable<EntityRecord> records)
         {
-            const string orders = $"${OrderListEntry.Relations.Order}";
+            const string orders = $"${Record.Relations.Order}";
 
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
             return records.Where(r => ((List<EntityRecord>)r[orders])
-                    .Any(o => o[Order.Number].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
+                    .Any(o => o[Order.Fields.Number].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
         }
 
         private static IEnumerable<EntityRecord> ApplyManufacturerFilter(string? filterValue, IEnumerable<EntityRecord> records)
@@ -108,7 +129,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return records;
 
             return records
-                .Where(r => GetManufacturer(r)[Company.Name].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                .Where(r => GetManufacturer(r).Name.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
         }
 
         private static IEnumerable<EntityRecord> ApplyStateFilter(string? filterValue, IEnumerable<EntityRecord> records)
@@ -116,65 +137,64 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
-            return records.Where(r => ((string)r[OrderListEntry.State]).Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+            return records.Where(r => ((string)r[Record.Fields.State]).Contains(filterValue, StringComparison.OrdinalIgnoreCase));
         }
 
         private IEnumerable<EntityRecord> GetRecords(Guid projectId)
         {
-            if (Project.Find(projectId) is not EntityRecord project)
+            if (Repository.Project.Find(projectId) is not Project project)
                 return [];
 
-            var projectOrderEntries = OrderEntry.FindManyByProject(projectId);
-            var orderEntries = Order.FindManyByProject(projectId)
-                .ToDictionary(r => (Guid)r["id"], r => r);
+            var projectOrderEntries = Repository.Order.FindManyEntriesByProject(projectId);
+            var orderEntries = Repository.Order.FindManyByProject(projectId)
+                .ToDictionary(r => r.Id!.Value, r => r);
 
             var orderedAmountLookup = projectOrderEntries
-                .GroupBy(r => (Guid)r[OrderEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[OrderEntry.Amount]));
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var receivedAmountLookup = GoodsReceivingEntry.FindManyByProject(projectId)
                 .GroupBy(r => (Guid)r[GoodsReceivingEntry.Article])
                 .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[GoodsReceivingEntry.Amount]));
 
             var ordersLookup = projectOrderEntries
-                .GroupBy(r => (Guid)r[OrderEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[(Guid)r[OrderEntry.Order]]).ToList());
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[r.Order]).ToList());
 
-            var inventoryAmountLookup = InventoryReservationEntry.FindManyByProject(projectId)
-                .GroupBy(r => (Guid)r[InventoryReservationEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[InventoryReservationEntry.Amount]));
+            var inventoryAmountLookup = Repository.Inventory.FindManyReservationEntriesByProject(projectId)
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var partListEntries = !ArticleId.HasValue
-                ? PartListEntry.FindManyByProject(projectId, true)
-                : PartListEntry.FindManyByProjectAndArticle(projectId, ArticleId.Value, true);
+                ? Repository.PartList.FindManyEntriesByProject(projectId, true)
+                : Repository.PartList.FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true);
 
             var articleLookup = GetArticleLookup(partListEntries);
 
             return partListEntries
-                .GroupBy(ple => (Guid)ple[PartListEntry.Article])
+                .GroupBy(ple => ple.Article)
                 .Select(g => RecordFromGroup(g, project, 
                     articleLookup, ordersLookup, 
                     orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
-                .OrderBy(r => GetArticle(r)[Article.Fields.PartNumber].ToString());
+                .OrderBy(r => GetArticle(r).PartNumber.ToString());
         }
 
-        private static Dictionary<Guid, Article?> GetArticleLookup(List<EntityRecord> partListEntries)
+        private static Dictionary<Guid, Article?> GetArticleLookup(List<PartListEntry> partListEntries)
         {
-            var articleRepo = new ArticleRepository();
+            var articleRepo = Repository.Article;
             var articleIds = partListEntries
-                .Select(ple => (Guid)ple[PartListEntry.Article])
+                .Select(ple => ple.Article)
                 .Distinct()
                 .ToArray();
 
             return articleRepo.FindManyWithTypes(articleIds);
         }
 
-
         private static EntityRecord RecordFromGroup(
-            IGrouping<Guid, EntityRecord> group, 
-            EntityRecord project,
+            IGrouping<Guid, PartListEntry> group, 
+            Project project,
             Dictionary<Guid, Article?> articleLookup,
-            Dictionary<Guid, List<EntityRecord>> ordersLookup, 
+            Dictionary<Guid, List<Order>> ordersLookup, 
             Dictionary<Guid, decimal> orderedAmountLookup, 
             Dictionary<Guid, decimal> receivedAmountLookup, 
             Dictionary<Guid, decimal> inventoryAmountLookup)
@@ -182,51 +202,33 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var rec = new EntityRecord();
 
             var commons = group.First();
-            var articleId = (Guid)commons[PartListEntry.Article];
+            var articleId = commons.Article;
             var article = articleLookup[articleId];
             var articles = article == null ? [] : new List<EntityRecord>() { article };
-            var amount = group.Sum(r => (decimal)r[PartListEntry.Amount]);
+            var demand = group.Sum(r => r.Amount);
+            var orders = new List<EntityRecord>();
+            orders.AddRange(GetOrders(articleId, ordersLookup));
 
             rec["id"] = articleId;
-            rec[OrderListEntry.Project] = (Guid)project["id"];
-            rec[OrderListEntry.Article] = articleId;
+            rec[Record.Fields.Project] = (Guid)project["id"];
+            rec[Record.Fields.Article] = articleId;
 
-            rec[$"${OrderListEntry.Relations.Article}"] = articles;
-            rec[$"${OrderListEntry.Relations.Project}"] = new List<EntityRecord>() { project };
-            rec[$"${OrderListEntry.Relations.Order}"] = GetOrders(articleId, ordersLookup);
-            SetFields(rec, amount, orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup);
+            rec[$"${Record.Relations.Article}"] = articles;
+            rec[$"${Record.Relations.Project}"] = new List<EntityRecord>() { project };
+            rec[$"${Record.Relations.Order}"] = orders;
+
+            var orderedAmount = GetAmount(orderedAmountLookup, articleId);
+            var receivedAmount = GetAmount(receivedAmountLookup, articleId);
+            var inventoryAmount = GetAmount(inventoryAmountLookup, articleId);
+
+            rec[Record.Fields.Demand] = demand;
+            rec[Record.Fields.OrderedAmount] = orderedAmount;
+            rec[Record.Fields.ReceivedAmount] = receivedAmount;
+            rec[Record.Fields.InventoryAmount] = inventoryAmount;
+            rec[Record.Fields.State] = GetState(demand, orderedAmount, receivedAmount, inventoryAmount);
 
             return rec;
         }
-
-        private static List<EntityRecord> GetOrders(Guid articleId, Dictionary<Guid, List<EntityRecord>> ordersLookup)
-        {
-            if (!ordersLookup.TryGetValue(articleId, out var orders))
-                return [];
-            return orders;
-        }
-
-        private static void SetFields(
-            EntityRecord rec, 
-            decimal demand, 
-            Dictionary<Guid, decimal> orderedAmountLookup, 
-            Dictionary<Guid, decimal> receivedAmountLookup, 
-            Dictionary<Guid, decimal> inventoryAmountLookup)
-        {
-            var article = (Guid)GetArticle(rec)["id"];
-            var orderedAmount = GetAmount(orderedAmountLookup, article);
-            var receivedAmount = GetAmount(receivedAmountLookup, article);
-            var inventoryAmount = GetAmount(inventoryAmountLookup, article);
-
-            rec[OrderListEntry.Demand] = demand;
-            rec[OrderListEntry.OrderedAmount] = orderedAmount;
-            rec[OrderListEntry.ReceivedAmount] = receivedAmount;
-            rec[OrderListEntry.InventoryAmount] = inventoryAmount;
-            rec[OrderListEntry.State] = GetState(demand, orderedAmount, receivedAmount, inventoryAmount);
-        }
-
-        private static EntityRecord GetArticle(EntityRecord record)
-            => ((List<EntityRecord>)record[$"${OrderListEntry.Relations.Article}"])[0];
 
         private static string GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory)
         {
@@ -236,11 +238,24 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return "To Order";
             return "Incomming";
         }
+        private static List<Order> GetOrders(Guid articleId, Dictionary<Guid, List<Order>> ordersLookup)
+        {
+            if (!ordersLookup.TryGetValue(articleId, out var orders))
+                return [];
+            return orders;
+        }
 
-        private static EntityRecord GetManufacturer(EntityRecord rec)
+        private static Article GetArticle(EntityRecord record)
+        {
+            var article = ((List<EntityRecord>)record[$"${Record.Relations.Article}"])[0];
+            return new Article(article);
+        }
+
+        private static Company GetManufacturer(EntityRecord rec)
         {
             var article = GetArticle(rec);
-            return ((List<EntityRecord>)article[$"${Article.Relations.Manufacturer}"])[0];
+            var record = ((List<EntityRecord>)article[$"${Article.Relations.Manufacturer}"])[0];
+            return new Company(record);
         }
 
         private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)

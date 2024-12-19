@@ -5,7 +5,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class OrderListEntryDetail : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string Project = "project";
             public const string Article = "article";
@@ -18,14 +18,14 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "Order List Entry detail for given project and article";
             ResultModel = nameof(EntityRecord);
 
-            Parameters.Add(new() { Name = Parameter.Project, Type = "guid", Value = "null" });
-            Parameters.Add(new() { Name = Parameter.Article, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Article, Type = "guid", Value = "null" });
         }
 
         public override object? Execute(Dictionary<string, object> arguments)
         {
-            var projectId = arguments[Parameter.Project] as Guid?;
-            var articleId = arguments[Parameter.Article] as Guid?;
+            var projectId = arguments[Arguments.Project] as Guid?;
+            var articleId = arguments[Arguments.Article] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty || !articleId.HasValue || articleId == Guid.Empty)
                 return null;
 
@@ -38,7 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         private static Dictionary<string, object> BuildDataSourceArguments(OrderListEntries4Project ds, Guid projectId)
         {
             var result = ds.GetDefaultArgs();
-            result[OrderListEntries4Project.Parameter.Project] = projectId;
+            result[OrderListEntries4Project.Arguments.Project] = projectId;
             return result;
         }
     }

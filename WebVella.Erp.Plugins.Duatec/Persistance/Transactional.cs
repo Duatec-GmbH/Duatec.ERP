@@ -34,7 +34,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance
             }
         }
 
-        public static bool TryExecute(BaseErpPageModel pageModel, Action action)
+        public static bool TryExecute(BaseErpPageModel? pageModel, Action action)
         {
             using var dbCtx = DbContext.CreateContext(ErpSettings.ConnectionString);
             using var connection = dbCtx.CreateConnection();
@@ -49,10 +49,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance
             catch (Exception ex)
             {
                 connection.RollbackTransaction();
-                pageModel.PutMessage(ScreenMessageType.Error, ex.Message);
+                pageModel?.PutMessage(ScreenMessageType.Error, ex.Message);
                 return false;
             }
         }
+
+        public static bool TryExecute(Action action)
+            => TryExecute(null, action);
 
         private static LocalRedirectResult DeleteFailure(DbConnection connection, BaseErpPageModel pageModel, string message)
         {

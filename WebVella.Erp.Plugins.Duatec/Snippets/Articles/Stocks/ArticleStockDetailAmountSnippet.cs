@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -27,7 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
         private static ArticleType? GetArticleType(InventoryEntry rec)
         {
             return rec.Article != Guid.Empty
-                ? new ArticleRepository().FindTypeByArticleId(rec.Article)
+                ? Repository.Article.FindTypeByArticleId(rec.Article)
                 : null;
         }
     }

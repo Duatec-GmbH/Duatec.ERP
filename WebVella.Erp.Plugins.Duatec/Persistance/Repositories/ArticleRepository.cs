@@ -1,12 +1,24 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class ArticleRepository : RepositoryBase<Article>
     {
-        private const string ManufacturerSelect = $"*, ${Article.Relations.Manufacturer}.{Company.Name}";
+        public static class Alternatives
+        {
+            public const string Entity = "article_equivalent";
+
+            public static class Fields
+            {
+                public const string Source = "source";
+                public const string Target = "target";
+            }
+        }
+
+        private const string DefaultSelect = $"*, ${Article.Relations.Manufacturer}.{Company.Fields.Name}";
 
         public override string Entity => Article.Entity;
 
@@ -14,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
              => Article.Create(record);
 
         public Article? Find(Guid id)
-            => Find(id, ManufacturerSelect);
+            => Find(id, DefaultSelect);
 
         public bool Exists(long eplanId)
             => ExistsBy(Article.Fields.EplanId, eplanId.ToString());
@@ -23,16 +35,30 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             => ExistsBy(Article.Fields.PartNumber, partNumber);
 
         public Dictionary<string, Article?> FindMany(params string[] partNumbers)
-            => FindManyByUniqueArgs(Article.Fields.PartNumber, ManufacturerSelect, partNumbers);
+            => FindManyByUniqueArgs(Article.Fields.PartNumber, DefaultSelect, partNumbers);
 
         public Dictionary<string, Article?> FindManyWithTypes(params string[] partNumbers)
             => IncludeTypes(FindMany(partNumbers));
 
         public Dictionary<Guid, Article?> FindMany(params Guid[] ids)
-            => FindManyByUniqueArgs("id", ManufacturerSelect, ids);
+            => FindManyByUniqueArgs("id", DefaultSelect, ids);
 
         public Dictionary<Guid, Article?> FindManyWithTypes(params Guid[] ids)
             => IncludeTypes(FindMany(ids));
+
+        public override bool Delete(Guid id)
+        {
+            var alternatives = FindAlternativeIds(id);
+            var result = false;
+
+            Transactional.TryExecute(() =>
+            {
+                foreach (var alternative in alternatives)
+                    DeleteAlternativeMapping(alternative, id);
+                result = base.Delete(id);
+            });
+            return result;
+        }
 
         public Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
         {
@@ -72,18 +98,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             var result = new Dictionary<Guid, ArticleType?>(dict.Count);
 
             foreach (var (key, val) in dict)
-                result[key] = val == null ? null : new ArticleType(val);
+                result[key] = ArticleType.Create(val);
 
             return result;
         }
 
         public bool ArticleHasAlternatives(Guid id)
-            => Record.Exists(ArticleAlternative.Entity, ArticleAlternative.Fields.Source, id);
+            => Record.Exists(Alternatives.Entity, Alternatives.Fields.Source, id);
 
         public List<Guid> FindAlternativeIds(Guid id)
         {
-            return Record.FindManyBy(ArticleAlternative.Entity, ArticleAlternative.Fields.Source, id)
-                .Select(r => (Guid)r[ArticleAlternative.Fields.Target])
+            return Record.FindManyBy(Alternatives.Entity, Alternatives.Fields.Source, id)
+                .Select(r => (Guid)r[Alternatives.Fields.Target])
                 .ToList();
         }
 
@@ -118,7 +144,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             foreach (var rec in articleLookup.Values.Where(v => v != null))
             {
                 var typeId = (Guid)rec![Article.Fields.Type];
-                var list = new List<ArticleType>();
+                var list = new List<EntityRecord>();
 
                 if (typeLookup.TryGetValue(typeId, out var type) && type != null)
                     list.Add(type);
@@ -136,10 +162,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 return id;
 
             var rec = new EntityRecord();
-            rec[ArticleAlternative.Fields.Source] = source;
-            rec[ArticleAlternative.Fields.Target] = target;
+            rec[Alternatives.Fields.Source] = source;
+            rec[Alternatives.Fields.Target] = target;
 
-            return Record.Insert(ArticleAlternative.Entity, rec);
+            return Record.Insert(Alternatives.Entity, rec);
         }
 
         private static void DeleteAlternativeEntry(Guid source, Guid target)
@@ -148,7 +174,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (!id.HasValue)
                 return;
 
-            Record.Delete(ArticleAlternative.Entity, id.Value);
+            Record.Delete(Alternatives.Entity, id.Value);
         }
 
         private static EntityRecord? FindAlternative(Guid source, Guid target)
@@ -160,19 +186,19 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 [
                     new()
                     {
-                        FieldName = ArticleAlternative.Fields.Source,
+                        FieldName = Alternatives.Fields.Source,
                         FieldValue = source,
                         QueryType = QueryType.EQ
                     },
                     new()
                     {
-                        FieldName = ArticleAlternative.Fields.Target,
+                        FieldName = Alternatives.Fields.Target,
                         FieldValue = target,
                         QueryType = QueryType.EQ
                     },
                 ]
             };
-            return Record.FindByQuery(ArticleAlternative.Entity, query);
+            return Record.FindByQuery(Alternatives.Entity, query);
         }
     }
 }

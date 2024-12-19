@@ -1,12 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class ArticleEquivalents : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string Id = "id";
             public const string SortBy = "sortBy";
@@ -20,26 +20,23 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "All equivalents of an article";
             ResultModel = nameof(EntityRecordList);
 
-            Parameters.Add(new DataSourceParameter { Name = Parameter.Id, Type = "guid", Value = "null" });
-            Parameters.Add(new DataSourceParameter { Name = Parameter.SortBy, Type = "text", Value = Article.Fields.PartNumber });
-            Parameters.Add(new DataSourceParameter { Name = Parameter.SortOrder, Type = "text", Value = "asc" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.Id, Type = "guid", Value = "null" });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.SortBy, Type = "text", Value = Article.Fields.PartNumber });
+            Parameters.Add(new DataSourceParameter { Name = Arguments.SortOrder, Type = "text", Value = "asc" });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
             var result = new EntityRecordList();
-            if (!arguments.TryGetValue(Parameter.Id, out var objId) || objId is not Guid id)
+            if (!arguments.TryGetValue(Arguments.Id, out var objId) || objId is not Guid id)
                 return result;
 
-            var repo = new ArticleRepository();
-
-            // This could be optimized but I do not expect many article to be defined as alternative
-            var articles = repo.FindAlternativeIds(id)
-                .Select(repo.Find)
+            var articles = Repository.Article.FindAlternativeIds(id)
+                .Select(Repository.Article.Find)
                 .Where(a => a != null)!;
 
-            var sortBy = (string)arguments[Parameter.SortBy];
-            var sortOrder = (string)arguments[Parameter.SortOrder];
+            var sortBy = (string)arguments[Arguments.SortBy];
+            var sortOrder = (string)arguments[Arguments.SortOrder];
 
             if (sortBy == Article.Fields.Designation)
                 articles = articles.OrderBy(a => a!.Designation);

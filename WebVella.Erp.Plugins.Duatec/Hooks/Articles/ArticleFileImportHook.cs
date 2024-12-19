@@ -5,7 +5,6 @@ using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -69,11 +68,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             {
                 foreach (var article in articles)
                 {
-                    var manufacturer = Company.FindId(article!.Manufacturer.ShortName)
-                        ?? Company.Insert(article.Manufacturer)
+                    var manufacturer = Repository.Company.FindByShortName(article!.Manufacturer.ShortName)?.Id
+                        ?? Repository.Company.Insert(article.Manufacturer)
                         ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
 
-                    if (new ArticleRepository().Insert(article, manufacturer, types[article.PartNumber]) == null)
+                    if (Repository.Article.Insert(article, manufacturer, types[article.PartNumber]) == null)
                         throw new DbException($"Could not create article '{article.PartNumber}'.");
                 }
             }

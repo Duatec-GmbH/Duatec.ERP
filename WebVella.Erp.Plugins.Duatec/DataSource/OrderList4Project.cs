@@ -1,11 +1,12 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
     internal class OrderList4Project : CodeDataSource
     {
-        public static class Parameter
+        public static class Arguments
         {
             public const string Project = "project";
         }
@@ -17,22 +18,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Description = "List of all order lists for given project";
             ResultModel = nameof(EntityRecordList);
 
-            Parameters.Add(new() { Name = Parameter.Project, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
         {
-            var projectId = arguments[Parameter.Project] as Guid?;
+            var projectId = arguments[Arguments.Project] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
-            var project = Project.Find(projectId.Value);
+            var project = Repository.Project.Find(projectId.Value);
             if (project == null)
                 return new EntityRecordList();
 
             var rec = new EntityRecord();
             rec["id"] = projectId.Value;
-            rec["name"] = $"{project[Project.Number]} - Order List";
+            rec["name"] = $"{project.Number} - Order List";
 
             var result = new EntityRecordList { rec };
             result.TotalCount = 1;

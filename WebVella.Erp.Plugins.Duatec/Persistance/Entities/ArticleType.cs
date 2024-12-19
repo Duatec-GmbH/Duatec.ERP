@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
@@ -13,11 +14,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string IsInteger = "is_integer";
         }
 
-        public ArticleType()
-            : base() { }
-
-        public ArticleType(EntityRecord rec)
-            : base(rec) { }
+        public ArticleType(EntityRecord? record = null)
+            : base(record) { }
 
         public static ArticleType? Create(EntityRecord? rec)
             => rec == null ? null : new ArticleType(rec);

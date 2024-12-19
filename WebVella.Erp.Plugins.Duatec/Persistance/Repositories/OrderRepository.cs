@@ -1,14 +1,20 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class OrderRepository : RepositoryBase<Order>
+    internal class OrderRepository : ListRepositoryBase<Order, OrderEntry>
     {
         public override string Entity => Order.Entity;
 
+        protected override string EntryEntity => OrderEntry.Entity;
+
         protected override Order? MapToTypedRecord(EntityRecord? record)
             => Order.Create(record);
+
+        protected override OrderEntry? MapEntryToTypedRecord(EntityRecord? record)
+            => OrderEntry.Create(record);
 
         public List<Order> FindManyByProject(Guid projectId, string select = "*")
             => FindManyBy(Order.Fields.Project, projectId, select);
@@ -33,7 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     }).ToList()
             };
 
-            return FindManyByQuery(query);
+            return FindManyByQuery(query, select);
         }
 
         public List<OrderEntry> FindManyEntriesByProject(Guid projectId, string select = "*")
@@ -60,13 +66,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             };
 
             return FindManyEntriesByQuery(query, select);
-        }
-
-        private static List<OrderEntry> FindManyEntriesByQuery(QueryObject query, string select)
-        {
-            return Record.FindManyByQuery(OrderEntry.Entity, query, select)
-                .Select(OrderEntry.Create)
-                .ToList()!;
         }
 
         private QueryObject OrdersByProjectQuery(Guid projectId)

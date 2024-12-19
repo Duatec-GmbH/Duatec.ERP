@@ -1,59 +1,31 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    using Args = (string Name, Guid? Project, bool IsActive);
-
-    internal class PartListValidator : IRecordValidator<EntityRecord>
+    internal class PartListValidator : IRecordValidator<PartList>
     {
-        private static readonly NameFormatValidator _nameFormatValidator = new(PartList.Entity, PartList.Name);
+        private static readonly NameFormatValidator _nameFormatValidator = new(PartList.Entity, PartList.Fields.Name);
 
-        public List<ValidationError> ValidateOnCreate(EntityRecord record)
-        {
-            var args = GetArgs(record);
+        public List<ValidationError> ValidateOnCreate(PartList record)
+            => Validate(record, null);
 
-            var result = ValidateFormat(record);
-
-            if (result.Count == 0 && PartList.Exists(args.Project!.Value, args.Name))
-                result.Add(NameUniqueError());
-
-            return result;
-        }
-
-        public List<ValidationError> ValidateOnUpdate(EntityRecord record)
-        {
-            var id = (Guid)record["id"];
-            var args = GetArgs(record);
-
-            var result = ValidateFormat(record);
-
-            if (result.Count == 0 && PartList.Exists(args.Project!.Value, args.Name, id))
-                result.Add(NameUniqueError());
-
-            return result;
-        }
+        public List<ValidationError> ValidateOnUpdate(PartList record)
+            => Validate(record, record.Id!.Value);
 
         private static ValidationError NameUniqueError()
-            => new (PartList.Name, "Part list name must be unique within projects");
+            => new (PartList.Fields.Name, "Part list name must be unique within projects");
 
-        private static Args GetArgs(EntityRecord record)
+        private static List<ValidationError> Validate(PartList record, Guid? id)
         {
-            return (record[PartList.Name] as string ?? string.Empty,
-                record[PartList.Project] as Guid?,
-                record[PartList.IsActive] as bool? ?? false);
-        }
+            var result = _nameFormatValidator.Validate(record.Name, PartList.Fields.Name);
 
-        private static List<ValidationError> ValidateFormat(EntityRecord record)
-        {
-            var name = record[PartList.Name] as string ?? string.Empty;
-            var project = record[PartList.Project] as Guid?;
-
-            var result = _nameFormatValidator.Validate(name, PartList.Name);
-            if (!project.HasValue || !Project.Exists(project.Value))
-                result.Add(new ValidationError(PartList.Project, "Part list project is required"));
+            if (record.Project == Guid.Empty || Repository.Project.Exists(record.Project))
+                result.Add(new ValidationError(PartList.Fields.Project, "Part list project is required"));
+            else if (result.Count == 0 && Repository.PartList.ExistsWithinProject(record.Project, record.Name, id))
+                result.Add(NameUniqueError());
 
             return result;
         }

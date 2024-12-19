@@ -16,6 +16,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {
             var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            if (rec == null)
+                return pageModel.BadRequest();
+
             var id = (Guid)rec["id"];
             var projectId = (Guid)rec[PartList.Project];
 

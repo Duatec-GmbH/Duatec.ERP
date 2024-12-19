@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Eplan;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 
@@ -9,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
     {
         private static readonly ShortNameFormatValidator _shortNameValidator = new();
         private static readonly string _manufacturer = Text.FancyfySnakeCase(Company.Entity);
-        private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Company.ShortName);
+        private static readonly string _manufacturerShortName = Text.FancyfySnakeCase(Company.Fields.ShortName);
 
         public PartNumberUniqueValidator() 
             : base(Article.Entity, Article.Fields.PartNumber)
@@ -44,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && !Company.FindId(shortName).HasValue)
+                    if (shortNameErrors.Count == 0 && Repository.Company.FindByShortName(shortName) == null)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
                     if (DataPortal.GetArticleByPartNumber(value) != null)

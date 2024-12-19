@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
@@ -15,11 +16,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string LogoUrl = "logo";
         }
 
-        public Company(EntityRecord record)
+        public Company(EntityRecord? record = null)
             : base(record) { }
-
-        public Company()
-            : base() { }
 
         public static Company? Create(EntityRecord? record)
             => record == null ? null : new Company(record);
