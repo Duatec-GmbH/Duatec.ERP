@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
@@ -19,21 +19,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             if (rec == null)
                 return pageModel.BadRequest();
 
-            var id = (Guid)rec["id"];
-            var projectId = (Guid)rec[PartList.Project];
+            var pl = new PartList(rec);
 
-            QueryResponse TransactionalAction()
+            if (!Repository.PartList.Delete(pl.Id!.Value))
             {
-                var entries = PartListEntry.FindMany(id, "id")
-                    .ToIdArray();
-
-                var recMan = new RecordManager();
-                recMan.DeleteRecords(PartListEntry.Entity, entries);
-                return recMan.DeleteRecord(PartList.Entity, id);
+                pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
+                return null;
             }
-            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{projectId}";
 
-            return Transactional.Delete(pageModel, TransactionalAction, returnUrl);
+            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{pl.Project}";
+            return pageModel.LocalRedirect(returnUrl);
         }
     }
 }

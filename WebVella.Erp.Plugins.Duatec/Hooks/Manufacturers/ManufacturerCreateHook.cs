@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
@@ -20,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = _validator.ValidateOnCreate(record);
+            var errors = _validator.ValidateOnCreate(new Company(record));
             validationErrors.AddRange(errors);
 
             return null;

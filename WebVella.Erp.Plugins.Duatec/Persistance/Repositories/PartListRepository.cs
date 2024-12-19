@@ -11,6 +11,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryEntity => PartListEntry.Entity;
 
+        protected override string EntryParentIdPath => PartListEntry.Fields.PartList;
+
         protected override PartList? MapToTypedRecord(EntityRecord? record)
             => PartList.Create(record);
 

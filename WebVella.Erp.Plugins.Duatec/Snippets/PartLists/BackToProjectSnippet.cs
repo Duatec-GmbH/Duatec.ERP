@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists
             if (rec == null)
                 return null;
 
-            var project = (Guid)rec[PartList.Project];
+            var project = (Guid)rec[PartList.Fields.Project];
             return $"{pageModel.ErpRequestContext.App.Name}/projects/projects/r/{project}/";
         }
     }

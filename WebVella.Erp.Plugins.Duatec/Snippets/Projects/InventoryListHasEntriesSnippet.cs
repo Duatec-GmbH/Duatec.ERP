@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             if (!pageModel.RecordId.HasValue)
                 return false;
 
-            return InventoryReservationList.FindMany(pageModel.RecordId.Value).Count > 0;
+            return Repository.Inventory.ExistsByProject(pageModel.RecordId.Value);
         }
     }
 }

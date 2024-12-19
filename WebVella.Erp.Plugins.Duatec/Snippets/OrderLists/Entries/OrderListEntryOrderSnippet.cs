@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
@@ -14,11 +15,11 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
             if (rec == null)
                 return string.Empty;
 
-            var orders = (List<EntityRecord>)rec[$"${OrderListEntry.Relations.Order}"];
+            var orders = (List<EntityRecord>)rec[$"${OrderListEntries4Project.Record.Relations.Order}"];
             if (orders == null || orders.Count == 0)
                 return string.Empty;
 
-            return string.Join(", ", orders.Select(o => o[Order.Number].ToString()).Order());
+            return string.Join(", ", orders.Select(o => o[Order.Fields.Number].ToString()).Order());
         }
     }
 }

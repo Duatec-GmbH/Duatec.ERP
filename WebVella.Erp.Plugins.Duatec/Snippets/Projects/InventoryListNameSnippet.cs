@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
@@ -13,7 +14,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             object? number;
             if(pageModel.TryGetDataSourceProperty<Entity>("Entity") is Entity entity && entity.Name == Project.Entity)
             {
-                number = pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[Project.Number];
+                number = pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?
+                    [Project.Fields.Number];
             }
             else
             {
@@ -21,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
                 if (rec == null)
                     return null;
 
-                number = Project.Find((Guid)rec[InventoryReservationList.Project])?[Project.Number];
+                number = Repository.Project.Find((Guid)rec[InventoryReservationList.Fields.Project])?[Project.Fields.Number];
             }
 
             return Result(number);

@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
         protected TEntry? FindEntryBy(string property, object? value, string select = "*")
             => MapEntryToTypedRecord(Record.FindBy(EntryEntity, property, value, select));
 
-        public bool EntryExistsBy(string property, object? value)
+        protected bool EntryExistsBy(string property, object? value)
             => Record.Exists(EntryEntity, property, value);
 
         protected List<TEntry> FindManyEntriesBy(string property, object? value, string select = "*")

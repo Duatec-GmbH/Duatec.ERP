@@ -10,7 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var url = $"{pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[Company.WebsiteUrl]}";
+            var url = $"{pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?
+                [Company.Fields.WebsiteUrl]}";
+
             return !string.IsNullOrEmpty(url);
         }
     }

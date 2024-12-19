@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
@@ -16,18 +17,15 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles.Stocks
 
             var entry = new InventoryEntry(rec);
 
-            if (entry?.WarehouseLocation == null)
+            var location = Repository.Warehouse.FindEntry(entry.WarehouseLocation);
+            if (location == null) 
                 return null;
 
-            var location = WarehouseLocation.Find(entry.WarehouseLocation);
-            if (location?[WarehouseLocation.Warehouse] is not Guid warehouseId)
+            var warehouse = Repository.Warehouse.Find(location.Warehouse);
+            if (warehouse == null)
                 return null;
 
-            var warehouse = Warehouse.Find(warehouseId);
-            if (warehouse?[Warehouse.Designation] is not string wh || location[WarehouseLocation.Designation] is not string whl)
-                return null;
-
-            return $"{wh} - {whl}";
+            return $"{warehouse?.Designation} - {location?.Designation}";
         }
     }
 }

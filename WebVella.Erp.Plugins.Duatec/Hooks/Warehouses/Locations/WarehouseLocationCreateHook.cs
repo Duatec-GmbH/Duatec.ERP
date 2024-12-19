@@ -12,11 +12,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
         protected override string ManageHook => HookKeys.Warehouse.Location.Manage;
 
         protected override EntityRecord CreateRecord(BaseErpPageModel pageModel)
-        {
-            var rec = new EntityRecord();
-            rec[WarehouseLocation.Designation] = string.Empty;
-            rec[WarehouseLocation.Warehouse] = null;
-            return rec;
-        }
+            => new WarehouseLocation() { Designation = string.Empty };
     }
 }

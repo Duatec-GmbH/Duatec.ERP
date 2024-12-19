@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
@@ -10,10 +10,10 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            if (!pageModel.RecordId.HasValue || Project.Find(pageModel.RecordId.Value) is not EntityRecord project)
+            if (!pageModel.RecordId.HasValue || Repository.Project.Find(pageModel.RecordId.Value) is not Project project)
                 return null;
 
-            return $"{project[Project.Number]} - Order List";
+            return $"{project.Number} - Order List";
         }
     }
 }

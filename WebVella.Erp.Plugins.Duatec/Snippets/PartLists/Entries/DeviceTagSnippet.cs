@@ -10,7 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
-            var deviceTag = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?[PartListEntry.DeviceTag] as string;
+            var deviceTag = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?
+                [PartListEntry.Fields.DeviceTag] as string;
+
             return deviceTag?
                 .Replace("\r", string.Empty)
                 .Replace("\n", "<br/>");

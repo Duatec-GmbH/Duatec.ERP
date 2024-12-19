@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public static List<EntityRecord> FindManyByProject(Guid projectId, string select = "*")
         {
-            var subQuery = Entities.Order.FindManyByProject(projectId)
+            var subQuery = Repository.Order.FindManyByProject(projectId)
                 .Select(r => new QueryObject() { FieldName = Order, FieldValue = (Guid)r["id"], QueryType = QueryType.EQ })
                 .ToList();
 

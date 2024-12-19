@@ -10,6 +10,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryEntity => WarehouseLocation.Entity;
 
+        protected override string EntryParentIdPath => WarehouseLocation.Fields.Warehouse;
+
         protected override WarehouseLocation? MapEntryToTypedRecord(EntityRecord? record)
             => WarehouseLocation.Create(record);
 

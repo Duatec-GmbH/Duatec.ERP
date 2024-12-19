@@ -3,6 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
@@ -15,16 +16,14 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
             if (rec == null)
                 return false;
 
-            var id = $"{rec[Company.EplanId]}";
-            var shortName = $"{rec[Company.ShortName]}";
-            var name = $"{rec[Company.Name]}";
+            var man = new Company(rec);
 
-            if (!long.TryParse(id, out var eplanId) || string.IsNullOrEmpty(shortName) || string.IsNullOrEmpty(name))
+            if (!long.TryParse(man.EplanId, out var eplanId) || string.IsNullOrEmpty(man.ShortName) || string.IsNullOrEmpty(man.Name))
                 return false;
 
-            var dto = new DataPortalManufacturer(eplanId, shortName, name, null, null);
+            var dto = new DataPortalManufacturer(eplanId, man.ShortName, man.Name, null, null);
 
-            return Company.CanBeImported(dto);
+            return Repository.Company.CanBeImported(dto);
         }
     }
 }

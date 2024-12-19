@@ -18,6 +18,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public List<InventoryEntry> FindManyByProject(Guid? projectId)
             => FindManyBy(InventoryEntry.Fields.Project, projectId);
 
+        public bool ExistsByProject(Guid projectId)
+            => ExistsBy(InventoryEntry.Fields.Project, projectId);
 
         public List<InventoryEntry> FindManyByArticleAndProject(Guid articleId, Guid? projectId, string select = "*")
         {

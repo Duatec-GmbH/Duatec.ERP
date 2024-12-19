@@ -10,6 +10,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryEntity => OrderEntry.Entity;
 
+        protected override string EntryParentIdPath => OrderEntry.Fields.Order;
+
         protected override Order? MapToTypedRecord(EntityRecord? record)
             => Order.Create(record);
 

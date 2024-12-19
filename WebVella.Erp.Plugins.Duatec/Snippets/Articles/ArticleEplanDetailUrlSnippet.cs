@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
@@ -14,14 +15,13 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
             if (rec == null)
                 return null;
 
-            var partNumber = rec[Article.Fields.PartNumber]?.ToString();
-            var eplanId = rec[Article.Fields.EplanId]?.ToString();
-            var manufacturer = Company.Find((Guid)rec[Article.Fields.Manufacturer])?[Company.Name]?.ToString();
+            var article = new Article(rec);
+            var manufacturer = Repository.Company.Find(article.Manufacturer)?.Name;
 
-            if (string.IsNullOrEmpty(partNumber) || string.IsNullOrEmpty(eplanId) || string.IsNullOrEmpty(manufacturer))
+            if (string.IsNullOrEmpty(article.PartNumber) || string.IsNullOrEmpty(article.EplanId) || string.IsNullOrEmpty(manufacturer))
                 return null;
 
-            return $"https://dataportal.eplan.com/part-details/{manufacturer}/{partNumber}/id-{eplanId}";
+            return $"https://dataportal.eplan.com/part-details/{manufacturer}/{article.PartNumber}/id-{article.EplanId}";
         }
     }
 }

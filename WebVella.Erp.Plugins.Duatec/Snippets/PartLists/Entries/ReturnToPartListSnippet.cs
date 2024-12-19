@@ -20,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries
         private static Guid? GetListId(BaseErpPageModel pageModel)
         {
             Guid? id = null;
-            if(Try.Get(() => pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[PartListEntry.PartList] as Guid?, out var recId))
+            if(Try.Get(() => pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[PartListEntry.Fields.PartList] as Guid?, out var recId))
                 id = recId;
 
             id ??= pageModel.Request.Query.TryGetValue("plId", out var idArg) && Guid.TryParse(idArg, out var listId) 

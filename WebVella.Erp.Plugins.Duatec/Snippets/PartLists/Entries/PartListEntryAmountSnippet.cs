@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries
     internal class PartListEntryAmountSnippet : ArticleAmountSnippetBase
     {
         protected override decimal? GetAmount(BaseErpPageModel pageModel)
-            => GetDataSourcePropertyFromRecord(pageModel, PartListEntry.Amount) as decimal?;
+            => GetDataSourcePropertyFromRecord(pageModel, PartListEntry.Fields.Amount) as decimal?;
 
         protected override Article? GetArticle(BaseErpPageModel pageModel)
             => Article.Create(GetDataSourcePropertyFromRecord(pageModel, $"${PartListEntry.Relations.Article}[0]") as EntityRecord);

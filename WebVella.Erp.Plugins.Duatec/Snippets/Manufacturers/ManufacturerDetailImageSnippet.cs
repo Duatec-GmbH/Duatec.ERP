@@ -11,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
         protected override int? Width => 200;
 
         protected override string? Url(BaseErpPageModel pageModel)
-            => pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[Company.LogoUrl]?.ToString();
+            => pageModel.TryGetDataSourceProperty<EntityRecord>("Record")?[Company.Fields.LogoUrl]?.ToString();
     }
 }

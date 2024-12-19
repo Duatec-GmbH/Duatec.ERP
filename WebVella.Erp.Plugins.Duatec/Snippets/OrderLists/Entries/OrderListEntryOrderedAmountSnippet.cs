@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+﻿using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries.Base;
 using WebVella.Erp.Web.Models;
 
@@ -8,6 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
     internal class OrderListEntryOrderedAmountSnippet : OrderListEntryAmountSnippetBase
     {
         protected override decimal? GetAmount(BaseErpPageModel pageModel)
-            => GetDataSourcePropertyFromRecord(pageModel, OrderListEntry.OrderedAmount) as decimal?;
+            => GetDataSourcePropertyFromRecord(pageModel, OrderListEntries4Project.Record.Fields.OrderedAmount) as decimal?;
     }
 }
