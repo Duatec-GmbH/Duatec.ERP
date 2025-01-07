@@ -1725,11 +1725,8 @@ namespace WebVella.Erp.Database
 								relationFieldMeta.Fields.Add(relatedIdField);
 						}
 
-						//if field already added
-						if (relationFieldMeta.Fields.Any(x => x.Id == relatedField.Id))
-							continue;
-
-						relationFieldMeta.Fields.Add(relatedField);
+						if (!relationFieldMeta.Fields.Any(x => x.Id == relatedField.Id))
+							relationFieldMeta.Fields.Add(relatedField);
 					}
                 }
             }
