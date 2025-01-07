@@ -181,13 +181,16 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static Dictionary<Guid, Article?> GetArticleLookup(List<PartListEntry> partListEntries)
         {
-            var articleRepo = Repository.Article;
+            const string select = $"*, " +
+                $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
+                $"${Article.Relations.Type}.*";
+
             var articleIds = partListEntries
                 .Select(ple => ple.Article)
                 .Distinct()
                 .ToArray();
 
-            return articleRepo.FindManyWithTypes(articleIds);
+            return Repository.Article.FindMany(select, articleIds);
         }
 
         private static EntityRecord RecordFromGroup(

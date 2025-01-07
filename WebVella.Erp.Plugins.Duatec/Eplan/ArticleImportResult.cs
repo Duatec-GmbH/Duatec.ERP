@@ -43,7 +43,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
                 return [];
 
             var partNumbers = GetPartNumbers(eplanArticles);
-            var dbArticles = Repository.Article.FindMany(partNumbers);
+            var dbArticles = Repository.Article.FindMany(partNumbers: partNumbers);
             var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);

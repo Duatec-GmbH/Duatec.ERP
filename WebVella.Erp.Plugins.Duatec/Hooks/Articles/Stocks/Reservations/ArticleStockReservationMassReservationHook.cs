@@ -55,7 +55,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(v => v.PartNumber)
                 .ToArray();
 
-            var articleLookup = Repository.Article.FindManyWithTypes(partNumbersToProcess);
+            const string select = $"*, " +
+                $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
+                $"${Article.Relations.Type}.*";
+
+            var articleLookup = Repository.Article.FindMany(select, partNumbersToProcess);
             var demandLookup = GetDemandLookup(projectId, articleLookup);
             var inventoryLookup = GetInventoryLookup(projectId, articleLookup);
             var reservationsLookup = Repository.Inventory.FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);

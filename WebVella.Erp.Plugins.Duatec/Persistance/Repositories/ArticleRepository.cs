@@ -18,15 +18,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             }
         }
 
-        private const string DefaultSelect = $"*, ${Article.Relations.Manufacturer}.{Company.Fields.Name}";
-
         public override string Entity => Article.Entity;
 
         protected override Article? MapToTypedRecord(EntityRecord? record)
              => Article.Create(record);
-
-        public Article? Find(Guid id)
-            => Find(id, DefaultSelect);
 
         public bool Exists(long eplanId)
             => ExistsBy(Article.Fields.EplanId, eplanId.ToString());
@@ -34,17 +29,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public bool Exists(string partNumber)
             => ExistsBy(Article.Fields.PartNumber, partNumber);
 
-        public Dictionary<string, Article?> FindMany(params string[] partNumbers)
-            => FindManyByUniqueArgs(Article.Fields.PartNumber, DefaultSelect, partNumbers);
+        public Dictionary<string, Article?> FindMany(string select = "*", params string[] partNumbers)
+            => FindManyByUniqueArgs(Article.Fields.PartNumber, select, partNumbers);
 
-        public Dictionary<string, Article?> FindManyWithTypes(params string[] partNumbers)
-            => IncludeTypes(FindMany(partNumbers));
-
-        public Dictionary<Guid, Article?> FindMany(params Guid[] ids)
-            => FindManyByUniqueArgs("id", DefaultSelect, ids);
-
-        public Dictionary<Guid, Article?> FindManyWithTypes(params Guid[] ids)
-            => IncludeTypes(FindMany(ids));
+        public Dictionary<Guid, Article?> FindMany(string select = "*", params Guid[] ids)
+            => FindManyByUniqueArgs("id", select, ids);
 
         public override bool Delete(Guid id)
         {
@@ -113,6 +102,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 .ToList();
         }
 
+        public List<Article> FindAlternatives(Guid id, string select = "*")
+        {
+            var ids = FindAlternativeIds(id)
+                .Distinct()
+                .ToArray();
+
+            return FindMany(select, ids)
+                .Where(kp => kp.Value != null)
+                .Select(kp => kp.Value)
+                .ToList()!;
+        }
+
         public void InsertAlternativeMapping(Guid a, Guid b)
         {
             InsertAlternativeEntry(a, b);
@@ -126,34 +127,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
 #pragma warning restore CA1822 // Mark members as static
-
-        private Dictionary<T, Article?> IncludeTypes<T>(Dictionary<T, Article?> articleLookup)
-            where T : notnull
-        {
-            var typeIds = articleLookup.Values
-                .Where(v => v != null)
-                .Select(a => (Guid)a![Article.Fields.Type])
-                .Distinct()
-                .ToArray();
-
-            if (typeIds.Length == 0)
-                return articleLookup;
-
-            var typeLookup = FindManyTypesById(typeIds);
-
-            foreach (var rec in articleLookup.Values.Where(v => v != null))
-            {
-                var typeId = (Guid)rec![Article.Fields.Type];
-                var list = new List<EntityRecord>();
-
-                if (typeLookup.TryGetValue(typeId, out var type) && type != null)
-                    list.Add(type);
-
-                rec[$"${Article.Relations.Type}"] = list;
-            }
-
-            return articleLookup;
-        }
 
         private static Guid? InsertAlternativeEntry(Guid source, Guid target)
         {

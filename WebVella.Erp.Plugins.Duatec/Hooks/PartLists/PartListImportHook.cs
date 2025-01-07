@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 .Distinct()
                 .ToArray();
 
-            var articleLookup = Repository.Article.FindMany(partNumbers);
+            var articleLookup = Repository.Article.FindMany(partNumbers: partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);

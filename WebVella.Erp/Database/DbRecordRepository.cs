@@ -1657,7 +1657,6 @@ namespace WebVella.Erp.Database
                         throw new Exception(string.Format("Invalid query result field '{0}'. The relation field name is not specified.", token));
 
 
-
                     Field field = result.SingleOrDefault(x => x.Name == "$" + relationName);
                     RelationFieldMeta relationFieldMeta = null;
                     if (field == null)
@@ -1708,26 +1707,30 @@ namespace WebVella.Erp.Database
 
                     relationFieldMeta.Entity = joinToEntity;
 
-                    var relatedField = joinToEntity.Fields.SingleOrDefault(x => x.Name == relationFieldName);
-                    if (relatedField == null)
-                        throw new Exception(string.Format("Invalid query result field '{0}'. The relation field does not exist.", token));
+                    var relatedFields = relationFieldName == "*" ? joinToEntity.Fields
+						: joinToEntity.Fields.Where(x => x.Name == relationFieldName);
 
-                    //add id field of related entity
-                    if (relatedField.Name != "id")
-                    {
-                        var relatedIdField = joinToEntity.Fields.SingleOrDefault(x => x.Name == "id");
+					if (!relatedFields.Any())
+						throw new Exception(string.Format("Invalid query result field '{0}'. The relation field does not exist.", token));
 
-                        //if field already added
-                        if (!relationFieldMeta.Fields.Any(x => x.Id == relatedIdField.Id))
-                            relationFieldMeta.Fields.Add(relatedIdField);
-                    }
+					foreach (var relatedField in relatedFields)
+					{
+						//add id field of related entity
+						if (relatedField.Name != "id")
+						{
+							var relatedIdField = joinToEntity.Fields.SingleOrDefault(x => x.Name == "id");
 
-                    //if field already added
-                    if (relationFieldMeta.Fields.Any(x => x.Id == relatedField.Id))
-                        continue;
+							//if field already added
+							if (!relationFieldMeta.Fields.Any(x => x.Id == relatedIdField.Id))
+								relationFieldMeta.Fields.Add(relatedIdField);
+						}
 
+						//if field already added
+						if (relationFieldMeta.Fields.Any(x => x.Id == relatedField.Id))
+							continue;
 
-                    relationFieldMeta.Fields.Add(relatedField);
+						relationFieldMeta.Fields.Add(relatedField);
+					}
                 }
             }
 
