@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public static class Fields
         {
             public const string PartList = "part_list_id";
-            public const string Article = "article_id";
+            public const string Article = Entities.Article.AsForeignKey;
             public const string DeviceTag = "device_tag";
             public const string Amount = "amount";
         }

@@ -6,6 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
     public class Article : TypedEntityRecord
     {
         public const string Entity = "article";
+        public const string AsForeignKey = "article_id";
 
         public static class Relations
         {

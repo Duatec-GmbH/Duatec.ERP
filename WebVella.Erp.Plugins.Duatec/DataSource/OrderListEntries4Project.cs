@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public static class Fields
             {
                 public const string Project = "project_id";
-                public const string Article = "article_id";
+                public const string Article = Persistance.Entities.Article.AsForeignKey;
                 public const string Demand = "demand";
                 public const string OrderedAmount = "ordered_amount";
                 public const string ReceivedAmount = "received_amount";
