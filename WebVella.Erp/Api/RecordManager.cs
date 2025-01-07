@@ -19,7 +19,7 @@ namespace WebVella.Erp.Api
 
 		private readonly EntityManager entityManager;
 		private readonly EntityRelationManager entityRelationManager;
-		private DbRelationRepository relationRepository;
+		private readonly DbRelationRepository relationRepository;
 		private List<EntityRelation> relations = null;
 		private bool ignoreSecurity = false;
 		private readonly bool executeHooks = true;
@@ -1793,21 +1793,6 @@ namespace WebVella.Erp.Api
 					}
 				}
 
-				//try
-				//{
-				//	if (query.Query != null)
-				//		ProcessQueryObject(entity, query.Query);
-				//}
-				//catch (Exception ex)
-				//{
-				//	response.Success = false;
-				//	response.Message = "The query is incorrect and cannot be executed.";
-				//	response.Object = null;
-				//	response.Errors.Add(new ErrorModel { Message = ex.Message });
-				//	response.Timestamp = DateTime.UtcNow;
-				//	return response;
-				//}
-
 				var fields = CurrentContext.RecordRepository.ExtractQueryFieldsMeta(query);
 				var data = CurrentContext.RecordRepository.Find(query);
 				response.Object = new QueryResult { FieldsMeta = fields, Data = data };
@@ -1846,21 +1831,6 @@ namespace WebVella.Erp.Api
 					response.Timestamp = DateTime.UtcNow;
 					return response;
 				}
-
-				//try
-				//{
-				//	if (query.Query != null)
-				//		ProcessQueryObject(entity, query.Query);
-				//}
-				//catch (Exception ex)
-				//{
-				//	response.Success = false;
-				//	response.Message = "The query is incorrect and cannot be executed";
-				//	response.Object = 0;
-				//	response.Errors.Add(new ErrorModel { Message = ex.Message });
-				//	response.Timestamp = DateTime.UtcNow;
-				//	return response;
-				//}
 
 				List<Field> fields = CurrentContext.RecordRepository.ExtractQueryFieldsMeta(query);
 				response.Object = CurrentContext.RecordRepository.Count(query);
