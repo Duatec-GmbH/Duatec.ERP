@@ -24,18 +24,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var modified = new InventoryEntry(record);
-            var id = modified.Id!.Value;
 
-            if (modified.Amount == 0)
-            {
-                if (Repository.Inventory.Delete(id))
-                    return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
-
-                validationErrors.Add(new ValidationError(string.Empty, "Could not delete record"));
-                return null;
-            }
-
-            var unmodified = Repository.Inventory.Find(id)!;
+            var unmodified = Repository.Inventory.Find(modified.Id!.Value)!;
             modified.Article = unmodified.Article;
             modified.Project = unmodified.Project;
             modified.WarehouseLocation = unmodified.WarehouseLocation;

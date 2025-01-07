@@ -17,23 +17,19 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             var result = new List<ValidationError>();
 
-            var article = record.Article;
-            var location = record.WarehouseLocation;
-            var amount = record.Amount;
-
             NumberFormatValidator amountValidator;
 
-            if (location == Guid.Empty)
+            if (record.WarehouseLocation == Guid.Empty)
                 result.Add(new ValidationError(InventoryEntry.Fields.WarehouseLocation, "Warehouse location is required"));
-            if (article != Guid.Empty)
-                amountValidator = GetAmountValidator(article);
+            if (record.Article != Guid.Empty)
+                amountValidator = GetAmountValidator(record.Article);
             else
             {
                 result.Add(new ValidationError(InventoryEntry.Fields.Article, "Article is required"));
                 amountValidator = GetDefaultAmountValidator();
             }
 
-            result.AddRange(amountValidator.Validate(amount, InventoryEntry.Fields.Amount));
+            result.AddRange(amountValidator.Validate(record.Amount, InventoryEntry.Fields.Amount));
 
             return result;
         }

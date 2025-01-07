@@ -21,6 +21,73 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public bool ExistsByProject(Guid projectId)
             => ExistsBy(InventoryEntry.Fields.Project, projectId);
 
+        public override Guid? Insert(InventoryEntry record)
+        {
+            RoundAmount(record);
+            if (record.Amount <= 0)
+                throw new ArgumentException("Can not insert inventory entry with amount smaller or equal '0'");
+
+            if(Find(record.Article, record.WarehouseLocation, record.Project) is InventoryEntry entry)
+            {
+                entry.Amount += record.Amount;
+
+                if (!Update(entry))
+                    return null;
+
+                record.Amount = entry.Amount;
+                record.Id = entry.Id;
+
+                return record.Id;
+            }
+            return base.Insert(record);
+        }
+
+        public Guid? MovePartial(InventoryEntry record)
+        {
+            RoundAmount(record);
+            var unmodified = Find(record.Id!.Value)!;
+
+            if (unmodified.Amount <= record.Amount)
+                throw new ArgumentException("For a partial move the given amount must be smaller than unmodified record amount");
+
+            unmodified.Amount -= record.Amount;
+
+            if (Update(unmodified))
+                return Insert(record);
+            return null;
+        }
+
+        public override bool Update(InventoryEntry record)
+        {
+            RoundAmount(record);
+            if (record.Amount <= 0)
+                return Delete(record.Id!.Value);
+
+            var unmodified = Find(record.Id!.Value)!;
+
+            if (unmodified.Project == record.Project
+                && unmodified.Article == record.Article 
+                && unmodified.WarehouseLocation == record.WarehouseLocation)
+            {
+                return base.Update(record);
+            }
+
+            if (Find(record.Article, record.WarehouseLocation, record.Project) is InventoryEntry entry)
+            {
+                entry.Amount += record.Amount;
+
+                if (!Delete(record.Id.Value))
+                    return false;
+
+                record.Id = entry.Id;
+                record.Amount = entry.Amount;
+
+                return base.Update(entry);
+            }
+
+            return base.Update(record);
+        }
+
         public List<InventoryEntry> FindManyByArticleAndProject(Guid articleId, Guid? projectId, string select = "*")
         {
             var query = new QueryObject()
@@ -124,5 +191,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             const string articleRelation = $"${InventoryReservationEntry.Relations.Article}";
             return (rec[articleRelation] as List<EntityRecord>)?.FirstOrDefault()?[Article.Fields.PartNumber] as string;
         }
+
+        private static void RoundAmount(InventoryEntry record)
+            => record.Amount = Math.Round(record.Amount, 2);
     }
 }

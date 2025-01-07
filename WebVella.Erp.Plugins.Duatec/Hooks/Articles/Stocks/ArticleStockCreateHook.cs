@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
@@ -28,19 +29,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             if (errors.Count > 0)
                 return null;
 
-            var entry = new InventoryEntry(record);
-
-            Common.RoundAmount(entry);
-            try
+            if(Repository.Inventory.Insert(rec) is not Guid id)
             {
-                Common.Create(entry);
-                return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, (Guid)record["id"]));
-            }
-            catch (Exception ex)
-            {
-                validationErrors.Add(new ValidationError(string.Empty, ex.Message));
+                validationErrors.Add(new ValidationError(string.Empty, "Could not create inventory entry"));
                 return null;
             }
+
+            return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, id));
         }
     }
 }
