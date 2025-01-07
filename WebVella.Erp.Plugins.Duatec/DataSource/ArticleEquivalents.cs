@@ -37,8 +37,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var sortOrder = (string)arguments[Arguments.SortOrder];
 
             if (sortBy == Article.Fields.Designation)
-                articles = articles.OrderBy(a => a!.Designation);
-            else articles = articles.OrderBy(a => a!.PartNumber);
+                articles = articles.OrderBy(a => a.Designation);
+            else articles = articles.OrderBy(a => a.PartNumber);
 
             if (sortOrder == "desc")
                 articles = articles.Reverse();
