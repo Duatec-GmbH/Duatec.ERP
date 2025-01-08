@@ -1,9 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
@@ -484,16 +487,42 @@ namespace WebVella.Erp.Web.Models
 
 		public object GetProperty(string propName)
 		{
-			//Stopwatch sw = new Stopwatch();
-			//sw.Start();
-			//try
-			//{
 			if (string.IsNullOrWhiteSpace(propName))
 				throw new ArgumentException(nameof(propName));
 
+			if (!propName.Contains("{{"))
+				return ResolveProperty(propName);
+
+			var sb = new StringBuilder();
+
+			var idx = 0;
+
+			while(idx < propName.Length)
+			{
+				if (!(idx < propName.Length - 1 && propName[idx] == '{' && propName[idx + 1] == '{'))
+					sb.Append(propName[idx++]);
+				else
+				{
+					idx = idx + 2;
+					var end = propName.IndexOf("}}", idx);
+					if (end <= idx)
+						throw new PropertyDoesNotExistException("Could not interpret property value");
+
+					var prop = propName[idx..end];
+					var value = ResolveProperty(prop);
+					sb.Append($"{value}");
+					idx = end + 2;
+				}
+			}
+			return sb.ToString();
+		}
+
+		private object ResolveProperty(string propName)
+		{
 			//replace keyword $index with 0
-			var name = propName.Trim().Replace("$index", "0");
-			string[] tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
+			propName = propName.Trim();
+			var name = propName.Replace("$index", "0");
+			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 
 			List<string> completePropChain = new List<string>();
 			foreach (var pName in tmpPropChain)
@@ -531,9 +560,9 @@ namespace WebVella.Erp.Web.Models
 					var testName = propName.Trim().Substring(7); //cut the Record. in front
 					if (pName != testName)
 					{
-						if(currentPropDict.TryGetValue(testName, out var mpv))
+						if (currentPropDict.TryGetValue(testName, out var mpv))
 							return mpv.Value;
-						else if (ppName.StartsWith('$'))
+						else if (pName.StartsWith('$'))
 						{
 							var entity = Properties["Entity"].Value as Entity;
 							var result = Properties["Record"].Value;
@@ -576,7 +605,7 @@ namespace WebVella.Erp.Web.Models
 										return null;
 									result = records[idx];
 								}
-								else if(result is EntityRecord rec)
+								else if (result is EntityRecord rec)
 								{
 									result = rec[access];
 								}
@@ -588,7 +617,7 @@ namespace WebVella.Erp.Web.Models
 							return result;
 						}
 					}
-						
+
 				}
 
 				//try to get property with full key (after http post object are entered with no . split
@@ -633,15 +662,13 @@ namespace WebVella.Erp.Web.Models
 					}
 				}
 				currentPropDict = mpw.Properties;
-				parentPropName = ppName;
+				parentPropName = pName;
 			}
 
 			return mpw.Value;
-			//}
-			//finally {
-			//	Debug.WriteLine(">>>>>>>>>> " + propName + " >> " + sw.ElapsedMilliseconds);
-			//}
 		}
+
+
 
 		private object ExecDataSource(DSW dsWrapper)
 		{

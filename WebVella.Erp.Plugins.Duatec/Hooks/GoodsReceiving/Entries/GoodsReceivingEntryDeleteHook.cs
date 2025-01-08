@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Snippets.GoodsReceiving.Entries;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -23,6 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
             if (!pageModel.RecordId.HasValue)
                 return null;
 
+            // TODO Replace Record manager with repo
             var recMan = new RecordManager();
             var response = recMan.DeleteRecord(GoodsReceivingEntry.Entity, pageModel.RecordId.Value);
 
@@ -32,9 +31,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
                 return null;
             }
 
-            pageModel.DataModel.SetRecord(response.Object.Data.Single());
-            var url = $"{new ReturnToGoodsReceivingSnippet().Evaluate(pageModel)}";
-            return pageModel.LocalRedirect(url);
+            return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
         }
     }
 }

@@ -15,7 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
             if (rec == null)
                 return string.Empty;
 
-            var orders = (List<EntityRecord>)rec[$"${OrderListEntries4Project.Record.Relations.Order}"];
+            var orders = rec[$"${OrderListEntries4Project.Record.Relations.Order}"] as List<EntityRecord>;
             if (orders == null || orders.Count == 0)
                 return string.Empty;
 

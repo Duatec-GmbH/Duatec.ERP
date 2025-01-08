@@ -2,7 +2,6 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -31,8 +30,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
                 return null;
             }
 
-            pageModel.DataModel.SetRecord(response.Object.Data.Single());
-            var url = $"{new ReturnToPartListSnippet().Evaluate(pageModel)}";
+            var context = pageModel.ErpRequestContext;
+            var url = $"";
+
             return pageModel.LocalRedirect(url);
         }
     }

@@ -1,5 +1,4 @@
-﻿using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities

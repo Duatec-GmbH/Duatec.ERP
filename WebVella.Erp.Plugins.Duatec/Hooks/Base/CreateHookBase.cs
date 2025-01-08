@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
     {
         protected abstract IRecordValidator<T> Validator { get; }
 
-        protected abstract T WrapRecord(EntityRecord rec);
+        protected abstract T ToTypedRecord(EntityRecord rec);
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
@@ -20,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = Validator.ValidateOnCreate(WrapRecord(record));
+            var errors = Validator.ValidateOnCreate(ToTypedRecord(record));
             validationErrors.AddRange(errors);
 
             return null;

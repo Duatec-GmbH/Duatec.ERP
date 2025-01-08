@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {

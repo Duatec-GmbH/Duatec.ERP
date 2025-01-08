@@ -6,8 +6,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets
     [Snippet]
     public class RecordIsNotNullAndHasIdSnippet : ICodeVariable
     {
-        protected virtual string IdParameter => "hId";
-
         public object Evaluate(BaseErpPageModel pageModel)
         {
             try

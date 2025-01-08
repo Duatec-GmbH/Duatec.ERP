@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Snippets.GoodsReceiving.Entries;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -22,8 +21,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
             if (!Guid.TryParse(pageModel.GetFormValue("id"), out Guid deliveryNoteId))
                 return null;
 
+            // TODO replace record manager with repository
             var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(Persistance.Entities.DeliveryNotes.Entity, deliveryNoteId);
+            var response = recMan.DeleteRecord(DeliveryNote.Entity, deliveryNoteId);
 
             if (!response.Success)
             {
@@ -31,9 +31,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
                 return null;
             }
 
-            pageModel.DataModel.SetRecord(response.Object.Data.Single());
-            var url = $"{new ReturnToGoodsReceivingSnippet().Evaluate(pageModel)}";
-            return pageModel.LocalRedirect(url);
+            var name = $"{response.Object.Data.Single()[DeliveryNote.File]}";
+            if (name.Contains('/'))
+                name = name[(name.LastIndexOf('/') + 1)..];
+
+            pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted delivery note '{name}'");
+
+            return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
         }
     }
 }

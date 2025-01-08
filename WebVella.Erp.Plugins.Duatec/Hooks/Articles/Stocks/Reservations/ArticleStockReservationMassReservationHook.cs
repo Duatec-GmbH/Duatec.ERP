@@ -6,7 +6,6 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Snippets.OrderLists;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Hooks;
@@ -351,8 +350,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
 
         private static LocalRedirectResult ReturnToProject(BaseErpPageModel pageModel)
         {
-            var url = new BackToProjectSnippet().Evaluate(pageModel) as string ?? string.Empty;
-            return pageModel.LocalRedirect(url);
+            var id = pageModel.RecordId;
+            var appName = pageModel.ErpRequestContext.App.Name;
+            var area = pageModel.ErpRequestContext?.SitemapArea?.Name;
+
+            return pageModel.LocalRedirect($"/{appName}/{area}/projects/r/{id}");
         }
     }
 }

@@ -13,6 +13,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Projects
 
         protected override IRecordValidator<Project> Validator => _validator;
 
-        protected override Project WrapRecord(EntityRecord rec) => new(rec);
+        protected override Project ToTypedRecord(EntityRecord rec) => new(rec);
     }
 }

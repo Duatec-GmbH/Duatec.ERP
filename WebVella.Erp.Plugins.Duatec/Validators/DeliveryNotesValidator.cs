@@ -40,8 +40,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static Args GetArgs(EntityRecord record)
         {
-            return (record[DeliveryNotes.GoodsReceiving] as Guid?,
-                record[DeliveryNotes.DeliveryNote]);
+            return (record[DeliveryNote.GoodsReceiving] as Guid?,
+                record[DeliveryNote.File]);
         }
     }
 }

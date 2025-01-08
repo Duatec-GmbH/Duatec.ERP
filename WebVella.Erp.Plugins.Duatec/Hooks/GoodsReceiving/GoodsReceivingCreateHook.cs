@@ -6,12 +6,12 @@ using WebVella.Erp.Plugins.Duatec.Validators;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving
 {
     [HookAttachment(key: HookKeys.GoodsReceiving.Create)]
-    internal class GoodsReceivingCreateHook : CreateHookBase<EntityRecord>
+    internal class GoodsReceivingCreateHook : CreateHookBase<EntityRecord> // TODO swap with typed record
     {
         private static readonly GoodsReceivingValidator _validator = new();
 
         protected override IRecordValidator<EntityRecord> Validator => _validator;
 
-        protected override EntityRecord WrapRecord(EntityRecord rec) => rec;
+        protected override EntityRecord ToTypedRecord(EntityRecord rec) => rec;
     }
 }

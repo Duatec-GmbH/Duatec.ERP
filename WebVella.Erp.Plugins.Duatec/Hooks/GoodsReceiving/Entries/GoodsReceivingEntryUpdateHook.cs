@@ -3,7 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries;
+using WebVella.Erp.Plugins.Duatec.Snippets;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
-            var url = $"{new ReturnToPartListSnippet().Evaluate(pageModel)}";
+            var url = $"{new ListUrlSnippet().Evaluate(pageModel)}";
             return pageModel.LocalRedirect(url);
         }
 
