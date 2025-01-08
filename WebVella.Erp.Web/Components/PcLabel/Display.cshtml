@@ -1,0 +1,12 @@
+﻿@using WebVella.Erp.Web.Utils;
+@using WebVella.Erp.Web.Components;
+@using WebVella.Erp.Web.Models;
+@{
+    var options = (PcLabel.PcLabelOptions)ViewBag.Options;
+}
+@if ((bool)ViewBag.IsVisible)
+{
+    <div class="form-group wv-field display wv-field-textarea @options.Class">
+        <label class="control-label label-stacked">@options.Text</label>
+    </div>
+}
