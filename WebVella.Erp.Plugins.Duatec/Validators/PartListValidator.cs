@@ -22,7 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             var result = _nameFormatValidator.Validate(record.Name, PartList.Fields.Name);
 
-            if (record.Project == Guid.Empty || Repository.Project.Exists(record.Project))
+            if (record.Project == Guid.Empty)
                 result.Add(new ValidationError(PartList.Fields.Project, "Part list project is required"));
             else if (result.Count == 0 && Repository.PartList.ExistsWithinProject(record.Project, record.Name, id))
                 result.Add(NameUniqueError());

@@ -18,7 +18,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
             var context = pageModel.ErpRequestContext;
-            var url = $"";
+            var id = record[PartListEntry.Fields.PartList];
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{id}/detail";
             return pageModel.LocalRedirect(url);
         }
 

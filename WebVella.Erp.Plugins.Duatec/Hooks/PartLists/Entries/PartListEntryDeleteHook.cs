@@ -30,8 +30,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
                 return null;
             }
 
+            var partListId = response.Object.Data[0][PartListEntry.Fields.PartList];
+
             var context = pageModel.ErpRequestContext;
-            var url = $"";
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{partListId}/detail";
 
             return pageModel.LocalRedirect(url);
         }

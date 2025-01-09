@@ -1,12 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Service;
 using WebVella.Erp.Web.Services;
 
@@ -39,6 +42,8 @@ namespace WebVella.Erp.Web.Models
 			{
 				//if page request context is set, it is used, otherwise, the requestContext is used
 				ErpRequestContext reqCtx = erpPageModel.ErpRequestContext;
+
+				properties.Add("$exists", new MPW(MPT.Function, new ExistsFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -500,7 +505,11 @@ namespace WebVella.Erp.Web.Models
 			while(idx < propName.Length)
 			{
 				if (!(idx < propName.Length - 1 && propName[idx] == '{' && propName[idx + 1] == '{'))
+				{
+					if (propName[idx] == '{' || propName[idx] == '}')
+						throw new PropertyDoesNotExistException("Could not interpret property value");
 					sb.Append(propName[idx++]);
+				}
 				else
 				{
 					idx += 2;
@@ -522,18 +531,23 @@ namespace WebVella.Erp.Web.Models
 			//replace keyword $index with 0
 			propName = propName.Trim();
 			var name = propName.Replace("$index", "0");
-			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 
+			if (propName.StartsWith('$') && propName.EndsWith(')'))
+				return ExecFunction(propName);
+
+			// TODO before making it possible to nest functions refactor this because then spliting is not enough anymore
+			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 			var completePropChain = new List<string>();
+
 			foreach (var pName in tmpPropChain)
 			{
 				var indexerIdx = pName.IndexOf('[');
 				if (indexerIdx != -1)
 				{
 					var n = pName[..indexerIdx];
-					var idx = pName[indexerIdx..];
+					var i = pName[indexerIdx..];
 					completePropChain.Add(n);
-					completePropChain.Add(idx);
+					completePropChain.Add(i);
 				}
 				else
 					completePropChain.Add(pName);
@@ -543,6 +557,8 @@ namespace WebVella.Erp.Web.Models
 			var currentPropDict = properties;
 			var currentPropertyNamePath = string.Empty;
 			string parentPropName = string.Empty;
+
+			int idx = 0;
 			foreach (var ppName in completePropChain)
 			{
 
@@ -555,12 +571,12 @@ namespace WebVella.Erp.Web.Models
 					currentPropertyNamePath += $".{pName}";
 
 				//try to get property with full key (after http post object are entered with no . split
-				if (parentPropName == "Record")
+				if (parentPropName == "Record" && idx == 1)
 				{
 					var testName = propName.Trim()[7..]; //cut the Record. in front
 					if (pName != testName)
 					{
-						if (currentPropDict.TryGetValue(testName, out var mpv))
+						if (!pName.StartsWith('$') && currentPropDict.TryGetValue(testName, out var mpv))
 							return mpv.Value;
 						else if (pName.StartsWith('$'))
 						{
@@ -571,12 +587,12 @@ namespace WebVella.Erp.Web.Models
 							{
 								var accessor = completePropChain[i];
 
-								// makes indexing optional
-								if (!(accessor.StartsWith('[') && accessor.EndsWith(']')) && result is List<EntityRecord> l && l.Count == 1)
-									result = l[0];
-
 								if (accessor.StartsWith('$'))
 								{
+									// makes indexing optional between relations
+									if (result is List<EntityRecord> l && l.Count == 1)
+										result = l[0];
+
 									if (result is not EntityRecord rec)
 										throw new PropertyDoesNotExistException($"Property not found");
 
@@ -634,21 +650,103 @@ namespace WebVella.Erp.Web.Models
 									if (result is not List<EntityRecord> records)
 										throw new PropertyDoesNotExistException("Property not found");
 
-									var idx = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
-									if (idx >= records.Count)
+									var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
+									if (index >= records.Count)
 										return null;
-									result = records[idx];
+									result = records[index];
 								}
 								else if(result is EntityRecord rec)
 								{
+									if (i < completePropChain.Count - 1)
+										throw new PropertyDoesNotExistException("Property not found");
+
 									result = rec[accessor];										
+								}
+								else if(result is List<EntityRecord> recList)
+								{
+									if (i < completePropChain.Count - 1)
+										throw new PropertyDoesNotExistException("Property not found");
+
+									if (recList.Count == 0)
+										return null;
+
+									var first = recList[0];
+									if (recList.Count == 1)
+										return first?[accessor];
+
+									return recList.Select(r => r?[accessor])
+										.ToList();
 								}
 								else throw new PropertyDoesNotExistException($"Property not found");
 							}
 							return result;
 						}
 					}
+				}
 
+				if (parentPropName == "RowRecord" && idx == 1)
+				{
+					var testName = propName.Trim()[10..]; //cut the Record. in front
+					if (pName != testName)
+					{
+						if (!pName.StartsWith('$') && currentPropDict.TryGetValue(testName, out var mpv))
+							return mpv.Value;
+						else if (pName.StartsWith('$'))
+						{
+							var result = properties["RowRecord"].Value;
+
+							for (var i = 1; i < completePropChain.Count; i++)
+							{
+								var accessor = completePropChain[i];
+
+								if (accessor.StartsWith('$'))
+								{
+									// makes indexing optional between relations
+									if (result is List<EntityRecord> l && l.Count == 1)
+										result = l[0];
+
+									if (result is not EntityRecord rec || !rec.Properties.TryGetValue(accessor, out var obj))
+										throw new PropertyDoesNotExistException($"Property not found");
+
+									result = obj;
+								}
+								else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
+								{
+									if (result is not List<EntityRecord> records)
+										throw new PropertyDoesNotExistException("Property not found");
+
+									var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
+									if (index >= records.Count)
+										return null;
+									result = records[index];
+								}
+								else if (result is EntityRecord rec)
+								{
+									if (i < completePropChain.Count - 1)
+										throw new PropertyDoesNotExistException("Property not found");
+
+									result = rec[accessor];
+								}
+								else if (result is List<EntityRecord> recList)
+								{
+									if(i < completePropChain.Count - 1)
+										throw new PropertyDoesNotExistException("Property not found");
+
+									if (recList.Count == 0)
+										return null;
+
+									var first = recList[0];
+									if (recList.Count == 1)
+										return first?[accessor];
+
+									return recList.Select(r => r?[accessor])
+										.ToList();
+								}
+								else throw new PropertyDoesNotExistException($"Property not found");
+							}
+							return result;
+						}
+					}
 				}
 
 				//try to get property with full key (after http post object are entered with no . split
@@ -667,11 +765,10 @@ namespace WebVella.Erp.Web.Models
 						throw new PropertyDoesNotExistException($"Property name is found, but list index is out of bounds.");
 				}
 
-
 				mpw = currentPropDict[pName];
-				if (mpw != null && mpw.Type == MPT.DataSource)
+				if (mpw != null)
 				{
-					if (mpw.Value is DSW dsw)
+					if (mpw.Type == MPT.DataSource && mpw.Value is DSW dsw)
 					{
 						var result = ExecDataSource(dsw);
 						if (result is List<EntityRecord> || result is EntityRecordList)
@@ -691,6 +788,8 @@ namespace WebVella.Erp.Web.Models
 						}
 					}
 				}
+
+				idx++;
 				currentPropDict = mpw.Properties;
 				parentPropName = pName;
 			}
@@ -698,7 +797,23 @@ namespace WebVella.Erp.Web.Models
 			return mpw.Value;
 		}
 
+		private object ExecFunction(string propName)
+		{
+			var leftPars = propName.Count(c => c == '(');
+			var rightPars = propName.Count(c => c == ')');
 
+			if (leftPars != 1 || rightPars != 1)
+				throw new PropertyDoesNotExistException($"function call is malformed or contains multiple parentheses (not allowed yet)");
+
+			var openParIdx = propName.IndexOf('(');
+			var funName = propName[..openParIdx].Trim();
+			var paramsString = propName[(openParIdx + 1)..^1].Trim();
+
+			if (!properties.TryGetValue(funName, out var mpv) || mpv.Value is not QueryFunction fun)
+				throw new PropertyDoesNotExistException($"function call is malformed or contains multiple parentheses (not allowed yet)");
+
+			return fun.Execute(paramsString);
+		}
 
 		private object ExecDataSource(DSW dsWrapper)
 		{
@@ -873,7 +988,8 @@ namespace WebVella.Erp.Web.Models
 			Object,
 			DataSource,
 			EntityRecord,
-			ListEntityRecords
+			ListEntityRecords,
+			Function,
 		}
 
 		//DataSourceWrapper
@@ -943,8 +1059,72 @@ namespace WebVella.Erp.Web.Models
 				}
 			}
 		}
+
+		//FunctionWrapper
+		private abstract class QueryFunction
+		{
+			protected QueryFunction(PageDataModel dataModel)
+			{
+				DataModel = dataModel;
+			}
+
+			protected PageDataModel DataModel { get; }
+
+			protected abstract int ParamCount { get; }
+
+			public abstract string Name { get; }
+
+			protected static string[] ParseParams(string paramsString)
+			{
+				if (string.IsNullOrEmpty(paramsString))
+					return [];
+
+				// TODO when allow nesting refactor this
+
+				return paramsString.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+			}
+
+			public object Execute(string paramsString)
+			{
+				var parameters = ParseParams(paramsString);
+				if (parameters.Length != ParamCount && ParamCount > -1)
+					throw new PropertyDoesNotExistException($"Function '{Name}' requires exactly {ParamCount} arguments");
+
+				var args = parameters.Select(DataModel.ResolveProperty)
+					.ToArray();
+
+				return Execute(args);
+			}
+
+			protected abstract object Execute(object[] parameters);
+		}
+
+		private class ExistsFunction : QueryFunction
+		{
+			public ExistsFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "exists";
+
+			protected override int ParamCount => 1;
+
+			protected override object Execute(object[] parameters)
+			{
+				var para = parameters[0];
+				var result = para is EntityRecord
+					|| para is string s && !string.IsNullOrWhiteSpace(s)
+					|| para is IEnumerable en && en is not string && en.Any()
+					|| para is Guid id && id != Guid.Empty
+					|| para is decimal n && n != 0
+					|| para is int i && i != 0
+					|| para is bool b && b;
+				return result;
+			}
+		}
 		#endregion
 	}
+
 
 	public class PropertyDoesNotExistException : Exception
 	{

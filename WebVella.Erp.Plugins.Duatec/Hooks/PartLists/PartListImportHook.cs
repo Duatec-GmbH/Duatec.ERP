@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
-            if (!pageModel.Request.Query.TryGetValue("lId", out var listVal) || !Guid.TryParse(listVal, out var listId))
+            if (!pageModel.Request.Query.TryGetValue("plId", out var listVal) || !Guid.TryParse(listVal, out var listId))
                 return pageModel.BadRequest();
 
             var filePath = pageModel.GetFormValue("file");
