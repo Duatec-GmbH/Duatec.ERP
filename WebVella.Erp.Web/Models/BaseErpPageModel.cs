@@ -75,7 +75,24 @@ namespace WebVella.Erp.Web.Models
 		[BindProperty(Name = "returnUrl", SupportsGet = true)]
 		public string ReturnUrl { get; set; } = "";
 
+		[BindProperty(Name = "currentUrl", SupportsGet = true)]
 		public string CurrentUrl { get; set; } = "";
+
+		[BindProperty(Name = "currentUrlWithoutParameters", SupportsGet = true)]
+		public string CurrentUrlWithoutParameters
+		{
+			get
+			{
+				if(string.IsNullOrEmpty(CurrentUrl))
+					return string.Empty;
+
+				var idx = CurrentUrl.IndexOf('?');
+				if (idx < 0)
+					return CurrentUrl;
+
+				return CurrentUrl[0..idx];
+			}
+		}
 
 		public string HookKey
 		{
@@ -91,15 +108,6 @@ namespace WebVella.Erp.Web.Models
 		protected IActionResult ExecutePageHooksOnGet(string hookKey = null)
 		{
 			hookKey ??= HookKey;
-
-			foreach (var inst in HookManager.GetHookedInstances<IParameterizedPageHook>(hookKey))
-			{
-				var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
-				var result = inst.OnGet(this, args);
-				if (result != null)
-					return result;
-			}
-
 			foreach (var inst in HookManager.GetHookedInstances<IPageHook>(hookKey))
 			{
 				var result = inst.OnGet(this);
@@ -110,14 +118,6 @@ namespace WebVella.Erp.Web.Models
 
 		protected IActionResult ExecutePageHooksOnPost()
 		{
-			foreach (var inst in HookManager.GetHookedInstances<IParameterizedPageHook>(HookKey))
-			{
-				var args = ParameterizedHook.GetArguments(inst, HttpContext.Request.Query);
-				var result = inst.OnPost(this, args);
-				if (result != null)
-					return result;
-			}
-
 			foreach (var inst in HookManager.GetHookedInstances<IPageHook>(HookKey))
 			{
 				var result = inst.OnPost(this);

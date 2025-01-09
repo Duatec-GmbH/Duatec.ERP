@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Database;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Web.Service;
 using WebVella.Erp.Web.Services;
@@ -20,12 +16,14 @@ namespace WebVella.Erp.Web.Models
 	{
 		internal bool SafeCodeDataVariable { get; set; } = false;
 
-		DataSourceManager dsMan = new DataSourceManager();
-		RecordManager recMan = new RecordManager();
-		EntityRelationManager relMan = new EntityRelationManager();
-		EntityManager entMan = new EntityManager();
-		BaseErpPageModel erpPageModel = null;
-		private Dictionary<string, MPW> Properties = new Dictionary<string, MPW>();
+		private readonly DataSourceManager dsMan = new();
+		private readonly RecordManager recMan = new();
+		private readonly EntityRelationManager relMan = new();
+		private readonly EntityManager entMan = new();
+		private readonly BaseErpPageModel erpPageModel = null;
+		private readonly Dictionary<string, MPW> properties = [];
+		// improvement to not load same values multiple times, since it can't be stored within record
+		private readonly Dictionary<string, (List<EntityRecord> Result, Entity Entity)> alreadyResolvedRecordProperties = [];
 
 		internal PageDataModel(BaseErpPageModel erpPageModel)
 		{
@@ -43,7 +41,7 @@ namespace WebVella.Erp.Web.Models
 				ErpRequestContext reqCtx = erpPageModel.ErpRequestContext;
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
-				Properties.Add("CurrentUser", currentUserMPW);
+				properties.Add("CurrentUser", currentUserMPW);
 				if (erpPageModel.CurrentUser != null)
 				{
 					currentUserMPW.Properties.Add("CreatedOn", new MPW(MPT.Object, erpPageModel.CurrentUser.CreatedOn));
@@ -68,7 +66,7 @@ namespace WebVella.Erp.Web.Models
 					}
 				}
 
-				Properties.Add("ReturnUrl", new MPW(MPT.Object, erpPageModel.ReturnUrl));
+				properties.Add("ReturnUrl", new MPW(MPT.Object, erpPageModel.ReturnUrl));
 
 				//this is the case of with related/parent entity and related/parent record id set
 				if (erpPageModel.RecordId != null && erpPageModel.ParentRecordId != null && erpPageModel.RelationId != null &&
@@ -79,18 +77,18 @@ namespace WebVella.Erp.Web.Models
 					if (!response.Success)
 						throw new Exception(response.Message);
 					else if (response.Object.Data.Count > 0)
-						Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, response.Object.Data[0]));
+						properties.Add("ParentRecord", new MPW(MPT.EntityRecord, response.Object.Data[0]));
 					else
-						Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
+						properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
 
 					eq = new EntityQuery(reqCtx.Entity.Name, "*", EntityQuery.QueryEQ("id", erpPageModel.RecordId.Value));
 					response = recMan.Find(eq);
 					if (!response.Success)
 						throw new Exception(response.Message);
 					else if (response.Object.Data.Count > 0)
-						Properties.Add("Record", new MPW(MPT.EntityRecord, response.Object.Data[0]));
+						properties.Add("Record", new MPW(MPT.EntityRecord, response.Object.Data[0]));
 					else
-						Properties.Add("Record", new MPW(MPT.EntityRecord, null));
+						properties.Add("Record", new MPW(MPT.EntityRecord, null));
 				}
 
 				//this is the case of Create and List page with related/parent entity amd with no related/parent record set
@@ -102,11 +100,11 @@ namespace WebVella.Erp.Web.Models
 					if (!response.Success)
 						throw new Exception(response.Message);
 					else if (response.Object.Data.Count > 0)
-						Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, response.Object.Data[0]));
+						properties.Add("ParentRecord", new MPW(MPT.EntityRecord, response.Object.Data[0]));
 					else
-						Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
+						properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
 
-					Properties.Add("Record", new MPW(MPT.EntityRecord, null));
+					properties.Add("Record", new MPW(MPT.EntityRecord, null));
 				}
 
 				//this is the case with no parent (relations/parents cases are checked above)
@@ -117,18 +115,18 @@ namespace WebVella.Erp.Web.Models
 					if (!response.Success)
 						throw new Exception(response.Message);
 					else if (response.Object.Data.Count > 0)
-						Properties.Add("Record", new MPW(MPT.EntityRecord, response.Object.Data[0]));
+						properties.Add("Record", new MPW(MPT.EntityRecord, response.Object.Data[0]));
 					else
-						Properties.Add("Record", new MPW(MPT.EntityRecord, null));
+						properties.Add("Record", new MPW(MPT.EntityRecord, null));
 
-					Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
+					properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
 				}
 
 				//this is the case with no entity page
 				else
 				{
-					Properties.Add("Record", new MPW(MPT.EntityRecord, null));
-					Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
+					properties.Add("Record", new MPW(MPT.EntityRecord, null));
+					properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
 				}
 
 				var validationMPW = new MPW(MPT.Object, erpPageModel.Validation);
@@ -151,15 +149,15 @@ namespace WebVella.Erp.Web.Models
 					validationMPW.Properties.Add("Errors", errorsMPW);
 
 				}
-				Properties.Add("Validation", validationMPW);
+				properties.Add("Validation", validationMPW);
 
 
 				if (reqCtx != null)
 				{
-					Properties.Add("RecordId", new MPW(MPT.Object, reqCtx.RecordId));
-					Properties.Add("ParentRecordId", new MPW(MPT.Object, reqCtx.ParentRecordId));
-					Properties.Add("RelationId", new MPW(MPT.Object, reqCtx.RelationId));
-					Properties.Add("PageContext", new MPW(MPT.Object, reqCtx.PageContext));
+					properties.Add("RecordId", new MPW(MPT.Object, reqCtx.RecordId));
+					properties.Add("ParentRecordId", new MPW(MPT.Object, reqCtx.ParentRecordId));
+					properties.Add("RelationId", new MPW(MPT.Object, reqCtx.RelationId));
+					properties.Add("PageContext", new MPW(MPT.Object, reqCtx.PageContext));
 
 					var pageMPW = new MPW(MPT.Object, reqCtx.Page);
 					if (reqCtx.Page != null)
@@ -177,7 +175,7 @@ namespace WebVella.Erp.Web.Models
 						pageMPW.Properties.Add("Type", new MPW(MPT.Object, reqCtx.Page.Type));
 						pageMPW.Properties.Add("Weight", new MPW(MPT.Object, reqCtx.Page.Weight));
 					}
-					Properties.Add("Page", pageMPW);
+					properties.Add("Page", pageMPW);
 
 					var parentPageMPW = new MPW(MPT.Object, reqCtx.ParentPage);
 					if (reqCtx.ParentPage != null)
@@ -195,7 +193,7 @@ namespace WebVella.Erp.Web.Models
 						parentPageMPW.Properties.Add("Type", new MPW(MPT.Object, reqCtx.ParentPage.Type));
 						parentPageMPW.Properties.Add("Weight", new MPW(MPT.Object, reqCtx.ParentPage.Weight));
 					}
-					Properties.Add("ParentPage", parentPageMPW);
+					properties.Add("ParentPage", parentPageMPW);
 
 					var entityMPW = new MPW(MPT.Object, reqCtx.Entity);
 					if (reqCtx.Entity != null)
@@ -210,7 +208,7 @@ namespace WebVella.Erp.Web.Models
 						entityMPW.Properties.Add("RecordScreenIdField", new MPW(MPT.Object, reqCtx.Entity.RecordScreenIdField));
 						entityMPW.Properties.Add("System", new MPW(MPT.Object, reqCtx.Entity.System));
 					}
-					Properties.Add("Entity", entityMPW);
+					properties.Add("Entity", entityMPW);
 
 					var parentEntityMPW = new MPW(MPT.Object, reqCtx.ParentEntity);
 					if (reqCtx.ParentEntity != null)
@@ -225,7 +223,7 @@ namespace WebVella.Erp.Web.Models
 						parentEntityMPW.Properties.Add("RecordScreenIdField", new MPW(MPT.Object, reqCtx.ParentEntity.RecordScreenIdField));
 						parentEntityMPW.Properties.Add("System", new MPW(MPT.Object, reqCtx.ParentEntity.System));
 					}
-					Properties.Add("ParentEntity", parentEntityMPW);
+					properties.Add("ParentEntity", parentEntityMPW);
 
 					var detectionMPW = new MPW(MPT.Object, reqCtx.Detection);
 					if (reqCtx.Detection != null)
@@ -238,7 +236,7 @@ namespace WebVella.Erp.Web.Models
 						}
 						detectionMPW.Properties.Add("Device", deviceMPW);
 					}
-					Properties.Add("Detection", detectionMPW);
+					properties.Add("Detection", detectionMPW);
 
 					var appMPW = new MPW(MPT.Object, reqCtx.App);
 					if (reqCtx.App != null)
@@ -290,7 +288,7 @@ namespace WebVella.Erp.Web.Models
 						}
 						appMPW.Properties.Add("Sitemap", sitemapMPW);
 					}
-					Properties.Add("App", appMPW);
+					properties.Add("App", appMPW);
 
 					var sitemapNodeMPW = new MPW(MPT.Object, reqCtx.SitemapNode);
 					if (reqCtx.SitemapNode != null)
@@ -306,7 +304,7 @@ namespace WebVella.Erp.Web.Models
 						sitemapNodeMPW.Properties.Add($"Url", new MPW(MPT.Object, reqCtx.SitemapNode.Url));
 						sitemapNodeMPW.Properties.Add($"Weight", new MPW(MPT.Object, reqCtx.SitemapNode.Weight));
 					}
-					Properties.Add("SitemapNode", sitemapNodeMPW);
+					properties.Add("SitemapNode", sitemapNodeMPW);
 
 					var sitemapAreaMPW = new MPW(MPT.Object, reqCtx.SitemapArea);
 					if (reqCtx.SitemapArea != null)
@@ -339,7 +337,7 @@ namespace WebVella.Erp.Web.Models
 						}
 						sitemapAreaMPW.Properties.Add($"Nodes", areaNodesMPW);
 					}
-					Properties.Add("SitemapArea", sitemapAreaMPW);
+					properties.Add("SitemapArea", sitemapAreaMPW);
 				}
 
 				EntityRecord queryRecord = new EntityRecord();
@@ -352,29 +350,31 @@ namespace WebVella.Erp.Web.Models
 							queryRecord[key] = ((string)httpCtx.Request.Query[key]) ?? string.Empty;
 					}
 				}
-				Properties.Add("RequestQuery", new MPW(MPT.EntityRecord, queryRecord));
+				properties.Add("RequestQuery", new MPW(MPT.EntityRecord, queryRecord));
 			}
 			else
 			{
-				Properties.Add("CurrentUser", new MPW(MPT.Object, null));
-				Properties.Add("RecordId", new MPW(MPT.Object, null));
-				Properties.Add("ParentRecordId", new MPW(MPT.Object, null));
-				Properties.Add("Record", new MPW(MPT.EntityRecord, null));
-				Properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
-				Properties.Add("ReturnUrl", new MPW(MPT.Object, null));
+				properties.Add("CurrentUser", new MPW(MPT.Object, null));
+				properties.Add("RecordId", new MPW(MPT.Object, null));
+				properties.Add("ParentRecordId", new MPW(MPT.Object, null));
+				properties.Add("Record", new MPW(MPT.EntityRecord, null));
+				properties.Add("ParentRecord", new MPW(MPT.EntityRecord, null));
+				properties.Add("ReturnUrl", new MPW(MPT.Object, null));
 			}
 
-			Properties.Add("RowRecord", new MPW(MPT.EntityRecord, null));
+			properties.Add("RowRecord", new MPW(MPT.EntityRecord, null));
+			
 		}
 
 		public void SetRowRecord(EntityRecord rowRecord)
 		{
-			Properties["RowRecord"] = new MPW(MPT.EntityRecord, rowRecord);
+			properties["RowRecord"] = new MPW(MPT.EntityRecord, rowRecord);
 		}
 
 		public void SetRecord(EntityRecord record)
 		{
-			Properties["Record"] = new MPW(MPT.EntityRecord, record);
+			alreadyResolvedRecordProperties.Clear();
+			properties["Record"] = new MPW(MPT.EntityRecord, record);
 		}
 
 		private void InitDataSources(ErpPage page)
@@ -389,7 +389,7 @@ namespace WebVella.Erp.Web.Models
 				if (ds == null)
 					continue;
 
-				Properties[pageDS.Name] = new MPW(MPT.DataSource, new DSW { DataSource = ds, PageDataSource = pageDS });
+				properties[pageDS.Name] = new MPW(MPT.DataSource, new DSW { DataSource = ds, PageDataSource = pageDS });
 			}
 
 		}
@@ -399,9 +399,9 @@ namespace WebVella.Erp.Web.Models
 			if (string.IsNullOrWhiteSpace(text))
 				return text;
 
-			if (text.Trim().StartsWith("{"))
+			if (text.Trim().StartsWith('{'))
 			{
-				DataSourceVariable variable = null;
+				DataSourceVariable variable;
 				try
 				{
 					variable = JsonConvert.DeserializeObject<DataSourceVariable>(text, new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error });
@@ -488,7 +488,7 @@ namespace WebVella.Erp.Web.Models
 		public object GetProperty(string propName)
 		{
 			if (string.IsNullOrWhiteSpace(propName))
-				throw new ArgumentException(nameof(propName));
+				throw new ArgumentException($"Argument '{nameof(propName)}' must not be null or whitespace");
 
 			if (!propName.Contains("{{"))
 				return ResolveProperty(propName);
@@ -503,7 +503,7 @@ namespace WebVella.Erp.Web.Models
 					sb.Append(propName[idx++]);
 				else
 				{
-					idx = idx + 2;
+					idx += 2;
 					var end = propName.IndexOf("}}", idx);
 					if (end <= idx)
 						throw new PropertyDoesNotExistException("Could not interpret property value");
@@ -524,14 +524,14 @@ namespace WebVella.Erp.Web.Models
 			var name = propName.Replace("$index", "0");
 			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 
-			List<string> completePropChain = new List<string>();
+			var completePropChain = new List<string>();
 			foreach (var pName in tmpPropChain)
 			{
-				var indexerIdx = pName.IndexOf("[");
+				var indexerIdx = pName.IndexOf('[');
 				if (indexerIdx != -1)
 				{
-					var n = pName.Substring(0, indexerIdx);
-					var idx = pName.Substring(indexerIdx, pName.Length - indexerIdx);
+					var n = pName[..indexerIdx];
+					var idx = pName[indexerIdx..];
 					completePropChain.Add(n);
 					completePropChain.Add(idx);
 				}
@@ -540,7 +540,7 @@ namespace WebVella.Erp.Web.Models
 			}
 
 			MPW mpw = null;
-			var currentPropDict = Properties;
+			var currentPropDict = properties;
 			var currentPropertyNamePath = string.Empty;
 			string parentPropName = string.Empty;
 			foreach (var ppName in completePropChain)
@@ -557,62 +557,93 @@ namespace WebVella.Erp.Web.Models
 				//try to get property with full key (after http post object are entered with no . split
 				if (parentPropName == "Record")
 				{
-					var testName = propName.Trim().Substring(7); //cut the Record. in front
+					var testName = propName.Trim()[7..]; //cut the Record. in front
 					if (pName != testName)
 					{
 						if (currentPropDict.TryGetValue(testName, out var mpv))
 							return mpv.Value;
 						else if (pName.StartsWith('$'))
 						{
-							var entity = Properties["Entity"].Value as Entity;
-							var result = Properties["Record"].Value;
+							var entity = properties["Entity"].Value as Entity;
+							var result = properties["Record"].Value;
 
-							foreach (var access in completePropChain.Skip(1))
+							for(var i = 1; i < completePropChain.Count; i++)
 							{
-								if (access.StartsWith('$'))
+								var accessor = completePropChain[i];
+
+								// makes indexing optional
+								if (!(accessor.StartsWith('[') && accessor.EndsWith(']')) && result is List<EntityRecord> l && l.Count == 1)
+									result = l[0];
+
+								if (accessor.StartsWith('$'))
 								{
 									if (result is not EntityRecord rec)
 										throw new PropertyDoesNotExistException($"Property not found");
 
-									var relName = access[1..];
+									var path = completePropChain[1..(i + 1)]
+										.Select(p => p.Replace(" ", string.Empty).Trim())
+										.Where(p => p != "[0]");
+									var currentPath = string.Join('.', path);
+
+									if (alreadyResolvedRecordProperties.TryGetValue(currentPath, out var tuple))
+									{
+										result = tuple.Result;
+										entity = tuple.Entity;
+										continue;
+									}
+
+									var relName = accessor[1..];
 									var relResponse = relMan.Read(relName);
 
 									if (!relResponse.Success || relResponse.Object == null)
 										throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
 
-									var (entityId, fieldName, sourceFieldName) = OtherSideOfRelation(relResponse.Object, entity);
-									var fieldValue = rec[sourceFieldName];
-
-									var nextEntity = entMan.ReadEntity(entityId)?.Object
+									var (entityId, nextIdName, sourceIdName) = OtherSideOfRelation(relResponse.Object, entity);
+									var resultEntity = entMan.ReadEntity(entityId)?.Object
 										?? throw new PropertyDoesNotExistException($"Invalid relation '{relName}'");
 
-									var response = new RecordManager()
-										.Find(new EntityQuery(nextEntity.Name, "*", new QueryObject() { FieldName = fieldName, FieldValue = fieldValue, QueryType = QueryType.EQ }));
+									List<EntityRecord> resultList;
+									if (rec.Properties.TryGetValue(accessor, out var obj) && obj is List<EntityRecord> recList)
+										resultList = recList;
+									else
+									{
+										// automatically load values
+										var nextIdValue = rec[sourceIdName];
+										var queryObject = new QueryObject()
+										{
+											FieldName = nextIdName,
+											FieldValue = nextIdValue,
+											QueryType = QueryType.EQ
+										};
 
-									if (!response.Success || response.Object.Data == null)
-										throw new PropertyDoesNotExistException(response.Message);
+										var response = new RecordManager()
+											.Find(new EntityQuery(resultEntity.Name, "*", queryObject));
 
-									result = response.Object.Data;
-									entity = nextEntity;
+										if (!response.Success || response.Object.Data == null)
+											throw new PropertyDoesNotExistException(response.Message);
+
+										resultList = response.Object.Data;
+									}
+
+									alreadyResolvedRecordProperties[currentPath] = (resultList, resultEntity);
+									entity = resultEntity;
+									result = resultList;
 								}
-								else if (access.StartsWith('[') && access.EndsWith(']'))
+								else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
 								{
 									if (result is not List<EntityRecord> records)
 										throw new PropertyDoesNotExistException("Property not found");
 
-									var idx = int.Parse(access[1..(access.Length - 1)].Trim());
+									var idx = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
 									if (idx >= records.Count)
 										return null;
 									result = records[idx];
 								}
-								else if (result is EntityRecord rec)
+								else if(result is EntityRecord rec)
 								{
-									result = rec[access];
+									result = rec[accessor];										
 								}
-								else
-								{
-									throw new PropertyDoesNotExistException($"Property not found");
-								}
+								else throw new PropertyDoesNotExistException($"Property not found");
 							}
 							return result;
 						}
@@ -623,14 +654,14 @@ namespace WebVella.Erp.Web.Models
 				//try to get property with full key (after http post object are entered with no . split
 				if (parentPropName == "RelatedRecord")
 				{
-					var testName = propName.Trim().Substring(14); //cut the RelatedRecord. in front
-					if (pName != testName && currentPropDict.ContainsKey(testName))
-						return currentPropDict[testName].Value;
+					var testName = propName.Trim()[14..]; //cut the RelatedRecord. in front
+					if (pName != testName && currentPropDict.TryGetValue(testName, out var result))
+						return result.Value;
 				}
 
 				if (!currentPropDict.ContainsKey(pName))
 				{
-					if (!currentPropertyNamePath.EndsWith("]"))
+					if (!currentPropertyNamePath.EndsWith(']'))
 						throw new PropertyDoesNotExistException($"Property name '{currentPropertyNamePath}' not found.");
 					else
 						throw new PropertyDoesNotExistException($"Property name is found, but list index is out of bounds.");
@@ -640,8 +671,7 @@ namespace WebVella.Erp.Web.Models
 				mpw = currentPropDict[pName];
 				if (mpw != null && mpw.Type == MPT.DataSource)
 				{
-					DSW dsw = mpw.Value as DSW;
-					if (dsw != null)
+					if (mpw.Value is DSW dsw)
 					{
 						var result = ExecDataSource(dsw);
 						if (result is List<EntityRecord> || result is EntityRecordList)
@@ -674,7 +704,7 @@ namespace WebVella.Erp.Web.Models
 		{
 			if (dsWrapper.DataSource.Type == DataSourceType.CODE)
 			{
-				Dictionary<string, object> arguments = new Dictionary<string, object>();
+				var arguments = new Dictionary<string, object>();
 				if (dsWrapper.DataSource.Parameters != null)
 				{
 					foreach (var par in dsWrapper.DataSource.Parameters)
@@ -773,7 +803,7 @@ namespace WebVella.Erp.Web.Models
 				throw new Exception("Not supported data source type.");
 		}
 
-		private string CheckProcessDefaultValue(string value)
+		private static string CheckProcessDefaultValue(string value)
 		{
 			if (!string.IsNullOrEmpty(value))
 			{
@@ -794,7 +824,7 @@ namespace WebVella.Erp.Web.Models
 				return value;
 
 
-			Dictionary<string, string> replacementDict = new Dictionary<string, string>();
+			var replacementDict = new Dictionary<string, string>();
 
 			var foundTags = Regex.Matches(value, @"(?<=\{\{)[^}]*(?=\}\})").Cast<Match>().Select(match => match.Value).Distinct().ToList();
 			foreach (var tag in foundTags)
@@ -805,8 +835,8 @@ namespace WebVella.Erp.Web.Models
 				{
 					//this is a tag with a default value
 					int questionMarksLocation = processedTag.IndexOf("??");
-					var tagValue = processedTag.Substring(0, questionMarksLocation).Trim();
-					var tagDefault = processedTag.Substring(questionMarksLocation + 2).Trim().Replace("\"", "").Replace("'", "");
+					var tagValue = processedTag[..questionMarksLocation].Trim();
+					var tagDefault = processedTag[(questionMarksLocation + 2)..].Trim().Replace("\"", "").Replace("'", "");
 					processedTag = tagValue;
 					defaultValue = tagDefault;
 				}
@@ -861,7 +891,7 @@ namespace WebVella.Erp.Web.Models
 
 			public object Value { get; set; }
 
-			public Dictionary<string, MPW> Properties { get; private set; } = new Dictionary<string, MPW>();
+			public Dictionary<string, MPW> Properties { get; private set; } = [];
 
 			public MPW(MPT type, object value)
 			{
@@ -870,8 +900,7 @@ namespace WebVella.Erp.Web.Models
 
 				if (Type == MPT.ListEntityRecords)
 				{
-					List<EntityRecord> records = Value as List<EntityRecord>;
-					if (records != null)
+					if (Value is List<EntityRecord> records)
 					{
 						for (int i = 0; i < records.Count; i++)
 						{
@@ -882,18 +911,17 @@ namespace WebVella.Erp.Web.Models
 				}
 				else if (Type == MPT.EntityRecord)
 				{
-					EntityRecord record = Value as EntityRecord;
-					if (record != null)
+					if (Value is EntityRecord record)
 					{
 						foreach (var propName in record.Properties.Keys)
 						{
 							var propValue = record[propName.Trim()];
 							//the case when set record from page post
-							if (propName.StartsWith("$") && propName.Contains(".") && propValue is List<Guid>)
+							if (propName.StartsWith('$') && propName.Contains('.') && propValue is List<Guid> l)
 							{
 								string[] split = propName.Split('.');
-								List<EntityRecord> records = new List<EntityRecord>();
-								foreach (Guid id in (List<Guid>)propValue)
+								var records = new List<EntityRecord>();
+								foreach (Guid id in l)
 								{
 									EntityRecord rec = new EntityRecord();
 									rec["id"] = id;

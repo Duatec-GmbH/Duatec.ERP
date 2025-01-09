@@ -11,15 +11,13 @@ using WebVella.Erp.Web.Models;
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
     [HookAttachment(key: HookKeys.Manufacturer.EplanImport)]
-    internal class ManufacturerEplanImportHook : IParameterizedPageHook
+    internal class ManufacturerEplanImportHook : IPageHook
     {
         private const string EplanIdArg = "hEplanId";
 
-        public string[] Parameters => [EplanIdArg];
-
-        public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
-            if (!args.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
+            if (!pageModel.Request.Query.TryGetValue(EplanIdArg, out var id) || !long.TryParse(id, out var eplanId))
                 PutInvalidArg(pageModel);
             else
             {
@@ -39,7 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
             return pageModel.LocalRedirect(url);
         }
 
-        public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             return null;
         }

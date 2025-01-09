@@ -6,17 +6,15 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    public abstract class ManageOnListHookBase : IParameterizedPageHook
+    public abstract class ManageOnListHookBase : IPageHook
     {
         protected virtual string IdParameter => "hId";
 
-        public string[] Parameters => [IdParameter];
-
         protected abstract EntityRecord? Find(Guid id);
 
-        public IActionResult? OnGet(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
-            if (!args.TryGetValue(IdParameter, out var idValue) || !Guid.TryParse(idValue, out var id))
+            if (!pageModel.Request.Query.TryGetValue(IdParameter, out var idValue) || !Guid.TryParse(idValue, out var id))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, $"Invalid format '{IdParameter}'");
                 return null;
@@ -28,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
             return null;
         }
 
-        public IActionResult? OnPost(BaseErpPageModel pageModel, Dictionary<string, string?> args)
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             return null;
         }
