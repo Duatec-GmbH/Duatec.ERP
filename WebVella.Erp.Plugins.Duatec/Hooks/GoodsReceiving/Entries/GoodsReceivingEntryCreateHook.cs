@@ -31,9 +31,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            record[GoodsReceivingEntry.GoodsReceiving] = listId;
+            var rec = new GoodsReceivingEntry(record) { GoodsReceiving = listId };
 
-            validationErrors.AddRange(_validator.ValidateOnCreate(record));
+            validationErrors.AddRange(_validator.ValidateOnCreate(rec));
             return null;
         }
     }

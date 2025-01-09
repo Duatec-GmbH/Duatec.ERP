@@ -2,9 +2,9 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base
 {
-    public abstract class TypedEntityRecord : EntityRecord
+    public abstract class TypedEntityRecordWrapper : EntityRecord
     {
-        public TypedEntityRecord(EntityRecord? record = null)
+        public TypedEntityRecordWrapper(EntityRecord? record = null)
         {
             if (record != null)
                 Properties = record.Properties;

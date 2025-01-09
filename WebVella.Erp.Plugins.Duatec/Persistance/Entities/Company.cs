@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public class Company : TypedEntityRecord
+    public class Company : TypedEntityRecordWrapper
     {
         public const string Entity = "manufacturer";
 

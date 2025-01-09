@@ -153,9 +153,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var receivedAmountLookup = GoodsReceivingEntry.FindManyByProject(projectId)
-                .GroupBy(r => (Guid)r[GoodsReceivingEntry.Article])
-                .ToDictionary(g => g.Key, g => g.Sum(r => (decimal)r[GoodsReceivingEntry.Amount]));
+            var receivedAmountLookup = Repository.GoodsReceiving.FindManyEntriesByProject(projectId)
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var ordersLookup = projectOrderEntries
                 .GroupBy(r => r.Article)

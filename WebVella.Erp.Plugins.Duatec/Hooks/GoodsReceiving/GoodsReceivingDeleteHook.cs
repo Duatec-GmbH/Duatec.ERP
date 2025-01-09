@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving
@@ -16,18 +16,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving
         {
             var id = (Guid)pageModel.TryGetDataSourceProperty<EntityRecord>("Record")["id"];
 
-            var entries = GoodsReceivingEntry.FindMany(id, "id")
-                .Select(r => (Guid)r["id"])
-                .ToArray();
+            if (Repository.GoodsReceiving.FindManyEntriesByGoodsReceiving(id, "id").Count > 0)
+                pageModel.PutMessage(ScreenMessageType.Error, "Can not delete goods receiving when there are still items atached");
+            else if(!Repository.GoodsReceiving.Delete(id))
+                pageModel.PutMessage(ScreenMessageType.Error, "Could not delete goods receiving");
+            else
+                return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
 
-            QueryResponse TransactionalAction()
-            {
-                var recMan = new RecordManager();
-                recMan.DeleteRecords(GoodsReceivingEntry.Entity, entries);
-                return recMan.DeleteRecord(Persistance.Entities.GoodsReceiving.Entity, id);
-            }
-
-            return Transactional.Delete(pageModel, TransactionalAction);
+            return null;
         }
     }
 }

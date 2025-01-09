@@ -31,9 +31,9 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             var result = new List<ValidationError>();
             if (!goodsReceiving.HasValue)
-                result.Add(new ValidationError(GoodsReceivingEntry.GoodsReceiving, "Delivery notes 'goods receiving' is required"));
+                result.Add(new ValidationError(GoodsReceivingEntry.Fields.GoodsReceiving, "Delivery notes 'goods receiving' is required"));
             if (deliveryNote == null)
-                result.Add(new ValidationError(GoodsReceivingEntry.Article, "Delivery notes 'delivery note' is required"));
+                result.Add(new ValidationError(GoodsReceivingEntry.Fields.Article, "Delivery notes 'delivery note' is required"));
 
             return result;
         }

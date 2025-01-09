@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets;
 using WebVella.Erp.Plugins.Duatec.Validators;
@@ -23,10 +24,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var oldRec = GoodsReceivingEntry.Find((Guid)record["id"]);
-            record[GoodsReceivingEntry.GoodsReceiving] = oldRec![GoodsReceivingEntry.GoodsReceiving];
+            var rec = new GoodsReceivingEntry(record);
 
-            validationErrors.AddRange(_validator.ValidateOnUpdate(record));
+            var oldRec = Repository.GoodsReceiving.FindEntry(rec.Id!.Value);
+            rec.GoodsReceiving = oldRec!.GoodsReceiving;
+
+            validationErrors.AddRange(_validator.ValidateOnUpdate(rec));
 
             return null;
         }

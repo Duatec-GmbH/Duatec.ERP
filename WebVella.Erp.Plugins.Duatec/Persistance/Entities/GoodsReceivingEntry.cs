@@ -1,76 +1,48 @@
-﻿using WebVella.Erp.Api;
-using WebVella.Erp.Api.Models;
-using WebVella.Erp.Eql;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public static class GoodsReceivingEntry
+    public class GoodsReceivingEntry : TypedEntityRecordWrapper
     {
+        public const string Entity = "goods_receiving_entry";
+
         public static class Relations
         {
             public const string Article = "goods_receiving_entry_article";
             public const string GoodsReceiving = "goods_receiving_entry_goods_receiving";
         }
 
-        public const string Entity = "goods_receiving_entry";
-        public const string Article = Entities.Article.AsForeignKey;
-        public const string GoodsReceiving = "goods_receiving_id";
-        public const string Amount = "amount";
-
-        public static List<EntityRecord> FindMany(Guid goodsReceiving, string select = "*")
-            => Record.FindManyBy(Entity, GoodsReceiving, goodsReceiving, select);
-
-        public static List<EntityRecord> FindManyByProject(Guid projectId, string select = "*")
+        public static class Fields
         {
-            var subQuery = Entities.GoodsReceiving.FindManyByProject(projectId)
-                .Select(r => new QueryObject() { FieldName = GoodsReceiving, FieldValue = (Guid)r["id"] })
-                .ToList();
-
-            var recMan = new RecordManager();
-            var response = recMan.Find(new EntityQuery(Entity, select,
-                new QueryObject() { QueryType = QueryType.OR, SubQueries = subQuery }));
-
-            return response.Object?.Data ?? [];
+            public const string Article = Entities.Article.AsForeignKey;
+            public const string GoodsReceiving = "goods_receiving_id";
+            public const string Amount = "amount";
         }
 
-        public static List<EntityRecord> FindManyByProjectAndArticle(Guid projectId, Guid articleId)
+        public GoodsReceivingEntry(EntityRecord? record = null)
+            : base(record) { }
+
+
+        public static GoodsReceivingEntry? Create(EntityRecord? record)
+            => record == null ? null : new GoodsReceivingEntry(record);
+
+        public Guid GoodsReceiving
         {
-            var query = @$"SELECT * FROM {Entity} 
-WHERE {Article} = @articleId 
-AND ${Relations.GoodsReceiving}.${Entities.GoodsReceiving.Relations.Order}.${Order.Relations.Project}.id = @projectId";
-
-            var command = new EqlCommand(query,
-                new EqlParameter("articleId", articleId),
-                new EqlParameter("projectId", projectId));
-
-            return command.Execute();
+            get => TryGet<Guid>(Fields.GoodsReceiving);
+            set => Properties[Fields.GoodsReceiving] = value;
         }
 
-        public static EntityRecord? Find(Guid id)
-            => Record.Find(Entity, id);
-
-        public static bool Exists(Guid goodsReceiving, Guid article, Guid? excluded = null)
+        public Guid Article
         {
-            var subQueries = new List<QueryObject>()
-            {
-                new() { FieldName = GoodsReceiving, FieldValue = goodsReceiving, QueryType = QueryType.EQ },
-                new() { FieldName = Article, FieldValue = article, QueryType = QueryType.EQ }
-            };
-            if (excluded.HasValue)
-            {
-                subQueries.Add(new()
-                {
-                    QueryType = QueryType.NOT,
-                    SubQueries = [new() { FieldName = "id", FieldValue = excluded.Value, QueryType = QueryType.EQ }]
-                });
-            }
+            get => TryGet<Guid>(Fields.Article);
+            set => Properties[Fields.Article] = value;
+        }
 
-            var recMan = new RecordManager();
-            var response = recMan.Count(new EntityQuery(Entity, "id",
-                new QueryObject() { QueryType = QueryType.AND, SubQueries = subQueries }));
-
-            return response.Object > 0;
+        public decimal Amount
+        {
+            get => TryGet<decimal>(Fields.Amount);
+            set => Properties[Fields.Amount] = value;
         }
     }
 }

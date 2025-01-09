@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    internal class InventoryReservationList : TypedEntityRecord
+    internal class InventoryReservationList : TypedEntityRecordWrapper
     {
         public const string Entity = "article_stock_reservation";
 

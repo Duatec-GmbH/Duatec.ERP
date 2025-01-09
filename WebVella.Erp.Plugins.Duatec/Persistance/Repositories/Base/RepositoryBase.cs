@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {
-    public abstract class RepositoryBase<T> where T : TypedEntityRecord
+    public abstract class RepositoryBase<T> where T : TypedEntityRecordWrapper
     {
         public abstract string Entity { get; }
 

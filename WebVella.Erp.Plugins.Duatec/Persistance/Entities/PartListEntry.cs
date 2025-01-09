@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    internal class PartListEntry : TypedEntityRecord
+    internal class PartListEntry : TypedEntityRecordWrapper
     {
         public const string Entity = "part_list_entry";
 

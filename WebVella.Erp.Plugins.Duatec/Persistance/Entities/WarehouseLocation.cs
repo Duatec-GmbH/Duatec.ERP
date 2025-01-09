@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public class WarehouseLocation : TypedEntityRecord
+    public class WarehouseLocation : TypedEntityRecordWrapper
     {
         public const string Entity = "warehouse_location";
 

@@ -17,5 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance
         public static ProjectRepository Project { get; } = new();
 
         public static WarehouseRepository Warehouse { get; } = new();
+
+        public static GoodsReceivingRepository GoodsReceiving { get; } = new();
     }
 }

@@ -6,8 +6,8 @@ using WebVella.Erp.Plugins.Duatec.Util;
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {
     internal abstract class ListRepositoryBase<TList, TEntry> : RepositoryBase<TList>
-        where TList : TypedEntityRecord
-        where TEntry : TypedEntityRecord
+        where TList : TypedEntityRecordWrapper
+        where TEntry : TypedEntityRecordWrapper
     {
         protected abstract string EntryEntity { get; }
 
@@ -22,10 +22,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 
             if(children.Length > 0)
             {
-                Transactional.TryExecute(() =>
+                return Transactional.TryExecute(() =>
                 {
                     var recMan = new RecordManager();
                     recMan.DeleteRecords(EntryEntity, children);
+
+                    base.Delete(id);
                 });
             }
 

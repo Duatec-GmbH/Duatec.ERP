@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public class Article : TypedEntityRecord
+    public class Article : TypedEntityRecordWrapper
     {
         public const string Entity = "article";
         public const string AsForeignKey = "article_id";

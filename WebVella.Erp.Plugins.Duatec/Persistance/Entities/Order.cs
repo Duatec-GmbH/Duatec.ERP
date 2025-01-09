@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
-    public class Order : TypedEntityRecord
+    public class Order : TypedEntityRecordWrapper
     {
         public const string Entity = "order";
 
