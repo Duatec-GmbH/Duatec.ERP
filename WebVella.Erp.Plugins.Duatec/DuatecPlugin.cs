@@ -3560,7 +3560,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         new WebVella.Erp.Web.Services.AppService().CreateArea(id, appId, name, label, labelTranslations, description, descriptionTranslations, iconClass, color, weight, showGroupNames, access, WebVella.Erp.Database.DbContext.Current.Transaction);
                     }
                     #endregion
-
+                     
                     #region << ***Create sitemap area*** Sitemap area name: warehouses >>
                     {
                         var id = new Guid("3ee7e1d2-145c-4c92-ad9b-43f20e85e33a");
