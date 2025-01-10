@@ -293,56 +293,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Delete entity*** Entity Name: role >>
-                    {
-                        {
-                            var response = entMan.DeleteEntity(new Guid("c4541fee-fbb6-4661-929e-1724adec285a"));
-                            if (!response.Success)
-                                throw new Exception("System error 10060. Entity: role Delete. Message:" + response.Message);
-                        }
-                    }
-                    #endregion
-
-                    #region << ***Delete entity*** Entity Name: user >>
-                    {
-                        {
-                            var response = entMan.DeleteEntity(new Guid("b9cebc3b-6443-452a-8e34-b311a73dcc8b"));
-                            if (!response.Success)
-                                throw new Exception("System error 10060. Entity: user Delete. Message:" + response.Message);
-                        }
-                    }
-                    #endregion
-
-                    #region << ***Delete entity*** Entity Name: user_file >>
-                    {
-                        {
-                            var response = entMan.DeleteEntity(new Guid("5c666c54-9e76-4327-ac7a-55851037810c"));
-                            if (!response.Success)
-                                throw new Exception("System error 10060. Entity: user_file Delete. Message:" + response.Message);
-                        }
-                    }
-                    #endregion
-
-                    #region << ***Delete entity*** Entity Name: smtp_service >>
-                    {
-                        {
-                            var response = entMan.DeleteEntity(new Guid("17698b9f-e533-4f8d-a651-a00f7de2989e"));
-                            if (!response.Success)
-                                throw new Exception("System error 10060. Entity: smtp_service Delete. Message:" + response.Message);
-                        }
-                    }
-                    #endregion
-
-                    #region << ***Delete entity*** Entity Name: email >>
-                    {
-                        {
-                            var response = entMan.DeleteEntity(new Guid("085e2442-820a-4df7-ab92-516ce23197c4"));
-                            if (!response.Success)
-                                throw new Exception("System error 10060. Entity: email Delete. Message:" + response.Message);
-                        }
-                    }
-                    #endregion
-
                     #region << ***Delete entity*** Entity Name: task >>
                     {
                         {
@@ -33680,6 +33630,8 @@ OFFSET 0
 
                 }
 #pragma warning restore
+
+                // necessary stuff from webvella (DO NOT DELETE)
 
                 currentPluginSettings.Version = 1;
                 SavePluginData(JsonConvert.SerializeObject(currentPluginSettings));
