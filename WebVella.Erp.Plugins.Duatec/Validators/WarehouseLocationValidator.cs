@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             if (record.Warehouse == Guid.Empty)
                 result.Add(new ValidationError(WarehouseLocation.Fields.Warehouse, $"Please select a {_warehousePretty}"));
 
-            if (result.Count == 0 && RepositoryService.Warehouse.EntryExistsWithinWarehouse(record.Warehouse, record.Designation, id))
+            if (result.Count == 0 && RepositoryService.WarehouseRepository.EntryExistsWithinWarehouse(record.Warehouse, record.Designation, id))
             {
                 var message = $"{_entityPretty} {_entityPropertyPretty} '{record.Designation}' already exists within selected {_warehousePretty}";
                 result.Add(new ValidationError(WarehouseLocation.Fields.Designation, message));

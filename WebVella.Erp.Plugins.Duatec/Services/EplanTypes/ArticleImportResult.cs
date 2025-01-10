@@ -1,9 +1,8 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
+namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
 {
     internal class ArticleImportResult
     {
@@ -37,13 +36,13 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
 
         public string[] AvailableActions { get; }
 
-        public static List<ArticleImportResult> FromEplanArticles(List<EplanArticle> eplanArticles)
+        public static List<ArticleImportResult> FromEplanArticles(List<EplanArticleDto> eplanArticles)
         {
             if (eplanArticles.Count == 0)
                 return [];
 
             var partNumbers = GetPartNumbers(eplanArticles);
-            var dbArticles = RepositoryService.Article.FindMany(partNumbers: partNumbers);
+            var dbArticles = RepositoryService.ArticleRepository.FindMany(partNumbers: partNumbers);
             var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);
@@ -74,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
             return result;
         }
 
-        private static string[] GetPartNumbers(List<EplanArticle> eplanArticles)
+        private static string[] GetPartNumbers(List<EplanArticleDto> eplanArticles)
         {
             var result = eplanArticles
                 .Select(a => a.PartNumber)
@@ -87,9 +86,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
             return result;
         }
 
-        private static Dictionary<string, DataPortalArticle?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, Article?> dbArticles)
+        private static Dictionary<string, DataPortalArticleDto?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, Article?> dbArticles)
         {
-            var result = partNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticle?));
+            var result = partNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticleDto?));
 
             var edpPartNumbers = partNumbers
                 .Where(pn => dbArticles[pn] == null)
@@ -106,8 +105,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
             return result;
         }
 
-        private static ArticleImportState GetArticleState(EplanArticle article,
-            DataPortalArticle? edpArticle, EntityRecord? dbRecord)
+        private static ArticleImportState GetArticleState(EplanArticleDto article,
+            DataPortalArticleDto? edpArticle, EntityRecord? dbRecord)
         {
             if (IsDbArticle(article, dbRecord))
             {
@@ -122,7 +121,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
             return ArticleImportState.UnknownArticle;
         }
 
-        private static bool IsValidEplanArticle(EplanArticle article, DataPortalArticle? edpArticle)
+        private static bool IsValidEplanArticle(EplanArticleDto article, DataPortalArticleDto? edpArticle)
         {
             return edpArticle != null
                 && article.PartNumber == edpArticle.PartNumber
@@ -130,7 +129,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
                 && article.OrderNumber == edpArticle.OrderNumber;
         }
 
-        private static bool IsDbArticle(EplanArticle article, EntityRecord? dbArticle)
+        private static bool IsDbArticle(EplanArticleDto article, EntityRecord? dbArticle)
         {
             return dbArticle != null
                 && article.PartNumber.Equals(dbArticle[Article.Fields.PartNumber])

@@ -11,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
         protected override string Entity => WarehouseLocation.Entity;
 
         protected override string? RecordLabel(Guid id)
-            => RepositoryService.Warehouse.Find(id)?.Designation;
+            => RepositoryService.WarehouseRepository.Find(id)?.Designation;
     }
 }

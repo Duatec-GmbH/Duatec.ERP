@@ -4,7 +4,7 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 .Distinct()
                 .ToArray();
 
-            var articleLookup = RepositoryService.Article.FindMany(partNumbers: partNumbers);
+            var articleLookup = RepositoryService.ArticleRepository.FindMany(partNumbers: partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);
@@ -63,7 +63,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             {
                 foreach(var rec in entries)
                 {
-                    if (!RepositoryService.PartList.Insert(rec).HasValue)
+                    if (!RepositoryService.PartListRepository.Insert(rec).HasValue)
                         throw new DbException($"Could not create part list entries");
                 }
             }
@@ -100,11 +100,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             return Error(pageModel, message);
         }
 
-        private static Key Key(EplanPart part)
+        private static Key Key(EplanPartDto part)
             => (part.PartNumber, part.TypeNumber, part.OrderNumber, part.Description);
         
 
-        private static PartListEntry ListEntryRecord(IGrouping<Key, EplanPart> group, Dictionary<string, Article> articleLookup, Guid partListId)
+        private static PartListEntry ListEntryRecord(IGrouping<Key, EplanPartDto> group, Dictionary<string, Article> articleLookup, Guid partListId)
         {
             return new PartListEntry()
             {
@@ -116,7 +116,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             };
         }
 
-        private static string ListAgg(IGrouping<Key, EplanPart> group)
+        private static string ListAgg(IGrouping<Key, EplanPartDto> group)
         {
             var entries = group
                 .Select(g => g.DeviceTag?.Trim())

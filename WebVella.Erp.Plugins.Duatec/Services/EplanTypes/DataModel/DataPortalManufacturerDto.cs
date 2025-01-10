@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
 {
-    public class DataPortalManufacturer
+    public class DataPortalManufacturerDto
     {
-        public DataPortalManufacturer(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
+        public DataPortalManufacturerDto(long id, string shortName, string name, string? websiteUrl, string? logoUrl)
         {
             EplanId = id;
             ShortName = shortName;
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 
         public string LogoUrl { get; }
 
-        public static DataPortalManufacturer? FromJson(JsonNode? json)
+        public static DataPortalManufacturerDto? FromJson(JsonNode? json)
         {
             if (json == null || $"{json["type"]}" != "manufacturers")
                 return null;
@@ -37,7 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
             var websiteUrl = json["website"]?.GetValue<string?>();
             var logoUrl = json["logo_url"]?.GetValue<string>();
 
-            return new DataPortalManufacturer(
+            return new DataPortalManufacturerDto(
                 id: id,
                 shortName: shortName,
                 name: name,

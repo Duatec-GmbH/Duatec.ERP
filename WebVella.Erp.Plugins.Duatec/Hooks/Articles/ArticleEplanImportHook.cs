@@ -4,7 +4,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return;
             }
 
-            if(!Guid.TryParse(type, out var typeId) || RepositoryService.Article.FindType(typeId) == null)
+            if(!Guid.TryParse(type, out var typeId) || RepositoryService.ArticleRepository.FindType(typeId) == null)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, $"Type with id '{type}' does not exist.");
                 return;
@@ -52,11 +52,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
             void TransactionalAction()
             {
-                var manufacturer = RepositoryService.Company.FindByShortName(article.Manufacturer.ShortName)?.Id
-                    ?? RepositoryService.Company.Insert(article.Manufacturer)
+                var manufacturer = RepositoryService.CompanyRepository.FindByShortName(article.Manufacturer.ShortName)?.Id
+                    ?? RepositoryService.CompanyRepository.Insert(article.Manufacturer)
                     ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'.");
 
-                if (RepositoryService.Article.Insert(article, manufacturer, typeId) == null)
+                if (RepositoryService.ArticleRepository.Insert(article, manufacturer, typeId) == null)
                     throw new DbException($"Could not create article '{article.PartNumber}'.");
             }
 
@@ -65,15 +65,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         }
 
 
-        private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out DataPortalArticle? article)
+        private static bool TryGetArticle(BaseErpPageModel pageModel, string partNumber, [NotNullWhen(true)] out DataPortalArticleDto? article)
         {
             article = EplanDataPortal.GetArticleByPartNumber(partNumber);
 
             if (article == null)
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
-            else if (RepositoryService.Article.Exists(article.PartNumber))
+            else if (RepositoryService.ArticleRepository.Exists(article.PartNumber))
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' already exists in the data base.");
-            else if (RepositoryService.Article.Exists(article.EplanId))
+            else if (RepositoryService.ArticleRepository.Exists(article.EplanId))
                 pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");
             else return true;
 

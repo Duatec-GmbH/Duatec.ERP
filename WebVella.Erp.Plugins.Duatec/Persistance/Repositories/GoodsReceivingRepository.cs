@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<GoodsReceiving> FindManyByProject(Guid projectId, string select = "*")
         {
-            var subQuery = RepositoryService.Order.FindManyByProject(projectId, $"id")
+            var subQuery = RepositoryService.OrderRepository.FindManyByProject(projectId, $"id")
                 .Select(o => o.Id!.Value)
                 .Distinct()
                 .Select(oId => new QueryObject()

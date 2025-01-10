@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
 {
-    public class DataPortalArticle
+    public class DataPortalArticleDto
     {
-        private DataPortalArticle(long id, DataPortalManufacturer manufacturer,
+        private DataPortalArticleDto(long id, DataPortalManufacturerDto manufacturer,
             string partNumber, string typeNumber, string orderNumber,
             string designation, string pictureUrl)
         {
@@ -20,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 
         public long EplanId { get; }
 
-        public DataPortalManufacturer Manufacturer { get; }
+        public DataPortalManufacturerDto Manufacturer { get; }
 
         public string PartNumber { get; }
 
@@ -32,17 +31,17 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 
         public string PictureUrl { get; }
 
-        public static DataPortalArticle? FromJson(JsonNode? json, string partNumber)
+        public static DataPortalArticleDto? FromJson(JsonNode? json, string partNumber)
         {
             return FromJson(json, partNumber, GetDataFromPartNumber);
         }
 
-        public static DataPortalArticle? FromJson(JsonNode? json, long id)
+        public static DataPortalArticleDto? FromJson(JsonNode? json, long id)
         {
             return FromJson(json, id, GetDataFromId);
         }
 
-        private static DataPortalArticle? FromJson<T>(JsonNode? json, T idValue, Func<JsonNode?, T, JsonNode?> getDataNode)
+        private static DataPortalArticleDto? FromJson<T>(JsonNode? json, T idValue, Func<JsonNode?, T, JsonNode?> getDataNode)
         {
             var data = getDataNode(json, idValue);
 
@@ -55,7 +54,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 
             var pictureId = data["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
 
-            return new DataPortalArticle(
+            return new DataPortalArticleDto(
                 id: id,
                 manufacturer: manufacturer,
                 partNumber: attributes["part_number"]!.GetValue<string>(),
@@ -65,9 +64,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
                 pictureUrl: GetPictureUrl(json, pictureId) ?? string.Empty);
         }
 
-        private static DataPortalManufacturer GetManufacturer(JsonNode? json)
+        private static DataPortalManufacturerDto GetManufacturer(JsonNode? json)
         {
-            return DataPortalManufacturer.FromJson(json?["included"]?.AsArray()
+            return DataPortalManufacturerDto.FromJson(json?["included"]?.AsArray()
                 .FirstOrDefault(n => $"{n?["type"]}" == "manufacturers"))!;
         }
 

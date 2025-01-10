@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Validators;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public class GoodsReceivingEntry : TypedEntityRecordWrapper
     {

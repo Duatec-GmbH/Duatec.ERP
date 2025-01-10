@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var entry = TypedEntityRecordWrapper.Cast<PartListEntry>(record)!;
-            var oldRec = RepositoryService.PartList.FindEntry(entry.Id!.Value)!;
+            var oldRec = RepositoryService.PartListRepository.FindEntry(entry.Id!.Value)!;
 
             entry.PartList = oldRec.PartList;
             validationErrors.AddRange(_validator.ValidateOnUpdate(entry));

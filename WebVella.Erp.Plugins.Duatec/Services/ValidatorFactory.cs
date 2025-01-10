@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Attributes;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
 {
-    internal class ValidatorFactory
+    internal static class ValidatorFactory
     {
         private static Dictionary<Type, List<object>>? _validators = null;
 

@@ -11,6 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
         protected override string Entity => ArticleType.Entity;
 
         protected override string? RecordLabel(Guid id)
-            => RepositoryService.Article.FindType(id)?.Label;
+            => RepositoryService.ArticleRepository.FindType(id)?.Label;
     }
 }

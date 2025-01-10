@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
         {
             if (!pageModel.RecordId.HasValue)
                 return false;
-            return RepositoryService.Article.ArticleHasAlternatives(pageModel.RecordId.Value);
+            return RepositoryService.ArticleRepository.ArticleHasAlternatives(pageModel.RecordId.Value);
         }
     }
 }

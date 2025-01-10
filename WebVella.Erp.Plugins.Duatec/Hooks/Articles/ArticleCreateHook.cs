@@ -31,7 +31,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             var shortName = entry.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
 
-            entry.Manufacturer = RepositoryService.Company.FindByShortName(shortName)!.Id!.Value;
+            entry.Manufacturer = RepositoryService.CompanyRepository.FindByShortName(shortName)!.Id!.Value;
             return null;
         }
     }

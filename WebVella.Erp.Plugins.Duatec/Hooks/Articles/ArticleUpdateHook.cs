@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             var recordId = (Guid)record["id"];
 
-            var oldAlternatives = RepositoryService.Article.FindAlternativeIds(recordId);
+            var oldAlternatives = RepositoryService.ArticleRepository.FindAlternativeIds(recordId);
             var currentAlternatives = pageModel.GetFormValue("equivalents")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Guid.Parse)
@@ -37,10 +37,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             void TransactionalAction()
             {
                 foreach (var id in toDelete)
-                    RepositoryService.Article.DeleteAlternativeMapping(recordId, id);
+                    RepositoryService.ArticleRepository.DeleteAlternativeMapping(recordId, id);
 
                 foreach (var id in toAdd)
-                    RepositoryService.Article.InsertAlternativeMapping(recordId, id);
+                    RepositoryService.ArticleRepository.InsertAlternativeMapping(recordId, id);
             }
 
             Transactional.TryExecute(pageModel, TransactionalAction);

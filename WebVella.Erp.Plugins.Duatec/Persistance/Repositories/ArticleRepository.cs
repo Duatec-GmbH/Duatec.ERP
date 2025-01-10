@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -46,7 +46,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return result;
         }
 
-        public Guid? Insert(DataPortalArticle article, Guid manufacturerId, Guid typeId)
+        public Guid? Insert(DataPortalArticleDto article, Guid manufacturerId, Guid typeId)
         {
             var rec = new Article
             {

@@ -12,8 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             if (!pageModel.RecordId.HasValue)
                 return false;
 
-            return RepositoryService.PartList.FindManyByProject(pageModel.RecordId.Value)
-                .Exists(pl => pl.IsActive && RepositoryService.PartList.EntryExistsWithinList(pl.Id!.Value));
+            return RepositoryService.PartListRepository.FindManyByProject(pageModel.RecordId.Value)
+                .Exists(pl => pl.IsActive && RepositoryService.PartListRepository.EntryExistsWithinList(pl.Id!.Value));
         }
     }
 }

@@ -1,33 +1,33 @@
 ﻿using System.Collections;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Test.DataPortal
 {
     internal static class Common
     {
-        public static void AssertArticleIsValid(DataPortalArticle? sut)
+        public static void AssertArticleIsValid(DataPortalArticleDto? sut)
         {
             Assert.That(sut, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(DataPortalArticle.EplanId));
+                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(DataPortalArticleDto.EplanId));
                 AssertManufacturerIsValid(sut.Manufacturer);
-                AssertIsNotEmpty(sut.PartNumber, nameof(DataPortalArticle.PartNumber));
-                AssertIsNotEmpty(sut.Designation, nameof(DataPortalArticle.Designation));
-                Assert.That(sut.PictureUrl, Is.Not.Null, nameof(DataPortalArticle.PictureUrl));
+                AssertIsNotEmpty(sut.PartNumber, nameof(DataPortalArticleDto.PartNumber));
+                AssertIsNotEmpty(sut.Designation, nameof(DataPortalArticleDto.Designation));
+                Assert.That(sut.PictureUrl, Is.Not.Null, nameof(DataPortalArticleDto.PictureUrl));
             });
         }
 
-        public static void AssertManufacturerIsValid(DataPortalManufacturer? sut)
+        public static void AssertManufacturerIsValid(DataPortalManufacturerDto? sut)
         {
             Assert.That(sut, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(DataPortalManufacturer.EplanId));
-                AssertIsNotEmpty(sut.Name, nameof(DataPortalManufacturer.Name));
-                AssertIsNotEmpty(sut.ShortName, nameof(DataPortalManufacturer.ShortName));
-                Assert.That(sut.WebsiteUrl, Is.Not.Null, nameof(DataPortalManufacturer.WebsiteUrl));
-                AssertIsNotEmpty(sut.LogoUrl, nameof(DataPortalManufacturer.LogoUrl));
+                Assert.That(sut!.EplanId, Is.Not.Zero, nameof(DataPortalManufacturerDto.EplanId));
+                AssertIsNotEmpty(sut.Name, nameof(DataPortalManufacturerDto.Name));
+                AssertIsNotEmpty(sut.ShortName, nameof(DataPortalManufacturerDto.ShortName));
+                Assert.That(sut.WebsiteUrl, Is.Not.Null, nameof(DataPortalManufacturerDto.WebsiteUrl));
+                AssertIsNotEmpty(sut.LogoUrl, nameof(DataPortalManufacturerDto.LogoUrl));
             });
         }
 

@@ -36,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static NumberFormatValidator GetAmountValidator(Guid article)
         {
-            var type = RepositoryService.Article.FindTypeByArticleId(article);
+            var type = RepositoryService.ArticleRepository.FindTypeByArticleId(article);
             var isInteger = type?.IsInteger is true;
             return new (InventoryEntry.Entity, InventoryEntry.Fields.Amount, isInteger, true, false);
         }

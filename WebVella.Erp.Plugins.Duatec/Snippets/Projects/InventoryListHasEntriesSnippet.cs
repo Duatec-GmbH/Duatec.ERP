@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             if (!pageModel.RecordId.HasValue)
                 return false;
 
-            return RepositoryService.Inventory.ExistsByProject(pageModel.RecordId.Value);
+            return RepositoryService.InventoryRepository.ExistsByProject(pageModel.RecordId.Value);
         }
     }
 }

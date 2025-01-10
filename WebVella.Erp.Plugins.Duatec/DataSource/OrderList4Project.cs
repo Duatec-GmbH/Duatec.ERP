@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
-            var project = RepositoryService.Project.Find(projectId.Value);
+            var project = RepositoryService.ProjectRepository.Find(projectId.Value);
             if (project == null)
                 return new EntityRecordList();
 

@@ -27,7 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             const decimal eps = 0.005m;
 
             var entry = TypedEntityRecordWrapper.Cast<InventoryEntry>(record)!;
-            var unchanged = RepositoryService.Inventory.Find(entry.Id!.Value)!;
+            var unchanged = RepositoryService.InventoryRepository.Find(entry.Id!.Value)!;
 
             if (OriginAndTargetAreSame(entry, unchanged))
                 validationErrors.Add(new ValidationError(string.Empty, "Can not move article without changes at project and/or location"));
@@ -40,7 +40,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
             if (amount >= max + eps)
             {
-                var type = RepositoryService.Article.FindTypeByArticleId(unchanged.Article)!;
+                var type = RepositoryService.ArticleRepository.FindTypeByArticleId(unchanged.Article)!;
                 var isInt = type.IsInteger;
                 var maxVal = isInt ? $"{max:0}" : $"{max:0.00}";
                 validationErrors.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {maxVal} {type.Unit}"));
@@ -67,7 +67,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         private static LocalRedirectResult? CompleteMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
-            if(RepositoryService.Inventory.Update(record))
+            if(RepositoryService.InventoryRepository.Update(record))
                 return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, record.Id!.Value));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not update inventory entry"));
@@ -76,7 +76,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         private static LocalRedirectResult? PartialMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
-            if(RepositoryService.Inventory.MovePartial(record) is Guid id)
+            if(RepositoryService.InventoryRepository.MovePartial(record) is Guid id)
                 return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, id));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not move inventory entry"));

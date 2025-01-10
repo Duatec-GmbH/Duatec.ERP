@@ -2,7 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Company? FindByShortName(string shortName)
             => FindBy(Company.Fields.ShortName, shortName);
 
-        public Guid? Insert(DataPortalManufacturer manufacturer)
+        public Guid? Insert(DataPortalManufacturerDto manufacturer)
         {
             var rec = new Company()
             {
@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return Insert(rec);
         }
 
-        public bool CanBeImported(DataPortalManufacturer manufacturer)
+        public bool CanBeImported(DataPortalManufacturerDto manufacturer)
         {
             var query = new QueryObject()
             {

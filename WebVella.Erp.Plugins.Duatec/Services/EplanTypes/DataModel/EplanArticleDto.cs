@@ -1,8 +1,8 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
+﻿namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
 {
-    internal class EplanArticle
+    internal class EplanArticleDto
     {
-        private EplanArticle(string partNumber, string typeNumber, string orderNumber, string description)
+        private EplanArticleDto(string partNumber, string typeNumber, string orderNumber, string description)
         {
             PartNumber = partNumber;
             TypeNumber = typeNumber;
@@ -18,7 +18,7 @@
 
         public string Description { get; }
 
-        public static EplanArticle FromPart(EplanPart part)
+        public static EplanArticleDto FromPart(EplanPartDto part)
         {
             return new(
                 partNumber: part.PartNumber,

@@ -9,6 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
     public class ArticleTypeManageHook : ManageOnListHookBase
     {
         protected override EntityRecord? Find(Guid id)
-            => RepositoryService.Article.FindType(id);
+            => RepositoryService.ArticleRepository.FindType(id);
     }
 }

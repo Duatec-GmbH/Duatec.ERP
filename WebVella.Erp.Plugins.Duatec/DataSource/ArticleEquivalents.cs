@@ -31,7 +31,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!arguments.TryGetValue(Arguments.Id, out var objId) || objId is not Guid id)
                 return result;
 
-            IEnumerable<Article> articles = RepositoryService.Article.FindAlternatives(id, $"*, ${Article.Relations.Manufacturer}.name");
+            IEnumerable<Article> articles = RepositoryService.ArticleRepository.FindAlternatives(id, $"*, ${Article.Relations.Manufacturer}.name");
 
             var sortBy = (string)arguments[Arguments.SortBy];
             var sortOrder = (string)arguments[Arguments.SortOrder];

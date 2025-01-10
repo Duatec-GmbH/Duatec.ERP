@@ -16,9 +16,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
         {
             var id = (Guid)pageModel.TryGetDataSourceProperty<EntityRecord>("Record")["id"];
 
-            if (RepositoryService.GoodsReceiving.FindManyEntriesByGoodsReceiving(id, "id").Count > 0)
+            if (RepositoryService.GoodsReceivingRepository.FindManyEntriesByGoodsReceiving(id, "id").Count > 0)
                 pageModel.PutMessage(ScreenMessageType.Error, "Can not delete goods receiving when there are still items atached");
-            else if(!RepositoryService.GoodsReceiving.Delete(id))
+            else if(!RepositoryService.GoodsReceivingRepository.Delete(id))
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete goods receiving");
             else
                 return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));

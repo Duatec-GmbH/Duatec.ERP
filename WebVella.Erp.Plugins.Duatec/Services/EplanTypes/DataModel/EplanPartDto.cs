@@ -1,11 +1,10 @@
 ﻿using System.Xml.Linq;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
 {
-    internal class EplanPart
+    internal class EplanPartDto
     {
-        private EplanPart(string deviceTag, string partNumber, string typeNumber, string orderNumber, string description)
+        private EplanPartDto(string deviceTag, string partNumber, string typeNumber, string orderNumber, string description)
         {
             DeviceTag = deviceTag;
             PartNumber = partNumber;
@@ -40,9 +39,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
         public string Description { get; }
 
 
-        public static EplanPart FromXElement(XElement element)
+        public static EplanPartDto FromXElement(XElement element)
         {
-            return new EplanPart(
+            return new EplanPartDto(
                 deviceTag: GetAttributeValue(element, "P_FUNC_IDENTDEVICETAG"),
                 partNumber: GetAttributeValue(element, "P_ARTICLEREF_PARTNO"),
                 typeNumber: GetAttributeValue(element, "P_ARTICLE_TYPENR"),

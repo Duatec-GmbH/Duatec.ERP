@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
+﻿namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
 {
     internal static class ArticleImportAction
     {

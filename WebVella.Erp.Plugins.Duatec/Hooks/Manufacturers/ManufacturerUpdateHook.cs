@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var company = TypedEntityRecordWrapper.Cast<Company>(record)!;
-            var oldRec = RepositoryService.Company.Find(company.Id!.Value);
+            var oldRec = RepositoryService.CompanyRepository.Find(company.Id!.Value);
             company.EplanId = oldRec?.EplanId;
 
             var errors = _validator.ValidateOnUpdate(company);

@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
         {
             var rec = TypedEntityRecordWrapper.Cast<GoodsReceivingEntry>(record)!;
 
-            var oldRec = RepositoryService.GoodsReceiving.FindEntry(rec.Id!.Value);
+            var oldRec = RepositoryService.GoodsReceivingRepository.FindEntry(rec.Id!.Value);
             rec.GoodsReceiving = oldRec!.GoodsReceiving;
 
             validationErrors.AddRange(_validator.ValidateOnUpdate(rec));

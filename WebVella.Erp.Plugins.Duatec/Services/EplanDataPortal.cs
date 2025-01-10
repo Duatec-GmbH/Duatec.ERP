@@ -1,13 +1,13 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
 {
     public static class EplanDataPortal
     {
-        private static DateTimeOffset ManufacturersValidUntil = DateTimeOffset.Now;
-        private static List<DataPortalManufacturer> Manufacturers = [];
+        private static DateTimeOffset _validUntil = DateTimeOffset.Now;
+        private static readonly List<DataPortalManufacturerDto> _manufacturers = new(500);
 
         private static string GetArticleByPartNumberUrl(string partNumber)
             => $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
@@ -15,61 +15,63 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         private static string GetArticleByIdUrl(long id)
             => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
 
-        public static List<DataPortalManufacturer> GetManufacturers()
+        public static List<DataPortalManufacturerDto> GetManufacturers()
         {
-            if (Manufacturers.Count == 0 || ManufacturersValidUntil < DateTimeOffset.Now)
+            if (DateTimeOffset.Now >= _validUntil || _manufacturers.Count == 0)
             {
-                lock (Manufacturers)
+                lock (_manufacturers)
                 {
+#pragma warning disable S1075 // URIs should not be hardcoded
                     var json = JsonFromUrl("https://dataportal.eplan.com/api/manufacturers");
+#pragma warning restore S1075 // URIs should not be hardcoded
+
                     var values = json?["data"]?.AsArray();
 
-                    if (values != null && values.Count >= 0)
+                    if (values != null)
                     {
+                        _manufacturers.Clear();
+                        _manufacturers.AddRange(values
+                            .Select(DataPortalManufacturerDto.FromJson)
+                            .Where(m => m != null)!);
 
-                        Manufacturers = values
-                            .Select(DataPortalManufacturer.FromJson)
-                            .Where(m => m != null)!
-                            .ToList()!;
-
-                        ManufacturersValidUntil = DateTimeOffset.Now.AddHours(2);
+                        _validUntil = DateTimeOffset.Now.AddHours(2);
                     }
                 }
             }
 
-            return Manufacturers;
+            return _manufacturers;
         }
 
-        public static DataPortalManufacturer? GetManufacturerByShortName(string shortName)
+        public static DataPortalManufacturerDto? GetManufacturerByShortName(string shortName)
         {
             return GetManufacturers()
-                .FirstOrDefault(m => m.ShortName == shortName);
+                .Find(m => m.ShortName == shortName);
         }
 
-        public static DataPortalManufacturer? GetManufacturerById(long id)
+        public static DataPortalManufacturerDto? GetManufacturerById(long id)
         {
             return GetManufacturers()
-                .FirstOrDefault(m => m.EplanId == id);
+                .Find(m => m.EplanId == id);
         }
 
-        public static DataPortalArticle? GetArticleByPartNumber(string partNumber)
+        public static DataPortalArticleDto? GetArticleByPartNumber(string partNumber)
         {
             var url = GetArticleByPartNumberUrl(partNumber);
 
             var json = JsonFromUrl(url);
 
-            return DataPortalArticle.FromJson(json, partNumber);
+            return DataPortalArticleDto.FromJson(json, partNumber);
         }
 
-        public static async Task<DataPortalArticle?> GetArticleByPartNumberAsync(string partNumber)
+        public static async Task<DataPortalArticleDto?> GetArticleByPartNumberAsync(string partNumber)
         {
             var url = GetArticleByPartNumberUrl(partNumber);
 
             return await JsonFromUrlAsync(url)
-                .ContinueWith(n => DataPortalArticle.FromJson(n.Result, partNumber));
+                .ContinueWith(n => DataPortalArticleDto.FromJson(n.Result, partNumber));
         }
 
-        public static Dictionary<string, DataPortalArticle?> GetArticlesByPartNumber(params string[] partNumbers)
+        public static Dictionary<string, DataPortalArticleDto?> GetArticlesByPartNumber(params string[] partNumbers)
         {
             if (partNumbers.Length == 0)
                 return [];
@@ -81,13 +83,13 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             return Task.WhenAll(tasks).Result.ToDictionary(t => t.PartNumber, t => t.Article);
         }
 
-        public static DataPortalArticle? GetArticleById(long id)
+        public static DataPortalArticleDto? GetArticleById(long id)
         {
             var url = GetArticleByIdUrl(id);
 
             var json = JsonFromUrl(url);
 
-            return DataPortalArticle.FromJson(json, id);
+            return DataPortalArticleDto.FromJson(json, id);
         }
 
         private static JsonNode? JsonFromUrl(string url)

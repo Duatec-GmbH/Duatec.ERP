@@ -15,7 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {
             var id = (Guid)pageModel.TryGetDataSourceProperty<EntityRecord>("Record")["id"];
-            var success = RepositoryService.Article.Delete(id);
+            var success = RepositoryService.ArticleRepository.Delete(id);
 
             if (!success)
             {

@@ -46,7 +46,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 return Error(pageModel, "Amount must be greater than or equal '0'");
 
             var projectId = pageModel.RecordId.Value;
-            if (!RepositoryService.Project.Exists(projectId))
+            if (!RepositoryService.ProjectRepository.Exists(projectId))
                 return pageModel.BadRequest();
 
             var formData = new List<FormValues>(partNumbers.Length);
@@ -77,15 +77,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
-            var articleLookup = RepositoryService.Article.FindMany(select, partNumbersToProcess);
-            var reservationsLookup = RepositoryService.Inventory
+            var articleLookup = RepositoryService.ArticleRepository.FindMany(select, partNumbersToProcess);
+            var reservationsLookup = RepositoryService.InventoryRepository
                 .FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);
 
             var demandLookup = GetDemandLookup(projectId, articleLookup, reservationsLookup);
             var reservedInventoryLookup = GetInventoryLookup(projectId, articleLookup);
             var availableInventoryLookup = GetInventoryLookup(null, articleLookup);
 
-            var list = RepositoryService.Inventory.FindReservationListByProject(projectId);
+            var list = RepositoryService.InventoryRepository.FindReservationListByProject(projectId);
 
             return () =>
             {
@@ -189,7 +189,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static void Move(Guid projectId, InventoryEntry entry)
         {
             entry.Project = projectId;
-            if (!RepositoryService.Inventory.Update(entry))
+            if (!RepositoryService.InventoryRepository.Update(entry))
                 throw new DbException("Could not move inventory entry");
         }
 
@@ -197,7 +197,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         {
             entry.Project = projectId;
             entry.Amount = amount;
-            if (!RepositoryService.Inventory.MovePartial(entry).HasValue)
+            if (!RepositoryService.InventoryRepository.MovePartial(entry).HasValue)
                 throw new DbException("Could not partially move inventory entry");
         }
 
@@ -247,7 +247,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var available = RepositoryService.Inventory.FindManyByProject(projectId)
+            var available = RepositoryService.InventoryRepository.FindManyByProject(projectId)
                 .Where(i => ids.Contains(i.Article))
                 .GroupBy(i => i.Article)
                 .ToDictionary(g => g.Key, g => g.ToArray());
@@ -275,7 +275,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var totalDemands = RepositoryService.PartList.FindManyEntriesByProject(projectId, true)
+            var totalDemands = RepositoryService.PartListRepository.FindManyEntriesByProject(projectId, true)
                 .Where(e => ids.Contains(e.Article))
                 .GroupBy(e => e.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));

@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var modified = TypedEntityRecordWrapper.Cast<InventoryEntry>(record)!;
-            var unmodified = RepositoryService.Inventory.Find(modified.Id!.Value)!;
+            var unmodified = RepositoryService.InventoryRepository.Find(modified.Id!.Value)!;
 
             modified.Article = unmodified.Article;
             modified.Project = unmodified.Project;

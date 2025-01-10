@@ -4,8 +4,8 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan;
-using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes;
+using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -63,17 +63,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             return true;
         }
 
-        private static LocalRedirectResult? Import(BaseErpPageModel pageModel, IEnumerable<DataPortalArticle> articles, Dictionary<string, Guid> types)
+        private static LocalRedirectResult? Import(BaseErpPageModel pageModel, IEnumerable<DataPortalArticleDto> articles, Dictionary<string, Guid> types)
         {
             void TransactionalAction()
             {
                 foreach (var article in articles)
                 {
-                    var manufacturer = RepositoryService.Company.FindByShortName(article!.Manufacturer.ShortName)?.Id
-                        ?? RepositoryService.Company.Insert(article.Manufacturer)
+                    var manufacturer = RepositoryService.CompanyRepository.FindByShortName(article!.Manufacturer.ShortName)?.Id
+                        ?? RepositoryService.CompanyRepository.Insert(article.Manufacturer)
                         ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
 
-                    if (RepositoryService.Article.Insert(article, manufacturer, types[article.PartNumber]) == null)
+                    if (RepositoryService.ArticleRepository.Insert(article, manufacturer, types[article.PartNumber]) == null)
                         throw new DbException($"Could not create article '{article.PartNumber}'.");
                 }
             }

@@ -21,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             if (rec == null)
                 return pageModel.BadRequest();
 
-            if (!RepositoryService.PartList.Delete(rec.Id!.Value))
+            if (!RepositoryService.PartListRepository.Delete(rec.Id!.Value))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
                 return null;

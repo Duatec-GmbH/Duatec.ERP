@@ -9,6 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses.Locations
     public class WarehouseLocationManageHook : ManageOnListHookBase
     {
         protected override EntityRecord? Find(Guid id)
-            => RepositoryService.Warehouse.FindEntry(id);
+            => RepositoryService.WarehouseRepository.FindEntry(id);
     }
 }
