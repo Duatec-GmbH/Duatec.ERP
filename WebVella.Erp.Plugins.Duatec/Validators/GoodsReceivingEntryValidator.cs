@@ -2,12 +2,14 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Attributes;
 using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = GoodsReceivingEntry.Fields;
 
+    [TypedValidator(typeof(GoodsReceivingEntry))]
     internal class GoodsReceivingEntryValidator : IRecordValidator<GoodsReceivingEntry>
     {
         public List<ValidationError> ValidateOnCreate(GoodsReceivingEntry record)

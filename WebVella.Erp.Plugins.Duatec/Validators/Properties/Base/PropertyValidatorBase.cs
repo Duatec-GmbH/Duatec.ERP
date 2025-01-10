@@ -10,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
         protected readonly string _entityPretty;
         protected readonly string _entityPropertyPretty;
 
-        public PropertyValidatorBase(string entity, string entityProperty)
+        protected PropertyValidatorBase(string entity, string entityProperty)
         {
             _entity = entity;
             _entityProperty = entityProperty;

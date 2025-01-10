@@ -1,12 +1,14 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Attributes;
 using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = Project.Fields;
 
+    [TypedValidator(typeof(Project))]
     internal class ProjectValidator : IRecordValidator<Project>
     {
         const string Entity = Project.Entity;

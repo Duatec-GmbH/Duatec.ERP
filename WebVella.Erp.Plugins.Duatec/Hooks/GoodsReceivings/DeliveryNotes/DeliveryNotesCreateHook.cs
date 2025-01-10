@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
     internal class DeliveryNotesCreateHook : IRecordCreatePageHook
     {
         private const string listArg = "grId";
-        private static readonly DeliveryNotesValidator _validator = new();
+        private static readonly DeliveryNoteValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {

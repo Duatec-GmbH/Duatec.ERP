@@ -2,7 +2,7 @@
 {
     internal abstract class NameFormatValidatorBase : PropertyValidatorBase
     {
-        public NameFormatValidatorBase(string entity, string entityProperty)
+        protected NameFormatValidatorBase(string entity, string entityProperty)
             : base(entity, entityProperty)
         { }
 

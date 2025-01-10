@@ -1,12 +1,14 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Attributes;
 using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = Warehouse.Fields;
 
+    [TypedValidator(typeof(Warehouse))]
     internal class WareHouseValidator : IRecordValidator<Warehouse>
     {
         const string Entity = Warehouse.Entity;

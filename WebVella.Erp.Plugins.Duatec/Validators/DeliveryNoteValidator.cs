@@ -1,12 +1,14 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.TypedRecords.Attributes;
 using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = DeliveryNote.Fields;
 
-    internal class DeliveryNotesValidator : IRecordValidator<DeliveryNote>
+    [TypedValidator(typeof(DeliveryNote))]
+    internal class DeliveryNoteValidator : IRecordValidator<DeliveryNote>
     {
         public List<ValidationError> ValidateOnCreate(DeliveryNote record)
             => Validate(record);

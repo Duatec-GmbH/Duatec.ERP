@@ -4,11 +4,13 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.TypedRecords.Validation;
+using WebVella.TypedRecords.Attributes;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = Company.Fields;
 
+    [TypedValidator(typeof(Company))]
     internal class CompanyValidator : IRecordValidator<Company>
     {
         const string Entity = Company.Entity;

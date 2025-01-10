@@ -2,12 +2,14 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Attributes;
 using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = PartListEntry.Fields;
 
+    [TypedValidator(typeof(PartListEntry))]
     internal class PartListEntryValidator : IRecordValidator<PartListEntry>
     {
         const string Entity = PartListEntry.Entity;
