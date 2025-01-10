@@ -2,12 +2,16 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
+    using Fields = PartList.Fields;
+
     internal class PartListValidator : IRecordValidator<PartList>
     {
-        private static readonly NameFormatValidator _nameFormatValidator = new(PartList.Entity, PartList.Fields.Name);
+        const string Entity = PartList.Entity;
+        private static readonly NameFormatValidator _nameFormatValidator = new(Entity, Fields.Name);
 
         public List<ValidationError> ValidateOnCreate(PartList record)
             => Validate(record, null);
@@ -15,19 +19,22 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         public List<ValidationError> ValidateOnUpdate(PartList record)
             => Validate(record, record.Id!.Value);
 
-        private static ValidationError NameUniqueError()
-            => new (PartList.Fields.Name, "Part list name must be unique within projects");
+        public List<ValidationError> ValidateOnDelete(PartList record)
+            => [];
 
         private static List<ValidationError> Validate(PartList record, Guid? id)
         {
-            var result = _nameFormatValidator.Validate(record.Name, PartList.Fields.Name);
+            var result = _nameFormatValidator.Validate(record.Name, Fields.Name);
 
             if (record.Project == Guid.Empty)
-                result.Add(new ValidationError(PartList.Fields.Project, "Part list project is required"));
+                result.Add(new ValidationError(Fields.Project, "Part list project is required"));
             else if (result.Count == 0 && RepositoryService.PartListRepository.ExistsWithinProject(record.Project, record.Name, id))
                 result.Add(NameUniqueError());
 
             return result;
         }
+
+        private static ValidationError NameUniqueError()
+            => new (Fields.Name, "Part list name must be unique within projects");
     }
 }

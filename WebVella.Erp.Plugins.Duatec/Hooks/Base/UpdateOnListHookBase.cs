@@ -2,13 +2,15 @@
 using Microsoft.Extensions.Primitives;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {
-    public abstract class UpdateOnListHookBase<T> : IPageHook where T : EntityRecord
+    public abstract class UpdateOnListHookBase<T> : IPageHook where T : TypedEntityRecordWrapper, new()
     {
         protected virtual string IdParameter => "hId";
 

@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class Company : TypedEntityRecordWrapper
     {
         public const string Entity = "manufacturer";
@@ -13,33 +17,35 @@
             public const string LogoUrl = "logo";
         }
 
+        public override string EntityName => Entity;
+
         public string? EplanId
         {
-            get => TryGet<string?>(Fields.EplanId);
+            get => Get<string?>(Fields.EplanId);
             set => Properties[Fields.EplanId] = value;
         }
 
         public string ShortName
         {
-            get => TryGet(Fields.ShortName, string.Empty);
+            get => Get(Fields.ShortName, string.Empty);
             set => Properties[Fields.ShortName] = value;
         }
 
         public string Name
         {
-            get => TryGet(Fields.Name, string.Empty);
+            get => Get(Fields.Name, string.Empty);
             set => Properties[Fields.Name] = value;
         }
 
         public string? WebsiteUrl
         {
-            get => TryGet<string?>(Fields.WebsiteUrl);
+            get => Get<string?>(Fields.WebsiteUrl);
             set => Properties[Fields.WebsiteUrl] = value;
         }
 
         public string? LogoUrl
         {
-            get => TryGet<string?>(Fields.LogoUrl);
+            get => Get<string?>(Fields.LogoUrl);
             set => Properties[Fields.LogoUrl] = value;
         }
     }

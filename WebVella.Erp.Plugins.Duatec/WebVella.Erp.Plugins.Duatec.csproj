@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WebVella.Erp.Web\WebVella.Erp.Web.csproj" />
     <ProjectReference Include="..\WebVella.ERP\WebVella.Erp.csproj" />
+    <ProjectReference Include="..\WebVella.TypedRecords\WebVella.TypedRecords.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

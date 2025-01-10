@@ -7,13 +7,14 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
     [HookAttachment(key: HookKeys.Article.Stock.Update)]
     internal class ArticleStockUpdateHook : IRecordManagePageHook
     {
-        private static readonly ArticleStockValidator _validator = new();
+        private static readonly InventoryEntryValidator _validator = new();
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
@@ -22,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var modified = TypedEntityRecordWrapper.Cast<InventoryEntry>(record)!;
+            var modified = TypedEntityRecordWrapper.WrapElseDefault<InventoryEntry>(record)!;
             var unmodified = RepositoryService.InventoryRepository.Find(modified.Id!.Value)!;
 
             modified.Article = unmodified.Article;

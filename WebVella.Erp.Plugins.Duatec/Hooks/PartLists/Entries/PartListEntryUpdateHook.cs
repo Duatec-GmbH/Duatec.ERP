@@ -7,6 +7,7 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 {
@@ -25,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var entry = TypedEntityRecordWrapper.Cast<PartListEntry>(record)!;
+            var entry = TypedEntityRecordWrapper.WrapElseDefault<PartListEntry>(record)!;
             var oldRec = RepositoryService.PartListRepository.FindEntry(entry.Id!.Value)!;
 
             entry.PartList = oldRec.PartList;

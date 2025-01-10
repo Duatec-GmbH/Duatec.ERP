@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class Article : TypedEntityRecordWrapper
     {
         public const string Entity = "article";
@@ -26,57 +30,59 @@
 
         public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
 
+        public override string EntityName => Entity;
+
         public string EplanId
         {
-            get => TryGet(Fields.EplanId, string.Empty);
+            get => Get(Fields.EplanId, string.Empty);
             set => Properties[Fields.EplanId] = value;
         }
 
         public string PartNumber
         {
-            get => TryGet(Fields.PartNumber, string.Empty);
+            get => Get(Fields.PartNumber, string.Empty);
             set => Properties[Fields.PartNumber] = value;
         }
 
         public string TypeNumber
         {
-            get => TryGet(Fields.TypeNumber, string.Empty);
+            get => Get(Fields.TypeNumber, string.Empty);
             set => Properties[Fields.TypeNumber] = value;
         }
 
         public string OrderNumber
         {
-            get => TryGet(Fields.OrderNumber, string.Empty);
+            get => Get(Fields.OrderNumber, string.Empty);
             set => Properties[Fields.OrderNumber] = value;
         }
 
         public string Designation
         {
-            get => TryGet(Fields.Designation, string.Empty);
+            get => Get(Fields.Designation, string.Empty);
             set => Properties[Fields.Designation] = value;
         }
 
         public Guid Type
         {
-            get => TryGet<Guid>(Fields.Type);
+            get => Get<Guid>(Fields.Type);
             set => Properties[Fields.Type] = value;
         }
 
         public Guid Manufacturer
         {
-            get => TryGet<Guid>(Fields.Manufacturer);
+            get => Get<Guid>(Fields.Manufacturer);
             set => Properties[Fields.Manufacturer] = value;
         }
 
         public string? Image
         {
-            get => TryGet<string?>(Fields.Image);
+            get => Get<string?>(Fields.Image);
             set => Properties[Fields.Image] = value;
         }
 
         public bool IsBlocked
         {
-            get => TryGet<bool>(Fields.IsBlocked);
+            get => Get<bool>(Fields.IsBlocked);
             set => Properties[Fields.IsBlocked] = value;
         }
     }

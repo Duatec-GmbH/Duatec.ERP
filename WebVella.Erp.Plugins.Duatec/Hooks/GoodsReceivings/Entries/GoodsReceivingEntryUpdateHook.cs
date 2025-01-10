@@ -8,6 +8,7 @@ using WebVella.Erp.Plugins.Duatec.Snippets;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
@@ -24,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var rec = TypedEntityRecordWrapper.Cast<GoodsReceivingEntry>(record)!;
+            var rec = TypedEntityRecordWrapper.WrapElseDefault<GoodsReceivingEntry>(record)!;
 
             var oldRec = RepositoryService.GoodsReceivingRepository.FindEntry(rec.Id!.Value);
             rec.GoodsReceiving = oldRec!.GoodsReceiving;

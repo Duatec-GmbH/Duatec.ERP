@@ -7,6 +7,7 @@ using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
@@ -22,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var entry = TypedEntityRecordWrapper.Cast<Article>(record)!;
+            var entry = TypedEntityRecordWrapper.WrapElseDefault<Article>(record)!;
 
             validationErrors.AddRange(_articleValidator.ValidateOnCreate(entry));
             if (validationErrors.Count > 0)

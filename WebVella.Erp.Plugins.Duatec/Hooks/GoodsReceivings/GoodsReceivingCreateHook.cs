@@ -2,9 +2,11 @@
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
 {
+    [Obsolete]
     [HookAttachment(key: HookKeys.GoodsReceiving.Create)]
     internal class GoodsReceivingCreateHook : CreateHookBase<GoodsReceiving>
     {

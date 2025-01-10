@@ -1,9 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Attributes
+﻿namespace WebVella.TypedRecords.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    internal class ValidatorAttribute : Attribute
+    public sealed class TypedValidatorAttribute : Attribute
     {
-        public ValidatorAttribute(Type targetType)
+        public TypedValidatorAttribute(Type targetType)
         {
             TargetType = targetType;
         }

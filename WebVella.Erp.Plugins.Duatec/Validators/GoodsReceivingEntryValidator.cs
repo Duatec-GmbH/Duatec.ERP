@@ -2,10 +2,12 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
-using Fields = WebVella.Erp.Plugins.Duatec.Persistance.Entities.GoodsReceivingEntry.Fields;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
+    using Fields = GoodsReceivingEntry.Fields;
+
     internal class GoodsReceivingEntryValidator : IRecordValidator<GoodsReceivingEntry>
     {
         public List<ValidationError> ValidateOnCreate(GoodsReceivingEntry record)
@@ -23,6 +25,9 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             }
             return result;
         }
+
+        public List<ValidationError> ValidateOnDelete(GoodsReceivingEntry record)
+            => [];
 
         private static List<ValidationError> Validate(GoodsReceivingEntry record, Guid? id)
         {

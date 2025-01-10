@@ -4,24 +4,24 @@ using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
     [HookAttachment(key: HookKeys.Article.Stock.Create)]
     internal class ArticleStockCreateHook : IRecordCreatePageHook
     {
-        private static readonly ArticleStockValidator _validator = new();
+        private static readonly InventoryEntryValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
             => null;
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var rec = TypedEntityRecordWrapper.Cast<InventoryEntry>(record)!;
+            var rec = TypedEntityRecordWrapper.Wrap<InventoryEntry>(record);
 
             var errors = _validator.ValidateOnCreate(rec);
             validationErrors.AddRange(errors);
@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
                 return null;
             }
 
-            return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, id));
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
         }
     }
 }

@@ -7,10 +7,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class PartListRepository : ListRepositoryBase<PartList, PartListEntry>
     {
-        public override string Entity => PartList.Entity;
-
-        protected override string EntryEntity => PartListEntry.Entity;
-
         protected override string EntryParentIdPath => PartListEntry.Fields.PartList;
 
         public List<PartList> FindManyByProject(Guid projectId)

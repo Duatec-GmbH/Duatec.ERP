@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     internal class PartList : TypedEntityRecordWrapper
     {
         public const string Entity = "part_list";
@@ -17,21 +21,23 @@
             public const string IsActive = "is_active";
         }
 
+        public override string EntityName => Entity;
+
         public Guid Project
         {
-            get => TryGet<Guid>(Fields.Project);
+            get => Get<Guid>(Fields.Project);
             set => Properties[Fields.Project] = value;
         }
 
         public string Name
         {
-            get => TryGet(Fields.Name, string.Empty);
+            get => Get(Fields.Name, string.Empty);
             set => Properties[Fields.Name] = value;
         }
 
         public bool IsActive
         {
-            get => TryGet<bool>(Fields.IsActive);
+            get => Get<bool>(Fields.IsActive);
             set => Properties[Fields.IsActive] = value;
         }
     }

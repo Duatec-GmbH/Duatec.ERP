@@ -4,18 +4,18 @@ using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
     [HookAttachment(key: HookKeys.Article.Stock.Move)]
     internal class ArticleStockMoveHook : IRecordManagePageHook
     {
-        private static readonly ArticleStockValidator _validator = new();
+        private static readonly InventoryEntryValidator _validator = new();
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         {
             const decimal eps = 0.005m;
 
-            var entry = TypedEntityRecordWrapper.Cast<InventoryEntry>(record)!;
+            var entry = TypedEntityRecordWrapper.WrapElseDefault<InventoryEntry>(record)!;
             var unchanged = RepositoryService.InventoryRepository.Find(entry.Id!.Value)!;
 
             if (OriginAndTargetAreSame(entry, unchanged))
@@ -68,7 +68,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         private static LocalRedirectResult? CompleteMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
             if(RepositoryService.InventoryRepository.Update(record))
-                return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, record.Id!.Value));
+                return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not update inventory entry"));
             return null;
@@ -77,7 +77,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
         private static LocalRedirectResult? PartialMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
             if(RepositoryService.InventoryRepository.MovePartial(record) is Guid id)
-                return pageModel.LocalRedirect(PageUrl.EntityDetail(pageModel, id));
+                return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not move inventory entry"));
             return null;

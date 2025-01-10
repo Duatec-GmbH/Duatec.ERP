@@ -1,53 +1,51 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.TypedRecords.Common;
 
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
+namespace WebVella.TypedRecords.Persistance
 {
-    public abstract class RepositoryBase<T> where T : TypedEntityRecordWrapper, new()
+    public abstract class TypedRepositoryBase<T> where T : TypedEntityRecordWrapper, new()
     {
-        public abstract string Entity { get; }
-
-        protected T? MapToTypedRecord(EntityRecord? record)
-            => TypedEntityRecordWrapper.Cast<T>(record);
+        protected string Entity { get; } = new T().EntityName;
 
         public T? Find(Guid id, string select = "*")
-            => MapToTypedRecord(Record.Find(Entity, id, select));
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Find(Entity, id, select));
 
         public bool Exists(Guid id)
-            => Record.Exists(Entity, "id", id);
+            => RepositoryHelper.Exists(Entity, "id", id);
 
         public virtual Guid? Insert(T record)
-            => Record.Insert(Entity, record);
+            => RepositoryHelper.Insert(Entity, record);
 
         public virtual bool Update(T record)
-            => Record.Update(Entity, record);
+            => RepositoryHelper.Update(Entity, record);
 
         public virtual bool Delete(Guid id)
-            => Record.Delete(Entity, id);
+            => RepositoryHelper.Delete(Entity, id);
 
         protected T? FindBy(string property, object? value, string select = "*")
-            => MapToTypedRecord(Record.FindBy(Entity, property, value, select));
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.FindBy(Entity, property, value, select));
 
         protected bool ExistsBy(string property, object? value)
-            => Record.Exists(Entity, property, value);
+            => RepositoryHelper.Exists(Entity, property, value);
 
         protected List<T> FindManyBy(string property, object? value, string select = "*")
-            => Record.FindManyBy(Entity, property, value, select).Select(MapToTypedRecord).ToList()!;
+            => RepositoryHelper.FindManyBy(Entity, property, value, select).Select(TypedEntityRecordWrapper.Wrap<T>).ToList();
 
         protected Dictionary<TKey, T?> FindManyByUniqueArgs<TKey>(string property, string select = "*", params TKey[] args)
             where TKey : notnull
         {
-            return Record.FindManyByUniqueArgs(Entity, property, select, args)
-                .ToDictionary(kp => kp.Key, kp => MapToTypedRecord(kp.Value));
+            return RepositoryHelper.FindManyByUniqueArgs(Entity, property, select, args)
+                .ToDictionary(kp => kp.Key, kp => TypedEntityRecordWrapper.WrapElseDefault<T>(kp.Value))!;
         }
 
         protected bool ExistsByQuery(QueryObject query)
-            => Record.ExistsByQuery(Entity, query);
+            => RepositoryHelper.ExistsByQuery(Entity, query);
 
         protected List<T> FindManyByQuery(QueryObject query, string select = "*")
-            => Record.FindManyByQuery(Entity, query, select).Select(MapToTypedRecord).ToList()!;
+            => RepositoryHelper.FindManyByQuery(Entity, query, select).Select(TypedEntityRecordWrapper.Wrap<T>).ToList()!;
 
         protected T? FindByQuery(QueryObject query, string select = "*")
-            => MapToTypedRecord(Record.FindByQuery(Entity, query, select));
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.FindByQuery(Entity, query, select));
 
         protected static QueryObject ExcludeIdQuery(Guid excludedId)
         {

@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class ArticleType : TypedEntityRecordWrapper
     {
         public const string Entity = "article_type";
@@ -11,21 +15,23 @@
             public const string IsInteger = "is_integer";
         }
 
+        public override string EntityName => Entity;
+
         public string Label
         {
-            get => TryGet(Fields.Label, string.Empty);
+            get => Get(Fields.Label, string.Empty);
             set => Properties[Fields.Label] = value;
         }
 
         public string Unit
         {
-            get => TryGet(Fields.Unit, string.Empty);
+            get => Get(Fields.Unit, string.Empty);
             set => Properties[Fields.Unit] = value;
         }
 
         public bool IsInteger
         {
-            get => TryGet<bool>(Fields.IsInteger);
+            get => Get<bool>(Fields.IsInteger);
             set => Properties[Fields.IsInteger] = value;
         }
     }

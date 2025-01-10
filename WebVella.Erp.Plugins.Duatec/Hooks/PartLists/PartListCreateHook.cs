@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 {
@@ -24,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             if (!pageModel.Request.Query.TryGetValue("pId", out var projectIdVal) || !Guid.TryParse(projectIdVal, out var projectId))
                 return pageModel.BadRequest();
 
-            var partList = TypedEntityRecordWrapper.Cast<PartList>(record)!;
+            var partList = TypedEntityRecordWrapper.WrapElseDefault<PartList>(record)!;
             partList.Project = projectId;
             validationErrors.AddRange(_validator.ValidateOnCreate(partList));
 

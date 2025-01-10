@@ -4,6 +4,7 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
@@ -13,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
             var record = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord");
-            var rec = TypedEntityRecordWrapper.Cast<Company>(record);
+            var rec = TypedEntityRecordWrapper.WrapElseDefault<Company>(record);
             if (rec == null)
                 return false;
 

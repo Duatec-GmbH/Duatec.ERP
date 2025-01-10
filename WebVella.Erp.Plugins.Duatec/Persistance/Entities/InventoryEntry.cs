@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     internal class InventoryEntry : TypedEntityRecordWrapper
     {
         public const string Entity = "article_stock";
@@ -19,27 +23,29 @@
             public const string Amount = "amount";
         }
 
+        public override string EntityName => Entity;
+
         public Guid WarehouseLocation
         {
-            get => TryGet<Guid>(Fields.WarehouseLocation);
+            get => Get<Guid>(Fields.WarehouseLocation);
             set => Properties[Fields.WarehouseLocation] = value;
         }
 
         public Guid Article
         {
-            get => TryGet<Guid>(Fields.Article);
+            get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
         }
 
         public Guid? Project
         {
-            get => TryGet<Guid?>(Fields.Project);
+            get => Get<Guid?>(Fields.Project);
             set => Properties[Fields.Project] = value;
         }
 
         public decimal Amount
         {
-            get => TryGet(Fields.Amount, decimal.MinValue); 
+            get => Get(Fields.Amount, decimal.MinValue); 
             set => Properties[Fields.Amount] = value;
         }
     }

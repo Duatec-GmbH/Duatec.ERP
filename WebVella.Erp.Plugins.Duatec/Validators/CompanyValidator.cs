@@ -1,23 +1,27 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ManufacturerValidator : IRecordValidator<Company>
+    using Fields = Company.Fields;
+
+    internal class CompanyValidator : IRecordValidator<Company>
     {
-        private static readonly NameUniqueValidator _nameValidator = new(Company.Entity, Company.Fields.Name);
+        const string Entity = Company.Entity;
+        private static readonly NameUniqueValidator _nameValidator = new(Entity, Fields.Name);
         private static readonly ShortNameUniqueValidator _shortNameValidator = new();
 
         public List<ValidationError> ValidateOnCreate(Company record)
         {
-            var result = _nameValidator.ValidateOnCreate(record.Name, Company.Fields.Name);
+            var result = _nameValidator.ValidateOnCreate(record.Name, Fields.Name);
             if (result.Count == 0 && ValidateNameWithEplanApi(record.Name) is ValidationError nameError)
                 result.Add(nameError);
 
-            var shortNameErrors = _shortNameValidator.ValidateOnCreate(record.ShortName, Company.Fields.ShortName);
+            var shortNameErrors = _shortNameValidator.ValidateOnCreate(record.ShortName, Fields.ShortName);
             if (shortNameErrors.Count == 0 && ValidateShortNameWithEplanApi(record.ShortName) is ValidationError shortNameError)
                 shortNameErrors.Add(shortNameError);
 
@@ -29,11 +33,11 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             var id = record.Id!.Value;
 
-            var result = _nameValidator.ValidateOnUpdate(record.Name, Company.Fields.Name, id);
+            var result = _nameValidator.ValidateOnUpdate(record.Name, Fields.Name, id);
             if(result.Count == 0 && string.IsNullOrEmpty(record.EplanId) && ValidateNameWithEplanApi(record.Name) is ValidationError nameError)
                 result.Add(nameError);
 
-            var shortNameErrors = _shortNameValidator.ValidateOnUpdate(record.ShortName, Company.Fields.ShortName, id);
+            var shortNameErrors = _shortNameValidator.ValidateOnUpdate(record.ShortName, Fields.ShortName, id);
             if (shortNameErrors.Count == 0 && record.EplanId == null && ValidateShortNameWithEplanApi(record.Name) is ValidationError shortNameError)
                 shortNameErrors.Add(shortNameError);
 
@@ -41,23 +45,30 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             return result;
         }
 
+        public List<ValidationError> ValidateOnDelete(Company record)
+            => [];
+
         private static ValidationError? ValidateNameWithEplanApi(string name)
         {
             if(EplanDataPortal.GetManufacturers().Exists(m => name.Equals(m.Name)))
-                return new ValidationError(Company.Fields.Name, $"{ErrorPrefix(Company.Fields.Name, name)} is listed in EPLAN");
+                return new ValidationError(Fields.Name, $"{ErrorPrefix(Fields.Name, name)} is listed in EPLAN");
             return null;
         }
 
         private static ValidationError? ValidateShortNameWithEplanApi(string shortName)
         {
             if (EplanDataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName)))
-                return new ValidationError(Company.Fields.ShortName, $"{ErrorPrefix(Company.Fields.ShortName, shortName)} is listed in EPLAN");
+                return new ValidationError(Fields.ShortName, $"{ErrorPrefix(Fields.ShortName, shortName)} is listed in EPLAN");
             return null;
         }
 
         private static string ErrorPrefix(string property, string value)
         {
-            return $"{Text.FancyfySnakeCaseStartWithUpper(Company.Entity)} " +
+            var entityName = Text.FancyfySnakeCase(Entity);
+            if (entityName.Length > 0)
+                entityName = char.ToUpper(entityName[0]) + entityName[1..];
+
+            return $"{entityName} " +
                 $"with {Text.FancyfySnakeCase(property)} '{value}'";
         }
     }

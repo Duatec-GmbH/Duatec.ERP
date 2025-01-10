@@ -6,13 +6,14 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
     [HookAttachment(key: HookKeys.Manufacturer.Create)]
     internal class ManufacturerCreateHook : IRecordCreatePageHook
     {
-        private readonly static ManufacturerValidator _validator = new();
+        private readonly static CompanyValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
@@ -21,7 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var rec = TypedEntityRecordWrapper.Cast<Company>(record)!;
+            var rec = TypedEntityRecordWrapper.WrapElseDefault<Company>(record)!;
             var errors = _validator.ValidateOnCreate(rec);
             validationErrors.AddRange(errors);
 

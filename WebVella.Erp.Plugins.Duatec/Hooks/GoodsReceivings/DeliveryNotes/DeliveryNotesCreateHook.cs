@@ -3,10 +3,10 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
 {
@@ -33,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            var rec = TypedEntityRecordWrapper.Cast<DeliveryNote>(record)!;
+            var rec = TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(record)!;
             validationErrors.AddRange(_validator.ValidateOnCreate(rec));
 
             return null;

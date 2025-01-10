@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -251,14 +252,14 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         private static Article GetArticle(EntityRecord record)
         {
             var article = ((List<EntityRecord>)record[$"${Record.Relations.Article}"])[0];
-            return TypedEntityRecordWrapper.Cast<Article>(article)!;
+            return TypedEntityRecordWrapper.WrapElseDefault<Article>(article)!;
         }
 
         private static Company GetManufacturer(EntityRecord rec)
         {
             var article = GetArticle(rec);
             var record = ((List<EntityRecord>)article[$"${Article.Relations.Manufacturer}"])[0];
-            return TypedEntityRecordWrapper.Cast<Company>(record)!;
+            return TypedEntityRecordWrapper.WrapElseDefault<Company>(record)!;
         }
 
         private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)

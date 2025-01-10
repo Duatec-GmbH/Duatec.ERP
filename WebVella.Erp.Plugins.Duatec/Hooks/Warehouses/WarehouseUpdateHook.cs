@@ -1,9 +1,9 @@
 ﻿using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Warehouses
 {

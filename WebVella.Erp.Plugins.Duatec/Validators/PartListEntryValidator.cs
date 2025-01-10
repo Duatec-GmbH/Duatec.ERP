@@ -2,11 +2,16 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
+    using Fields = PartListEntry.Fields;
+
     internal class PartListEntryValidator : IRecordValidator<PartListEntry>
     {
+        const string Entity = PartListEntry.Entity;
+
         public List<ValidationError> ValidateOnCreate(PartListEntry record)
             => Validate(record, null);
 
@@ -20,23 +25,26 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             return result;
         }
 
+        public List<ValidationError> ValidateOnDelete(PartListEntry record)
+            => [];
+
         private static List<ValidationError> Validate(PartListEntry record, Guid? id)
         {
             var result = new List<ValidationError>();
             if (record.PartList == Guid.Empty)
-                result.Add(new ValidationError(PartListEntry.Fields.PartList, "Part list entry 'part list' is required"));
+                result.Add(new ValidationError(Fields.PartList, "Part list entry 'part list' is required"));
             if (record.Article == Guid.Empty)
-                result.Add(new ValidationError(PartListEntry.Fields.Article, "Part list entry 'article' is required"));
+                result.Add(new ValidationError(Fields.Article, "Part list entry 'article' is required"));
 
             if (result.Count == 0 && RepositoryService.PartListRepository.EntryExistsWithinList(record.PartList, record.Article, id))
-                result.Add(new ValidationError(PartListEntry.Fields.Article, "Part list entry with the same article already exists within part list"));
+                result.Add(new ValidationError(Fields.Article, "Part list entry with the same article already exists within part list"));
 
             if (record.Article != Guid.Empty)
             {
                 var type = RepositoryService.ArticleRepository.FindTypeByArticleId(record.Article);
-                var amountValidator = GetNumberFormatValidator(PartListEntry.Fields.Amount, type);
+                var amountValidator = GetNumberFormatValidator(Fields.Amount, type);
 
-                result.AddRange(amountValidator.Validate(record.Amount, PartListEntry.Fields.Amount));
+                result.AddRange(amountValidator.Validate(record.Amount, Fields.Amount));
             }
 
             return result;
@@ -45,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private static NumberFormatValidator GetNumberFormatValidator(string entityProperty, ArticleType? type)
         {
             var isInteger = type?.IsInteger is true;
-            return new NumberFormatValidator(PartListEntry.Entity, entityProperty, isInteger, true);
+            return new NumberFormatValidator(Entity, entityProperty, isInteger, true);
         }
     }
 }

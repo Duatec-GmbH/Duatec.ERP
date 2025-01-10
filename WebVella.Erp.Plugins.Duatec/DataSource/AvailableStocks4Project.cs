@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -117,7 +118,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         private static Article GetArticle(EntityRecord rec)
         {
             var article = ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
-            return TypedEntityRecordWrapper.Cast<Article>(article)!;
+            return TypedEntityRecordWrapper.WrapElseDefault<Article>(article)!;
         }
     }
 }

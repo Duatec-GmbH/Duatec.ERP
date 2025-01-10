@@ -2,7 +2,6 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
@@ -21,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
             else if(!RepositoryService.GoodsReceivingRepository.Delete(id))
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete goods receiving");
             else
-                return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
+                return pageModel.LocalRedirect(pageModel.EntityListUrl());
 
             return null;
         }

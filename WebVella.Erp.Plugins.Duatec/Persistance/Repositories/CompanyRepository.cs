@@ -1,15 +1,13 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class CompanyRepository : RepositoryBase<Company>
+    internal class CompanyRepository : TypedRepositoryBase<Company>
     {
-        public override string Entity => Company.Entity;
-
         public Dictionary<string, Company?> FindManyByShortName(params string[] shortNames)
             => FindManyByUniqueArgs(Company.Fields.ShortName, "*", shortNames);
 

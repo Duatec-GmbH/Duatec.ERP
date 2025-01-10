@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
 {
@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
         {
             _entity = entity;
             _entityProperty = entityProperty;
-            _entityPretty = Text.FancyfySnakeCaseStartWithUpper(entity);
+            _entityPretty = Util.Text.FancyfySnakeCaseStartWithUpper(entity);
             _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
         }
 
@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
 
             if (value.Any(c => !CharIsAllowed(c)))
             {
-                var invalidCharString = Text.InvalidCharacters(value, CharIsAllowed);
+                var invalidCharString = Util.Text.InvalidCharacters(value, CharIsAllowed);
                 result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not contain invalid characters {invalidCharString}"));
             }
             return result;

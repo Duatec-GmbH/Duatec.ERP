@@ -1,9 +1,9 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
+namespace WebVella.TypedRecords.Common
 {
-    internal static class Record
+    internal static class RepositoryHelper
     {
         internal static bool Exists(string entity, string field, object? fieldValue)
         {

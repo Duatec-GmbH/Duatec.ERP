@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class Project : TypedEntityRecordWrapper
     {
         public const string Entity = "project";
@@ -10,15 +14,17 @@
             public const string Name = "name";
         }
 
+        public override string EntityName => Entity;
+
         public string Number
         {
-            get => TryGet(Fields.Number, string.Empty);
+            get => Get(Fields.Number, string.Empty);
             set => Properties[Fields.Number] = value;
         }
 
         public string Name
         {
-            get => TryGet(Fields.Name, string.Empty);
+            get => Get(Fields.Name, string.Empty);
             set => Properties[Name] = value;
         }
     }

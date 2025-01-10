@@ -74,6 +74,13 @@ namespace WebVella.Erp.Api.Models
 		{
 			return Name;
 		}
+
+		public string FancyName()
+			=> FancyName(Name);
+
+
+		public static string FancyName(string name)
+			=> Utilities.Text.FancyfySnakeCase(name);
 	}
 
 	[Serializable]

@@ -7,11 +7,11 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
 {
@@ -327,7 +327,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static ArticleType? GetArticleType(Article rec)
         {
             var type = (rec[$"${Article.Relations.Type}"] as List<EntityRecord>)?.FirstOrDefault();
-            return TypedEntityRecordWrapper.Cast<ArticleType>(type);
+            return TypedEntityRecordWrapper.WrapElseDefault<ArticleType>(type);
         }
 
 

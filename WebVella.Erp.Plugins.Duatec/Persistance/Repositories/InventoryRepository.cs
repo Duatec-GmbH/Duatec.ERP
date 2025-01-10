@@ -2,13 +2,13 @@
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+using WebVella.TypedRecords;
+using WebVella.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class InventoryRepository : RepositoryBase<InventoryEntry>
+    internal class InventoryRepository : TypedRepositoryBase<InventoryEntry>
     {
-        public override string Entity => InventoryEntry.Entity;
-
         public List<InventoryEntry> FindManyByArticle(Guid articleId)
             => FindManyBy(InventoryEntry.Fields.Article, articleId);
 
@@ -142,8 +142,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 #pragma warning disable CA1822 // Mark members as static
         public InventoryReservationList? FindReservationListByProject(Guid projectId, string select = "*")
         {
-            var rec = Record.FindBy(InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
-            return TypedEntityRecordWrapper.Cast<InventoryReservationList>(rec);
+            var rec = RepositoryHelper.FindBy(InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationList>(rec);
         }
 
         public List<InventoryReservationEntry> FindManyReservationEntriesByProject(Guid projectId, string select = "*")
@@ -152,8 +152,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (!list.HasValue || list == Guid.Empty)
                 return [];
 
-            return Record.FindManyBy(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
-                .Select(TypedEntityRecordWrapper.Cast<InventoryReservationEntry>)
+            return RepositoryHelper.FindManyBy(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
+                .Select(TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>)
                 .ToList()!;
         }
 

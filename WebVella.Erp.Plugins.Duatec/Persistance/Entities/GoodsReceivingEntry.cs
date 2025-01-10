@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class GoodsReceivingEntry : TypedEntityRecordWrapper
     {
         public const string Entity = "goods_receiving_entry";
@@ -17,21 +21,23 @@
             public const string Amount = "amount";
         }
 
+        public override string EntityName => Entity;
+
         public Guid GoodsReceiving
         {
-            get => TryGet<Guid>(Fields.GoodsReceiving);
+            get => Get<Guid>(Fields.GoodsReceiving);
             set => Properties[Fields.GoodsReceiving] = value;
         }
 
         public Guid Article
         {
-            get => TryGet<Guid>(Fields.Article);
+            get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
         }
 
         public decimal Amount
         {
-            get => TryGet<decimal>(Fields.Amount);
+            get => Get<decimal>(Fields.Amount);
             set => Properties[Fields.Amount] = value;
         }
     }

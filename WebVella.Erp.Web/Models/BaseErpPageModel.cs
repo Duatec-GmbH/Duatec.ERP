@@ -511,5 +511,59 @@ namespace WebVella.Erp.Web.Models
 			#endregion
 		}
 
+		public string GetFormValue(string id)
+		{
+			if (Request.Form.ContainsKey(id) && !string.IsNullOrWhiteSpace(Request.Form[id]))
+				return Request.Form[id]!;
+			return string.Empty;
+		}
+
+		public string[] GetFormValues(string id)
+		{
+			if (Request.Form.ContainsKey(id) && !string.IsNullOrWhiteSpace(Request.Form[id]))
+				return Request.Form[id].ToString().Split(',').Select(s => s.Trim()).ToArray();
+			return [];
+		}
+
+		public void PutMessage(ScreenMessageType type, string message)
+		{
+			TempData.Put("ScreenMessage", new ScreenMessage()
+			{
+				Message = message,
+				Type = type,
+				Title = type.ToString()
+			});
+		}
+
+		public string EntityListUrl(string? pageName = null)
+			=> EntityPage('l', pageName);
+
+		public string EntityDetailUrl(Guid id, string? pageName = null)
+			=> EntityGuidPage('r', id, pageName);
+
+		public string EntityManageUrl(Guid id, string? pageName = null)
+			=> EntityGuidPage('m', id, pageName);
+
+		public string EntityCreateUrl(string? pageName = null)
+			=> EntityPage('c', pageName);
+
+
+		private string EntityPage(char pageKind, string? pageName = null)
+		{
+			var ctx = ErpRequestContext;
+			var result = $"/{ctx?.App?.Name}/{ctx?.SitemapArea?.Name}/{ctx?.SitemapNode?.Name}/{pageKind}";
+
+			if (!string.IsNullOrEmpty(pageName))
+				result += '/' + pageName;
+			return result;
+		}
+
+		private string EntityGuidPage(char pageKind, Guid id, string? pageName = null)
+		{
+			var result = EntityPage(pageKind) + $"/{id}";
+			if (!string.IsNullOrEmpty(pageName))
+				result += '/' + pageName;
+			return result;
+		}
 	}
 }

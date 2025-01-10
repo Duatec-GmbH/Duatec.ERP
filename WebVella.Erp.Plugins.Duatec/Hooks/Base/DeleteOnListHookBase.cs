@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 

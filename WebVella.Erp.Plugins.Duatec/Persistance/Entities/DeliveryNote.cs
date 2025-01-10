@@ -1,5 +1,9 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿using WebVella.TypedRecords;
+using WebVella.TypedRecords.Attributes;
+
+namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    [TypedEntity(Entity)]
     public class DeliveryNote : TypedEntityRecordWrapper
     {
         public const string Entity = "delivery_notes";
@@ -15,15 +19,17 @@
             public const string GoodsReceiving = "delivery_notes_goods_receiving";
         }
 
+        public override string EntityName => Entity;
+
         public Guid GoodsReceiving
         {
-            get => TryGet<Guid>(Fields.GoodsReceiving);
+            get => Get<Guid>(Fields.GoodsReceiving);
             set => Properties[Fields.GoodsReceiving] = value;
         }
 
         public object File
         {
-            get => TryGet<object>(Fields.File);
+            get => Get<object>(Fields.File);
             set => Properties[Fields.File] = value;
         }
     }

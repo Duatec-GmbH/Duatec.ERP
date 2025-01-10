@@ -8,10 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class GoodsReceivingRepository : ListRepositoryBase<GoodsReceiving, GoodsReceivingEntry>
     {
-        public override string Entity => GoodsReceiving.Entity;
-
-        protected override string EntryEntity => GoodsReceivingEntry.Entity;
-
         protected override string EntryParentIdPath => GoodsReceivingEntry.Fields.GoodsReceiving;
 
         public List<GoodsReceiving> FindManyByOrder(Guid orderId, string select = "*")

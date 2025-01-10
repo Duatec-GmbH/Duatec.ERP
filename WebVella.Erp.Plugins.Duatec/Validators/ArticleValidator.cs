@@ -1,20 +1,24 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
+    using Fields = Article.Fields;
+
     public class ArticleValidator : IRecordValidator<Article>
     {
+        const string Entity = Article.Entity;
         private static readonly PartNumberUniqueValidator _partNumberValidator = new();
-        private static readonly NameFormatValidator _typeNumberValidator = new(Article.Entity, Article.Fields.TypeNumber);
-        private static readonly NameFormatValidator _orderNumberValidator = new(Article.Entity, Article.Fields.OrderNumber);
-        private static readonly NameFormatValidator _designationValidator = new(Article.Entity, Article.Fields.Designation);
+        private static readonly NameFormatValidator _typeNumberValidator = new(Entity, Fields.TypeNumber);
+        private static readonly NameFormatValidator _orderNumberValidator = new(Entity, Fields.OrderNumber);
+        private static readonly NameFormatValidator _designationValidator = new(Entity, Fields.Designation);
 
         public List<ValidationError> ValidateOnCreate(Article record)
         {
             var errors = Validate(record);
-            errors.AddRange(_partNumberValidator.ValidateOnCreate(record.PartNumber, Article.Fields.PartNumber));
+            errors.AddRange(_partNumberValidator.ValidateOnCreate(record.PartNumber, Fields.PartNumber));
 
             return errors;
         }
@@ -22,16 +26,19 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         public List<ValidationError> ValidateOnUpdate(Article record)
         {
             var errors = Validate(record);
-            errors.AddRange(_partNumberValidator.ValidateOnUpdate(record.PartNumber, Article.Fields.PartNumber, record.Id!.Value));
+            errors.AddRange(_partNumberValidator.ValidateOnUpdate(record.PartNumber, Fields.PartNumber, record.Id!.Value));
 
             return errors;
         }
 
+        public List<ValidationError> ValidateOnDelete(Article record)
+            => [];
+
         private static List<ValidationError> Validate(Article record)
         {
-            var result = _typeNumberValidator.Validate(record.TypeNumber, Article.Fields.TypeNumber);
-            result.AddRange(_orderNumberValidator.Validate(record.OrderNumber, Article.Fields.OrderNumber));
-            result.AddRange(_designationValidator.Validate(record.Designation, Article.Fields.Designation));
+            var result = _typeNumberValidator.Validate(record.TypeNumber, Fields.TypeNumber);
+            result.AddRange(_orderNumberValidator.Validate(record.OrderNumber, Fields.OrderNumber));
+            result.AddRange(_designationValidator.Validate(record.Designation, Fields.Designation));
 
             return result;
         }

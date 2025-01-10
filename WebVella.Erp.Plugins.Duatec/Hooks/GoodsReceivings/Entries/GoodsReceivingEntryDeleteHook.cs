@@ -2,7 +2,7 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 

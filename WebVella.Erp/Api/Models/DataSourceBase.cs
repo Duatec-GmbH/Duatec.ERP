@@ -40,5 +40,15 @@ namespace WebVella.Erp.Api.Models
 		{
 			return Name;
 		}
+
+		public Dictionary<string, object> GetDefaultArgs()
+		{
+			var result = new Dictionary<string, object>(32);
+			var dsMan = new DataSourceManager();
+
+			foreach (var param in Parameters)
+				result[param.Name] = dsMan.GetDataSourceParameterValue(param);
+			return result;
+		}
 	}
 }

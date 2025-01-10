@@ -6,12 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class WarehouseRepository : ListRepositoryBase<Warehouse, WarehouseLocation>
     {
-        public override string Entity => Warehouse.Entity;
-
-        protected override string EntryEntity => WarehouseLocation.Entity;
-
         protected override string EntryParentIdPath => WarehouseLocation.Fields.Warehouse;
-
 
         public bool EntryExistsWithinWarehouse(Guid warehouseId, string designation, Guid? excludedId)
         {

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace WebVella.Erp.Api.Models
 {
@@ -22,6 +23,15 @@ namespace WebVella.Erp.Api.Models
 			};
 			response.Errors.Add(new ErrorModel { Message = message });
 			return response;
+		}
+
+		public string GetMessage()
+		{
+			var messages = Errors
+				.Select(e => e.Message)
+				.Prepend(Message);
+
+			return string.Join(Environment.NewLine, messages);
 		}
 	}
 }

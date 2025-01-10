@@ -6,10 +6,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class OrderRepository : ListRepositoryBase<Order, OrderEntry>
     {
-        public override string Entity => Order.Entity;
-
-        protected override string EntryEntity => OrderEntry.Entity;
-
         protected override string EntryParentIdPath => OrderEntry.Fields.Order;
 
         public List<Order> FindManyByProject(Guid projectId, string select = "*")

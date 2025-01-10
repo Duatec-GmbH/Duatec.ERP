@@ -2,9 +2,11 @@
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
+using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 {
+    [Obsolete]
     [HookAttachment(key: HookKeys.PartList.Update)]
     internal class PartListUpdateHook : UpdateHookBase<PartList>
     {

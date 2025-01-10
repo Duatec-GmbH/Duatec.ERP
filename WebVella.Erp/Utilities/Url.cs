@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace WebVella.Erp.Plugins.Duatec.Util
+namespace WebVella.Erp.Utilities
 {
     public static partial class Url
     {

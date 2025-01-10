@@ -2,9 +2,10 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
 {
@@ -31,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
                 return null;
             }
 
-            var rec = TypedEntityRecordWrapper.Cast<DeliveryNote>(response.Object.Data[0])!;
+            var rec = TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(response.Object.Data[0])!;
 
             var name = $"{rec.File}";
             if (name.Contains('/'))

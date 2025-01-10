@@ -2,7 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
             }
 
-            return pageModel.LocalRedirect(PageUrl.EntityList(pageModel));
+            return pageModel.LocalRedirect(pageModel.EntityListUrl());
         }
     }
 }

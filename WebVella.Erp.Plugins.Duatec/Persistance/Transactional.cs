@@ -1,5 +1,4 @@
 ﻿using WebVella.Erp.Database;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance

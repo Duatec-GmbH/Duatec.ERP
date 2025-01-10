@@ -7,13 +7,14 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
     [HookAttachment(key: HookKeys.Manufacturer.Update)]
     internal class ManufacturerUpdateHook : IRecordManagePageHook
     {
-        private readonly static ManufacturerValidator _validator = new();
+        private readonly static CompanyValidator _validator = new();
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
         {
@@ -22,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var company = TypedEntityRecordWrapper.Cast<Company>(record)!;
+            var company = TypedEntityRecordWrapper.WrapElseDefault<Company>(record)!;
             var oldRec = RepositoryService.CompanyRepository.Find(company.Id!.Value);
             company.EplanId = oldRec?.EplanId;
 
