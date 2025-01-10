@@ -1,5 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Hooks;
+﻿using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Validators;
@@ -12,7 +11,5 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
         private static readonly PartListValidator _validator = new();
 
         protected override IRecordValidator<PartList> Validator => _validator;
-
-        protected override PartList WrapRecord(EntityRecord record) => new (record);
     }
 }

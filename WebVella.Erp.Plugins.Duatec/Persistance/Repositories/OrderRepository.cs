@@ -12,12 +12,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryParentIdPath => OrderEntry.Fields.Order;
 
-        protected override Order? MapToTypedRecord(EntityRecord? record)
-            => Order.Create(record);
-
-        protected override OrderEntry? MapEntryToTypedRecord(EntityRecord? record)
-            => OrderEntry.Create(record);
-
         public List<Order> FindManyByProject(Guid projectId, string select = "*")
             => FindManyBy(Order.Fields.Project, projectId, select);
 

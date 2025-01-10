@@ -24,7 +24,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             if (!pageModel.Request.Query.TryGetValue("pId", out var projectIdVal) || !Guid.TryParse(projectIdVal, out var projectId))
                 return pageModel.BadRequest();
 
-            var partList = new PartList(record) { Project = projectId };
+            var partList = TypedEntityRecordWrapper.Cast<PartList>(record)!;
+            partList.Project = projectId;
             validationErrors.AddRange(_validator.ValidateOnCreate(partList));
 
             return null;

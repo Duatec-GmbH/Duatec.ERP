@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -28,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return new EntityRecordList();
 
             var demandLookup = GetDemandLookup(projectId.Value);
-            var stocks = Repository.Inventory.FindManyByProject(null)
+            var stocks = RepositoryService.Inventory.FindManyByProject(null)
                 .Where(r => demandLookup.ContainsKey(r.Article))
                 .ToArray();
 
@@ -49,15 +49,15 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static Dictionary<Guid, decimal> GetDemandLookup(Guid projectId)
         {
-            var demandLookup = Repository.PartList.FindManyEntriesByProject(projectId, true)
+            var demandLookup = RepositoryService.PartList.FindManyEntriesByProject(projectId, true)
                 .GroupBy(ple => ple.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var orderedLookup = Repository.Order.FindManyEntriesByProject(projectId)
+            var orderedLookup = RepositoryService.Order.FindManyEntriesByProject(projectId)
                 .GroupBy(oe => oe.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var inventoryLookup = Repository.Inventory.FindManyByProject(projectId)
+            var inventoryLookup = RepositoryService.Inventory.FindManyByProject(projectId)
                 .GroupBy(ie => ie.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
@@ -87,7 +87,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .Distinct()
                 .ToArray();
 
-            return Repository.Article.FindMany(select, articleIds);
+            return RepositoryService.Article.FindMany(select, articleIds);
         }
 
         private static EntityRecord RecordFromGroup(
@@ -117,7 +117,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         private static Article GetArticle(EntityRecord rec)
         {
             var article = ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
-            return new Article(article);
+            return TypedEntityRecordWrapper.Cast<Article>(article)!;
         }
     }
 }

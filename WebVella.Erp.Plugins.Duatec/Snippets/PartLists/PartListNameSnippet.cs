@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -15,8 +15,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists
             if (rec == null)
                 return null;
 
-            var partList = new PartList(rec);
-            var project = Repository.Project.Find(partList.Project);
+            var partList = TypedEntityRecordWrapper.Cast<PartList>(rec)!;
+            var project = RepositoryService.Project.Find(partList.Project);
 
             var result = $"{project?.Number} - {partList.Name}";
             if (!partList.IsActive)

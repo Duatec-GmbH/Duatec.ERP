@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+using WebVella.Erp.Plugins.Duatec.Services;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -13,18 +14,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryParentIdPath => GoodsReceivingEntry.Fields.GoodsReceiving;
 
-        protected override GoodsReceivingEntry? MapEntryToTypedRecord(EntityRecord? record)
-            => GoodsReceivingEntry.Create(record);
-
-        protected override GoodsReceiving? MapToTypedRecord(EntityRecord? record)
-            => GoodsReceiving.Create(record);
-
         public List<GoodsReceiving> FindManyByOrder(Guid orderId, string select = "*")
             => FindManyBy(GoodsReceiving.Fields.Order, orderId, select);
 
         public List<GoodsReceiving> FindManyByProject(Guid projectId, string select = "*")
         {
-            var subQuery = Repository.Order.FindManyByProject(projectId, $"id")
+            var subQuery = RepositoryService.Order.FindManyByProject(projectId, $"id")
                 .Select(o => o.Id!.Value)
                 .Distinct()
                 .Select(oId => new QueryObject()

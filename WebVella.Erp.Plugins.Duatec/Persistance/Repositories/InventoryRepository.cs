@@ -9,9 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
     {
         public override string Entity => InventoryEntry.Entity;
 
-        protected override InventoryEntry? MapToTypedRecord(EntityRecord? record)
-            => InventoryEntry.Create(record);
-
         public List<InventoryEntry> FindManyByArticle(Guid articleId)
             => FindManyBy(InventoryEntry.Fields.Article, articleId);
 
@@ -146,7 +143,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public InventoryReservationList? FindReservationListByProject(Guid projectId, string select = "*")
         {
             var rec = Record.FindBy(InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
-            return InventoryReservationList.Create(rec);
+            return TypedEntityRecordWrapper.Cast<InventoryReservationList>(rec);
         }
 
         public List<InventoryReservationEntry> FindManyReservationEntriesByProject(Guid projectId, string select = "*")
@@ -156,7 +153,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 return [];
 
             return Record.FindManyBy(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
-                .Select(InventoryReservationEntry.Create)
+                .Select(TypedEntityRecordWrapper.Cast<InventoryReservationEntry>)
                 .ToList()!;
         }
 

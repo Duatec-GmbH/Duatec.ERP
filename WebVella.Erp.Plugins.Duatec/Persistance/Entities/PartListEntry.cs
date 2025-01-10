@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal class PartListEntry : TypedEntityRecordWrapper
     {
@@ -20,12 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string DeviceTag = "device_tag";
             public const string Amount = "amount";
         }
-
-        public PartListEntry(EntityRecord? record = null)
-            : base(record) { }
-
-        public static PartListEntry? Create(EntityRecord? record)
-            => record == null ? null : new PartListEntry(record);
 
         public Guid PartList
         {

@@ -1,13 +1,13 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {
-    public abstract class RepositoryBase<T> where T : TypedEntityRecordWrapper
+    public abstract class RepositoryBase<T> where T : TypedEntityRecordWrapper, new()
     {
         public abstract string Entity { get; }
 
-        protected abstract T? MapToTypedRecord(EntityRecord? record);
+        protected T? MapToTypedRecord(EntityRecord? record)
+            => TypedEntityRecordWrapper.Cast<T>(record);
 
         public T? Find(Guid id, string select = "*")
             => MapToTypedRecord(Record.Find(Entity, id, select));

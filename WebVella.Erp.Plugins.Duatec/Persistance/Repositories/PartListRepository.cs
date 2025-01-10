@@ -13,12 +13,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryParentIdPath => PartListEntry.Fields.PartList;
 
-        protected override PartList? MapToTypedRecord(EntityRecord? record)
-            => PartList.Create(record);
-
-        protected override PartListEntry? MapEntryToTypedRecord(EntityRecord? record)
-            => PartListEntry.Create(record);
-
         public List<PartList> FindManyByProject(Guid projectId)
             => FindManyBy(PartList.Fields.Project, projectId);
 

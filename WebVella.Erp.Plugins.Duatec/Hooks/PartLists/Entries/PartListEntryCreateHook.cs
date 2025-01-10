@@ -31,7 +31,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            var entry = new PartListEntry(record) { PartList = listId };
+            var entry = TypedEntityRecordWrapper.Cast<PartListEntry>(record);
+            entry!.PartList = listId;
 
             validationErrors.AddRange(_validator.ValidateOnCreate(entry));
             return null;

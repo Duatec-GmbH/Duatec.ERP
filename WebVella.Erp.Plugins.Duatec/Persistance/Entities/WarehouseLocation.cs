@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public class WarehouseLocation : TypedEntityRecordWrapper
     {
@@ -12,12 +9,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Warehouse = "warehouse_id";
             public const string Designation = "designation";
         }
-
-        public WarehouseLocation(EntityRecord? entityRecord = null)
-            : base(entityRecord) { }
-
-        public static WarehouseLocation? Create(EntityRecord? record)
-            => record == null ? null : new WarehouseLocation(record);
 
         public Guid Warehouse
         {

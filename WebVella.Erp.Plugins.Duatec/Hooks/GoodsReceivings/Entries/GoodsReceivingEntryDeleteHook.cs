@@ -6,10 +6,10 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
+namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
-    [HookAttachment(key: HookKeys.GoodsReceiving.DeliveryNotes.Delete)]
-    internal class DeliveryNotesDeleteHook : IPageHook
+    [HookAttachment(key: HookKeys.GoodsReceiving.Entry.Delete)]
+    internal class GoodsReceivingEntryDeleteHook : IPageHook
     {
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
@@ -18,24 +18,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.DeliveryNotes
 
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
-            if (!Guid.TryParse(pageModel.GetFormValue("id"), out Guid deliveryNoteId))
+            if (!pageModel.RecordId.HasValue)
                 return null;
 
-            // TODO replace record manager with repository
+            // TODO Replace Record manager with repo
             var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(DeliveryNote.Entity, deliveryNoteId);
+            var response = recMan.DeleteRecord(GoodsReceivingEntry.Entity, pageModel.RecordId.Value);
 
             if (!response.Success)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
                 return null;
             }
-
-            var name = $"{response.Object.Data.Single()[DeliveryNote.File]}";
-            if (name.Contains('/'))
-                name = name[(name.LastIndexOf('/') + 1)..];
-
-            pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted delivery note '{name}'");
 
             return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
         }

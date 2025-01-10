@@ -2,14 +2,14 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Snippets;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
+namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
     [HookAttachment(key: HookKeys.GoodsReceiving.Entry.Update)]
     internal class GoodsReceivingEntryUpdateHook : IRecordManagePageHook
@@ -24,9 +24,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var rec = new GoodsReceivingEntry(record);
+            var rec = TypedEntityRecordWrapper.Cast<GoodsReceivingEntry>(record)!;
 
-            var oldRec = Repository.GoodsReceiving.FindEntry(rec.Id!.Value);
+            var oldRec = RepositoryService.GoodsReceiving.FindEntry(rec.Id!.Value);
             rec.GoodsReceiving = oldRec!.GoodsReceiving;
 
             validationErrors.AddRange(_validator.ValidateOnUpdate(rec));

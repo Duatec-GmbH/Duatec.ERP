@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal class PartList : TypedEntityRecordWrapper
     {
@@ -19,12 +16,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Name = "name";
             public const string IsActive = "is_active";
         }
-
-        public PartList(EntityRecord record)
-            : base(record) { }
-
-        public static PartList? Create(EntityRecord? record)
-            => record == null ? null : new PartList(record);
 
         public Guid Project
         {

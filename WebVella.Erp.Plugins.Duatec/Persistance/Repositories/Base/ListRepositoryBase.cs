@@ -1,19 +1,19 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
 using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {
     internal abstract class ListRepositoryBase<TList, TEntry> : RepositoryBase<TList>
-        where TList : TypedEntityRecordWrapper
-        where TEntry : TypedEntityRecordWrapper
+        where TList : TypedEntityRecordWrapper, new()
+        where TEntry : TypedEntityRecordWrapper, new()
     {
         protected abstract string EntryEntity { get; }
 
         protected abstract string EntryParentIdPath { get; }
 
-        protected abstract TEntry? MapEntryToTypedRecord(EntityRecord? record);
+        protected TEntry? MapEntryToTypedRecord(EntityRecord? record)
+            => TypedEntityRecordWrapper.Cast<TEntry>(record);
 
         public override bool Delete(Guid id)
         {

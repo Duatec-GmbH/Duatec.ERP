@@ -1,9 +1,9 @@
 ﻿using System.Xml.Linq;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan
+namespace WebVella.Erp.Plugins.Duatec.Services
 {
-    internal static class EplanXml
+    internal static class EplanXmlService
     {
         public static List<EplanArticle> GetArticles(Stream stream)
         {
@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         public static List<EplanPart> GetParts(Stream stream)
         {
             return GetParts(XElement.Load(stream))
-                .ToList(); 
+                .ToList();
         }
 
         private static IEnumerable<EplanPart> GetParts(XElement node)

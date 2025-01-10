@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Eplan;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -28,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return null;
 
             var types = importInfos.ToDictionary(i => i.PartNumber, i => i.TypeId);
-            var articles = DataPortal.GetArticlesByPartNumber([.. types.Keys]);
+            var articles = EplanDataPortal.GetArticlesByPartNumber([.. types.Keys]);
 
             if(articles.Values.Any(v => v == null))
                 return pageModel.BadRequest();
@@ -68,11 +69,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             {
                 foreach (var article in articles)
                 {
-                    var manufacturer = Repository.Company.FindByShortName(article!.Manufacturer.ShortName)?.Id
-                        ?? Repository.Company.Insert(article.Manufacturer)
+                    var manufacturer = RepositoryService.Company.FindByShortName(article!.Manufacturer.ShortName)?.Id
+                        ?? RepositoryService.Company.Insert(article.Manufacturer)
                         ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
 
-                    if (Repository.Article.Insert(article, manufacturer, types[article.PartNumber]) == null)
+                    if (RepositoryService.Article.Insert(article, manufacturer, types[article.PartNumber]) == null)
                         throw new DbException($"Could not create article '{article.PartNumber}'.");
                 }
             }

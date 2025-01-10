@@ -21,7 +21,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var errors = _validator.ValidateOnCreate(new Company(record));
+            var rec = TypedEntityRecordWrapper.Cast<Company>(record)!;
+            var errors = _validator.ValidateOnCreate(rec);
             validationErrors.AddRange(errors);
 
             return null;

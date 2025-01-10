@@ -1,5 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
+﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Validators;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
@@ -19,13 +19,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string GoodsReceiving = "goods_receiving_id";
             public const string Amount = "amount";
         }
-
-        public GoodsReceivingEntry(EntityRecord? record = null)
-            : base(record) { }
-
-
-        public static GoodsReceivingEntry? Create(EntityRecord? record)
-            => record == null ? null : new GoodsReceivingEntry(record);
 
         public Guid GoodsReceiving
         {

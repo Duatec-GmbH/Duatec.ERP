@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             if (record.Project == Guid.Empty)
                 result.Add(new ValidationError(PartList.Fields.Project, "Part list project is required"));
-            else if (result.Count == 0 && Repository.PartList.ExistsWithinProject(record.Project, record.Name, id))
+            else if (result.Count == 0 && RepositoryService.PartList.ExistsWithinProject(record.Project, record.Name, id))
                 result.Add(NameUniqueError());
 
             return result;

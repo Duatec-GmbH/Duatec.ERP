@@ -2,8 +2,8 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
@@ -25,8 +25,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var entry = new PartListEntry(record);
-            var oldRec = Repository.PartList.FindEntry(entry.Id!.Value)!;
+            var entry = TypedEntityRecordWrapper.Cast<PartListEntry>(record)!;
+            var oldRec = RepositoryService.PartList.FindEntry(entry.Id!.Value)!;
 
             entry.PartList = oldRec.PartList;
             validationErrors.AddRange(_validator.ValidateOnUpdate(entry));

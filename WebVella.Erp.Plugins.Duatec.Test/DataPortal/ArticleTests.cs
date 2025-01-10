@@ -7,7 +7,7 @@
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticleIds100))]
         public void GetArticleWithId_ReturnsValidDto(string id)
         {
-            var sut = Eplan.DataPortal.GetArticleById(long.Parse(id));
+            var sut = Services.EplanDataPortal.GetArticleById(long.Parse(id));
 
             Common.AssertArticleIsValid(sut);
         }
@@ -16,7 +16,7 @@
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticlePartNumbers100))]
         public void GetArticleWithPartNumber_ReturnsValidDto(string partNumber)
         {
-            var sut = Eplan.DataPortal.GetArticleByPartNumber(partNumber);
+            var sut = Services.EplanDataPortal.GetArticleByPartNumber(partNumber);
 
             Common.AssertArticleIsValid(sut);
         }
@@ -26,7 +26,7 @@
         {
             var partNumbers = ArticleResources.ArticlePartNumbers100;
 
-            var result = Eplan.DataPortal.GetArticlesByPartNumber(partNumbers);
+            var result = Services.EplanDataPortal.GetArticlesByPartNumber(partNumbers);
 
             Assert.That(result, Has.Count.EqualTo(partNumbers.Length));
             Assert.Multiple(() =>

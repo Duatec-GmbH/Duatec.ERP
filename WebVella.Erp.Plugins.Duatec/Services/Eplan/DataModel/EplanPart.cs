@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 {
     internal class EplanPart
     {

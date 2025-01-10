@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan
+namespace WebVella.Erp.Plugins.Duatec.Services
 {
-    public static class DataPortal
+    public static class EplanDataPortal
     {
         private static DateTimeOffset ManufacturersValidUntil = DateTimeOffset.Now;
         private static List<DataPortalManufacturer> Manufacturers = [];
@@ -72,7 +72,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
         public static Dictionary<string, DataPortalArticle?> GetArticlesByPartNumber(params string[] partNumbers)
         {
             if (partNumbers.Length == 0)
-                return[];
+                return [];
 
             var tasks = partNumbers
                 .Select(async pn => new { PartNumber = pn, Article = await GetArticleByPartNumberAsync(pn) })

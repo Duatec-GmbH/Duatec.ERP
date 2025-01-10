@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -15,19 +15,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
     {
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            var record = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            var rec = TypedEntityRecordWrapper.Cast<PartList>(record);
+
             if (rec == null)
                 return pageModel.BadRequest();
 
-            var pl = new PartList(rec);
-
-            if (!Repository.PartList.Delete(pl.Id!.Value))
+            if (!RepositoryService.PartList.Delete(rec.Id!.Value))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
                 return null;
             }
 
-            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{pl.Project}";
+            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{rec.Project}";
             return pageModel.LocalRedirect(returnUrl);
         }
     }

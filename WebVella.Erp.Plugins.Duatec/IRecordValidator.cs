@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 
-namespace WebVella.Erp.Plugins.Duatec.Validators
+namespace WebVella.Erp.Plugins.Duatec
 {
     public interface IRecordValidator<in T> where T : EntityRecord
     {

@@ -2,8 +2,9 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -35,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return Error(pageModel, "File not found");
 
             using var stream = new MemoryStream(file.GetBytes());
-            var articles = EplanXml.GetArticles(stream);
+            var articles = EplanXmlService.GetArticles(stream);
 
             fsRepository.Delete(filePath);
 

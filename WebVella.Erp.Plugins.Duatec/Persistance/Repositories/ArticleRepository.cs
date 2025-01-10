@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -19,9 +19,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
         public override string Entity => Article.Entity;
-
-        protected override Article? MapToTypedRecord(EntityRecord? record)
-             => Article.Create(record);
 
         public bool Exists(long eplanId)
             => ExistsBy(Article.Fields.EplanId, eplanId.ToString());
@@ -69,7 +66,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public ArticleType? FindType(Guid typeId)
         {
             var rec = Record.FindBy(ArticleType.Entity, "id", typeId);
-            return rec == null ? null : new ArticleType(rec);
+            return TypedEntityRecordWrapper.Cast<ArticleType>(rec);
         }
 
         public ArticleType? FindTypeByArticle(Article article)
@@ -87,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             var result = new Dictionary<Guid, ArticleType?>(dict.Count);
 
             foreach (var (key, val) in dict)
-                result[key] = ArticleType.Create(val);
+                result[key] = TypedEntityRecordWrapper.Cast<ArticleType>(val);
 
             return result;
         }

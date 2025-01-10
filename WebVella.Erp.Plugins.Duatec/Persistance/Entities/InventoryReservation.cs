@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     internal class InventoryReservationList : TypedEntityRecordWrapper
     {
@@ -16,12 +13,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string Project = "project_id";
         }
-
-        public InventoryReservationList(EntityRecord? record = null)
-            : base (record) { }
-
-        public static InventoryReservationList? Create(EntityRecord? rec)
-            => rec == null ? null : new InventoryReservationList(rec);
 
         public Guid Project
         {

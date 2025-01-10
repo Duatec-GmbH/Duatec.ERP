@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public class Order : TypedEntityRecordWrapper
     {
@@ -19,12 +16,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Number = "order_number";
             public const string Project = "project_id";
         }
-
-        public Order(EntityRecord? record = null)
-            : base(record) { }
-
-        public static Order? Create(EntityRecord? record)
-            => record == null ? null : new Order(record);
 
         public Guid Supplier
         {

@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Persistance;
+﻿using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -12,8 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             if (!pageModel.RecordId.HasValue)
                 return false;
 
-            return Repository.PartList.FindManyByProject(pageModel.RecordId.Value)
-                .Exists(pl => pl.IsActive && Repository.PartList.EntryExistsWithinList(pl.Id!.Value));
+            return RepositoryService.PartList.FindManyByProject(pageModel.RecordId.Value)
+                .Exists(pl => pl.IsActive && RepositoryService.PartList.EntryExistsWithinList(pl.Id!.Value));
         }
     }
 }

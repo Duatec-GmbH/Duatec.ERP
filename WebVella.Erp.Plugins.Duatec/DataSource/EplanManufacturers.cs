@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -36,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var name = (string?)arguments[Arguments.Name];
 
             var comparison = StringComparison.OrdinalIgnoreCase;
-            var manufacturers = DataPortal.GetManufacturers()
+            var manufacturers = EplanDataPortal.GetManufacturers()
                 .Where(m => (shortName == null || m.ShortName.Contains(shortName, comparison)) 
                     && (name == null || m.Name.Contains(name, comparison)))
                 .OrderBy(m => m.ShortName)

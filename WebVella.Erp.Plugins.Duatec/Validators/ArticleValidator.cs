@@ -4,7 +4,7 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    internal class ArticleValidator : IRecordValidator<Article>
+    public class ArticleValidator : IRecordValidator<Article>
     {
         private static readonly PartNumberUniqueValidator _partNumberValidator = new();
         private static readonly NameFormatValidator _typeNumberValidator = new(Article.Entity, Article.Fields.TypeNumber);

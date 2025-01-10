@@ -6,6 +6,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Hooks;
@@ -45,7 +46,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 return Error(pageModel, "Amount must be greater than or equal '0'");
 
             var projectId = pageModel.RecordId.Value;
-            if (!Repository.Project.Exists(projectId))
+            if (!RepositoryService.Project.Exists(projectId))
                 return pageModel.BadRequest();
 
             var formData = new List<FormValues>(partNumbers.Length);
@@ -76,15 +77,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
-            var articleLookup = Repository.Article.FindMany(select, partNumbersToProcess);
-            var reservationsLookup = Repository.Inventory
+            var articleLookup = RepositoryService.Article.FindMany(select, partNumbersToProcess);
+            var reservationsLookup = RepositoryService.Inventory
                 .FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);
 
             var demandLookup = GetDemandLookup(projectId, articleLookup, reservationsLookup);
             var reservedInventoryLookup = GetInventoryLookup(projectId, articleLookup);
             var availableInventoryLookup = GetInventoryLookup(null, articleLookup);
 
-            var list = Repository.Inventory.FindReservationListByProject(projectId);
+            var list = RepositoryService.Inventory.FindReservationListByProject(projectId);
 
             return () =>
             {
@@ -188,7 +189,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static void Move(Guid projectId, InventoryEntry entry)
         {
             entry.Project = projectId;
-            if (!Repository.Inventory.Update(entry))
+            if (!RepositoryService.Inventory.Update(entry))
                 throw new DbException("Could not move inventory entry");
         }
 
@@ -196,7 +197,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         {
             entry.Project = projectId;
             entry.Amount = amount;
-            if (!Repository.Inventory.MovePartial(entry).HasValue)
+            if (!RepositoryService.Inventory.MovePartial(entry).HasValue)
                 throw new DbException("Could not partially move inventory entry");
         }
 
@@ -246,7 +247,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var available = Repository.Inventory.FindManyByProject(projectId)
+            var available = RepositoryService.Inventory.FindManyByProject(projectId)
                 .Where(i => ids.Contains(i.Article))
                 .GroupBy(i => i.Article)
                 .ToDictionary(g => g.Key, g => g.ToArray());
@@ -274,7 +275,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var totalDemands = Repository.PartList.FindManyEntriesByProject(projectId, true)
+            var totalDemands = RepositoryService.PartList.FindManyEntriesByProject(projectId, true)
                 .Where(e => ids.Contains(e.Article))
                 .GroupBy(e => e.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
@@ -326,7 +327,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static ArticleType? GetArticleType(Article rec)
         {
             var type = (rec[$"${Article.Relations.Type}"] as List<EntityRecord>)?.FirstOrDefault();
-            return type == null ? null : new ArticleType(type);
+            return TypedEntityRecordWrapper.Cast<ArticleType>(type);
         }
 
 

@@ -8,20 +8,22 @@ using WebVella.Erp.Plugins.Duatec.Validators;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
+namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
 {
-    [HookAttachment(key: HookKeys.GoodsReceiving.Entry.Create)]
-    internal class GoodsReceivingEntryCreateHook : IRecordCreatePageHook
+    [HookAttachment(key: HookKeys.GoodsReceiving.DeliveryNotes.Create)]
+    internal class DeliveryNotesCreateHook : IRecordCreatePageHook
     {
         private const string listArg = "grId";
-        private static readonly GoodsReceivingEntryValidator _validator = new();
+        private static readonly DeliveryNotesValidator _validator = new();
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
         {
-            var listId = Guid.Parse(pageModel.Request.Query[listArg]!);
+            var listId = pageModel.Request.Query[listArg];
 
-            var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
             pageModel.PutMessage(Web.Models.ScreenMessageType.Success, "Successfully created goods receiving entry");
+
+            var context = pageModel.ErpRequestContext;
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{listId}/detail";
 
             return pageModel.LocalRedirect(url);
         }
@@ -31,9 +33,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceiving.Entries
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            var rec = new GoodsReceivingEntry(record) { GoodsReceiving = listId };
-
+            var rec = TypedEntityRecordWrapper.Cast<DeliveryNote>(record)!;
             validationErrors.AddRange(_validator.ValidateOnCreate(rec));
+
             return null;
         }
     }

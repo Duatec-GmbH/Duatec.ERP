@@ -1,7 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Eplan;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
@@ -45,10 +44,10 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && Repository.Company.FindByShortName(shortName) == null)
+                    if (shortNameErrors.Count == 0 && RepositoryService.Company.FindByShortName(shortName) == null)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
-                    if (DataPortal.GetArticleByPartNumber(value) != null)
+                    if (EplanDataPortal.GetArticleByPartNumber(value) != null)
                         result.Add(new ValidationError(formField, $"{_entityPretty} with {_entityPropertyPretty} '{value}' is an EPLAN article"));
                 }
             }

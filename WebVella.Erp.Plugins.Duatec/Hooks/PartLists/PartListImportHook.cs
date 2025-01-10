@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Eplan;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 return Error(pageModel, "File not found");
 
             using var stream = new MemoryStream(file.GetBytes());
-            var parts = EplanXml.GetParts(stream);
+            var parts = EplanXmlService.GetParts(stream);
 
             fsRepository.Delete(filePath);
 
@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
                 .Distinct()
                 .ToArray();
 
-            var articleLookup = Repository.Article.FindMany(partNumbers: partNumbers);
+            var articleLookup = RepositoryService.Article.FindMany(partNumbers: partNumbers);
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, articleLookup);
@@ -63,7 +63,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             {
                 foreach(var rec in entries)
                 {
-                    if (!Repository.PartList.Insert(rec).HasValue)
+                    if (!RepositoryService.PartList.Insert(rec).HasValue)
                         throw new DbException($"Could not create part list entries");
                 }
             }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
+namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 {
     public class DataPortalManufacturer
     {

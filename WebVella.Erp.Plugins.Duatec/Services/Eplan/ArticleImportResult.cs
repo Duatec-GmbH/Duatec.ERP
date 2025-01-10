@@ -1,9 +1,9 @@
 ﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Eplan.DataModel;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Eplan
+namespace WebVella.Erp.Plugins.Duatec.Services.Eplan
 {
     internal class ArticleImportResult
     {
@@ -43,12 +43,12 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
                 return [];
 
             var partNumbers = GetPartNumbers(eplanArticles);
-            var dbArticles = Repository.Article.FindMany(partNumbers: partNumbers);
+            var dbArticles = RepositoryService.Article.FindMany(partNumbers: partNumbers);
             var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);
 
-            foreach(var article in eplanArticles)
+            foreach (var article in eplanArticles)
             {
                 var dbArticle = dbArticles[article.PartNumber];
                 var edpArticle = edpArticles[article.PartNumber];
@@ -98,7 +98,7 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             if (edpPartNumbers.Length == 0)
                 return result;
 
-            var edpArticles = DataPortal.GetArticlesByPartNumber(edpPartNumbers);
+            var edpArticles = EplanDataPortal.GetArticlesByPartNumber(edpPartNumbers);
 
             foreach (var (key, val) in edpArticles)
                 result[key] = val;
@@ -106,13 +106,13 @@ namespace WebVella.Erp.Plugins.Duatec.Eplan
             return result;
         }
 
-        private static ArticleImportState GetArticleState(EplanArticle article, 
+        private static ArticleImportState GetArticleState(EplanArticle article,
             DataPortalArticle? edpArticle, EntityRecord? dbRecord)
         {
             if (IsDbArticle(article, dbRecord))
             {
-                return (bool)dbRecord![Article.Fields.IsBlocked] 
-                    ? ArticleImportState.BlockedArticle 
+                return (bool)dbRecord![Article.Fields.IsBlocked]
+                    ? ArticleImportState.BlockedArticle
                     : ArticleImportState.DbArticle;
             }
 

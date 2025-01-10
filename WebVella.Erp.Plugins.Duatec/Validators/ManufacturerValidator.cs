@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Eplan;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 
@@ -43,14 +43,14 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static ValidationError? ValidateNameWithEplanApi(string name)
         {
-            if(DataPortal.GetManufacturers().Exists(m => name.Equals(m.Name)))
+            if(EplanDataPortal.GetManufacturers().Exists(m => name.Equals(m.Name)))
                 return new ValidationError(Company.Fields.Name, $"{ErrorPrefix(Company.Fields.Name, name)} is listed in EPLAN");
             return null;
         }
 
         private static ValidationError? ValidateShortNameWithEplanApi(string shortName)
         {
-            if (DataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName)))
+            if (EplanDataPortal.GetManufacturers().Exists(m => shortName.Equals(m.ShortName)))
                 return new ValidationError(Company.Fields.ShortName, $"{ErrorPrefix(Company.Fields.ShortName, shortName)} is listed in EPLAN");
             return null;
         }

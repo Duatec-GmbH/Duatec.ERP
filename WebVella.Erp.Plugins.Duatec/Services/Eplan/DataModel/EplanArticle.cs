@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Eplan.DataModel
+﻿namespace WebVella.Erp.Plugins.Duatec.Services.Eplan.DataModel
 {
     internal class EplanArticle
     {

@@ -1,7 +1,4 @@
-﻿using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities.Base;
-
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
+﻿namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public class Article : TypedEntityRecordWrapper
     {
@@ -28,12 +25,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         }
 
         public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
-
-        public Article(EntityRecord? record = null) 
-            : base(record) { }
-
-        public static Article? Create(EntityRecord? record)
-            => record == null ? null : new Article(record);
 
         public string EplanId
         {
