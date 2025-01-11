@@ -91,8 +91,5 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public Company GetManufacturer()
             => GetSingleByRelation<Company>(Relations.Manufacturer)!;
-
-        public partial bool Test { par}
-
     }
 }
