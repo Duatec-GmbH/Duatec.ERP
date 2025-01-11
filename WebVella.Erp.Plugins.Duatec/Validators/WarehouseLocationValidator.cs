@@ -10,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = WarehouseLocation.Fields;
 
-    [TypedValidator(typeof(WarehouseLocation))]
+    [TypedValidator(Entity)]
     internal class WarehouseLocationValidator : IRecordValidator<WarehouseLocation>
     {
         const string Entity = WarehouseLocation.Entity;

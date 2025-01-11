@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = PartList.Fields;
 
-    [TypedValidator(typeof(PartList))]
+    [TypedValidator(Entity)]
     internal class PartListValidator : IRecordValidator<PartList>
     {
         const string Entity = PartList.Entity;

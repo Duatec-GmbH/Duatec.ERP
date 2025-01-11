@@ -9,6 +9,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
+    [Obsolete]
     [HookAttachment(key: HookKeys.Article.Delete)]
     internal class ArticleDeleteHook : IRecordDetailsPageHook
     {

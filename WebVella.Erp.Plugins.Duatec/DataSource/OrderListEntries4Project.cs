@@ -120,8 +120,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
-            return records.Where(r => ((List<EntityRecord>)r[orders])
-                    .Any(o => o[Order.Fields.Number].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
+            return records.Where(r => ((List<EntityRecord>)r[orders]).Exists(
+                o => o[Order.Fields.Number].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
         }
 
         private static IEnumerable<EntityRecord> ApplyManufacturerFilter(string? filterValue, IEnumerable<EntityRecord> records)
@@ -242,6 +242,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return "To Order";
             return "Incomming";
         }
+
         private static List<Order> GetOrders(Guid articleId, Dictionary<Guid, List<Order>> ordersLookup)
         {
             if (!ordersLookup.TryGetValue(articleId, out var orders))
@@ -256,11 +257,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         }
 
         private static Company GetManufacturer(EntityRecord rec)
-        {
-            var article = GetArticle(rec);
-            var record = ((List<EntityRecord>)article[$"${Article.Relations.Manufacturer}"])[0];
-            return TypedEntityRecordWrapper.WrapElseDefault<Company>(record)!;
-        }
+            => GetArticle(rec).GetManufacturer();
 
         private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)
         {

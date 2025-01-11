@@ -62,13 +62,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Designation] = value;
         }
 
-        public Guid Type
+        public Guid TypeId
         {
             get => Get<Guid>(Fields.Type);
             set => Properties[Fields.Type] = value;
         }
 
-        public Guid Manufacturer
+        public Guid ManufacturerId
         {
             get => Get<Guid>(Fields.Manufacturer);
             set => Properties[Fields.Manufacturer] = value;
@@ -85,5 +85,14 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get<bool>(Fields.IsBlocked);
             set => Properties[Fields.IsBlocked] = value;
         }
+
+        public ArticleType GetArticleType()
+            => GetSingleByRelation<ArticleType>(Relations.Type)!;
+
+        public Company GetManufacturer()
+            => GetSingleByRelation<Company>(Relations.Manufacturer)!;
+
+        public partial bool Test { par}
+
     }
 }

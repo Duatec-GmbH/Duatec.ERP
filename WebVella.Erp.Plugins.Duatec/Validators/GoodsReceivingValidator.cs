@@ -5,9 +5,11 @@ using WebVella.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
-    [TypedValidator(typeof(GoodsReceiving))]
+    [TypedValidator(Entity)]
     internal class GoodsReceivingValidator : IRecordValidator<GoodsReceiving>
     {
+        const string Entity = GoodsReceiving.Entity;
+
         public List<ValidationError> ValidateOnCreate(GoodsReceiving record)
             => [];
 

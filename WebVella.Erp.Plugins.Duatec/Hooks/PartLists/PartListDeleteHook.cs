@@ -16,10 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {
             var record = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            var rec = TypedEntityRecordWrapper.WrapElseDefault<PartList>(record);
-
-            if (rec == null)
-                return pageModel.BadRequest();
+            var rec = TypedEntityRecordWrapper.Wrap<PartList>(record);
 
             if (!RepositoryService.PartListRepository.Delete(rec.Id!.Value))
             {

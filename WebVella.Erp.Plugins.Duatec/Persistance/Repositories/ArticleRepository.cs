@@ -54,8 +54,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 TypeNumber = article.TypeNumber,
                 EplanId = article.EplanId.ToString(),
                 Designation = article.Designation,
-                Manufacturer = manufacturerId,
-                Type = typeId,
+                ManufacturerId = manufacturerId,
+                TypeId = typeId,
                 Image = article.PictureUrl,
             };
             return Insert(rec);
@@ -70,7 +70,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
         public ArticleType? FindTypeByArticle(Article article)
-            => FindType(article.Type);
+            => FindType(article.TypeId);
 
         public ArticleType? FindTypeByArticleId(Guid articleId)
         {

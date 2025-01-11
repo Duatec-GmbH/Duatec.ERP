@@ -10,6 +10,7 @@ using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
+    [Obsolete]
     [HookAttachment(key: HookKeys.Manufacturer.Create)]
     internal class ManufacturerCreateHook : IRecordCreatePageHook
     {

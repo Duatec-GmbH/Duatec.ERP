@@ -10,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = Company.Fields;
 
-    [TypedValidator(typeof(Company))]
+    [TypedValidator(Entity)]
     internal class CompanyValidator : IRecordValidator<Company>
     {
         const string Entity = Company.Entity;

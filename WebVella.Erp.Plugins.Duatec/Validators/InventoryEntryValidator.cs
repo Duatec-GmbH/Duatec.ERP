@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = InventoryEntry.Fields;
 
-    [TypedValidator(typeof(InventoryEntry))]
+    [TypedValidator(Entity)]
     internal class InventoryEntryValidator : IRecordValidator<InventoryEntry>
     {
         const string Entity = InventoryEntry.Entity;

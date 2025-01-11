@@ -9,9 +9,11 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = GoodsReceivingEntry.Fields;
 
-    [TypedValidator(typeof(GoodsReceivingEntry))]
+    [TypedValidator(Entity)]
     internal class GoodsReceivingEntryValidator : IRecordValidator<GoodsReceivingEntry>
     {
+        const string Entity = GoodsReceivingEntry.Entity;
+
         public List<ValidationError> ValidateOnCreate(GoodsReceivingEntry record)
             => Validate(record, null);
 

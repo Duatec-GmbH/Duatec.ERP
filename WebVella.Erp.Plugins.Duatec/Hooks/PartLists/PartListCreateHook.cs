@@ -1,33 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Validators;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 {
     [HookAttachment(key: HookKeys.PartList.Create)]
-    internal class PartListCreateHook : IRecordCreatePageHook
+    internal class PartListCreateHook : TypedValidatedCreateHook<PartList>
     {
-        private static readonly PartListValidator _validator = new();
-
-        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
-        {
-            return null;
-        }
-
-        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        protected override IActionResult? OnPreValidate(PartList record, Entity? entity, RecordCreatePageModel pageModel)
         {
             if (!pageModel.Request.Query.TryGetValue("pId", out var projectIdVal) || !Guid.TryParse(projectIdVal, out var projectId))
                 return pageModel.BadRequest();
 
-            var partList = TypedEntityRecordWrapper.WrapElseDefault<PartList>(record)!;
-            partList.Project = projectId;
-            validationErrors.AddRange(_validator.ValidateOnCreate(partList));
+            record.Project = projectId;
 
             return null;
         }

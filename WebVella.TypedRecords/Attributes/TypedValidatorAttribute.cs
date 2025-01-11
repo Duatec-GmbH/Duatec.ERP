@@ -3,11 +3,11 @@
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class TypedValidatorAttribute : Attribute
     {
-        public TypedValidatorAttribute(Type targetType)
+        public TypedValidatorAttribute(string entity)
         {
-            TargetType = targetType;
+            Entity = entity;
         }
 
-        public Type TargetType { get; }
+        public string Entity { get; }
     }
 }

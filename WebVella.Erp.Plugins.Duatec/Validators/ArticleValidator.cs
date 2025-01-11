@@ -8,7 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = Article.Fields;
 
-    [TypedValidator(typeof(Article))]
+    [TypedValidator(Entity)]
     public class ArticleValidator : IRecordValidator<Article>
     {
         const string Entity = Article.Entity;

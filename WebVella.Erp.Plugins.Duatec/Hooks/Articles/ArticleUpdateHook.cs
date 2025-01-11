@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
     [HookAttachment(key: HookKeys.Article.Update)]
-    internal class ArticleUpdateHook : IRecordManagePageHook
+    internal class ArticleUpdateHook : TypedValidatedUpdateHook<Article>
     {
-        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
+        public override IActionResult? OnPostManageRecord(Article record, Entity entity, RecordManagePageModel pageModel)
         {
-            var recordId = (Guid)record["id"];
-
+            var recordId = record.Id!.Value;
             var oldAlternatives = RepositoryService.ArticleRepository.FindAlternativeIds(recordId);
+
             var currentAlternatives = pageModel.GetFormValue("equivalents")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Guid.Parse)
@@ -44,11 +44,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 
             Transactional.TryExecute(pageModel, TransactionalAction);
 
-            return null;
-        }
-
-        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
-        {
             return null;
         }
     }

@@ -11,7 +11,6 @@ using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
 {
@@ -39,10 +38,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             if (partNumbers.Length != amounts.Length)
                 return Error(pageModel, "Amount can not be empty");
 
-            if (partNumbers.Length == 0 || amounts.All(d => d <= 0))
+            if (partNumbers.Length == 0 || Array.TrueForAll(amounts, d => d <= 0))
                 return Info(pageModel, "Nothing to do here");
 
-            if (amounts.Any(d => d < 0))
+            if (Array.Exists(amounts, d => d < 0))
                 return Error(pageModel, "Amount must be greater than or equal '0'");
 
             var projectId = pageModel.RecordId.Value;
@@ -97,10 +96,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                     var article = articleLookup[partNumber]
                         ?? throw new DbException($"Article with part number '{partNumber}' does not exist");
 
-                    var type = GetArticleType(article)
-                        ?? throw new DbException($"Article with part number '{partNumber}' is in invalid state");
-
-                    Validate(amount, type);
+                    Validate(amount, article.GetArticleType());
 
                     var demand = demandLookup[partNumber];
 
@@ -136,8 +132,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 MoveAll(projectId, availableEntries);
             else
             {
-                var availableWithinLocation = availableEntries
-                    .Where(ae => reservedEntries.Any(re => re.WarehouseLocation == ae.WarehouseLocation));
+                var availableWithinLocation = availableEntries.Where(
+                    ae => Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
                 var current = Reserve(projectId, amount, 0m, availableWithinLocation);
                 Reserve(projectId, amount, current, availableEntries);
@@ -212,7 +208,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             return Create(InventoryReservationList.Entity, list);
         }
 
-        private static InventoryReservationEntry CreateNewEntry(Guid listId, Guid articleId, decimal amount)
+        private static void CreateNewEntry(Guid listId, Guid articleId, decimal amount)
         {
             var rec = new InventoryReservationEntry()
             {
@@ -221,13 +217,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 Article = articleId,
                 Amount = amount
             };
-            return Create(InventoryReservationEntry.Entity, rec);
+            Create(InventoryReservationEntry.Entity, rec);
         }
 
-        private static InventoryReservationEntry IncreaseAmount(InventoryReservationEntry rec, decimal amount)
+        private static void IncreaseAmount(InventoryReservationEntry rec, decimal amount)
         {
             rec.Amount += amount;
-            return Create(InventoryReservationEntry.Entity, rec);
+            Create(InventoryReservationEntry.Entity, rec);
         }
 
         private static T Create<T>(string entity, T rec) where T : EntityRecord
@@ -323,13 +319,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(bool.Parse)
                 .ToArray();
         }
-
-        private static ArticleType? GetArticleType(Article rec)
-        {
-            var type = (rec[$"${Article.Relations.Type}"] as List<EntityRecord>)?.FirstOrDefault();
-            return TypedEntityRecordWrapper.WrapElseDefault<ArticleType>(type);
-        }
-
 
         private static LocalRedirectResult Error(BaseErpPageModel pageModel, string message)
         {

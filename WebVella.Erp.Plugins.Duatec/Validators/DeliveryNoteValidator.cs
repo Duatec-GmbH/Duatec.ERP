@@ -7,9 +7,11 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 {
     using Fields = DeliveryNote.Fields;
 
-    [TypedValidator(typeof(DeliveryNote))]
+    [TypedValidator(Entity)]
     internal class DeliveryNoteValidator : IRecordValidator<DeliveryNote>
     {
+        const string Entity = DeliveryNote.Entity;
+
         public List<ValidationError> ValidateOnCreate(DeliveryNote record)
             => Validate(record);
 

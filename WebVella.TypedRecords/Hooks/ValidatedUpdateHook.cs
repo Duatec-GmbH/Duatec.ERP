@@ -9,15 +9,15 @@ using WebVella.TypedRecords.Validation;
 
 namespace WebVella.TypedRecords.Hooks
 {
-    [HookAttachment(key: "validated-create")]
-    internal class ValidatedCreateHook : ValidatedModificationHookBase<EntityRecord, RecordCreatePageModel>, IRecordCreatePageHook
+    [HookAttachment(key: "validated-update")]
+    internal class ValidatedUpdateHook : ValidatedModificationHookBase<EntityRecord, RecordManagePageModel>, IRecordManagePageHook
     {
-        protected override string ActionNameInPastTense => "created";
+        protected override string ActionNameInPastTense => "updated";
 
-        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
+        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
             => null;
 
-        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
             => Execute(record, entity, pageModel, validationErrors);
 
         protected override List<ValidationError> Validate(EntityRecord record, Entity? entity)
