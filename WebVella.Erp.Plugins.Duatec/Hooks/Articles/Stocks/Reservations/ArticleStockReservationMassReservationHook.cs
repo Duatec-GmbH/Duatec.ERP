@@ -185,7 +185,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         private static void Move(Guid projectId, InventoryEntry entry)
         {
             entry.Project = projectId;
-            if (!RepositoryService.InventoryRepository.Update(entry))
+            if (RepositoryService.InventoryRepository.Update(entry) == null)
                 throw new DbException("Could not move inventory entry");
         }
 
@@ -193,7 +193,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         {
             entry.Project = projectId;
             entry.Amount = amount;
-            if (!RepositoryService.InventoryRepository.MovePartial(entry).HasValue)
+            if (RepositoryService.InventoryRepository.MovePartial(entry) == null)
                 throw new DbException("Could not partially move inventory entry");
         }
 

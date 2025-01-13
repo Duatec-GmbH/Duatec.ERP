@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     internal class PartListValidator : IRecordValidator<PartList>
     {
         const string Entity = PartList.Entity;
-        private static readonly NameFormatValidator _nameFormatValidator = new(Entity, Fields.Name);
+        private static readonly NameFormatValidator _nameFormatValidator = new(Entity, Fields.Name, true);
 
         public List<ValidationError> ValidateOnCreate(PartList record)
             => Validate(record, null);

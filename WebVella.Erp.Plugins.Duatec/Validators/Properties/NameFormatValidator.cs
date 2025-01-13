@@ -5,8 +5,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
     internal class NameFormatValidator : NameFormatValidatorBase
     {
-        public NameFormatValidator(string entity, string entityProperty) 
-            : base(entity, entityProperty)
+        public NameFormatValidator(string entity, string entityProperty, bool required) 
+            : base(entity, entityProperty, required)
         { }
 
         public virtual List<ValidationError> Validate(string value, string formField)

@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Company? FindByShortName(string shortName)
             => FindBy(Company.Fields.ShortName, shortName);
 
-        public Guid? Insert(DataPortalManufacturerDto manufacturer)
+        public Company? Insert(DataPortalManufacturerDto manufacturer)
         {
             var rec = new Company()
             {

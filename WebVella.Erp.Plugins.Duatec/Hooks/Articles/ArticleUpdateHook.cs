@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
     [HookAttachment(key: HookKeys.Article.Update)]
     internal class ArticleUpdateHook : TypedValidatedUpdateHook<Article>
     {
-        public override IActionResult? OnPostManageRecord(Article record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnPostModification(Article record, Entity entity, RecordManagePageModel pageModel)
         {
             var recordId = record.Id!.Value;
             var oldAlternatives = RepositoryService.ArticleRepository.FindAlternativeIds(recordId);
@@ -30,21 +30,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 .Where(g => !oldAlternatives.Contains(g))
                 .ToArray();
 
-            if (toDelete.Length == 0 && toAdd.Length == 0)
-                return null;
-
-            void TransactionalAction()
+            if (toDelete.Length != 0 || toAdd.Length != 0)
             {
-                foreach (var id in toDelete)
-                    RepositoryService.ArticleRepository.DeleteAlternativeMapping(recordId, id);
+                void TransactionalAction()
+                {
+                    foreach (var id in toDelete)
+                        RepositoryService.ArticleRepository.DeleteAlternativeMapping(recordId, id);
 
-                foreach (var id in toAdd)
-                    RepositoryService.ArticleRepository.InsertAlternativeMapping(recordId, id);
+                    foreach (var id in toAdd)
+                        RepositoryService.ArticleRepository.InsertAlternativeMapping(recordId, id);
+                }
+
+                Transactional.TryExecute(pageModel, TransactionalAction);
             }
 
-            Transactional.TryExecute(pageModel, TransactionalAction);
-
-            return null;
+            return base.OnPostModification(record, entity, pageModel);
         }
     }
 }

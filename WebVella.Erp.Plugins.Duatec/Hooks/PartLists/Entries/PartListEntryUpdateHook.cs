@@ -1,36 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Validators;
-using WebVella.Erp.Web.Hooks;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 {
     [HookAttachment(key: HookKeys.PartList.Entry.Update)]
-    internal class PartListEntryUpdateHook : IRecordManagePageHook
+    internal class PartListEntryUpdateHook : TypedValidatedUpdateHook<PartListEntry>
     {
-        private static readonly PartListEntryValidator _validator = new();
-
-        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnPostModification(PartListEntry record, Entity entity, RecordManagePageModel pageModel)
         {
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+
             var context = pageModel.ErpRequestContext;
-            var id = record[PartListEntry.Fields.PartList];
-            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{id}/detail";
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartList}/detail";
             return pageModel.LocalRedirect(url);
         }
 
-        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
+        protected override IActionResult? OnPreValidate(PartListEntry record, Entity entity, RecordManagePageModel pageModel)
         {
-            var entry = TypedEntityRecordWrapper.WrapElseDefault<PartListEntry>(record)!;
-            var oldRec = RepositoryService.PartListRepository.FindEntry(entry.Id!.Value)!;
-
-            entry.PartList = oldRec.PartList;
-            validationErrors.AddRange(_validator.ValidateOnUpdate(entry));
+            var rec = RepositoryService.PartListRepository.FindEntry(pageModel.RecordId!.Value)!;
+            record.PartList = rec.PartList;
 
             return null;
         }

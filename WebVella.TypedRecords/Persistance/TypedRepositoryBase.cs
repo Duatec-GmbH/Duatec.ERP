@@ -13,14 +13,14 @@ namespace WebVella.TypedRecords.Persistance
         public bool Exists(Guid id)
             => RepositoryHelper.Exists(Entity, "id", id);
 
-        public virtual Guid? Insert(T record)
-            => RepositoryHelper.Insert(Entity, record);
+        public virtual T? Insert(T record)
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Insert(Entity, record));
 
-        public virtual bool Update(T record)
-            => RepositoryHelper.Update(Entity, record);
+        public virtual T? Update(T record)
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Update(Entity, record));
 
-        public virtual bool Delete(Guid id)
-            => RepositoryHelper.Delete(Entity, id);
+        public virtual T? Delete(Guid id)
+            => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Delete(Entity, id));
 
         protected T? FindBy(string property, object? value, string select = "*")
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.FindBy(Entity, property, value, select));

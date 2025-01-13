@@ -2,8 +2,8 @@
 {
     internal abstract class NameFormatValidatorBase : PropertyValidatorBase
     {
-        protected NameFormatValidatorBase(string entity, string entityProperty)
-            : base(entity, entityProperty)
+        protected NameFormatValidatorBase(string entity, string entityProperty, bool required)
+            : base(entity, entityProperty, required)
         { }
 
         protected override bool CharIsAllowed(char c)

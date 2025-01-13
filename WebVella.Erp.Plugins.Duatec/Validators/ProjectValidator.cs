@@ -12,7 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     internal class ProjectValidator : IRecordValidator<Project>
     {
         const string Entity = Project.Entity;
-        private static readonly NameFormatValidator _nameValidator = new(Entity, Fields.Name);
+        private static readonly NameFormatValidator _nameValidator = new(Entity, Fields.Name, true);
         private static readonly ProjectNumberValidator _numberValidator = new();
 
         public List<ValidationError> ValidateOnCreate(Project record)

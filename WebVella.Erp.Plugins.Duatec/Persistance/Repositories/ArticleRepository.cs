@@ -32,11 +32,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<Guid, Article?> FindMany(string select = "*", params Guid[] ids)
             => FindManyByUniqueArgs("id", select, ids);
 
-        public override bool Delete(Guid id)
+        public override Article? Delete(Guid id)
         {
             var alternatives = FindAlternativeIds(id);
-            var result = false;
+            if (alternatives.Count == 0)
+                return base.Delete(id);
 
+            Article? result = null;
             Transactional.TryExecute(() =>
             {
                 foreach (var alternative in alternatives)
@@ -46,12 +48,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return result;
         }
 
-        public Guid? Insert(DataPortalArticleDto article, Guid manufacturerId, Guid typeId)
+        public Article? Insert(DataPortalArticleDto article, Guid manufacturerId, Guid typeId)
         {
             var rec = new Article
             {
                 PartNumber = article.PartNumber,
                 TypeNumber = article.TypeNumber,
+                OrderNumber = article.OrderNumber,
                 EplanId = article.EplanId.ToString(),
                 Designation = article.Designation,
                 ManufacturerId = manufacturerId,

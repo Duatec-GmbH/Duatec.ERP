@@ -11,9 +11,9 @@ namespace WebVella.TypedRecords.Hooks.Base
     {
         protected abstract string ActionNameInPastTense { get; }
 
-        protected abstract List<ValidationError> Validate(TRecord record, Entity? entity);
+        protected abstract List<ValidationError> Validate(TRecord record, Entity entity);
 
-        protected IActionResult? Execute(TRecord record, Entity? entity, TModel pageModel, List<ValidationError> validationErrors)
+        protected IActionResult? Execute(TRecord record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)
         {
             var result = OnPreValidate(record, entity, pageModel);
             if (result != null)
@@ -23,24 +23,28 @@ namespace WebVella.TypedRecords.Hooks.Base
 
             if (validationErrors.Count > 0)
                 return OnValidationFailure(record, entity, pageModel, validationErrors);
-            return OnValidationSuccess(record, entity, pageModel, validationErrors);
+
+            return OnValidationSuccess(record, entity, pageModel);
         }
 
-        protected virtual IActionResult? OnPreValidate(TRecord record, Entity? entity, TModel pageModel)
+        protected virtual IActionResult? OnPreValidate(TRecord record, Entity entity, TModel pageModel)
             => null;
 
-        protected virtual IActionResult? OnValidationSuccess(TRecord record, Entity? entity, TModel pageModel, List<ValidationError> validationErrors)
+        protected virtual IActionResult? OnPostModification(TRecord record, Entity entity, TModel pageModel)
         {
-            var msg = SuccessMessage(record, entity, pageModel);
-
+            var msg = SuccessMessage(entity);
             pageModel.PutMessage(ScreenMessageType.Success, msg);
             return null;
         }
 
-        protected virtual string SuccessMessage(TRecord record, Entity? entity, TModel pageModel)
-            => entity == null ? "Success" : $"Successfully {ActionNameInPastTense} {entity.FancyName()}";
-
-        protected virtual IActionResult? OnValidationFailure(TRecord record, Entity? entity, TModel pageModel, List<ValidationError> validationErrors)
+        protected virtual IActionResult? OnValidationFailure(TRecord record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)
             => null;
+
+        protected virtual IActionResult? OnValidationSuccess(TRecord record, Entity entity, TModel pageModel)
+            => null;
+
+
+        protected string SuccessMessage(Entity entity)
+            => $"Successfully {ActionNameInPastTense} {entity.FancyName()}";
     }
 }

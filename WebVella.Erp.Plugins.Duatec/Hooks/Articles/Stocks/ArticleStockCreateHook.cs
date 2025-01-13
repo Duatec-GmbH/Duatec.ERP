@@ -29,13 +29,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             if (errors.Count > 0)
                 return null;
 
-            if(RepositoryService.InventoryRepository.Insert(rec) is not Guid id)
+            if(RepositoryService.InventoryRepository.Insert(rec) is not InventoryEntry entry)
             {
                 validationErrors.Add(new ValidationError(string.Empty, "Could not create inventory entry"));
                 return null;
             }
 
-            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(entry.Id!.Value));
         }
     }
 }

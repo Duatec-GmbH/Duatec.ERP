@@ -3,6 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
@@ -104,5 +105,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 SubQueries = subQuery,
             };
         }
+
+#pragma warning disable CA1822 // Mark members as static
+
+        public DeliveryNote? FindDeliveryNote(Guid id, string select = "*")
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Find(DeliveryNote.Entity, id, select));
+
+        public DeliveryNote? InsertDeliveryNote(DeliveryNote record)
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Insert(DeliveryNote.Entity, record));
+
+        public DeliveryNote? DeleteDeliveryNote(Guid id)
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Delete(DeliveryNote.Entity, id));
+
+#pragma warning restore CA1822 // Mark members as static
     }
 }

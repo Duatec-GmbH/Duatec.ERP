@@ -1,41 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Validators;
-using WebVella.Erp.Web.Hooks;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
 {
     [HookAttachment(key: HookKeys.GoodsReceiving.DeliveryNotes.Create)]
-    internal class DeliveryNotesCreateHook : IRecordCreatePageHook
+    internal class DeliveryNotesCreateHook : TypedValidatedCreateHook<DeliveryNote>
     {
         private const string listArg = "grId";
-        private static readonly DeliveryNoteValidator _validator = new();
 
-        public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnPostModification(DeliveryNote record, Entity entity, RecordCreatePageModel pageModel)
         {
             var listId = pageModel.Request.Query[listArg];
 
-            pageModel.PutMessage(Web.Models.ScreenMessageType.Success, "Successfully created goods receiving entry");
-
             var context = pageModel.ErpRequestContext;
             var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{listId}/detail";
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
 
             return pageModel.LocalRedirect(url);
         }
 
-        public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
+        protected override IActionResult? OnPreValidate(DeliveryNote record, Entity? entity, RecordCreatePageModel pageModel)
         {
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
-
-            var rec = TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(record)!;
-            validationErrors.AddRange(_validator.ValidateOnCreate(rec));
-
+            record.GoodsReceiving = listId;
             return null;
         }
     }

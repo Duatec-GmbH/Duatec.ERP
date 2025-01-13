@@ -15,12 +15,12 @@ namespace WebVella.TypedRecords.Hooks
         protected override string ActionNameInPastTense => "created";
 
         public IActionResult? OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
-            => null;
+            => OnPostModification(record, entity, pageModel);
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
             => Execute(record, entity, pageModel, validationErrors);
 
-        protected override List<ValidationError> Validate(EntityRecord record, Entity? entity)
+        protected override List<ValidationError> Validate(EntityRecord record, Entity entity)
             => ValidationService.ValidateOnCreate(record, entity!.Name);
     }
 }

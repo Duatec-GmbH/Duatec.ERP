@@ -41,7 +41,7 @@ namespace WebVella.TypedRecords.Common
             return response.Object?.Data ?? [];
         }
 
-        internal static Guid? Insert(string entity, EntityRecord rec)
+        internal static EntityRecord? Insert(string entity, EntityRecord rec)
         {
             var recMan = new RecordManager();
             var id = Guid.NewGuid();
@@ -50,14 +50,17 @@ namespace WebVella.TypedRecords.Common
             var result = recMan.CreateRecord(entity, rec);
 
             return result.Success
-                ? id : null;
+                ? result.Object.Data.Single() : null;
         }
 
-        internal static bool Delete(string entity, Guid id)
+        internal static EntityRecord? Delete(string entity, Guid id)
         {
             var recMan = new RecordManager();
 
-            return recMan.DeleteRecord(entity, id).Success;
+            var response = recMan.DeleteRecord(entity, id);
+
+            return response.Success
+                ? response.Object.Data.Single() : null;
         }
 
         internal static bool ExistsByQuery(string entity, QueryObject query)
@@ -111,10 +114,14 @@ namespace WebVella.TypedRecords.Common
             return result;
         }
 
-        internal static bool Update(string entity, EntityRecord record)
+        internal static EntityRecord? Update(string entity, EntityRecord record)
         {
             var recMan = new RecordManager();
-            return recMan.UpdateRecord(entity, record).Success;
+            var response = recMan.UpdateRecord(entity, record);
+
+            return response.Success
+                ? response.Object.Data.Single()
+                : null;
         }
     }
 }

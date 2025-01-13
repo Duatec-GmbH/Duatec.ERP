@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     {
         const string Entity = ArticleType.Entity;
         private static readonly NameUniqueValidator _labelValidator = new(Entity, Fields.Label);
-        private static readonly NameFormatValidator _unitValidator = new(Entity, Fields.Unit);
+        private static readonly NameFormatValidator _unitValidator = new(Entity, Fields.Unit, true);
 
         public List<ValidationError> ValidateOnCreate(ArticleType record)
         {

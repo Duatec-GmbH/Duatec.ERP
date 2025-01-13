@@ -18,7 +18,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public bool ExistsByProject(Guid projectId)
             => ExistsBy(InventoryEntry.Fields.Project, projectId);
 
-        public override Guid? Insert(InventoryEntry record)
+        public override InventoryEntry? Insert(InventoryEntry record)
         {
             RoundAmount(record);
             if (record.Amount <= 0)
@@ -28,18 +28,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             {
                 entry.Amount += record.Amount;
 
-                if (!Update(entry))
+                if (Update(entry) == null)
                     return null;
 
                 record.Amount = entry.Amount;
                 record.Id = entry.Id;
 
-                return record.Id;
+                return record;
             }
             return base.Insert(record);
         }
 
-        public Guid? MovePartial(InventoryEntry record)
+        public InventoryEntry? MovePartial(InventoryEntry record)
         {
             RoundAmount(record);
             var unmodified = Find(record.Id!.Value)!;
@@ -49,12 +49,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
             unmodified.Amount -= record.Amount;
 
-            if (Update(unmodified))
+            if (Update(unmodified) != null)
                 return Insert(record);
             return null;
         }
 
-        public override bool Update(InventoryEntry record)
+        public override InventoryEntry? Update(InventoryEntry record)
         {
             RoundAmount(record);
             if (record.Amount <= 0)
@@ -73,8 +73,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             {
                 entry.Amount += record.Amount;
 
-                if (!Delete(record.Id.Value))
-                    return false;
+                if (Delete(record.Id.Value) == null)
+                    return null;
 
                 record.Id = entry.Id;
                 record.Amount = entry.Amount;

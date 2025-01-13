@@ -67,7 +67,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         private static LocalRedirectResult? CompleteMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
-            if(RepositoryService.InventoryRepository.Update(record))
+            if(RepositoryService.InventoryRepository.Update(record) != null)
                 return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not update inventory entry"));
@@ -76,7 +76,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         private static LocalRedirectResult? PartialMove(InventoryEntry record, BaseErpPageModel pageModel, List<ValidationError> validationErrors)
         {
-            if(RepositoryService.InventoryRepository.MovePartial(record) is Guid id)
+            if(RepositoryService.InventoryRepository.MovePartial(record)?.Id is Guid id)
                 return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
 
             validationErrors.Add(new ValidationError(string.Empty, "Could not move inventory entry"));

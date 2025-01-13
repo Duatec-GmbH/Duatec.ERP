@@ -1,37 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Utilities;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
     [HookAttachment(key: HookKeys.GoodsReceiving.Entry.Delete)]
-    internal class GoodsReceivingEntryDeleteHook : IPageHook
+    internal class GoodsReceivingEntryDeleteHook : TypedValidatedDeleteHook<GoodsReceivingEntry>
     {
-        public IActionResult? OnGet(BaseErpPageModel pageModel)
+        protected override IActionResult? OnPostModification(GoodsReceivingEntry record, Entity entity, BaseErpPageModel pageModel)
         {
-            return null;
-        }
+            base.OnPostModification(record, entity, pageModel);
 
-        public IActionResult? OnPost(BaseErpPageModel pageModel)
-        {
-            if (!pageModel.RecordId.HasValue)
-                return null;
+            var context = pageModel.ErpRequestContext;
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{record.GoodsReceiving}/detail";
 
-            // TODO Replace Record manager with repo
-            var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(GoodsReceivingEntry.Entity, pageModel.RecordId.Value);
-
-            if (!response.Success)
-            {
-                pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
-                return null;
-            }
-
-            return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
+            return pageModel.LocalRedirect(url);
         }
     }
 }

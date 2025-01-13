@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
-using WebVella.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
 {
@@ -20,27 +18,23 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
         public IActionResult? OnPost(BaseErpPageModel pageModel)
         {
             if (!Guid.TryParse(pageModel.GetFormValue("id"), out Guid deliveryNoteId))
-                return null;
+                return pageModel.BadRequest();
 
-            // TODO replace record manager with repository
-            var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(DeliveryNote.Entity, deliveryNoteId);
+            var rec = RepositoryService.GoodsReceivingRepository.DeleteDeliveryNote(deliveryNoteId);
 
-            if (!response.Success)
+            if(rec == null)
+                pageModel.PutMessage(ScreenMessageType.Error, "Could not delete delivery note");
+            else
             {
-                pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
-                return null;
+                var name = $"{rec.File}";
+                if (name.Contains('/'))
+                    name = name[(name.LastIndexOf('/') + 1)..];
+
+                pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted delivery note '{name}'");
             }
 
-            var rec = TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(response.Object.Data[0])!;
-
-            var name = $"{rec.File}";
-            if (name.Contains('/'))
-                name = name[(name.LastIndexOf('/') + 1)..];
-
-            pageModel.PutMessage(ScreenMessageType.Success, $"Successfully deleted delivery note '{name}'");
-
-            return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
+            var url = Url.RemoveParameters(pageModel.CurrentUrl);
+            return pageModel.LocalRedirect(url);
         }
     }
 }

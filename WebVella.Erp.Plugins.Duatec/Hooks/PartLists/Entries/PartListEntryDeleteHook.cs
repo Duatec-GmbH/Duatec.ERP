@@ -1,39 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 {
     [HookAttachment(key: HookKeys.PartList.Entry.Delete)]
-    internal class PartListEntryDeleteHook : IPageHook
+    internal class PartListEntryDeleteHook : TypedValidatedDeleteHook<PartListEntry>
     {
-        public IActionResult? OnGet(BaseErpPageModel pageModel)
+        protected override IActionResult? OnPostModification(PartListEntry record, Entity entity, BaseErpPageModel pageModel)
         {
-            return null;
-        }
-
-        public IActionResult? OnPost(BaseErpPageModel pageModel)
-        {
-            if (!pageModel.RecordId.HasValue)
-                return null;
-
-            var recMan = new RecordManager();
-            var response = recMan.DeleteRecord(PartListEntry.Entity, pageModel.RecordId.Value);
-
-            if (!response.Success)
-            {
-                pageModel.PutMessage(ScreenMessageType.Error, response.GetMessage());
-                return null;
-            }
-
-            var partListId = response.Object.Data[0][PartListEntry.Fields.PartList];
-
             var context = pageModel.ErpRequestContext;
-            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{partListId}/detail";
 
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartList}/detail";
             return pageModel.LocalRedirect(url);
         }
     }

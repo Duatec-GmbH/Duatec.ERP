@@ -14,30 +14,32 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 
         protected abstract string EntryParentIdPath { get; }
 
-        protected TList? MapToTypedRecord(EntityRecord? record)
-            => TypedEntityRecordWrapper.WrapElseDefault<TList>(record);
-
         protected TEntry? MapEntryToTypedRecord(EntityRecord? record)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(record);
 
-        public override bool Delete(Guid id)
+        public override TList? Delete(Guid id)
         {
             var children = FindManyEntriesBy(EntryParentIdPath, id)
                 .ToIdArray();
 
             if(children.Length > 0)
             {
-                return Transactional.TryExecute(() =>
+                TList? result = null;
+                Transactional.TryExecute(() =>
                 {
                     var recMan = new RecordManager();
                     recMan.DeleteRecords(EntryEntity, children);
 
-                    base.Delete(id);
+                    result = base.Delete(id);
                 });
+                return result;
             }
 
             return base.Delete(id);
         }
+
+        public TEntry? Insert(TEntry record)
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(EntryEntity, record));
 
         public TEntry? FindEntry(Guid id, string select = "*")
             => MapEntryToTypedRecord(RepositoryHelper.Find(EntryEntity, id, select));
@@ -45,14 +47,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
         public bool EntryExists(Guid id)
             => RepositoryHelper.Exists(EntryEntity, "id", id);
 
-        public Guid? Insert(TEntry record)
-            => RepositoryHelper.Insert(EntryEntity, record);
+        public TEntry? UpdateEntry(TEntry record)
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Update(EntryEntity, record));
 
-        public bool UpdateEntry(TEntry record)
-            => RepositoryHelper.Update(EntryEntity, record);
-
-        public bool DeleteEntry(Guid id)
-            => RepositoryHelper.Delete(EntryEntity, id);
+        public TEntry? DeleteEntry(Guid id)
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Delete(EntryEntity, id));
 
         protected TEntry? FindEntryBy(string property, object? value, string select = "*")
             => MapEntryToTypedRecord(RepositoryHelper.FindBy(EntryEntity, property, value, select));

@@ -15,12 +15,12 @@ namespace WebVella.TypedRecords.Hooks
         protected override string ActionNameInPastTense => "updated";
 
         public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
-            => null;
+            => OnPostModification(record, entity, pageModel);
 
         public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
             => Execute(record, entity, pageModel, validationErrors);
 
         protected override List<ValidationError> Validate(EntityRecord record, Entity? entity)
-            => ValidationService.ValidateOnCreate(record, entity!.Name);
+            => ValidationService.ValidateOnUpdate(record, entity!.Name);
     }
 }

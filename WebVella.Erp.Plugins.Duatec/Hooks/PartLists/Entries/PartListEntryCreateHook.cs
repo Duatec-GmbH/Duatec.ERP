@@ -3,6 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Utilities;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.TypedRecords.Hooks;
 
@@ -17,8 +18,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
         {
             var listId = Guid.Parse(pageModel.Request.Query[listArg]!);
 
-            var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
+            pageModel.PutMessage(ScreenMessageType.Success,  SuccessMessage(entity));
 
+            var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
             return pageModel.LocalRedirect(url);
         }
 

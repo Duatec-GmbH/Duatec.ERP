@@ -52,7 +52,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
             void TransactionalAction()
             {
                 var manufacturer = RepositoryService.CompanyRepository.FindByShortName(article.Manufacturer.ShortName)?.Id
-                    ?? RepositoryService.CompanyRepository.Insert(article.Manufacturer)
+                    ?? RepositoryService.CompanyRepository.Insert(article.Manufacturer)?.Id
                     ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'.");
 
                 if (RepositoryService.ArticleRepository.Insert(article, manufacturer, typeId) == null)

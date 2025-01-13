@@ -13,13 +13,13 @@ namespace WebVella.TypedRecords.Hooks
     {
         protected override string ActionNameInPastTense => "updated";
 
-        protected override List<ValidationError> Validate(T record, Entity? entity)
+        protected override List<ValidationError> Validate(T record, Entity entity)
             => ValidationService.ValidateOnUpdate(record);
 
-        public virtual IActionResult? OnPostManageRecord(T record, Entity entity, RecordManagePageModel pageModel)
-            => null;
+        public IActionResult? OnPostManageRecord(T record, Entity entity, RecordManagePageModel pageModel)
+            => OnPostModification(record, entity, pageModel);
 
-        public virtual IActionResult? OnPreManageRecord(T record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
+        public IActionResult? OnPreManageRecord(T record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
             => Execute(record, entity, pageModel, validationErrors);
 
         IActionResult? IRecordManagePageHook.OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Utilities;
@@ -10,35 +11,55 @@ namespace WebVella.TypedRecords.Hooks.Base
         where TRecord : EntityRecord
         where TModel : BaseErpPageModel
     {
-        protected virtual TRecord GetRecord(BaseErpPageModel pageModel)
-            => pageModel.TryGetDataSourceProperty<TRecord>("Record");
+        protected abstract TRecord MapRecord(EntityRecord rec);
 
-        protected virtual Entity? GetEntity(BaseErpPageModel pageModel)
+        protected virtual Entity GetEntity(BaseErpPageModel pageModel)
             => pageModel.TryGetDataSourceProperty<Entity>("Entity");
 
         protected IActionResult? Execute(TModel pageModel)
         {
             var entity = GetEntity(pageModel);
-            var record = GetRecord(pageModel);
+            var record = MapRecord(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
+
+            if (!record.Properties.TryGetValue("id", out var objId))
+                record.Properties["id"] = pageModel.RecordId;
 
             var errors = new List<ValidationError>();
-            var result = Execute(record, entity!, pageModel, errors);
+            var result = Execute(record, entity, pageModel, errors);
             if (result != null)
                 return result;
 
-            if (errors.Count == 0)
-                return pageModel.LocalRedirect(pageModel.EntityListUrl());
+            string url;
 
-            var url = pageModel.EntityListUrl(Url.RemoveParameters(pageModel.CurrentUrl));
+            if (errors.Count == 0)
+            {
+                var recMan = new RecordManager();
+
+                var response = recMan.DeleteRecord(entity, pageModel.RecordId!.Value);
+                if (!response.Success || response.Object?.Data == null || response.Object.Data.Count != 1)
+                    return OnError(pageModel, entity, response);
+
+                record = MapRecord(response.Object.Data[0]);
+
+                result = OnPostModification(record, entity, pageModel);
+                if (result != null)
+                    return result;
+
+                url = pageModel.EntityListUrl();
+                return pageModel.LocalRedirect(url);
+            }
+
+            url = Url.RemoveParameters(pageModel.CurrentUrl);
             return pageModel.LocalRedirect(url);
         }
 
-        protected virtual void PutErrorMessage(TModel pageModel, Entity? entity)
+        protected virtual IActionResult? OnError(TModel pageModel, Entity entity, QueryResponse response)
         {
-            var msg = entity == null ? "Failure"
-                : $"Failed to delete '{entity.FancyName()}'";
-
+            var msg = $"Failed to delete '{entity.FancyName()}'";
             pageModel.PutMessage(ScreenMessageType.Error, msg);
+
+            var url = Url.RemoveParameters(pageModel.CurrentUrl);
+            return pageModel.LocalRedirect(url);
         }
     }
 }

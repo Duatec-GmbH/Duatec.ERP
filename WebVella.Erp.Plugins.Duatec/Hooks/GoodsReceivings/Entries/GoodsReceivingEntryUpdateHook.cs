@@ -1,36 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Snippets;
-using WebVella.Erp.Plugins.Duatec.Validators;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords;
+using WebVella.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
     [HookAttachment(key: HookKeys.GoodsReceiving.Entry.Update)]
-    internal class GoodsReceivingEntryUpdateHook : IRecordManagePageHook
+    internal class GoodsReceivingEntryUpdateHook : TypedValidatedUpdateHook<GoodsReceivingEntry>
     {
-        private static readonly GoodsReceivingEntryValidator _validator = new();
-
-        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnPostModification(GoodsReceivingEntry record, Entity entity, RecordManagePageModel pageModel)
         {
-            var url = $"{new ListUrlSnippet().Evaluate(pageModel)}";
+            base.OnPostModification(record, entity, pageModel);
+            var context = pageModel.ErpRequestContext;
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{record.GoodsReceiving}/detail";
+
             return pageModel.LocalRedirect(url);
         }
 
-        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
+        protected override IActionResult? OnPreValidate(GoodsReceivingEntry record, Entity? entity, RecordManagePageModel pageModel)
         {
-            var rec = TypedEntityRecordWrapper.WrapElseDefault<GoodsReceivingEntry>(record)!;
-
-            var oldRec = RepositoryService.GoodsReceivingRepository.FindEntry(rec.Id!.Value);
-            rec.GoodsReceiving = oldRec!.GoodsReceiving;
-
-            validationErrors.AddRange(_validator.ValidateOnUpdate(rec));
+            var oldRec = RepositoryService.GoodsReceivingRepository.FindEntry(record.Id!.Value);
+            record.GoodsReceiving = oldRec!.GoodsReceiving;
+            if (record.Article == Guid.Empty)
+                record.Article = oldRec.Article;
 
             return null;
         }

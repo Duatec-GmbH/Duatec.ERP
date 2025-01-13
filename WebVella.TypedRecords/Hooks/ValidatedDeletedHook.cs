@@ -14,13 +14,16 @@ namespace WebVella.TypedRecords.Hooks
     {
         protected override string ActionNameInPastTense => "deleted";
 
-        protected override List<ValidationError> Validate(EntityRecord record, Entity? entity)
-            => ValidationService.ValidateOnCreate(record, entity!.Name);
+        protected override EntityRecord MapRecord(EntityRecord rec)
+            => rec;
 
-        public virtual IActionResult? OnGet(BaseErpPageModel pageModel)
+        protected override List<ValidationError> Validate(EntityRecord record, Entity entity)
+            => ValidationService.ValidateOnDelete(record, entity.Name);
+
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
             => null;
 
-        public virtual IActionResult? OnPost(BaseErpPageModel pageModel)
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
             => Execute(pageModel);
     }
 }

@@ -13,9 +13,9 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     {
         const string Entity = Article.Entity;
         private static readonly PartNumberUniqueValidator _partNumberValidator = new();
-        private static readonly NameFormatValidator _typeNumberValidator = new(Entity, Fields.TypeNumber);
-        private static readonly NameFormatValidator _orderNumberValidator = new(Entity, Fields.OrderNumber);
-        private static readonly NameFormatValidator _designationValidator = new(Entity, Fields.Designation);
+        private static readonly NameFormatValidator _typeNumberValidator = new(Entity, Fields.TypeNumber, true);
+        private static readonly NameFormatValidator _orderNumberValidator = new(Entity, Fields.OrderNumber, true);
+        private static readonly NameFormatValidator _designationValidator = new(Entity, Fields.Designation, true);
 
         public List<ValidationError> ValidateOnCreate(Article record)
         {
