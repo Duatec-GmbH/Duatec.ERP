@@ -115,6 +115,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Components\PcEditableGrid\" />
 		<Folder Include="TagHelpers\js-test\" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
@@ -172,18 +173,6 @@
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
 		<Content Update="Pages\RecordManage.cshtml">
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Update="Pages\RecordRelatedRecordCreate.cshtml">
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Update="Pages\RecordRelatedRecordDetails.cshtml">
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Update="Pages\RecordRelatedRecordManage.cshtml">
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Update="Pages\RecordRelatedRecordsList.cshtml">
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
 		<Content Update="Pages\Site.cshtml">
