@@ -3763,12 +3763,9 @@ border-bottom-style:dashed;
 	}
 
 
-.erp-list .form-group.erp-field {
-	margin-bottom: 0;
-}
+	td > div.form-group {
+		margin-bottom: 0px!important;
 
-	.erp-list .form-group.erp-field .control-label {
-		margin-bottom: 0;
 	}
 
 /*#endregion*/

@@ -1,6 +1,7 @@
 ﻿@addTagHelper *, WebVella.Erp.Plugins.Core
 @addTagHelper *, WebVella.Erp.Web
 @addTagHelper *, WebVella.TagHelpers
+@using WebVella.Erp.Web.TagHelpers
 @using WebVella.Erp.Web.Utils;
 @using WebVella.Erp.Web.Components;
 @using WebVella.Erp.Web.Models;
@@ -37,12 +38,13 @@
     <wv-div class="@divClass" id="@options.Id">
         <wv-button icon-class="fa fa-plus go-green"
                    text="Add Entry"
-                   class="float-right btn-sm"
-                   id="_grid_add_entry_button">
+                   class="float-right btn-sm mb-2"
+                   id="_editable_grid_add_entry_button"
+                   style="width:150px;">
         </wv-button>
 
-        <wv-table class="@tableClass" id="_editable_grid">
-            @if (options.HasThead && options.VisibleColumns > 0)
+        <wv-table class="@tableClass" id="@options.Id">
+            @if (options.HasThead)
             {
                 <wv-thead>
                     @foreach (var column in columns)
@@ -54,23 +56,15 @@
                             @column.Label
                         </wv-th>
                     }
+                    <wv-th style="width:150px;"></wv-th>
                 </wv-thead>
             }
-            <wv-tbody>
+            <wv-tbody id="_editable_grid_body">
             @{
                 await CreateRow(new EntityRecord(), true);
 
-                @if(records.Count == 0)
-                {
-                    <wv-tr>
-                        <td colspan="@options.VisibleColumns"><div class="alert alert-info m-0">@Html.Raw(options.EmptyText)</div></td>
-                    </wv-tr>
-                }
-                else
-                {
-                    foreach (var rec in records)
-                        await CreateRow(rec, false);
-                }
+                foreach (var rec in records)
+                    await CreateRow(rec, false);
 
                 async Task CreateRow(EntityRecord record, bool isDummy)
                 {
@@ -107,6 +101,20 @@
                                         }
                                     }
                                 }
+                            </wv-td>
+                        }
+
+                        @{
+                            var style = $"{WvVerticalAlignmentType.Middle.ToStyle()};"
+                                + $"{WvHorizontalAlignmentType.Right.ToStyle()};"
+                                + "width:150px;";
+
+                            <wv-td class="pl-0 pr-0" style="@style">
+                                <button class="wv-button btn btn-sm btn-red text-nowrap w-100 ml-0 mr-0 editable-grid-delete-button"
+                                    style="width:150px;">
+                                    <i class="far fa-trash-alt icon"></i>
+                                    Delete
+                                </button>
                             </wv-td>
                         }
                     </wv-tr>
