@@ -1,0 +1,126 @@
+﻿@addTagHelper *, WebVella.Erp.Plugins.Core
+@addTagHelper *, WebVella.Erp.Web
+@addTagHelper *, WebVella.TagHelpers
+@using WebVella.Erp.Web.Utils;
+@using WebVella.Erp.Web.Components;
+@using WebVella.Erp.Web.Models;
+@using WebVella.Erp.Web;
+@using WebVella.Erp.Api.Models;
+@using WebVella.TagHelpers.Models;
+@{
+    var options = (PcEditableGrid.PcEditableGridOptions)ViewBag.Options;
+    var node = (PageBodyNode)ViewBag.Node;
+    var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
+    var componentContext = (PageComponentContext)ViewBag.ComponentContext;
+    var records = (List<EntityRecord>)ViewBag.Records;
+    var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
+    var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
+
+    var tableClass = "table";
+    var divClass = "erp-list table-responsive-md";
+
+    if (options.Striped)
+        tableClass += " table-striped";
+
+    if(options.Bordered)
+        tableClass += " table-bordered";
+
+    if (options.Borderless)
+        tableClass += " table-borderless";
+
+    if(!string.IsNullOrWhiteSpace(options.Class))
+        divClass += $" {options.Class}";
+}
+
+@if ((bool)ViewBag.IsVisible)
+{
+    <wv-div class="@divClass" id="@options.Id">
+        <wv-button icon-class="fa fa-plus go-green"
+                   text="Add Entry"
+                   class="float-right btn-sm"
+                   id="_grid_add_entry_button">
+        </wv-button>
+
+        <wv-table class="@tableClass" id="_editable_grid">
+            @if (options.HasThead && options.VisibleColumns > 0)
+            {
+                <wv-thead>
+                    @foreach (var column in columns)
+                    {
+                        var style = string.IsNullOrWhiteSpace(column.Width)
+                            ? null : $"width:{column.Width};";
+
+                        <wv-th class="@column.Class" style="@style">
+                            @column.Label
+                        </wv-th>
+                    }
+                </wv-thead>
+            }
+            <wv-tbody>
+            @{
+                await CreateRow(new EntityRecord(), true);
+
+                @if(records.Count == 0)
+                {
+                    <wv-tr>
+                        <td colspan="@options.VisibleColumns"><div class="alert alert-info m-0">@Html.Raw(options.EmptyText)</div></td>
+                    </wv-tr>
+                }
+                else
+                {
+                    foreach (var rec in records)
+                        await CreateRow(rec, false);
+                }
+
+                async Task CreateRow(EntityRecord record, bool isDummy)
+                {
+                    var rowClass = isDummy ? "d-none" : string.Empty;
+                    
+                    <wv-tr class="@rowClass">
+                        @for (var i = 1; i <= options.VisibleColumns; i++)
+                        {
+                            var optType = options.GetType();
+                            var containerId = optType.GetProperty($"Container{i}Id").GetValue(options, null)?.ToString() ?? string.Empty;
+                            var columnNoWrap = (bool)(optType.GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
+                            var columnClass = optType.GetProperty($"Container{i}Class").GetValue(options, null)?.ToString() ?? string.Empty;
+                            var verticalAlign = (WvVerticalAlignmentType)(optType.GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
+                            var horizontalAlign = (WvHorizontalAlignmentType)(optType.GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
+                            var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
+                            var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
+
+                            <wv-td width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" width="@columnWidth" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
+                                @{
+                                    foreach (var childNode in columnChildNodes)
+                                    {
+                                        var nodeComponentName = "";
+                                        if (childNode != null)
+                                        {
+                                            var nameArray = childNode.ComponentName.Split('.');
+                                            nodeComponentName = nameArray[nameArray.Length - 1];
+                                        }
+                                        if (!String.IsNullOrWhiteSpace(nodeComponentName))
+                                        {
+                                            var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
+                                            var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
+                                            pcContext.DataModel.SetRowRecord(record);
+                                            @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
+                                        }
+                                    }
+                                }
+                            </wv-td>
+                        }
+                    </wv-tr>
+                    }
+                }
+            </wv-tbody>
+        </wv-table>
+
+        @if (!string.IsNullOrWhiteSpace(meta.ServiceJsUrl))
+        {
+            <script src=@meta.ServiceJsUrl></script>
+        }
+
+    </wv-div>
+
+
+}

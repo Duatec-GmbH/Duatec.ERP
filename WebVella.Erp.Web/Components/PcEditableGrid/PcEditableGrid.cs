@@ -11,31 +11,24 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Services;
 using WebVella.TagHelpers.Models;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace WebVella.Erp.Web.Components
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
-	[PageComponent(Label = "Grid", Library = "WebVella", Description = "Displays data list in a table format", Version = "0.0.1", IconClass = "fas fa-table")]
-	public class PcGrid : PageComponent
+	[PageComponent(Label = "Editable Grid", Library = "WebVella", Description = "Displays data list in a table format which is editable", Version = "0.0.1", IconClass = "fas fa-table")]
+	public class PcEditableGrid : PageComponent
 	{
 		protected ErpRequestContext ErpRequestContext { get; set; }
 
-		public PcGrid([FromServices]ErpRequestContext coreReqCtx)
+		public PcEditableGrid([FromServices] ErpRequestContext coreReqCtx)
 		{
 			ErpRequestContext = coreReqCtx;
 		}
 
-		public class PcGridOptions
+		public class PcEditableGridOptions
 		{
 			[JsonProperty(PropertyName = "is_visible")]
 			public string IsVisible { get; set; } = "";
-
-			//[JsonProperty(PropertyName = "pager")]
-			//public string Pager { get; set; } = "1";
-
-			//[JsonProperty(PropertyName = "total_count")]
-			//public string TotalCount { get; set; } = "0";
-
-			[JsonProperty(PropertyName = "page_size")]
-			public int? PageSize { get; set; } = 10;
 
 			[JsonProperty(PropertyName = "records")]
 			public string Records { get; set; } = "";
@@ -43,70 +36,35 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "striped")]
 			public bool Striped { get; set; } = false;
 
-			[JsonProperty(PropertyName = "small")]
-			public bool Small { get; set; } = false;
-
 			[JsonProperty(PropertyName = "bordered")]
 			public bool Bordered { get; set; } = false;
 
 			[JsonProperty(PropertyName = "borderless")]
 			public bool Borderless { get; set; } = false;
 
-			[JsonProperty(PropertyName = "hover")]
-			public bool Hover { get; set; } = false;
-
-			[JsonProperty(PropertyName = "reveals_details_on_click")]
-			public bool RevealsDetailsOnClick { get; set; } = false;
-
-			[JsonProperty(PropertyName = "detail_path")]
-			public string DetailPath { get; set; } = "";
-
-			[JsonProperty(PropertyName = "responsive_breakpoint")]
-			public WvCssBreakpoint ResponsiveBreakpoint { get; set; } = WvCssBreakpoint.None;
-
 			[JsonProperty(PropertyName = "id")]
-			public Guid? Id { get; set; } = null;// can be inherited
-
-			[JsonProperty(PropertyName = "prefix")]
-			public string Prefix { get; set; } = "";// can be inherited
+			public Guid? Id { get; set; } = null;
 
 			[JsonProperty(PropertyName = "name")]
-			public string Name { get; set; } = "";// can be inherited
+			public string Name { get; set; } = "";
 
 			[JsonProperty(PropertyName = "culture")]
-			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");// can be inherited
+			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");
 
 			[JsonProperty(PropertyName = "class")]
 			public string Class { get; set; } = "";
 
-			[JsonProperty(PropertyName = "query_string_sortby")]
-			public string QueryStringSortBy { get; set; } = "sortBy";
-
-			[JsonProperty(PropertyName = "query_string_sort_order")]
-			public string QueryStringSortOrder { get; set; } = "sortOrder";
-
-			[JsonProperty(PropertyName = "query_string_page")]
-			public string QueryStringPage { get; set; } = "page";
-			
-			[JsonProperty(PropertyName = "query_string_page_size")]
-			public string QueryStringPageSize { get; set; } = "pageSize";
-			
 			[JsonProperty(PropertyName = "visible_columns")]
 			public int VisibleColumns { get; set; } = 2;
 
 			[JsonProperty(PropertyName = "has_thead")]
 			public bool HasThead { get; set; } = true;
 
-			[JsonProperty(PropertyName = "has_tfoot")]
-			public bool HasTfoot { get; set; } = true;
-
-			[JsonProperty(PropertyName = "no_total")]
-			public bool NoTotal { get; set; } = false;
-
 			[JsonProperty(PropertyName = "empty_text")]
 			public string EmptyText { get; set; } = "No records";
 
 			#region << container1 >>
+
 			[JsonProperty(PropertyName = "container1_id")]
 			public string Container1Id { get; set; } = "column1";
 
@@ -490,16 +448,16 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "container12_horizontal_align")]
 			public WvHorizontalAlignmentType Container12HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
 			#endregion
-
 		}
 
 
 		public async Task<IViewComponentResult> InvokeAsync(PageComponentContext context)
 		{
-			ErpPage currentPage = null;
+			ErpPage currentPage;
 
 			try
 			{
+
 				#region << Init >>
 				if (context.Node == null)
 				{
@@ -511,24 +469,23 @@ namespace WebVella.Erp.Web.Components
 				{
 					return await Task.FromResult<IViewComponentResult>(Content("Error: PageModel cannot be null"));
 				}
-				else if (pageFromModel is ErpPage)
+				else if (pageFromModel is ErpPage page)
 				{
-					currentPage = (ErpPage)pageFromModel;
+					currentPage = page;
 				}
 				else
 				{
 					return await Task.FromResult<IViewComponentResult>(Content("Error: PageModel does not have Page property or it is not from ErpPage Type"));
 				}
 
-				var options = new PcGridOptions();
+				var options = new PcEditableGridOptions();
 				if (context.Options != null)
 				{
-					options = JsonConvert.DeserializeObject<PcGridOptions>(context.Options.ToString());
+					options = JsonConvert.DeserializeObject<PcEditableGridOptions>(context.Options.ToString());
 				}
 
 				var componentMeta = new PageComponentLibraryService().GetComponentMeta(context.Node.ComponentName);
 				#endregion
-
 
 				ViewBag.Options = options;
 				ViewBag.Node = context.Node;
@@ -537,74 +494,46 @@ namespace WebVella.Erp.Web.Components
 				ViewBag.AppContext = ErpAppContext.Current;
 				ViewBag.ComponentContext = context;
 
-
-				ViewBag.CssBreakpointOptions = WebVella.TagHelpers.Utilities.ModelExtensions.GetEnumAsSelectOptions<WvCssBreakpoint>();
 				ViewBag.Page = 1;
 				ViewBag.TotalCount = 0;
-
-				if(options.PageSize != null)
-				{
-					ViewBag.PageSize = options.PageSize;
-				}
-				else
-				{
-					ViewBag.PageSize = 0;
-				}
-				
+				ViewBag.PageSize = 0;
 
 				if (context.Mode != ComponentMode.Options && context.Mode != ComponentMode.Help)
 				{
 					var isVisible = true;
 					var isVisibleDS = context.DataModel.GetPropertyValueByDataSource(options.IsVisible);
-					if (isVisibleDS is string && !String.IsNullOrWhiteSpace(isVisibleDS.ToString()))
+					if (isVisibleDS is string s && !string.IsNullOrWhiteSpace(s))
 					{
-						if (Boolean.TryParse(isVisibleDS.ToString(), out bool outBool))
-						{
+						if (bool.TryParse(isVisibleDS.ToString(), out bool outBool))
 							isVisible = outBool;
-						}
 					}
-					else if (isVisibleDS is Boolean)
+					else if (isVisibleDS is bool b)
 					{
-						isVisible = (bool)isVisibleDS;
+						isVisible = b;
 					}
-					ViewBag.IsVisible = isVisible;
 
-					ViewBag.Records = context.DataModel.GetPropertyValueByDataSource(options.Records) as EntityRecordList ?? new EntityRecordList();
+					ViewBag.IsVisible = isVisible;
+					ViewBag.Records = context.DataModel.GetPropertyValueByDataSource(options.Records)
+						as EntityRecordList ?? [];
 
 					if (ViewBag.Records.Count > 0)
 					{
 						ViewBag.TotalCount = ((EntityRecordList)ViewBag.Records).TotalCount;
 					}
 					//Could be a simple List<EntityRecord> (if from relation)
-					if(ViewBag.Records.Count == 0){
-						ViewBag.Records = context.DataModel.GetPropertyValueByDataSource(options.Records) as List<EntityRecord> ?? new List<EntityRecord>();
-					}
-
-					string pageKey = options.Prefix + options.QueryStringPage;
-					if (HttpContext.Request.Query.ContainsKey(pageKey))
+					if (ViewBag.Records.Count == 0)
 					{
-						var queryValue = HttpContext.Request.Query[pageKey].ToString();
-						if (Int16.TryParse(queryValue, out Int16 outInt))
-						{
-							ViewBag.Page = outInt;
-						}
-					}
-
-					string pagesizeKey = options.Prefix + options.QueryStringPageSize;
-					if (HttpContext.Request.Query.ContainsKey(pagesizeKey))
-					{
-						var queryValue = HttpContext.Request.Query[pagesizeKey].ToString();
-						if (Int16.TryParse(queryValue, out Int16 outInt))
-						{
-							ViewBag.PageSize = outInt;
-						}
+						ViewBag.Records = context.DataModel.GetPropertyValueByDataSource(options.Records)
+							as List<EntityRecord> ?? [];
 					}
 				}
-				else {
+				else
+				{
 					ViewBag.VerticalAlignmentOptions = WebVella.TagHelpers.Utilities.ModelExtensions.GetEnumAsSelectOptions<WvVerticalAlignmentType>();
 					ViewBag.HorizontalAlignmentOptions = WebVella.TagHelpers.Utilities.ModelExtensions.GetEnumAsSelectOptions<WvHorizontalAlignmentType>();
 				}
 				var columns = new List<WvGridColumnMeta>();
+
 
 				#region << Init Columns >>
 				if (options.VisibleColumns > 0)
@@ -772,7 +701,6 @@ namespace WebVella.Erp.Web.Components
 						};
 						return await Task.FromResult<IViewComponentResult>(View("Error"));
 				}
-
 			}
 			catch (EqlException ex)
 			{

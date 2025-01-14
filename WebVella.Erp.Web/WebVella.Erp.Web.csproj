@@ -38,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Remove="Components\PcEditableGrid\service.js" />
 		<None Remove="Components\PcFieldIcon\service.js" />
 		<None Remove="Components\PcFieldMultiFileUpload\service.js" />
 		<None Remove="Components\PcFieldDataCsv\service.js" />
@@ -52,6 +53,7 @@
 		<EmbeddedResource Include="Components\Nav\script.js" />
 		<EmbeddedResource Include="Components\PcBtnToolbar\service.js" />
 		<EmbeddedResource Include="Components\PcBtnGroup\service.js" />
+		<EmbeddedResource Include="Components\PcEditableGrid\service.js" />
 		<EmbeddedResource Include="Components\PcFieldIcon\service.js" />
 		<EmbeddedResource Include="Components\PcFieldMultiFileUpload\service.js" />
 		<EmbeddedResource Include="Components\PcFieldHidden\service.js" />
@@ -115,7 +117,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Components\PcEditableGrid\" />
 		<Folder Include="TagHelpers\js-test\" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>

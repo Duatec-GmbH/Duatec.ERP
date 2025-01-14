@@ -34,6 +34,11 @@ namespace WebVella.Erp.Web.Services
 
 					string name = $"{type.Namespace}.{type.Name}";
 
+					if(type.Name == "PcEditableGrid")
+					{
+
+					}
+
 					bool serviceJsExist = FileService.EmbeddedResourceExists("service.js", name, assembly);
 					//bool designHtmlExist = FileService.EmbeddedResourceExists("design.html", name, assembly);
 					//bool optionsHtmlExist = FileService.EmbeddedResourceExists("options.html", name, assembly);
