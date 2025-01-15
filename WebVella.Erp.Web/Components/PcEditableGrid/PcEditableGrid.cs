@@ -60,6 +60,9 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "culture")]
 			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");// can be inherited
 
+			[JsonProperty(PropertyName = "has-add-button")]
+			public bool HasAddButton { get; set; } = true;
+
 
 			#region << container1 >>
 

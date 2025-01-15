@@ -12,11 +12,14 @@
 	var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
 }
 <div class="p-1">
-    <wv-button icon-class="fa fa-plus go-green" 
-        text="Add Entry" 
-        class="float-right btn-sm"
-        id="_grid_add_entry_button">
-    </wv-button>
+    @if (options.HasAddButton)
+    {
+        <wv-button icon-class="fa fa-plus go-green"
+                   text="Add Entry"
+                   class="float-right btn-sm">
+        </wv-button>
+    }
+
 	<wv-grid striped="@options.Striped" bordered="@options.Bordered" borderless="@options.Borderless" id="@options.Id"
 		name="@options.Name" culture="@options.Culture" class="@options.Class" columns="columns" has-thead="@options.HasThead">
 		<wv-grid-row>

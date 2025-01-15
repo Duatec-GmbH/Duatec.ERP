@@ -42,12 +42,17 @@
 @if ((bool)ViewBag.IsVisible)
 {
     <wv-div class="@divClass" id="@options.Id">
-        <wv-button icon-class="fa fa-plus go-green"
-                   text="Add Entry"
-                   class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
-                   style="width:@actionButtonWidth;">
-        </wv-button>
 
+        @if (options.HasAddButton)
+        {
+            var style = $"width:${actionButtonWidth};";
+
+            <wv-button icon-class="fa fa-plus go-green"
+                       text="Add Entry"
+                       class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
+                       style=@style>
+            </wv-button>            
+        }
         <wv-table class="@tableClass" id="@options.Id">
             @if (options.HasThead)
             {
