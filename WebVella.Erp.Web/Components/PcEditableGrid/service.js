@@ -3,49 +3,65 @@
 /// Your code goes below
 ///////////////////////////////////////////////////////////////////////////////////
 {
+	// TODO: find a way to load all scripts at once after page is load + ugglify scripts
+
 	const deleteBtns = document.getElementsByClassName('editable-grid-delete-button');
 
-	for (let btn of deleteBtns) {
-		addDeleteEvent(btn);
+	for (let deleteBtn of deleteBtns) {
+		addDeleteCallback(deleteBtn);
 	}
 
 	const addBtns = document.getElementsByClassName('editable-grid-add-entry-button');
 
 	for (const addBtn of addBtns) {
-
-		addBtn.addEventListener('click', () => {
-
-			// dummy node which is not visible
-			const body = addBtn.parentElement.getElementsByTagName('TBODY')[0];
-			const node = body.children[0].cloneNode(true);
-
-			body.appendChild(node);
-			node.classList.remove("d-none");
-
-			const fields = node.getElementsByClassName('wv-field');
-
-			for (const field of fields) {
-				replaceIds(field);
-			}
-
-			const btns = node.getElementsByClassName('editable-grid-delete-button');
-
-			for (let btn of btns) {
-				addDeleteEvent(btn);
-			}
-		});
+		addAddCallback(addBtn);
 	}
 
-	function addDeleteEvent(btn) {
+	function addAddCallback(btn) {
 
-		btn.addEventListener('click', () => {
+		// TODO remove this after refactoring page scripts
+		if (btn.getAttribute('listener') !== 'true') {
 
-			console.log('delete click');
-			const row = getParentTableRow(btn);
-			if (row) {
-				row.parentElement.removeChild(row);
-			}
-		});
+			// TODO remove this after refactoring page scripts
+			btn.setAttribute('listener', 'true');
+
+			btn.addEventListener('click', () => {
+
+				// dummy node which is not visible
+				const body = btn.parentElement.getElementsByTagName('TBODY')[0];
+				const node = body.children[0].cloneNode(true);
+
+				body.appendChild(node);
+				node.classList.remove("d-none");
+
+				const fields = node.getElementsByClassName('wv-field');
+
+				for (const field of fields) {
+					replaceIds(field);
+				}
+
+				const delBtns = node.getElementsByClassName('editable-grid-delete-button');
+
+				for (let delBtn of delBtns) {
+					addDeleteCallback(delBtn);
+				}
+			});
+		}
+	}
+
+	function addDeleteCallback(btn) {
+
+		// TODO remove this after refactoring page scripts
+		if (btn.getAttribute('listener') !== 'true' && !btn.classList.contains('d-none')) {
+
+			btn.addEventListener('click', () => {
+
+				const row = getParentTableRow(btn);
+				if (row) {
+					row.parentElement.removeChild(row);
+				}
+			});
+		}
 	}
 
 	function getParentTableRow(btn) {

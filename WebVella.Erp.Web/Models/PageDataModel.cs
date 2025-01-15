@@ -1099,7 +1099,7 @@ namespace WebVella.Erp.Web.Models
 			protected abstract object Execute(object[] parameters);
 		}
 
-		private class ExistsFunction : QueryFunction
+		private sealed class ExistsFunction : QueryFunction
 		{
 			public ExistsFunction(PageDataModel dataModel)
 				: base(dataModel)
