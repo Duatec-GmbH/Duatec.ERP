@@ -1,9 +1,31 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Util
+﻿using System.Text;
+
+namespace WebVella.Erp.Plugins.Duatec.Util
 {
     internal static class Text
     {
-        public static string FancyfySnakeCaseStartWithUpper(string entityName)
-            => char.ToUpper(entityName[0]) + Utilities.Text.FancyfySnakeCase(entityName[1..]);
+        public static string FancyfySnakeCase(string entityName)
+            => entityName.ToLower().Replace('_', ' ');
+
+        public static string FancyfyPascalCase(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            if (text.Length == 1)
+                return text;
+
+            var sb = new StringBuilder(text.Length * 2);
+
+            sb.Append(text[0]);
+            foreach (var c in text.Skip(1))
+            {
+                if (char.IsUpper(c))
+                    sb.Append($" {c}");
+                else sb.Append(c);
+            }
+            return sb.ToString();
+        }
 
         public static string InvalidCharacters(string value, Predicate<char> charIsAllowed)
         {

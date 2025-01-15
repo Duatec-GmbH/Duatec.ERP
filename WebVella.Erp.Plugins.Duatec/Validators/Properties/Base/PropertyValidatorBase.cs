@@ -16,8 +16,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
         {
             _entity = entity;
             _entityProperty = entityProperty;
-            _entityPretty = Util.Text.FancyfySnakeCaseStartWithUpper(entity);
-            _entityPropertyPretty = Utilities.Text.FancyfySnakeCase(entityProperty);
+            _entityPretty = Text.FancyfySnakeCase(entity).FirstToUpper();
+            _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
             _required = required;
         }
 

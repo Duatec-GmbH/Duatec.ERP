@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Exceptions;
-using WebVella.Erp.Utilities;
+using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
@@ -21,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
             _mustBePositive = mustBePositive;
             _zeroAllowed = zeroAllowed;
 
-            _entityPretty = Util.Text.FancyfySnakeCaseStartWithUpper(entity);
+            _entityPretty = Text.FancyfySnakeCase(entity).FirstToUpper();
             _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
         }
 

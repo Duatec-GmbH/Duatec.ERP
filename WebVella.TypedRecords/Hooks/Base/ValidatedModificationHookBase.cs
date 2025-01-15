@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Web.Models;
+using WebVella.TypedRecords.Util;
 
 namespace WebVella.TypedRecords.Hooks.Base
 {

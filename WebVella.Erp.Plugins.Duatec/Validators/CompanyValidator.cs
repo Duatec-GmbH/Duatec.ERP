@@ -1,10 +1,10 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Utilities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.TypedRecords.Validation;
 using WebVella.TypedRecords.Attributes;
+using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {

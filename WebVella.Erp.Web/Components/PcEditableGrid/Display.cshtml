@@ -9,6 +9,12 @@
 @using WebVella.Erp.Api.Models;
 @using WebVella.TagHelpers.Models;
 @{
+    const int btnWidth = 130;
+    const string unit = "px";
+
+    var actionButtonWidth = $"{btnWidth}{unit}";
+    var actionColumnWidth = $"{btnWidth + 16}{unit}";
+
     var options = (PcEditableGrid.PcEditableGridOptions)ViewBag.Options;
     var node = (PageBodyNode)ViewBag.Node;
     var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
@@ -38,9 +44,8 @@
     <wv-div class="@divClass" id="@options.Id">
         <wv-button icon-class="fa fa-plus go-green"
                    text="Add Entry"
-                   class="float-right btn-sm mb-2"
-                   id="_editable_grid_add_entry_button"
-                   style="width:150px;">
+                   class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
+                   style="width:@actionButtonWidth;">
         </wv-button>
 
         <wv-table class="@tableClass" id="@options.Id">
@@ -56,10 +61,10 @@
                             @column.Label
                         </wv-th>
                     }
-                    <wv-th style="width:150px;"></wv-th>
+                    <wv-th style="width:@actionColumnWidth;"></wv-th>
                 </wv-thead>
             }
-            <wv-tbody id="_editable_grid_body">
+            <wv-tbody>
             @{
                 await CreateRow(new EntityRecord(), true);
 
@@ -107,11 +112,10 @@
                         @{
                             var style = $"{WvVerticalAlignmentType.Middle.ToStyle()};"
                                 + $"{WvHorizontalAlignmentType.Right.ToStyle()};"
-                                + "width:150px;";
+                                + $"width:{actionColumnWidth};";
 
-                            <wv-td class="pl-0 pr-0" style="@style">
-                                <button class="wv-button btn btn-sm btn-red text-nowrap w-100 ml-0 mr-0 editable-grid-delete-button"
-                                    style="width:150px;">
+                            <wv-td style="@style">
+                                <button class="wv-button btn btn-sm btn-red text-nowrap w-100 editable-grid-delete-button">
                                     <i class="far fa-trash-alt icon"></i>
                                     Delete
                                 </button>

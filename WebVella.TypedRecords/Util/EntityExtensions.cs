@@ -1,16 +1,16 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
+using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.Utilities
+namespace WebVella.TypedRecords.Util
 {
-    public static class Text
+    public static class EntityExtensions
     {
-        public static string FancyfySnakeCase(string entityName) 
-            => entityName.ToLower().Replace('_', ' ');
+        public static string FancyName(this Entity entity)
+            => FancyfyPascalCase(entity.Name);
 
-        public static string FancyfyPascalCase(string text)
+        private static string FancyfyPascalCase(string text)
         {
-            if(string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
             if (text.Length == 1)
@@ -19,7 +19,7 @@ namespace WebVella.Erp.Utilities
             var sb = new StringBuilder(text.Length * 2);
 
             sb.Append(text[0]);
-            foreach(var c in text.Skip(1))
+            foreach (var c in text.Skip(1))
             {
                 if (char.IsUpper(c))
                     sb.Append($" {c}");

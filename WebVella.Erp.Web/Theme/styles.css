@@ -926,11 +926,6 @@ a {
 
 /*#region << Button Colors >>*/
 
-.btn {
-	box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
-	border-width: 0;
-}
-
 .input-group-prepend .btn, .input-group-append .btn {
 	box-shadow: none;
 	border: 1px solid #ccc;
@@ -3058,7 +3053,7 @@ body.sidebar-lg #sidebar .nav-item .dropdown-item {
 	.app-card .app-meta .label {
 		font-weight: bold;
 		margin-bottom: 0;
-		font-size: 14px;
+		font-size: 12px;
 	}
 
 	.app-card .app-meta .description {
@@ -5109,6 +5104,9 @@ wv-pb-manager .wv-pb-node > div > .row {
 			color: #F44336;
 		}
 
+input{
+	font-size: 12px;
+}
 /*#endregion*/
 
 
@@ -5119,6 +5117,11 @@ wv-pb-manager .wv-pb-node > div > .row {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+.btn {
+	position: relative;
+	top: -1px;
 }
 
 /*#endregion*/

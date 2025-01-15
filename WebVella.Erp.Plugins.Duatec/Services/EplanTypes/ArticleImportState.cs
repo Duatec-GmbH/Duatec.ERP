@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Utilities;
+﻿using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
 {

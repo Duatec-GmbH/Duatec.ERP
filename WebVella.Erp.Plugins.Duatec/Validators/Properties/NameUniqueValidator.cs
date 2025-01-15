@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Eql;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties

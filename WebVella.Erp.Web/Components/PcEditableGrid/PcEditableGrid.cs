@@ -48,9 +48,6 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "name")]
 			public string Name { get; set; } = "";
 
-			[JsonProperty(PropertyName = "culture")]
-			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");
-
 			[JsonProperty(PropertyName = "class")]
 			public string Class { get; set; } = "";
 
@@ -60,8 +57,9 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "has_thead")]
 			public bool HasThead { get; set; } = true;
 
-			[JsonProperty(PropertyName = "empty_text")]
-			public string EmptyText { get; set; } = "No records";
+			[JsonProperty(PropertyName = "culture")]
+			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");// can be inherited
+
 
 			#region << container1 >>
 

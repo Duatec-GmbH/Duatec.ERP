@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
+using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets
 {

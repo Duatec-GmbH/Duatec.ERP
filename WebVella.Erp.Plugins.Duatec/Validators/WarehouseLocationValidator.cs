@@ -1,10 +1,10 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Utilities;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.TypedRecords.Validation;
 using WebVella.TypedRecords.Attributes;
+using WebVella.Erp.Plugins.Duatec.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators
 {
@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         const string Entity = WarehouseLocation.Entity;
         private static readonly NameFormatValidator _labelValidator = new(Entity, Fields.Designation, true);
         private static readonly string _warehousePretty = Text.FancyfySnakeCase(Warehouse.Entity);
-        private static readonly string _entityPretty = Util.Text.FancyfySnakeCaseStartWithUpper(Entity);
+        private static readonly string _entityPretty = Text.FancyfySnakeCase(Entity).FirstToUpper();
         private static readonly string _entityPropertyPretty = Text.FancyfySnakeCase(Fields.Designation);
 
         public List<ValidationError> ValidateOnCreate(WarehouseLocation record)
