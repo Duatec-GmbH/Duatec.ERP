@@ -1,5 +1,5 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.TypedRecords.Persistance;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {

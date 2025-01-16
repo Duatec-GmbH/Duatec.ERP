@@ -6,7 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
-using WebVella.TypedRecords.Hooks;
+using WebVella.Erp.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
 {

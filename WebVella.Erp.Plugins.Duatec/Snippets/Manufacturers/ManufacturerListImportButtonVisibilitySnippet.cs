@@ -4,7 +4,7 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
-using WebVella.TypedRecords;
+using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {

@@ -2,8 +2,8 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
-using WebVella.TypedRecords;
-using WebVella.TypedRecords.Persistance;
+using WebVella.Erp.TypedRecords;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {

@@ -3,7 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.TypedRecords;
+using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {

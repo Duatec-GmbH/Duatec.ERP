@@ -1,5 +1,5 @@
-﻿using WebVella.TypedRecords;
-using WebVella.TypedRecords.Attributes;
+﻿using WebVella.Erp.TypedRecords;
+using WebVella.Erp.TypedRecords.Attributes;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {

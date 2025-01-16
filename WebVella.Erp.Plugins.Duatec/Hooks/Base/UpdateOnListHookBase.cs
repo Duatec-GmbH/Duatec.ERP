@@ -6,8 +6,8 @@ using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
-using WebVella.TypedRecords;
-using WebVella.TypedRecords.Validation;
+using WebVella.Erp.TypedRecords;
+using WebVella.Erp.TypedRecords.Validation;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 {

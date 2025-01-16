@@ -1,8 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.TypedRecords;
-using WebVella.TypedRecords.Persistance;
+using WebVella.Erp.TypedRecords;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 {

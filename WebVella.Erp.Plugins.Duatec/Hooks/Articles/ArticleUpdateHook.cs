@@ -5,7 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.TypedRecords.Hooks;
+using WebVella.Erp.TypedRecords.Hooks;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
