@@ -5119,9 +5119,8 @@ input{
 	align-items: center;
 }
 
-.btn {
-	position: relative;
-	top: -1px;
+.row-selected {
+	background-color: #e7ebef!important;
 }
 
 /*#endregion*/

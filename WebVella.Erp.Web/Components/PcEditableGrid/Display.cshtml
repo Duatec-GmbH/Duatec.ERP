@@ -45,7 +45,7 @@
 
         @if (options.HasAddButton)
         {
-            var style = $"width:${actionButtonWidth};";
+            var style = $"width:{actionButtonWidth};";
 
             <wv-button icon-class="fa fa-plus go-green"
                        text="Add Entry"
@@ -78,7 +78,7 @@
 
                 async Task CreateRow(EntityRecord record, bool isDummy)
                 {
-                    var rowClass = isDummy ? "d-none" : string.Empty;
+                    var rowClass = /* isDummy ? "d-none" : */ string.Empty;
                     
                     <wv-tr class="@rowClass">
                         @for (var i = 1; i <= options.VisibleColumns; i++)
