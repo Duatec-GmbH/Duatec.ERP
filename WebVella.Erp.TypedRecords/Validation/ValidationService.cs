@@ -28,7 +28,8 @@ namespace WebVella.Erp.TypedRecords.Validation
             public IEnumerable<IRecordValidator<T>> GetByType<T>() where T : TypedEntityRecordWrapper, new()
             {
                 if (_validatorsByType.TryGetValue(typeof(T), out var l))
-                    return l.Select(obj => (IRecordValidator<T>)obj);
+                    return l.Select(obj => obj as IRecordValidator<T>)
+                        .Where(v => v != null)!;
                 return [];
             }
         }
@@ -82,8 +83,14 @@ namespace WebVella.Erp.TypedRecords.Validation
                     .ToArray();
 
                 var validatorTypeInfos = allTypes
-                    .Where(t => t.GetCustomAttribute<TypedValidatorAttribute>() != null)
-                    .Select(t => new { Type = t, t.GetCustomAttribute<TypedValidatorAttribute>()!.Entity });
+                    .Where(t => t.GetCustomAttribute<TypedValidatorAttribute>() != null 
+                        || t.GetCustomAttribute<ValidatorAttribute>() != null)
+                    .Select(t => new 
+                    { 
+                        Type = t, 
+                        Entity = t.GetCustomAttribute<TypedValidatorAttribute>()?.Entity 
+                            ?? t.GetCustomAttribute<ValidatorAttribute>()!.Entity 
+                    });
 
                 var entityTypeLookup = allTypes
                     .Where(t => t.GetCustomAttribute<TypedEntityAttribute>() != null)
