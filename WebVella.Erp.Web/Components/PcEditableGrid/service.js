@@ -117,7 +117,7 @@
 
 	for (let deleteBtn of deleteBtns) {
 		addDeleteCallback(deleteBtn);
-		var row = getParentTableRow(deleteBtn);
+		let row = getParentTableRow(deleteBtn);
 		if (row)
 			addRowEvents(row);
 	}
@@ -128,7 +128,7 @@
 	}
 
 	function clearAllSelections() {
-		var bodies = document.getElementsByTagName('TBODY');
+		let bodies = document.getElementsByTagName('TBODY');
 
 		for (const body of bodies)
 			clearSelection(body);
@@ -167,11 +167,7 @@
 
 				const body = btn.parentElement.getElementsByTagName('TBODY')[0];
 
-				const scripts = body.getElementsByTagName('script');
-
-				for (let script of scripts) {
-					script.parentElement.removeChild(script);
-				}
+				deleteScripts(body);
 
 				// dummy node which is not visible
 				const node = body.children[0].cloneNode(true);
@@ -181,23 +177,41 @@
 				addRowEvents(node);
 				replaceIds(node);
 
-				for (const delBtn of delBtns) {
-					addDeleteCallback(delBtn);
-				}
+				addDeleteButtonEvets(node);
+				handleSelect2Elements(node);
 
-				const select2Containers = node.getElementsByClassName('select2');
-				for (let n of select2Containers)
-					n.parentElement.removeChild(n);
-
-				const selects = node.getElementsByTagName('select');
-				for (let n of selects)
-					$(n).select2();
-
-				for (let n of select2Containers)
-					n.setAttribute('style', null);
-
-				const delBtns = node.getElementsByClassName('editable-grid-delete-button');
 			});
+		}
+	}
+
+	function handleSelect2Elements(node) {
+
+		const selects = node.getElementsByTagName('select');
+		for (let n of selects) {
+			$(n).select2();
+		}
+
+		const select2Containers = node.getElementsByClassName('select2');
+		for (let n of select2Containers)
+			n.setAttribute('style', null);
+
+		const toDelete = node.getElementsByClassName('select2-container--bootstrap4');
+		for (let n of toDelete)
+			n.parentElement.removeChild(n);
+
+		for (let n of select2Containers)
+			n.classList.add('select2-container--bootstrap4');
+	}
+
+	function deleteScripts(node) {
+		for (let script of node.getElementsByTagName('script')) {
+			script.parentElement.removeChild(script);
+		}
+	}
+
+	function addDeleteButtonEvets(node) {
+		for (const delBtn of node.getElementsByClassName('editable-grid-delete-button')) {
+			addDeleteCallback(delBtn);
 		}
 	}
 
@@ -255,7 +269,7 @@
 
 		const labels = elem.getElementsByTagName('label');
 
-		var labelForIds = new Map();
+		let labelForIds = new Map();
 
 		for (let label of labels) {
 
@@ -279,10 +293,6 @@
 
 		for (let e of all) {
 
-			if (e.hasAttribute('data-select2-id')) {
-				e.setAttribute('data-select2-id', newSelect2Id());
-			}
-
 			if (e.id && e.tagName !== 'label') {
 
 				let newId = labelForIds.get(e.id);
@@ -297,14 +307,8 @@
 		}
 	}
 
-	function newSelect2Id() {
-		select2IdCounter++;
-		console.log(select2IdCounter);
-		return select2IdCounter;
-	}
-
 	function makeNewId(id) {
-		const uuidRegex = new RegExp('[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}');
+		const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
 		const match = uuidRegex.exec(id);
 
 		if (usedIds.has(id))

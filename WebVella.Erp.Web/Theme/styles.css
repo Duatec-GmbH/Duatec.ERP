@@ -5123,6 +5123,12 @@ input{
 	background-color: #e7ebef!important;
 }
 
+/* editable grid */
+
+tr > td > .wv-field-select > div > .select2 > .selection > .select2-selection--single > .select2-selection__arrow {
+	top: 3px!important;
+}
+
 /*#endregion*/
 
 /*#endregion*/
