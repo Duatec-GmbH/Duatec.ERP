@@ -6,39 +6,31 @@
 	// TODO: find a way to load all scripts at once after page is load + ugglify scripts
 
 	let usedIds = new Set();
-	let select2IdCounter = 0;
 
 	let mouseOverRow = null;
 	let shiftAnchor = null;
-
 	let cDown = false;
 	let vDown = false;
 	let xDown = false;
 
 	let documentProcessed;
 
-	let allElements = document.getElementsByTagName('*');
-	for (const elem of allElements) {
+	// get all ids already used in document
+	for (let elem of document.getElementsByTagName('*')) {
 
 		if (elem.hasAttribute('id'))
 			usedIds.add(elem.getAttribute('id'));
-
-		let select2Id = elem.getAttribute('data-select2-id');
-		if (select2Id && select2Id > select2IdCounter) {
-			select2IdCounter = select2Id;
-		}
 	}
 
-	let allSelectfields = document.getElementsByClassName('wv-field-select');
-
-	for (const elem of allSelectfields) {
+	// initialize select2 fields
+	for (let elem of document.getElementsByClassName('wv-field-select')) {
 
 		if (elem.parentElement.parentElement?.tagName === 'TR') {
 
-			const row = elem.parentElement.parentElement;
+			let row = elem.parentElement.parentElement;
 
 			if (!row.classList.contains('d-none')) {
-				const body = row.parentElement;
+				let body = row.parentElement;
 
 				deleteScripts(row);
 
@@ -51,11 +43,12 @@
 		}
 	}
 
-
+	// initialize document events
 	if (documentProcessed !== true) {
 
 		documentProcessed = true;
 
+		// initialize key down events
 		document.addEventListener('keydown', e => {
 
 			if (e.key == 'Escape') {
@@ -94,18 +87,55 @@
 			}
 			else if (e.key == 'v') {
 				if (e.ctrlKey && !vDown) {
-					// perform insert
+					let body = getTargetBody();
+					if (body) {
+						let row = getTargetRow(body);
+						if (row) {
+							let headers = getHeaders(body);
+
+							navigator.clipboard.readText()
+								.then(text => {
+
+									let arr = JSON.parse(text);
+									let newNodes = arr[0][1].map(_ => performClone(body.children[0]));
+
+									for (let kp of arr) {
+
+										let header = kp[0];
+										let data = kp[1];
+										let childIdx = headers.indexOf(header);
+
+										if (childIdx >= 0) {
+											for (let i = 0; i < newNodes.length; i++) {
+												let value = data[i];
+												setValue(newNodes[i].children[childIdx], value);
+											}
+										}
+									}
+									
+									e = row;
+									for (let node of newNodes) {
+										handleSelect2Elements(node);
+										e.after(node);
+										e = node;
+									}		
+								});
+						}
+					}
 				}
 				vDown = true;
 			} 
 		});
 
+		// initialize key up events
 		document.addEventListener('keyup', e => {
 
 			if (e.key == 'c') cDown = false;
 			if (e.key == 'v') vDown = false;
+			if (e.key == 'x') xDown = false;
 		});
 
+		// initialize click events
 		document.addEventListener('click', e => {
 
 			if (!mouseOverRow) {
@@ -129,7 +159,7 @@
 					else {
 						let state = 0;
 
-						for (const row of mouseOverRow.parentElement.children) {
+						for (let row of mouseOverRow.parentElement.children) {
 
 							if (state === 0) {
 								if (row !== shiftAnchor && row !== mouseOverRow)
@@ -159,19 +189,109 @@
 		}, true);
 	}
 
-	const addBtns = document.getElementsByClassName('editable-grid-add-entry-button');
-
-	for (const addBtn of addBtns) {
+	// initialize add entry buttons
+	for (let addBtn of document.getElementsByClassName('editable-grid-add-entry-button')) {
 		addAddCallback(addBtn);
 	}
 
-	const deleteBtns = document.getElementsByClassName('editable-grid-delete-button');
+	function getValue(col) {
 
-	for (let deleteBtn of deleteBtns) {
-		addDeleteCallback(deleteBtn);
-		let row = getParentTableRow(deleteBtn);
-		if (row)
-			addRowEvents(row);
+		for (let i = 0; i < col.children.length; i++) {
+			let elem = col.children[i];
+
+			if (elem.classList.contains('wv-field-number'))
+				return getNumber(elem);
+			if (elem.classList.contains('wv-field-text'))
+				return getText(elem);
+			if (elem.classList.contains('wv-field-checkbox'))
+				return getBool(elem);
+			if (elem.classList.contains('wv-field-select'))
+				return getSelectId(elem);
+		}
+
+		return null;
+	}
+
+	function setValue(col, value) {
+
+		for (let i = 0; i < col.children.length; i++) {
+			let elem = col.children[i];
+
+			if (elem.classList.contains('wv-field-number'))
+				return setNumber(elem, value);
+			if (elem.classList.contains('wv-field-text'))
+				return setText(elem, value);
+			if (elem.classList.contains('wv-field-checkbox'))
+				return setBool(elem, value);
+			if (elem.classList.contains('wv-field-select'))
+				return setSelectId(elem, value);
+		}
+
+		return null;
+	}
+
+	function getNumber(numberField) {
+		let input = numberField.getElementsByTagName('input')[0];
+		return input.value;
+	}
+
+	function setNumber(numberField, value) {
+		let input = numberField.getElementsByTagName('input')[0];
+		input.value = value;
+	}
+
+	function getText(textField) {
+		let input = textField.getElementsByTagName('input')[0];
+		if(input)
+			return input.value;
+
+		let p = textField;
+
+		while (p.children[0])
+			p = p.children[0];
+		return p?.innerText ?? null;
+	}
+
+	function setText(textField, value) {
+		let input = textField.getElementsByTagName('input')[0];
+		if (input) {
+			input.value = value;
+			return;
+		}
+
+		let p = textField;
+
+		while (p.children[0])
+			p = p.children[0];
+
+		p.innerText = value;
+	}
+
+	function getBool(checkBoxField) {
+		let inputs = checkBoxField.getElementsByTagName('input');
+		for (let input of inputs) {
+			if (input.hasAttribute('data-source-id'))
+				return input.value;
+		}
+	}
+
+	function setBool(checkBoxField, value) {
+		let inputs = checkBoxField.getElementsByTagName('input');
+		let hidden = inputs[0];
+		let visible = inputs[1];
+
+		hidden.value = value;
+		let b = value === 'true';
+
+		visible.checked = b;
+	}
+
+	function getSelectId(selectField) {
+		return selectField.getElementsByTagName('select')[0].value;
+	}
+
+	function setSelectId(selectField, value) {
+		selectField.getElementsByTagName('select')[0].value = value;
 	}
 
 	function putDataToClipboard(body) {
@@ -212,54 +332,6 @@
 		return null;
 	}
 
-	function getValue(col) {
-
-		for (let i = 0; i < col.children.length; i++) {
-			let elem = col.children[i];
-
-			if (elem.classList.contains('wv-field-number'))
-				return getNumber(elem);
-			if (elem.classList.contains('wv-field-text'))
-				return getText(elem);
-			if (elem.classList.contains('wv-field-checkbox'))
-				return getBool(elem);
-			if (elem.classList.contains('wv-field-select'))
-				return getSelectId(elem);
-		}
-
-		return null;
-	}
-
-	function getNumber(numberField) {
-		let input = numberField.getElementsByTagName('input')[0];
-		return input.value;
-	}
-
-	function getText(textField) {
-		let input = textField.getElementsByTagName('input')[0];
-		return input.value;
-	}
-
-	function getBool(checkBoxField) {
-		let inputs = checkBoxField.getElementsByTagName('input');
-		for (let input of inputs) {
-			if (input.classList.contains('form-check-input'))
-				return input.value;
-		}
-	}
-
-	function getSelectId(selectField) {
-		let displayVal = selectField.getElementsByClassName('select2-selection__rendered')[0]?.innerText;
-		if (displayVal && displayVal !== null && displayVal !== '') {
-			let options = selectField.getElementsByTagName('option');
-			for (let option of options) {
-				if (option.innerText === displayVal)
-					return option.value;
-			}
-		}
-		return null;
-	}
-
 	function getHeaders(body) {
 
 		let headers = body.parentElement.getElementsByTagName('th');
@@ -276,6 +348,13 @@
 		return result;
 	}
 
+	function getTargetRow(body) {
+		if (mouseOverRow && mouseOverRow.parentElement === body)
+			return mouseOverRow;
+
+		return body.children[body.children.length - 1];
+	}
+
 	function getTargetBody() {
 		let tables = getEditableGridTables();
 		if (tables.length == 1) {
@@ -288,7 +367,7 @@
 	}
 
 	function getEditableGridTables() {
-		const allTables = document.getElementsByTagName('table');
+		let allTables = document.getElementsByTagName('table');
 		let tables = [];
 
 		for (let table of allTables) {
@@ -300,14 +379,14 @@
 	}
 
 	function clearSelection(tbody) {
-		for (const row of tbody.children)
+		for (let row of tbody.children)
 			row.classList.remove('row-selected');
 	}
 
 	function clearAllSelections() {
 		let bodies = document.getElementsByTagName('TBODY');
 
-		for (const body of bodies)
+		for (let body of bodies)
 			clearSelection(body);
 
 		shiftAnchor = null;
@@ -339,7 +418,7 @@
 			btn.setAttribute('listener', 'true');
 
 			btn.addEventListener('click', () => {
-				const body = btn.parentElement.getElementsByTagName('TBODY')[0];
+				let body = btn.parentElement.getElementsByTagName('TBODY')[0];
 				if(body)
 					addNew(body);
 			});
@@ -351,7 +430,7 @@
 		// TODO check if body even supports insert a new item
 
 		clearAllSelections();
-		const node = performClone(body.children[0]);
+		let node = performClone(body.children[0]);
 
 		if(node)
 			body.appendChild(node);
@@ -363,13 +442,14 @@
 
 		deleteScripts(row);
 
-		const node = row.cloneNode(true);
+		let node = row.cloneNode(true);
 		node.classList.remove("d-none");
 
 		addRowEvents(node);
 		replaceIds(node);
 
 		addDeleteButtonEvets(node);
+		addCheckBoxEvents(node);
 		handleSelect2Elements(node);
 
 		return node;
@@ -377,16 +457,16 @@
 
 	function handleSelect2Elements(node) {
 
-		const selects = node.getElementsByTagName('select');
+		let selects = node.getElementsByTagName('select');
 		for (let n of selects) {
 			$(n).select2();
 		}
 
-		const select2Containers = node.getElementsByClassName('select2');
+		let select2Containers = node.getElementsByClassName('select2');
 		for (let n of select2Containers)
 			n.setAttribute('style', null);
 
-		const toDelete = node.getElementsByClassName('select2-container--bootstrap4');
+		let toDelete = node.getElementsByClassName('select2-container--bootstrap4');
 		for (let n of toDelete)
 			n.parentElement.removeChild(n);
 
@@ -404,8 +484,21 @@
 	}
 
 	function addDeleteButtonEvets(node) {
-		for (const delBtn of node.getElementsByClassName('editable-grid-delete-button')) {
+		for (let delBtn of node.getElementsByClassName('editable-grid-delete-button')) {
 			addDeleteCallback(delBtn);
+		}
+	}
+
+	function addCheckBoxEvents(node) {
+		let fields = node.getElementsByClassName('wv-field-checkbox');
+		for (let field of fields) {
+			let inputs = field.getElementsByTagName('input');
+			let hidden = inputs[0];
+			let visible = inputs[1];
+
+			visible.addEventListener('change', () => {
+				hidden.value = visible.checked.toString();
+			});
 		}
 	}
 
@@ -432,7 +525,7 @@
 
 	function addDeleteCallback(btn) {
 
-		const row = getParentTableRow(btn);
+		let row = getParentTableRow(btn);
 
 		// TODO remove this after refactoring page scripts
 		if (row && !row.classList.contains('d-none') && btn.getAttribute('listener') !== 'true') {
@@ -442,7 +535,7 @@
 			btn.addEventListener('click', () => {
 
 				clearAllSelections();
-				const row = getParentTableRow(btn);
+				let row = getParentTableRow(btn);
 				if (row) {
 					row.parentElement.removeChild(row);
 				}
@@ -461,21 +554,21 @@
 
 	function replaceIds(elem) {
 
-		const labels = elem.getElementsByTagName('label');
+		let labels = elem.getElementsByTagName('label');
 
 		let labelForIds = new Map();
 
 		for (let label of labels) {
 
 			if (label.id) {
-				const newId = makeNewId(label.id);
+				let newId = makeNewId(label.id);
 				if (newId)
 					label.id = newId;
 			}
 
 			if (label.htmlFor) {
 
-				const newId = makeNewId(label.htmlFor);
+				let newId = makeNewId(label.htmlFor);
 				if (newId) {
 					labelForIds.set(label.htmlFor, newId);
 					labelForIds.htmlFor = newId;
@@ -483,27 +576,33 @@
 			}
 		}
 
-		const all = elem.getElementsByTagName('*');
+		let all = elem.getElementsByTagName('*');
+		let replacedIds = new Map();
 
 		for (let e of all) {
 
 			if (e.id && e.tagName !== 'label') {
 
 				let newId = labelForIds.get(e.id);
+				if (!newId)
+					newId = replacedIds.get(e.id);
+
 				if (newId)
 					e.id = newId;
 				else {
 					newId = makeNewId(e.id);
-					if (newId)
+					if (newId) {
+						replacedIds.set(e.id, newId);
 						e.id = newId;
+					}
 				}
 			}
 		}
 	}
 
 	function makeNewId(id) {
-		const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
-		const match = uuidRegex.exec(id);
+		let uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+		let match = uuidRegex.exec(id);
 
 		if (usedIds.has(id))
 			usedIds.delete(id);
