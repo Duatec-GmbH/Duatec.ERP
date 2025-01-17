@@ -23,7 +23,7 @@
     var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
     var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
 
-    var tableClass = "table";
+    var tableClass = "table editable-grid";
     var divClass = "erp-list table-responsive-md";
 
     if (options.Striped)
@@ -53,7 +53,7 @@
                        style=@style>
             </wv-button>            
         }
-        <wv-table class="@tableClass" id="@options.Id">
+        <wv-table class="@tableClass" id="@options.Id" compatibility="@options.Compatibility">
             @if (options.HasThead)
             {
                 <wv-thead>
@@ -66,12 +66,17 @@
                             @column.Label
                         </wv-th>
                     }
-                    <wv-th style="width:@actionColumnWidth;"></wv-th>
+                    @if (options.HasDeleteButtons)
+                    {
+                        <wv-th style="width:@actionColumnWidth;"></wv-th>
+                    }
                 </wv-thead>
             }
             <wv-tbody>
             @{
-                await CreateRow(new EntityRecord(), true);
+
+                if(options.AllowCopy || options.AllowPaste)
+                    await CreateRow(new EntityRecord(), true);
 
                 foreach (var rec in records)
                     await CreateRow(rec, false);
@@ -114,7 +119,8 @@
                             </wv-td>
                         }
 
-                        @{
+                        @if(options.HasDeleteButtons)
+                        {
                             var style = $"{WvVerticalAlignmentType.Middle.ToStyle()};"
                                 + $"{WvHorizontalAlignmentType.Right.ToStyle()};"
                                 + $"width:{actionColumnWidth};";

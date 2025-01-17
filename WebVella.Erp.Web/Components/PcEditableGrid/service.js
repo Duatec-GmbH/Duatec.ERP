@@ -13,6 +13,7 @@
 
 	let cDown = false;
 	let vDown = false;
+	let xDown = false;
 
 	let documentProcessed;
 
@@ -28,19 +29,70 @@
 		}
 	}
 
+	let allSelectfields = document.getElementsByClassName('wv-field-select');
+
+	for (const elem of allSelectfields) {
+
+		if (elem.parentElement.parentElement?.tagName === 'TR') {
+
+			const row = elem.parentElement.parentElement;
+
+			if (!row.classList.contains('d-none')) {
+				const body = row.parentElement;
+
+				deleteScripts(row);
+
+				let node = performClone(row);
+				if (node) {
+					body.removeChild(row);
+					body.appendChild(node);
+				}
+			}
+		}
+	}
+
+
 	if (documentProcessed !== true) {
 
 		documentProcessed = true;
 
 		document.addEventListener('keydown', e => {
 
-			if (e.key == 'c') {
+			if (e.key == 'Escape') {
+				clearAllSelections();
+			}
+			else if (e.key == 'Insert' || e.key == '+') {
+				clearAllSelections();
+				let body = getTargetBody();
+				if (body)
+					addNew(body);
+			}
+			else if (e.key == 'Delete') {
+				let rows = document.getElementsByClassName('row-selected');
+				for (let row of rows)
+					row.parentElement.removeChild(row);
+			}
+			else if (e.key == 'c') {
 				if (e.ctrlKey && !cDown) {
-					// perform copy
+					let body = getTargetBody();
+					if (body)
+						putDataToClipboard(body);
 				}
 				cDown = true;
 			}
-			if (e.key == 'v') {
+			else if (e.key == 'x') {
+				if (e.ctrlKey && !xDown) {
+					let body = getTargetBody();
+					if (body) {
+						putDataToClipboard(body)?.then(() => {
+							let rows = body.getElementsByClassName('row-selected');
+							for (let row of rows)
+								body.removeChild(row);
+						});
+					}
+				}
+			}
+			else if (e.key == 'v') {
 				if (e.ctrlKey && !vDown) {
 					// perform insert
 				}
@@ -122,6 +174,131 @@
 			addRowEvents(row);
 	}
 
+	function putDataToClipboard(body) {
+		let rows = body.getElementsByClassName('row-selected');
+		if (rows.length > 0)
+		{
+			let headers = getHeaders(body);
+			let map = new Map();
+			let skip = [];
+
+			for (let i = 0; i < headers.length; i++) {
+				if (headers[i] == '' || map.has(headers[i])) {
+					skip[i] = true;
+				}
+				else {
+					map.set(headers[i], []);
+					skip[i] = false;
+				}
+			}
+
+			if (map.size > 0) {
+
+				for (let row of rows) {
+
+					for (let i = 0; i < headers.length; i++) {
+						if (!skip[i]) {
+
+							let values = map.get(headers[i]);
+							values[values.length] = getValue(row.children[i]);
+						}
+					}
+				}
+
+				let json = JSON.stringify(Array.from(map.entries()));
+				return navigator.clipboard.writeText(json);
+			}
+		}
+		return null;
+	}
+
+	function getValue(col) {
+
+		for (let i = 0; i < col.children.length; i++) {
+			let elem = col.children[i];
+
+			if (elem.classList.contains('wv-field-number'))
+				return getNumber(elem);
+			if (elem.classList.contains('wv-field-text'))
+				return getText(elem);
+			if (elem.classList.contains('wv-field-checkbox'))
+				return getBool(elem);
+			if (elem.classList.contains('wv-field-select'))
+				return getSelectId(elem);
+		}
+
+		return null;
+	}
+
+	function getNumber(numberField) {
+		let input = numberField.getElementsByTagName('input')[0];
+		return input.value;
+	}
+
+	function getText(textField) {
+		let input = textField.getElementsByTagName('input')[0];
+		return input.value;
+	}
+
+	function getBool(checkBoxField) {
+		let inputs = checkBoxField.getElementsByTagName('input');
+		for (let input of inputs) {
+			if (input.classList.contains('form-check-input'))
+				return input.value;
+		}
+	}
+
+	function getSelectId(selectField) {
+		let displayVal = selectField.getElementsByClassName('select2-selection__rendered')[0]?.innerText;
+		if (displayVal && displayVal !== null && displayVal !== '') {
+			let options = selectField.getElementsByTagName('option');
+			for (let option of options) {
+				if (option.innerText === displayVal)
+					return option.value;
+			}
+		}
+		return null;
+	}
+
+	function getHeaders(body) {
+
+		let headers = body.parentElement.getElementsByTagName('th');
+		let result = [];
+
+		for (let h of headers) {
+			let val = h.innerText?.trim();
+
+			if (val === null || val === '')
+				result[result.length] = '';
+			else
+				result[result.length] = val;
+		}
+		return result;
+	}
+
+	function getTargetBody() {
+		let tables = getEditableGridTables();
+		if (tables.length == 1) {
+			return tables[0].getElementsByTagName('tbody')[0];
+		}
+		else if (mouseOverRow) {
+			return mouseOverRow.parentElement;
+		}
+		return null;
+	}
+
+	function getEditableGridTables() {
+		const allTables = document.getElementsByTagName('table');
+		let tables = [];
+
+		for (let table of allTables) {
+			if (table.classList.contains('editable-grid')) {
+				tables[tables.length] = table;
+			}
+		}
+		return tables
+	}
+
 	function clearSelection(tbody) {
 		for (const row of tbody.children)
 			row.classList.remove('row-selected');
@@ -162,26 +339,40 @@
 			btn.setAttribute('listener', 'true');
 
 			btn.addEventListener('click', () => {
-
-				clearAllSelections();
-
 				const body = btn.parentElement.getElementsByTagName('TBODY')[0];
-
-				deleteScripts(body);
-
-				// dummy node which is not visible
-				const node = body.children[0].cloneNode(true);
-
-				node.classList.remove("d-none");
-				body.appendChild(node);
-				addRowEvents(node);
-				replaceIds(node);
-
-				addDeleteButtonEvets(node);
-				handleSelect2Elements(node);
-
+				if(body)
+					addNew(body);
 			});
 		}
+	}
+
+	function addNew(body) {
+
+		// TODO check if body even supports insert a new item
+
+		clearAllSelections();
+		const node = performClone(body.children[0]);
+
+		if(node)
+			body.appendChild(node);
+	}
+
+	function performClone(row) {
+
+		if (!(row instanceof HTMLElement)) return null;
+
+		deleteScripts(row);
+
+		const node = row.cloneNode(true);
+		node.classList.remove("d-none");
+
+		addRowEvents(node);
+		replaceIds(node);
+
+		addDeleteButtonEvets(node);
+		handleSelect2Elements(node);
+
+		return node;
 	}
 
 	function handleSelect2Elements(node) {
@@ -204,6 +395,9 @@
 	}
 
 	function deleteScripts(node) {
+
+		if (!(node instanceof HTMLElement)) return;
+
 		for (let script of node.getElementsByTagName('script')) {
 			script.parentElement.removeChild(script);
 		}
@@ -256,9 +450,9 @@
 		}
 	}
 
-	function getParentTableRow(btn) {
+	function getParentTableRow(elem) {
 
-		let it = btn;
+		let it = elem;
 		while (it && it.tagName !== 'TR') {
 			it = it.parentElement;
 		}

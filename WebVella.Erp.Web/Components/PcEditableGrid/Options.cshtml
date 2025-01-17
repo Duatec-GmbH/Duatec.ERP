@@ -30,10 +30,24 @@
 		<wv-field-datasource name="records" value="@options.Records" label-text="Records" page-id="erpRequest.Page.Id"></wv-field-datasource>
 	</wv-column>
     <wv-column span="4">
-        <wv-field-checkbox name="has-add-button" value="@options.HasAddButton" label-text="Has Add Button" text-true="has add button"></wv-field-checkbox>
+        <wv-field-checkbox name="has-add-button" value="@options.HasAddButton" label-text="Add Button" text-true="has add button"></wv-field-checkbox>
     </wv-column>
 </wv-row>
 <wv-row>
+    <wv-column span="4">
+        <wv-field-checkbox name="has-delete-buttons" value="@options.HasDeleteButtons" label-text="Delete Buttons" text-true="has delete buttons"></wv-field-checkbox>
+    </wv-column>
+    <wv-column span="4">
+        <wv-field-checkbox name="allow-copy" value="@options.AllowCopy" label-text="Copying Allowed" text-true="allow copy"></wv-field-checkbox>
+    </wv-column>
+    <wv-column span="4">
+        <wv-field-checkbox name="allow-paste" value="@options.AllowPaste" label-text="Pasting Allowed" text-true="allow pasting"></wv-field-checkbox>
+    </wv-column>
+</wv-row>
+<wv-row>
+    <wv-column span="4">
+        <wv-field-text name="compatibility" value="@options.Compatibility" label-text="Compatibility (for copy-paste compatibility with other grids)"></wv-field-text>
+    </wv-column>
 	<wv-column span="4">
 		<wv-field-text name="name" value="@options.Name" label-text="Name"></wv-field-text>
 	</wv-column>

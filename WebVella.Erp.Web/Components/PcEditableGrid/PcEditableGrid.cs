@@ -63,6 +63,18 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "has-add-button")]
 			public bool HasAddButton { get; set; } = true;
 
+			[JsonProperty(PropertyName = "allow-copy")]
+			public bool AllowCopy { get; set; } = true;
+
+			[JsonProperty(PropertyName = "allow-paste")]
+			public bool AllowPaste { get; set; } = true;
+
+			[JsonProperty(PropertyName = "has-delete-buttons")]
+			public bool HasDeleteButtons { get; set; } = true;
+
+			[JsonProperty(PropertyName = "compatibility")]
+			public string Compatibility { get; set; }
+
 
 			#region << container1 >>
 
