@@ -272,8 +272,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .ToHashSet();
 
             var totalDemands = RepositoryService.PartListRepository.FindManyEntriesByProject(projectId, true)
-                .Where(e => ids.Contains(e.Article))
-                .GroupBy(e => e.Article)
+                .Where(e => ids.Contains(e.ArticleId))
+                .GroupBy(e => e.ArticleId)
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
 
             var result = new Dictionary<string, decimal>();

@@ -12,7 +12,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
     {
         protected abstract string ActionNameInPastTense { get; }
 
-        protected abstract List<ValidationError> Validate(TRecord record, Entity entity);
+        protected abstract List<ValidationError> Validate(TRecord record, Entity entity, TModel pageModel);
 
         protected IActionResult? Execute(TRecord record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)
         {
@@ -20,7 +20,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
             if (result != null)
                 return result;
 
-            validationErrors.AddRange(Validate(record, entity));
+            validationErrors.AddRange(Validate(record, entity, pageModel));
 
             if (validationErrors.Count > 0)
                 return OnValidationFailure(record, entity, pageModel, validationErrors);

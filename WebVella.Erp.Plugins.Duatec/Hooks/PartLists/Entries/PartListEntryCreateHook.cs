@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();
 
-            record.PartList = listId;
+            record.PartListId = listId;
             return null;
         }
     }

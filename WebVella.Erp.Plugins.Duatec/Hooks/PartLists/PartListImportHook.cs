@@ -108,8 +108,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             return new PartListEntry()
             {
                 Id = Guid.NewGuid(),
-                PartList = partListId,
-                Article = articleLookup[group.Key.PartNumber].Id!.Value,
+                PartListId = partListId,
+                ArticleId = articleLookup[group.Key.PartNumber].Id!.Value,
                 DeviceTag = ListAgg(group),
                 Amount = group.Count()
             };

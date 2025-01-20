@@ -51,7 +51,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         private static Dictionary<Guid, decimal> GetDemandLookup(Guid projectId)
         {
             var demandLookup = RepositoryService.PartListRepository.FindManyEntriesByProject(projectId, true)
-                .GroupBy(ple => ple.Article)
+                .GroupBy(ple => ple.ArticleId)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var orderedLookup = RepositoryService.OrderRepository.FindManyEntriesByProject(projectId)

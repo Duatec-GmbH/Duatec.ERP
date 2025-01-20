@@ -20,7 +20,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
             => Execute(record, entity, pageModel, validationErrors);
 
-        protected override List<ValidationError> Validate(EntityRecord record, Entity entity)
+        protected override List<ValidationError> Validate(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
             => ValidationService.ValidateOnCreate(record, entity!.Name);
     }
 }

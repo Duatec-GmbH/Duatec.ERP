@@ -173,7 +173,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var articleLookup = GetArticleLookup(partListEntries);
 
             return partListEntries
-                .GroupBy(ple => ple.Article)
+                .GroupBy(ple => ple.ArticleId)
                 .Select(g => RecordFromGroup(g, project, 
                     articleLookup, ordersLookup, 
                     orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
@@ -187,7 +187,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 $"${Article.Relations.Type}.*";
 
             var articleIds = partListEntries
-                .Select(ple => ple.Article)
+                .Select(ple => ple.ArticleId)
                 .Distinct()
                 .ToArray();
 
@@ -206,7 +206,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var rec = new EntityRecord();
 
             var commons = group.First();
-            var articleId = commons.Article;
+            var articleId = commons.ArticleId;
             var article = articleLookup[articleId];
             var articles = article == null ? [] : new List<EntityRecord>() { article };
             var demand = group.Sum(r => r.Amount);

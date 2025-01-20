@@ -24,13 +24,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public override string EntityName => Entity;
 
-        public Guid PartList
+        public Guid PartListId
         {
             get => Get<Guid>(Fields.PartList);
             set => Properties[Fields.PartList] = value;
         }
 
-        public Guid Article
+        public Guid ArticleId
         {
             get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
@@ -47,5 +47,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get(Fields.Amount, decimal.MinValue); 
             set => Properties[Fields.Amount] = value;
         }
+
+        public Article? GetArticle()
+            => GetSingleByRelation<Article>(Relations.Article);
     }
 }

@@ -98,5 +98,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Delete = "part_list_delete";
             public const string Import = "part_list_file_import";
         }
+
+        public static class Order
+        {
+            public const string Update = "order_update";
+        }
     }
 }

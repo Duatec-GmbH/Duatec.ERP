@@ -17,14 +17,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
 
             var context = pageModel.ErpRequestContext;
-            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartList}/detail";
+            var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartListId}/detail";
             return pageModel.LocalRedirect(url);
         }
 
         protected override IActionResult? OnPreValidate(PartListEntry record, Entity entity, RecordManagePageModel pageModel)
         {
             var rec = RepositoryService.PartListRepository.FindEntry(pageModel.RecordId!.Value)!;
-            record.PartList = rec.PartList;
+            record.PartListId = rec.PartListId;
 
             return null;
         }

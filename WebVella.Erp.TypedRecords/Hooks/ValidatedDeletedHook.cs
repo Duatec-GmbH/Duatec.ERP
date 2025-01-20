@@ -17,7 +17,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
         protected override EntityRecord MapRecord(EntityRecord rec)
             => rec;
 
-        protected override List<ValidationError> Validate(EntityRecord record, Entity entity)
+        protected override List<ValidationError> Validate(EntityRecord record, Entity entity, BaseErpPageModel pageModel)
             => ValidationService.ValidateOnDelete(record, entity.Name);
 
         public IActionResult? OnGet(BaseErpPageModel pageModel)

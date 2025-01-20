@@ -22,7 +22,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
         public IActionResult? OnPost(BaseErpPageModel pageModel)
             => Execute(pageModel);
 
-        protected override List<ValidationError> Validate(T record, Entity entity)
+        protected override List<ValidationError> Validate(T record, Entity entity, BaseErpPageModel pageModel)
             => ValidationService.ValidateOnDelete(record);
     }
 }

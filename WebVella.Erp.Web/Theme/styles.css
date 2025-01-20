@@ -5127,7 +5127,7 @@ input{
 
 /* TODO add same for select 2 with label */
 
-tr > td > .wv-field-select > div > .select2 > .selection > .select2-selection--single > .select2-selection__arrow {
+.editable-grid > tbody > tr > td > .wv-field-select > div > .select2 > .selection > .select2-selection--single > .select2-selection__arrow {
 	top: 3px !important;
 }
 

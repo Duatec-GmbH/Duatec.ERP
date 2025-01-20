@@ -61,18 +61,12 @@ namespace WebVella.Erp.TypedRecords
         }
 
         protected IReadOnlyList<T> GetManyByRelation<T>(string relationName) where T : TypedEntityRecordWrapper, new()
-        {
-            var relation = GetRelation(relationName);
-            return GetRelatedRecords<T>(relation).ToList();
-        }
+            => GetRelatedRecords<T>(relationName).ToList();
+        
 
-        protected T? GetSingleByRelation<T>(string relationName)
-            where T : TypedEntityRecordWrapper, new()
-        {
-            var relation = GetRelation(relationName);
-            return GetRelatedRecords<T>(relation)
-                .SingleOrDefault();
-        }
+        protected T? GetSingleByRelation<T>(string relationName) where T : TypedEntityRecordWrapper, new()
+            => GetRelatedRecords<T>(relationName).SingleOrDefault();
+        
 
         public bool TryGet<T>(string property, out T result, T defaultValue = default!)
         {
@@ -85,15 +79,17 @@ namespace WebVella.Erp.TypedRecords
             return true;
         }
 
-        private IEnumerable<T> GetRelatedRecords<T>(EntityRelation relation) where T : TypedEntityRecordWrapper, new()
+        private IEnumerable<T> GetRelatedRecords<T>(string relationName) where T : TypedEntityRecordWrapper, new()
         {
-            if (TryGet<IEnumerable<EntityRecord>>($"${relation.Name}", out var res))
+            if (TryGet<IEnumerable<EntityRecord>>($"${relationName}", out var res))
             {
                 if (res == null) return [];
                 if (res is List<T> list) return list;
 
                 return res.Select(Wrap<T>);
             }
+
+            var relation = GetRelation(relationName);
 
             return FindRelatedRecords(relation)
                 .Select(Wrap<T>);

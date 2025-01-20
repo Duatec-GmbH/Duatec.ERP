@@ -69,6 +69,12 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "allow-paste")]
 			public bool AllowPaste { get; set; } = true;
 
+			[JsonProperty(PropertyName = "allow-delete")]
+			public bool AllowDelete { get; set; } = true;
+
+			[JsonProperty(PropertyName = "allow-add")]
+			public bool AllowAdd { get; set; } = true;
+
 			[JsonProperty(PropertyName = "has-delete-buttons")]
 			public bool HasDeleteButtons { get; set; } = true;
 

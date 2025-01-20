@@ -29,7 +29,7 @@
 
 			let row = elem.parentElement.parentElement;
 
-			if (!row.classList.contains('d-none')) {
+			if (row.parentElement.parentElement.classList.contains('editable-grid') && !row.classList.contains('d-none')) {
 				let body = row.parentElement;
 
 				deleteScripts(row);
@@ -39,6 +39,15 @@
 					body.removeChild(row);
 					body.appendChild(node);
 				}
+			}
+		}
+	}
+
+	for (let table of document.getElementsByClassName('editable-grid')) {
+
+		for (let tr of table.getElementsByTagName('TR')) {
+			if (tr.classList.contains('d-none')) {
+				setDisabled(tr);
 			}
 		}
 	}
@@ -57,18 +66,21 @@
 			else if (e.key == 'Insert' || e.key == '+') {
 				clearAllSelections();
 				let body = getTargetBody();
-				if (body)
+				if (body && body.getAttribute('add') === 'true')
 					addNew(body);
 			}
 			else if (e.key == 'Delete') {
-				let rows = document.getElementsByClassName('row-selected');
-				for (let row of rows)
-					row.parentElement.removeChild(row);
+				var body = getTargetBody();
+				if (body && body.getAttribute('delete') === 'true') {
+					let rows = body.getElementsByClassName('row-selected');
+					for (let row of rows)
+						row.parentElement.removeChild(row);
+				}
 			}
 			else if (e.key == 'c') {
 				if (e.ctrlKey && !cDown) {
 					let body = getTargetBody();
-					if (body)
+					if (body && body.getAttribute('copy') === 'true')
 						putDataToClipboard(body);
 				}
 				cDown = true;
@@ -76,7 +88,7 @@
 			else if (e.key == 'x') {
 				if (e.ctrlKey && !xDown) {
 					let body = getTargetBody();
-					if (body) {
+					if (body && body.getAttribute('delete') === 'true') {
 						putDataToClipboard(body)?.then(() => {
 							let rows = body.getElementsByClassName('row-selected');
 							for (let row of rows)
@@ -88,7 +100,7 @@
 			else if (e.key == 'v') {
 				if (e.ctrlKey && !vDown) {
 					let body = getTargetBody();
-					if (body) {
+					if (body && body.getAttribute('paste') === 'true') {
 						let row = getTargetRow(body);
 						if (row) {
 							let headers = getHeaders(body);
@@ -96,29 +108,40 @@
 							navigator.clipboard.readText()
 								.then(text => {
 
-									let arr = JSON.parse(text);
-									let newNodes = arr[0][1].map(_ => performClone(body.children[0]));
+									try {
+										let obj = JSON.parse(text);
 
-									for (let kp of arr) {
+										if (isCompatible(body, obj.compatibility)) {
 
-										let header = kp[0];
-										let data = kp[1];
-										let childIdx = headers.indexOf(header);
+											let newNodes = obj.data[0][1].map(_ => performClone(body.children[0]));
 
-										if (childIdx >= 0) {
-											for (let i = 0; i < newNodes.length; i++) {
-												let value = data[i];
-												setValue(newNodes[i].children[childIdx], value);
+											for (let kp of obj.data) {
+
+												let header = kp[0];
+												let data = kp[1];
+												let childIdx = headers.indexOf(header);
+
+												if (childIdx >= 0) {
+													for (let i = 0; i < newNodes.length; i++) {
+														let value = data[i];
+														setValue(newNodes[i].children[childIdx], value);
+													}
+												}
+											}
+
+											e = row;
+											for (let node of newNodes) {
+												handleSelect2Elements(node);
+												e.after(node);
+												e = node;
 											}
 										}
+
 									}
-									
-									e = row;
-									for (let node of newNodes) {
-										handleSelect2Elements(node);
-										e.after(node);
-										e = node;
-									}		
+									catch (e)
+									{
+										alert(e);
+									}
 								});
 						}
 					}
@@ -194,6 +217,20 @@
 		addAddCallback(addBtn);
 	}
 
+	function isCompatible(body, compatibility) {
+		let bodyComp = body.getAttribute('compatibility');
+
+		if (bodyComp === '' || bodyComp == '*')
+			return true;
+
+		let bodyEntries = bodyComp.split(',')
+			.map(e => e.trim());
+		let compEntries = compatibility.split(',')
+			.map(e => e.trim());
+
+		return compEntries.some(e => bodyEntries.some(be => be === e));
+	}
+
 	function getValue(col) {
 
 		for (let i = 0; i < col.children.length; i++) {
@@ -225,6 +262,9 @@
 				return setBool(elem, value);
 			if (elem.classList.contains('wv-field-select'))
 				return setSelectId(elem, value);
+
+			throw new Error(`Could not insert value at ${elem.tagName}`);
+
 		}
 
 		return null;
@@ -325,8 +365,12 @@
 					}
 				}
 
-				let json = JSON.stringify(Array.from(map.entries()));
-				return navigator.clipboard.writeText(json);
+				let obj = {
+					compatibility: body.getAttribute('compatibility'),
+					data: Array.from(map.entries())
+				};
+
+				return navigator.clipboard.writeText(JSON.stringify(obj));
 			}
 		}
 		return null;
@@ -362,6 +406,11 @@
 		}
 		else if (mouseOverRow) {
 			return mouseOverRow.parentElement;
+		}
+
+		var rows = document.getElementsByClassName('row-selected');
+		if (rows && rows.length > 0 && rows.every(r => r.parentElement === rows[0].parentElement)) {
+			return rows[0].parentElement;
 		}
 		return null;
 	}
@@ -445,6 +494,7 @@
 		let node = row.cloneNode(true);
 		node.classList.remove("d-none");
 
+		resetDisabled(node);
 		addRowEvents(node);
 		replaceIds(node);
 
@@ -486,6 +536,27 @@
 	function addDeleteButtonEvets(node) {
 		for (let delBtn of node.getElementsByClassName('editable-grid-delete-button')) {
 			addDeleteCallback(delBtn);
+		}
+	}
+
+	function setDisabled(node) {
+		for (let input of node.getElementsByTagName('input')) {
+			input.setAttribute('disabled', true);
+		}
+
+		for (let sel of node.getElementsByTagName('select')) {
+			sel.setAttribute('disabled', true);
+		}
+	}
+
+	function resetDisabled(node) {
+
+		for (let input of node.getElementsByTagName('input')) {
+			input.removeAttribute('disabled');
+		}
+
+		for (let sel of node.getElementsByTagName('select')) {
+			sel.removeAttribute('disabled');
 		}
 	}
 

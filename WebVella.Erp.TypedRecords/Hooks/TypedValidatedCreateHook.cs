@@ -13,7 +13,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
     {
         protected override string ActionNameInPastTense => "created";
 
-        protected override List<ValidationError> Validate(T record, Entity entity)
+        protected override List<ValidationError> Validate(T record, Entity entity, RecordCreatePageModel pageModel)
             => ValidationService.ValidateOnCreate(record);
 
         public virtual IActionResult? OnPostCreateRecord(T record, Entity entity, RecordCreatePageModel pageModel)
