@@ -3,7 +3,6 @@
 /// Your code goes below
 ///////////////////////////////////////////////////////////////////////////////////
 {
-	// TODO: find a way to load all scripts at once after page is load + ugglify scripts
 
 	let usedIds = new Set();
 
@@ -23,25 +22,25 @@
 	}
 
 	// initialize select2 fields
-	for (let elem of document.getElementsByClassName('wv-field-select')) {
+	//for (let elem of document.getElementsByClassName('wv-field-select')) {
 
-		if (elem.parentElement.parentElement?.tagName === 'TR') {
+	//	if (elem.parentElement.parentElement?.tagName === 'TR') {
 
-			let row = elem.parentElement.parentElement;
+	//		let row = elem.parentElement.parentElement;
 
-			if (row.parentElement.parentElement.classList.contains('editable-grid') && !row.classList.contains('d-none')) {
-				let body = row.parentElement;
+	//		if (row.parentElement.parentElement.classList.contains('editable-grid') && !row.classList.contains('d-none')) {
+	//			let body = row.parentElement;
 
-				deleteScripts(row);
+	//			deleteScripts(row);
 
-				let node = performClone(row);
-				if (node) {
-					body.removeChild(row);
-					body.appendChild(node);
-				}
-			}
-		}
-	}
+	//			let node = performClone(row);
+	//			if (node) {
+	//				body.removeChild(row);
+	//				body.appendChild(node);
+	//			}
+	//		}
+	//	}
+	//}
 
 	for (let table of document.getElementsByClassName('editable-grid')) {
 
@@ -50,6 +49,10 @@
 				setDisabled(tr);
 			}
 		}
+
+		let body = table.getElementsByTagName('tbody')[0];
+		updateFieldNames(body);
+
 	}
 
 	// initialize document events
@@ -75,6 +78,7 @@
 					let rows = body.getElementsByClassName('row-selected');
 					for (let row of rows)
 						row.parentElement.removeChild(row);
+					updateFieldNames(body);
 				}
 			}
 			else if (e.key == 'c') {
@@ -93,6 +97,7 @@
 							let rows = body.getElementsByClassName('row-selected');
 							for (let row of rows)
 								body.removeChild(row);
+							updateFieldNames(body);
 						});
 					}
 				}
@@ -135,6 +140,7 @@
 												e.after(node);
 												e = node;
 											}
+											updateFieldNames(body);
 										}
 
 									}
@@ -229,6 +235,49 @@
 			.map(e => e.trim());
 
 		return compEntries.some(e => bodyEntries.some(be => be === e));
+	}
+
+	function updateFieldNames(body) {
+
+		if (!body) return;
+
+		let idx = 0;
+
+		for (let elem of body.getElementsByTagName('TR')) {
+			if (!elem.classList.contains('d-none')) {
+
+				for (let select of elem.getElementsByTagName('select')) {
+					updateFieldName(select, idx);
+				}
+
+				for (let input of elem.getElementsByTagName('input')) {
+					updateFieldName(input, idx);
+				}
+				idx++;
+			}
+		}
+	}
+
+	function updateFieldName(elem, idx) {
+		if (elem.hasAttribute('name'))
+			setFieldName(elem, 'name', idx);
+
+		if (elem.hasAttribute('data-field-name'))
+			setFieldName(elem, 'data-field-name', idx);
+	}
+
+	function setFieldName(elem, attribute, idx) {
+		var oldVal = elem.getAttribute(attribute);
+		if (oldVal === undefined || oldVal === null || oldVal === '') return;
+
+		let start = oldVal.lastIndexOf('[');
+		if (start < 0)
+			elem.setAttribute(attribute, oldVal.concat(`[${idx}]`));
+		else if (oldVal.charAt(oldVal.length - 1) == ']') {
+
+			let val = oldVal.substring(0, start).concat(`[${idx}]`);
+			elem.setAttribute(attribute, val);
+		}
 	}
 
 	function getValue(col) {
@@ -460,10 +509,8 @@
 
 	function addAddCallback(btn) {
 
-		// TODO remove this after refactoring page scripts
 		if (btn.getAttribute('listener') !== 'true') {
 
-			// TODO remove this after refactoring page scripts
 			btn.setAttribute('listener', 'true');
 
 			btn.addEventListener('click', () => {
@@ -476,13 +523,13 @@
 
 	function addNew(body) {
 
-		// TODO check if body even supports insert a new item
-
 		clearAllSelections();
 		let node = performClone(body.children[0]);
 
-		if(node)
+		if (node) {
 			body.appendChild(node);
+			updateFieldNames(body);
+		}
 	}
 
 	function performClone(row) {
@@ -507,21 +554,27 @@
 
 	function handleSelect2Elements(node) {
 
-		let selects = node.getElementsByTagName('select');
-		for (let n of selects) {
-			$(n).select2();
+		// TODO check this code
+
+		for (let n of node.getElementsByClassName('wv-field-select')) {
+			SelectInlineEditInit(field.id, field.name, )
 		}
 
-		let select2Containers = node.getElementsByClassName('select2');
-		for (let n of select2Containers)
-			n.setAttribute('style', null);
+		//let selects = node.getElementsByTagName('select');
+		//for (let n of selects) {
+		//	$(n).select2();
+		//}
 
-		let toDelete = node.getElementsByClassName('select2-container--bootstrap4');
-		for (let n of toDelete)
-			n.parentElement.removeChild(n);
+		//let select2Containers = node.getElementsByClassName('select2');
+		//for (let n of select2Containers)
+		//	n.setAttribute('style', null);
 
-		for (let n of select2Containers)
-			n.classList.add('select2-container--bootstrap4');
+		//let toDelete = node.getElementsByClassName('select2-container--bootstrap4');
+		//for (let n of toDelete)
+		//	n.parentElement.removeChild(n);
+
+		//for (let n of select2Containers)
+		//	n.classList.add('select2-container--bootstrap4');
 	}
 
 	function deleteScripts(node) {
@@ -574,7 +627,6 @@
 	}
 
 	function addRowEvents(row) {
-		// TODO remove this after refactoring page scripts
 
 		if (row.getAttribute('mouse-events') !== true && !row.classList.contains('d-none')) {
 
@@ -598,7 +650,6 @@
 
 		let row = getParentTableRow(btn);
 
-		// TODO remove this after refactoring page scripts
 		if (row && !row.classList.contains('d-none') && btn.getAttribute('listener') !== 'true') {
 
 			btn.setAttribute('listener', 'true');
@@ -609,6 +660,7 @@
 				let row = getParentTableRow(btn);
 				if (row) {
 					row.parentElement.removeChild(row);
+					updateFieldNames(row.parentElement);
 				}
 			});
 		}

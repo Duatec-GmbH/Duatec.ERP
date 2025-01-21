@@ -44,9 +44,10 @@ namespace WebVella.Erp.TypedRecords.Common
         internal static EntityRecord? Insert(string entity, EntityRecord rec)
         {
             var recMan = new RecordManager();
-            var id = Guid.NewGuid();
 
-            rec["id"] = id;
+            if(!rec.Properties.TryGetValue("id", out var val) || val is not Guid)
+                rec["id"] = Guid.NewGuid();
+
             var result = recMan.CreateRecord(entity, rec);
 
             return result.Success

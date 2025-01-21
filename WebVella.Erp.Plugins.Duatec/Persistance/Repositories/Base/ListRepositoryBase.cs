@@ -38,7 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
             return base.Delete(id);
         }
 
-        public TEntry? Insert(TEntry record)
+        public TEntry? InsertEntry(TEntry record)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(EntryEntity, record));
 
         public TEntry? FindEntry(Guid id, string select = "*")

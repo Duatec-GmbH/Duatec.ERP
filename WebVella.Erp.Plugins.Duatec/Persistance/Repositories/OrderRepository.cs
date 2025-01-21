@@ -34,6 +34,36 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return FindManyByQuery(query, select);
         }
 
+        public OrderEntry? FindEntryByOrderAndArticle(Guid orderId, Guid articleId, Guid? excludedId = null, string select = "*")
+        {
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.AND,
+                SubQueries =
+                [
+                    new QueryObject()
+                    {
+                        QueryType = QueryType.EQ,
+                        FieldName = OrderEntry.Fields.Order,
+                        FieldValue = orderId,
+                    },
+                    new QueryObject()
+                    {
+                        QueryType = QueryType.EQ,
+                        FieldName = OrderEntry.Fields.Article,
+                        FieldValue = articleId,
+                    }
+                ]
+            };
+            if (excludedId.HasValue && excludedId != Guid.Empty)
+                query.SubQueries.Add(ExcludeIdQuery(excludedId.Value));
+
+            return FindEntryByQuery(query, select);
+        }
+
+        public List<OrderEntry> FindManyEntriesByOrder(Guid orderId, string select = "*")
+            => FindManyEntriesBy(OrderEntry.Fields.Order, orderId, select);
+
         public List<OrderEntry> FindManyEntriesByProject(Guid projectId, string select = "*")
         {
             var query = OrdersByProjectQuery(projectId);

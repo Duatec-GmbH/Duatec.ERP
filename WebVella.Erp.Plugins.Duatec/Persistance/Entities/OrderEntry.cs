@@ -40,5 +40,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get(Fields.Amount, decimal.MinValue);
             set => Properties[Fields.Amount] = value;
         }
+
+        public Article? GetArticle()
+            => GetSingleByRelation<Article>(Relations.Article);
+
+        public Order? GetOrder()
+            => GetSingleByRelation<Order>(Relations.Order);
     }
 }

@@ -62,7 +62,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
             {
                 foreach(var rec in entries)
                 {
-                    if (RepositoryService.PartListRepository.Insert(rec) == null)
+                    if (RepositoryService.PartListRepository.InsertEntry(rec) == null)
                         throw new DbException($"Could not create part list entries");
                 }
             }

@@ -12,6 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string Supplier = "order_supplier";
             public const string Project = "order_project";
+            public const string Entries = OrderEntry.Relations.Order;
         }
 
         public static class Fields
@@ -40,5 +41,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get<Guid>(Fields.Project);
             set => Properties[Fields.Project] = value;
         }
+
+
+        public IEnumerable<OrderEntry> GetEntries()
+            => GetManyByRelation<OrderEntry>(Relations.Entries);
+
+
+        public void SetEntries(IEnumerable<OrderEntry> entries)
+            => SetRelationValues(Relations.Entries, entries);
     }
 }
