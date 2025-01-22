@@ -23,6 +23,15 @@
     var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
     var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
 
+    var allowedComponents = new string[]
+    {
+        typeof(PcFieldText).FullName,
+        typeof(PcFieldSelect).FullName,
+        typeof(PcFieldCheckbox).FullName,
+        typeof(PcFieldNumber).FullName,
+        // TODO make possible for other fields
+    };
+
     var tableClass = "table editable-grid";
     var divClass = "erp-list table-responsive-md";
 
@@ -37,11 +46,13 @@
 
     if(!string.IsNullOrWhiteSpace(options.Class))
         divClass += $" {options.Class}";
+
+    var tableId = options.Id.HasValue ? options.Id.Value : Guid.NewGuid();
 }
 
 @if ((bool)ViewBag.IsVisible)
 {
-    <wv-div class="@divClass" id="table-@(options.Id)">
+    <wv-div class="@divClass" id="table-@(tableId)">
 
         @if (options.HasAddButton)
         {
@@ -53,7 +64,7 @@
                        style=@style>
             </wv-button>            
         }
-        <wv-table class="@tableClass" id="@options.Id">
+        <wv-table class="@tableClass" id="@tableId">
             @if (options.HasThead)
             {
                 <wv-thead>
@@ -78,17 +89,18 @@
                 paste="@options.AllowPaste.ToString().ToLower()" 
                 delete="@options.AllowDelete.ToString().ToLower()" 
                 add="@options.AllowAdd.ToString().ToLower()">
-            @{
+                @{
 
-                if(options.AllowCopy || options.AllowPaste)
-                    await CreateRow(new EntityRecord(), true);
+                    if(options.AllowCopy || options.AllowPaste)
+                        await CreateRow(new EntityRecord());
 
-                foreach (var rec in records)
-                    await CreateRow(rec, false);
+                    for(var i = 0; i < records.Count; i++)
+                        await CreateRow(records[i], i);
+                    
 
-                async Task CreateRow(EntityRecord record, bool isDummy)
+                async Task CreateRow(EntityRecord record, int idx = -1)
                 {
-                    var rowClass = isDummy ? "d-none" : string.Empty;
+                    var rowClass = idx < 0 ? "d-none" : string.Empty;
                     
                     <wv-tr class="@rowClass">
                         @for (var i = 1; i <= options.VisibleColumns; i++)
@@ -103,24 +115,34 @@
                             var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
 
                             <wv-td width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" width="@columnWidth" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
-                                @{
-                                    foreach (var childNode in columnChildNodes)
-                                    {
-                                        var nodeComponentName = "";
-                                        if (childNode != null)
+                                    @{
+                                        foreach (var childNode in columnChildNodes)
                                         {
-                                            var nameArray = childNode.ComponentName.Split('.');
-                                            nodeComponentName = nameArray[nameArray.Length - 1];
-                                        }
-                                        if (!String.IsNullOrWhiteSpace(nodeComponentName))
-                                        {
-                                            var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
-                                            var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
-                                            pcContext.DataModel.SetRowRecord(record);
-                                            @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
+                                            var nodeComponentName = "";
+                                            if (childNode != null)
+                                            {
+                                                var nameArray = childNode.ComponentName.Split('.');
+                                                nodeComponentName = nameArray[nameArray.Length - 1];
+                                            }
+                                            if (!String.IsNullOrWhiteSpace(nodeComponentName))
+                                            {
+                                                if (!allowedComponents.Contains(childNode.ComponentName))
+                                                    throw new NotSupportedException($"Editable grid does not support '{childNode.ComponentName}' yet");
+
+                                                var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
+
+                                                if (idx >= 0)
+                                                    childOptions["name"] = $"{childOptions["name"]}[{idx}]";
+
+                                                var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
+                                                pcContext.DataModel.SetRowRecord(record);
+
+
+                                                @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
+                                            }
+ 
                                         }
                                     }
-                                }
                             </wv-td>
                         }
 
@@ -131,7 +153,7 @@
                                 + $"width:{actionColumnWidth};";
 
                             <wv-td style="@style">
-                                <button class="wv-button btn btn-sm btn-red text-nowrap w-100 editable-grid-delete-button">
+                                <button class="btn btn-sm btn-red text-nowrap w-100 editable-grid-delete-button" type="button">
                                     <i class="far fa-trash-alt icon"></i>
                                     Delete
                                 </button>

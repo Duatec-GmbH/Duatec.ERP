@@ -1,10 +1,10 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class WarehouseRepository : ListRepositoryBase<Warehouse, WarehouseLocation>
+    internal class WarehouseRepository : TypedListRepositoryBase<Warehouse, WarehouseLocation>
     {
         protected override string EntryParentIdPath => WarehouseLocation.Fields.Warehouse;
 

@@ -1,11 +1,11 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Util;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class PartListRepository : ListRepositoryBase<PartList, PartListEntry>
+    internal class PartListRepository : TypedListRepositoryBase<PartList, PartListEntry>
     {
         protected override string EntryParentIdPath => PartListEntry.Fields.PartList;
 

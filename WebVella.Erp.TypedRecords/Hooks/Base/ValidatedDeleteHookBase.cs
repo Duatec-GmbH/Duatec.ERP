@@ -23,7 +23,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
             var entity = GetEntity(pageModel);
             var record = MapRecord(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
 
-            if (!record.Properties.TryGetValue("id", out var objId))
+            if (!record.Properties.ContainsKey("id"))
                 record.Properties["id"] = pageModel.RecordId;
 
             var errors = new List<ValidationError>();

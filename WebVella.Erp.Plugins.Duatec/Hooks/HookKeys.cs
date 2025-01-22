@@ -102,6 +102,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
         public static class Order
         {
             public const string Create = "order_create";
+            public const string Update = "order_update";
         }
     }
 }

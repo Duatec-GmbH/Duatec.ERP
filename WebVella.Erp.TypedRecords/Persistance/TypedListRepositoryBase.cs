@@ -1,12 +1,10 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Plugins.Duatec.Util;
-using WebVella.Erp.TypedRecords;
-using WebVella.Erp.TypedRecords.Persistance;
+using WebVella.Erp.TypedRecords.Common;
 
-namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
+namespace WebVella.Erp.TypedRecords.Persistance
 {
-    internal abstract class ListRepositoryBase<TList, TEntry> : TypedRepositoryBase<TList>
+    public abstract class TypedListRepositoryBase<TList, TEntry> : TypedRepositoryBase<TList>
         where TList : TypedEntityRecordWrapper, new()
         where TEntry : TypedEntityRecordWrapper, new()
     {
@@ -20,18 +18,17 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
         public override TList? Delete(Guid id)
         {
             var children = FindManyEntriesBy(EntryParentIdPath, id)
-                .ToIdArray();
+                .Select(e => e.Id!.Value)
+                .ToArray();
 
             if(children.Length > 0)
             {
                 TList? result = null;
-                Transactional.TryExecute(() =>
-                {
-                    var recMan = new RecordManager();
-                    recMan.DeleteRecords(EntryEntity, children);
+                var recMan = new RecordManager();
 
-                    result = base.Delete(id);
-                });
+                recMan.DeleteRecords(EntryEntity, children);
+
+                result = base.Delete(id);
                 return result;
             }
 
@@ -52,6 +49,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base
 
         public TEntry? DeleteEntry(Guid id)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Delete(EntryEntity, id));
+
+        public List<TEntry> DeleteManyEntries(params Guid[] ids)
+            => RepositoryHelper.DeleteMany(EntryEntity, ids).Select(MapEntryToTypedRecord).ToList()!;
 
         protected TEntry? FindEntryBy(string property, object? value, string select = "*")
             => MapEntryToTypedRecord(RepositoryHelper.FindBy(EntryEntity, property, value, select));

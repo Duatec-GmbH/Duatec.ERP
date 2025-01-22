@@ -64,6 +64,15 @@ namespace WebVella.Erp.TypedRecords.Common
                 ? response.Object.Data.Single() : null;
         }
 
+        internal static List<EntityRecord> DeleteMany(string entity, params Guid[] ids)
+        {
+            var recMan = new RecordManager();
+
+            var response = recMan.DeleteRecords(entity, ids);
+
+            return response.Object?.Data ?? [];
+        }
+
         internal static bool ExistsByQuery(string entity, QueryObject query)
         {
             var recMan = new RecordManager();

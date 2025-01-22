@@ -22,6 +22,9 @@ namespace WebVella.Erp.TypedRecords.Persistance
         public virtual T? Delete(Guid id)
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Delete(Entity, id));
 
+        public virtual List<T> DeleteMany(params Guid[] ids)
+            => RepositoryHelper.DeleteMany(Entity, ids).Select(TypedEntityRecordWrapper.Wrap<T>).ToList();
+
         protected T? FindBy(string property, object? value, string select = "*")
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.FindBy(Entity, property, value, select));
 

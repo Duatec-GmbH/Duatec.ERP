@@ -1,10 +1,10 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
+using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class OrderRepository : ListRepositoryBase<Order, OrderEntry>
+    internal class OrderRepository : TypedListRepositoryBase<Order, OrderEntry>
     {
         protected override string EntryParentIdPath => OrderEntry.Fields.Order;
 
