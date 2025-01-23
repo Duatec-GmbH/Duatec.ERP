@@ -293,8 +293,6 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #endregion
-
                     #region << ***Delete entity*** Entity Name: user_file >>
                     {
                         {

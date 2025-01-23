@@ -45,8 +45,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
                 .Distinct()
                 .ToArray();
 
-
-
             var typeLookup = new ArticleRepository(recMan).FindMany($"*, ${Article.Relations.Type}.*", articleIds)
                 .ToDictionary(kp => kp.Key, kp => kp.Value?.GetArticleType());
 
@@ -58,10 +56,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
 
             foreach (var error in GetArticleUniquenessErrors(entries, articleIds))
                 yield return error;
-
-            foreach (var error in GetConsistencyErrors(recMan, record, entries))
-                yield return error;
-
         }
 
         private static IEnumerable<ValidationError> GetEntryFormatErrors(OrderEntry entry, int idx, ArticleType? type)
@@ -71,20 +65,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
                 result.Add(Error(OrderEntry.Fields.Article, idx, "Order entry 'article' is required"));
 
             return result;
-        }
-
-        private static IEnumerable<ValidationError> GetConsistencyErrors(RecordManager recMan, Order record, List<OrderEntry> entries)
-        {
-            var demandedArticles = new PartListRepository(recMan).FindManyEntriesByProject(record.Project, true)
-                .Select(ple => ple.ArticleId)
-                .Distinct()
-                .ToHashSet();
-
-            for (var i = 0; i < entries.Count; i++)
-            {
-                if (!demandedArticles.Contains(entries[i].Article))
-                    yield return Error(OrderEntry.Fields.Article, i, "There is no demand for this article (does not occure in any active part list)");
-            }
         }
 
         private static IEnumerable<ValidationError> GetArticleUniquenessErrors(List<OrderEntry> entries, Guid[] articleIds)
@@ -119,7 +99,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
             return validator.Validate(entry.Amount, $"{OrderEntry.Fields.Amount}[{idx}]");
         }
 
-        private static ValidationError Error(string field, int index, string errorMessage)
+        protected static ValidationError Error(string field, int index, string errorMessage)
             => new($"{field}[{index}]", errorMessage);
 
         private static Guid GetId(string value)

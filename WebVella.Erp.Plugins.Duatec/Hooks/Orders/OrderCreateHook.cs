@@ -20,6 +20,26 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
         protected override List<ValidationError> ValidateRecord(Order record)
             => ValidationService.ValidateOnCreate(record);
 
+        protected override IEnumerable<ValidationError> ValidateEntries(Order record, List<OrderEntry> entries)
+        {
+            foreach (var error in base.ValidateEntries(record, entries))
+                yield return error;
+
+            var partListRepos = new PartListRepository();
+
+            var demands = partListRepos.FindManyEntriesByProject(record.Project, true)
+                .Select(ple => ple.ArticleId)
+                .Distinct()
+                .ToHashSet();
+
+            for(var i = 0; i < entries.Count; i++)
+            {
+                var article = entries[i].Article;
+                if (article != Guid.Empty && !demands.Contains(article))
+                    yield return Error(OrderEntry.Fields.Article, i, "There is no demand for this article");
+            }
+        }
+
         protected override void PersistanceAction(Order record, List<OrderEntry> entries)
         {
             foreach (var entry in entries)
