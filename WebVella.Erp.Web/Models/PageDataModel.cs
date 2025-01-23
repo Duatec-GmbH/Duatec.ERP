@@ -573,114 +573,108 @@ namespace WebVella.Erp.Web.Models
 				//try to get property with full key (after http post object are entered with no . split
 				if (parentPropName == "Record" && idx == 1)
 				{
-					var testName = propName.Trim()[7..]; //cut the Record. in front
-					if (pName != testName)
+					if (pName.StartsWith('$') && !currentPropDict.ContainsKey(pName))
 					{
-						if (!pName.StartsWith('$') && currentPropDict.TryGetValue(testName, out var mpv))
-							return mpv.Value;
-						else if (pName.StartsWith('$'))
+						var entity = properties["Entity"].Value as Entity;
+						var result = properties["Record"].Value;
+
+						for(var i = 1; i < completePropChain.Count; i++)
 						{
-							var entity = properties["Entity"].Value as Entity;
-							var result = properties["Record"].Value;
+							var accessor = completePropChain[i];
 
-							for(var i = 1; i < completePropChain.Count; i++)
+							if (accessor.StartsWith('$'))
 							{
-								var accessor = completePropChain[i];
+								// makes indexing optional between relations
+								if (result is List<EntityRecord> l && l.Count == 1)
+									result = l[0];
 
-								if (accessor.StartsWith('$'))
+								if (result is not EntityRecord rec)
+									throw new PropertyDoesNotExistException($"Property not found");
+
+								var path = completePropChain[1..(i + 1)]
+									.Select(p => p.Replace(" ", string.Empty).Trim())
+									.Where(p => p != "[0]");
+								var currentPath = string.Join('.', path);
+
+								if (alreadyResolvedRecordProperties.TryGetValue(currentPath, out var tuple))
 								{
-									// makes indexing optional between relations
-									if (result is List<EntityRecord> l && l.Count == 1)
-										result = l[0];
+									result = tuple.Result;
+									entity = tuple.Entity;
+									continue;
+								}
 
-									if (result is not EntityRecord rec)
-										throw new PropertyDoesNotExistException($"Property not found");
+								var relName = accessor[1..];
+								var relResponse = relMan.Read(relName);
 
-									var path = completePropChain[1..(i + 1)]
-										.Select(p => p.Replace(" ", string.Empty).Trim())
-										.Where(p => p != "[0]");
-									var currentPath = string.Join('.', path);
+								if (!relResponse.Success || relResponse.Object == null)
+									throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
 
-									if (alreadyResolvedRecordProperties.TryGetValue(currentPath, out var tuple))
+								var (entityId, nextIdName, sourceIdName) = OtherSideOfRelation(relResponse.Object, entity);
+								var resultEntity = entMan.ReadEntity(entityId)?.Object
+									?? throw new PropertyDoesNotExistException($"Invalid relation '{relName}'");
+
+								List<EntityRecord> resultList;
+								if (rec.Properties.TryGetValue(accessor, out var obj) && obj is List<EntityRecord> recList)
+									resultList = recList;
+								else
+								{
+									// automatically load values
+									var nextIdValue = rec[sourceIdName];
+									var queryObject = new QueryObject()
 									{
-										result = tuple.Result;
-										entity = tuple.Entity;
-										continue;
-									}
+										FieldName = nextIdName,
+										FieldValue = nextIdValue,
+										QueryType = QueryType.EQ
+									};
 
-									var relName = accessor[1..];
-									var relResponse = relMan.Read(relName);
+									var response = new RecordManager()
+										.Find(new EntityQuery(resultEntity.Name, "*", queryObject));
 
-									if (!relResponse.Success || relResponse.Object == null)
-										throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
+									if (!response.Success || response.Object.Data == null)
+										throw new PropertyDoesNotExistException(response.Message);
 
-									var (entityId, nextIdName, sourceIdName) = OtherSideOfRelation(relResponse.Object, entity);
-									var resultEntity = entMan.ReadEntity(entityId)?.Object
-										?? throw new PropertyDoesNotExistException($"Invalid relation '{relName}'");
-
-									List<EntityRecord> resultList;
-									if (rec.Properties.TryGetValue(accessor, out var obj) && obj is List<EntityRecord> recList)
-										resultList = recList;
-									else
-									{
-										// automatically load values
-										var nextIdValue = rec[sourceIdName];
-										var queryObject = new QueryObject()
-										{
-											FieldName = nextIdName,
-											FieldValue = nextIdValue,
-											QueryType = QueryType.EQ
-										};
-
-										var response = new RecordManager()
-											.Find(new EntityQuery(resultEntity.Name, "*", queryObject));
-
-										if (!response.Success || response.Object.Data == null)
-											throw new PropertyDoesNotExistException(response.Message);
-
-										resultList = response.Object.Data;
-									}
-
-									alreadyResolvedRecordProperties[currentPath] = (resultList, resultEntity);
-									entity = resultEntity;
-									result = resultList;
+									resultList = response.Object.Data;
 								}
-								else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
-								{
-									if (result is not List<EntityRecord> records)
-										throw new PropertyDoesNotExistException("Property not found");
 
-									var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
-									if (index >= records.Count)
-										return null;
-									result = records[index];
-								}
-								else if(result is EntityRecord rec)
-								{
-									if (i < completePropChain.Count - 1)
-										throw new PropertyDoesNotExistException("Property not found");
-
-									result = rec[accessor];										
-								}
-								else if(result is List<EntityRecord> recList)
-								{
-									if (i < completePropChain.Count - 1)
-										throw new PropertyDoesNotExistException("Property not found");
-
-									if (recList.Count == 0)
-										return null;
-
-									var first = recList[0];
-									if (recList.Count == 1)
-										return first?[accessor];
-
-									return recList.Select(r => r?[accessor])
-										.ToList();
-								}
-								else throw new PropertyDoesNotExistException($"Property not found");
+								alreadyResolvedRecordProperties[currentPath] = (resultList, resultEntity);
+								entity = resultEntity;
+								result = resultList;
 							}
-							return result;
+							else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
+							{
+								if (result is not List<EntityRecord> records)
+									throw new PropertyDoesNotExistException("Property not found");
+
+								var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
+								if (index >= records.Count)
+									return null;
+								result = records[index];
+							}
+							else if(result is EntityRecord rec)
+							{
+								if (i < completePropChain.Count - 1)
+									throw new PropertyDoesNotExistException("Property not found");
+
+								result = rec[accessor];										
+							}
+							else if(result is List<EntityRecord> recList)
+							{
+								if (i < completePropChain.Count - 1)
+									throw new PropertyDoesNotExistException("Property not found");
+
+								if (recList.Count == 0)
+									return null;
+
+								var first = recList[0];
+								if (recList.Count == 1)
+									return first?[accessor];
+
+								return recList.Select(r => r?[accessor])
+									.ToList();
+							}
+							else throw new PropertyDoesNotExistException($"Property not found");
 						}
+						return result;
 					}
 				}
 

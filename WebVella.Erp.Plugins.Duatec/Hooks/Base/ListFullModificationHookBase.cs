@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Base
 
         protected override IActionResult? OnValidationSuccess(TCollection record, Entity entity, TModel pageModel)
         {
-            record.Id = Guid.NewGuid();
+            record.Id ??= Guid.NewGuid();
             var entries = GetEntries(pageModel);
 
             void TransactionalAction()
