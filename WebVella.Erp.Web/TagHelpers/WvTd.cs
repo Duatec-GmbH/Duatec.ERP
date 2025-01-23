@@ -5,7 +5,7 @@ using WebVella.TagHelpers.Models;
 
 namespace WebVella.Erp.Web.TagHelpers
 {
-	[HtmlTargetElement("wv-td", ParentTag = "wv-tr")]
+	[HtmlTargetElement("wv-td")]
 	public class WvTd : TagHelperBase
 	{
 		protected override string OutputTag => "td";
@@ -31,10 +31,32 @@ namespace WebVella.Erp.Web.TagHelpers
 			if (!string.IsNullOrEmpty(Width)) 
 				result = result.Append($"width:{Width}");
 
-			result = AppendString(result, HorizontalAlignment.ToStyle());
-			result = AppendString(result, VerticalAlignment.ToStyle());
+			result = AppendString(result, ToStyle(HorizontalAlignment));
+			result = AppendString(result, ToStyle(VerticalAlignment));
 
 			return result;
+		}
+
+		private static string ToStyle(WvHorizontalAlignmentType horizontalAlign)
+		{
+			return horizontalAlign switch
+			{
+				WvHorizontalAlignmentType.Left => "text-align:left",
+				WvHorizontalAlignmentType.Center => "text-align:center",
+				WvHorizontalAlignmentType.Right => "text-align:right",
+				_ => string.Empty
+			};
+		}
+
+		private static string ToStyle(WvVerticalAlignmentType horizontalAlign)
+		{
+			return horizontalAlign switch
+			{
+				WvVerticalAlignmentType.Top => "vertical-align:top",
+				WvVerticalAlignmentType.Middle => "vertical-align:middle",
+				WvVerticalAlignmentType.Bottom => "vertical-align:bottom",
+				_ => string.Empty
+			};
 		}
 	}
 }

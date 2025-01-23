@@ -113,7 +113,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             rec["available"] = available;
             rec["demand"] = demand;
             rec[InventoryReservationEntry.Fields.Amount] = Math.Min(available, demand);
-            rec["auto_reserve"] = true;
 
             return rec;
         }

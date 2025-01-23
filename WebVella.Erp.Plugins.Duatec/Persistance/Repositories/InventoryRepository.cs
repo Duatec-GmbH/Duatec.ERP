@@ -54,7 +54,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             unmodified.Amount -= record.Amount;
 
             if (Update(unmodified) != null)
+            {
+                record.Id = Guid.NewGuid();
                 return Insert(record);
+            }
             return null;
         }
 

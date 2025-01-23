@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using WebVella.TagHelpers.Models;
 
 namespace WebVella.Erp.Web.TagHelpers
@@ -43,29 +42,7 @@ namespace WebVella.Erp.Web.TagHelpers
 			}
 		}
 
-		internal static string ToStyle(this WvHorizontalAlignmentType horizontalAlign)
-		{
-			return horizontalAlign switch
-			{
-				WvHorizontalAlignmentType.Left => "text-align:left",
-				WvHorizontalAlignmentType.Center => "text-align:center",
-				WvHorizontalAlignmentType.Right => "text-align:right",
-				_ => string.Empty
-			};
-		}
-
-		internal static string ToStyle(this WvVerticalAlignmentType horizontalAlign)
-		{
-			return horizontalAlign switch
-			{
-				WvVerticalAlignmentType.Top => "vertical-align:top",
-				WvVerticalAlignmentType.Middle => "vertical-align:middle",
-				WvVerticalAlignmentType.Bottom => "vertical-align:bottom",
-				_ => string.Empty
-			};
-		}
-
-		internal static void SetAttribute(this TagHelperOutput output, string key, string? value)
+		public static void SetAttribute(this TagHelperOutput output, string key, string? value)
 		{
 			if (!string.IsNullOrEmpty(value))
 				output.Attributes.SetAttribute(key, value);

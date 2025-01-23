@@ -52,7 +52,7 @@
 
 @if ((bool)ViewBag.IsVisible)
 {
-    <wv-div class="@divClass" id="table-@(tableId)">
+    <div class="@divClass" id="table-@(tableId)">
 
         @if (options.HasAddButton)
         {
@@ -64,10 +64,10 @@
                        style=@style>
             </wv-button>            
         }
-        <wv-table class="@tableClass" id="@tableId">
+        <table class="@tableClass" id="@tableId">
             @if (options.HasThead)
             {
-                <wv-thead>
+                <thead>
                     @foreach (var column in columns)
                     {
                         var style = string.IsNullOrWhiteSpace(column.Width)
@@ -81,9 +81,9 @@
                     {
                         <wv-th style="width:@actionColumnWidth;"></wv-th>
                     }
-                </wv-thead>
+                </thead>
             }
-            <wv-tbody 
+            <tbody
                 compatibility="@options.Compatibility" 
                 copy="@options.AllowCopy.ToString().ToLower()" 
                 paste="@options.AllowPaste.ToString().ToLower()" 
@@ -102,7 +102,7 @@
                 {
                     var rowClass = idx < 0 ? "d-none" : string.Empty;
                     
-                    <wv-tr class="@rowClass">
+                    <tr class="@rowClass">
                         @for (var i = 1; i <= options.VisibleColumns; i++)
                         {
                             var optType = options.GetType();
@@ -148,29 +148,25 @@
 
                         @if(options.HasDeleteButtons)
                         {
-                            var style = $"{WvVerticalAlignmentType.Middle.ToStyle()};"
-                                + $"{WvHorizontalAlignmentType.Right.ToStyle()};"
-                                + $"width:{actionColumnWidth};";
+                            var style = $"vertical-align:middle;text-align:right;width:{actionColumnWidth};";
 
-                            <wv-td style="@style">
+                            <td style="@style">
                                 <button class="btn btn-sm btn-red text-nowrap w-100 editable-grid-delete-button" type="button">
                                     <i class="far fa-trash-alt icon"></i>
                                     Delete
                                 </button>
-                            </wv-td>
+                            </td>
                         }
-                    </wv-tr>
+                    </tr>
                     }
                 }
-            </wv-tbody>
-        </wv-table>
+            </tbody>
+        </table>
 
         @if (!string.IsNullOrWhiteSpace(meta.ServiceJsUrl))
         {
             <script src=@meta.ServiceJsUrl></script>
         }
 
-    </wv-div>
-
-
+    </div>
 }

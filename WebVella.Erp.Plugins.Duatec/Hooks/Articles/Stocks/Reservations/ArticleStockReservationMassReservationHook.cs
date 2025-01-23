@@ -14,7 +14,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
 {
-    using FormValues = (string PartNumber, decimal Amount, bool PerformReserve);
+    using FormValues = (string PartNumber, decimal Amount);
 
 
     [HookAttachment(key: HookKeys.Article.Stock.Reservations.MassReservation)]
@@ -24,15 +24,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         {
             var partNumbers = pageModel.GetFormValues("part_number");
             var amounts = GetAmounts(pageModel);
-            var autoReserve = GetReserveFlags(pageModel);
 
             if (partNumbers.Distinct().Count() != partNumbers.Length)
                 return pageModel.BadRequest();
 
             if (!pageModel.RecordId.HasValue)
-                return pageModel.BadRequest();
-
-            if(partNumbers.Length != autoReserve.Length)
                 return pageModel.BadRequest();
 
             if (partNumbers.Length != amounts.Length)
@@ -57,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             {
                 var amount = amounts[i];
                 if (amount > 0m)
-                    formData.Add((partNumbers[i], amount, autoReserve[i]));
+                    formData.Add((partNumbers[i], amount));
             }
 
             var transactionalAction = BuildAction(recMan, projectId, formData);
@@ -97,7 +93,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 list ??= CreateList(projectId);
                 var listId = (Guid)list["id"];
 
-                foreach (var (partNumber, amount, performReserve) in formData)
+                foreach (var (partNumber, amount) in formData)
                 {
                     var article = articleLookup[partNumber]
                         ?? throw new DbException($"Article with part number '{partNumber}' does not exist");
@@ -115,17 +111,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                     var reservation = reservationsLookup[partNumber];
 
                     if (reservation == null)
-                        CreateNewEntry(listId, (Guid)article["id"], amount);
+                        CreateNewEntry(listId, article.Id!.Value, amount);
                     else
                         IncreaseAmount(reservation, amount);
 
-                    if (performReserve)
-                    {
-                        var availableInventory = availableInventoryLookup[partNumber];
-                        var reservedInventory = reservedInventoryLookup[partNumber];
+                    var availableInventory = availableInventoryLookup[partNumber];
+                    var reservedInventory = reservedInventoryLookup[partNumber];
 
-                        ReserveInventory(recMan, projectId, amount, availableInventory, reservedInventory);
-                    }
+                    ReserveInventory(recMan, projectId, amount, availableInventory, reservedInventory);
                 }
             };
         }
