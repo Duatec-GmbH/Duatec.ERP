@@ -19,6 +19,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         protected override string ActionNameInPastTense => "moved";
 
+        protected override IActionResult? OnPreValidate(InventoryEntry record, Entity entity, RecordManagePageModel pageModel)
+        {
+            var unchanged = new InventoryRepository().Find(record.Id!.Value)!;
+
+            record.Project = unchanged.Project;
+            record.Article = unchanged.Article;
+
+            return null;
+        }
+
 
         protected override List<ValidationError> Validate(InventoryEntry record, Entity entity, RecordManagePageModel pageModel)
         {
