@@ -2,9 +2,9 @@
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.TypedRecords;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
 {
@@ -22,7 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Manufacturers
                 return false;
 
             var dto = new DataPortalManufacturerDto(eplanId, rec.ShortName, rec.Name, null, null);
-            return RepositoryService.CompanyRepository.CanBeImported(dto);
+            return new CompanyRepository().CanBeImported(dto);
         }
     }
 }

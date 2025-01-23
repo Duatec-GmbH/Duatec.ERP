@@ -1,5 +1,4 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
