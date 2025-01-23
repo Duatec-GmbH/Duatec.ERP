@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.TypedRecords.Attributes;
@@ -52,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             return record.Order != Guid.Empty
                 && record.Article != Guid.Empty
-                && RepositoryService.OrderRepository.FindEntryByOrderAndArticle(record.Order, record.Article, id) != null;
+                && new OrderRepository().FindEntryByOrderAndArticle(record.Order, record.Article, id) != null;
         }
     }
 }

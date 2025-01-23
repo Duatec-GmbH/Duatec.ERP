@@ -6,6 +6,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Hooks;
@@ -44,8 +45,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             if (Array.Exists(amounts, d => d < 0))
                 return Error(pageModel, "Amount must be greater than or equal '0'");
 
+            var recMan = new RecordManager();
+            var projectRepo = new ProjectRepository(recMan);
+
             var projectId = pageModel.RecordId.Value;
-            if (!RepositoryService.ProjectRepository.Exists(projectId))
+            if (!projectRepo.Exists(projectId))
                 return pageModel.BadRequest();
 
             var formData = new List<FormValues>(partNumbers.Length);
@@ -57,7 +61,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                     formData.Add((partNumbers[i], amount, autoReserve[i]));
             }
 
-            var transactionalAction = BuildAction(projectId, formData);
+            var transactionalAction = BuildAction(recMan, projectId, formData);
 
             if (Transactional.TryExecute(pageModel, transactionalAction))
                 return Success(pageModel);
@@ -66,7 +70,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         }
 
 
-        private static Action BuildAction(Guid projectId, List<FormValues> formData)
+        private static Action BuildAction(RecordManager recMan, Guid projectId, List<FormValues> formData)
         {
             var partNumbersToProcess = formData
                 .Select(v => v.PartNumber)
@@ -76,15 +80,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
-            var articleLookup = RepositoryService.ArticleRepository.FindMany(select, partNumbersToProcess);
-            var reservationsLookup = RepositoryService.InventoryRepository
+            var articleRepo = new ArticleRepository(recMan);
+            var inventoryRepo = new InventoryRepository(recMan);
+
+            var articleLookup = articleRepo.FindMany(select, partNumbersToProcess);
+            var reservationsLookup = inventoryRepo
                 .FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);
 
-            var demandLookup = GetDemandLookup(projectId, articleLookup, reservationsLookup);
-            var reservedInventoryLookup = GetInventoryLookup(projectId, articleLookup);
-            var availableInventoryLookup = GetInventoryLookup(null, articleLookup);
+            var demandLookup = GetDemandLookup(recMan, projectId, articleLookup, reservationsLookup);
+            var reservedInventoryLookup = GetInventoryLookup(recMan, projectId, articleLookup);
+            var availableInventoryLookup = GetInventoryLookup(recMan, null, articleLookup);
 
-            var list = RepositoryService.InventoryRepository.FindReservationListByProject(projectId);
+            var list = inventoryRepo.FindReservationListByProject(projectId);
 
             return () =>
             {
@@ -118,29 +125,34 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                         var availableInventory = availableInventoryLookup[partNumber];
                         var reservedInventory = reservedInventoryLookup[partNumber];
 
-                        ReserveInventory(projectId, amount, availableInventory, reservedInventory);
+                        ReserveInventory(recMan, projectId, amount, availableInventory, reservedInventory);
                     }
                 }
             };
         }
 
 
-        private static void ReserveInventory(Guid projectId, decimal amount, InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
+        private static void ReserveInventory(RecordManager recMan, Guid projectId, decimal amount, InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
             var available = availableEntries.Aggregate(0m, (sum, entry) => sum + entry.Amount);
             if (amount == available)
-                MoveAll(projectId, availableEntries);
+                MoveAll(recMan, projectId, availableEntries);
             else
             {
                 var availableWithinLocation = availableEntries.Where(
                     ae => Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
-                var current = Reserve(projectId, amount, 0m, availableWithinLocation);
-                Reserve(projectId, amount, current, availableEntries);
+                var current = Reserve(recMan, projectId, amount, 0m, availableWithinLocation);
+                Reserve(recMan, projectId, amount, current, availableEntries);
             }
         }
 
-        private static decimal Reserve(Guid projectId, decimal amount, decimal current, IEnumerable<InventoryEntry> availableEntries)
+        private static decimal Reserve(
+            RecordManager recMan,
+            Guid projectId, 
+            decimal amount, 
+            decimal current, 
+            IEnumerable<InventoryEntry> availableEntries)
         {
             if (current >= amount)
                 return current;
@@ -167,33 +179,33 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 }
             }
 
-            MoveAll(projectId, toMove);
+            MoveAll(recMan, projectId, toMove);
             if (toSplit != null)
             {
-                MovePartial(projectId, toSplit, amount - current);
+                MovePartial(recMan, projectId, toSplit, amount - current);
                 current = 0;
             }
             return current;
         }
 
-        private static void MoveAll(Guid projectId, IEnumerable<InventoryEntry> entries)
+        private static void MoveAll(RecordManager recMan, Guid projectId, IEnumerable<InventoryEntry> entries)
         {
             foreach (var entry in entries)
-                Move(projectId, entry);
+                Move(recMan, projectId, entry);
         }
 
-        private static void Move(Guid projectId, InventoryEntry entry)
+        private static void Move(RecordManager recMan, Guid projectId, InventoryEntry entry)
         {
             entry.Project = projectId;
-            if (RepositoryService.InventoryRepository.Update(entry) == null)
+            if (new InventoryRepository(recMan).Update(entry) == null)
                 throw new DbException("Could not move inventory entry");
         }
 
-        private static void MovePartial(Guid projectId, InventoryEntry entry, decimal amount)
+        private static void MovePartial(RecordManager recMan, Guid projectId, InventoryEntry entry, decimal amount)
         {
             entry.Project = projectId;
             entry.Amount = amount;
-            if (RepositoryService.InventoryRepository.MovePartial(entry) == null)
+            if (new InventoryRepository(recMan).MovePartial(entry) == null)
                 throw new DbException("Could not partially move inventory entry");
         }
 
@@ -236,14 +248,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
             return rec;
         }
 
-        private static Dictionary<string, InventoryEntry[]> GetInventoryLookup(Guid? projectId, Dictionary<string, Article?> articleLookup)
+        private static Dictionary<string, InventoryEntry[]> GetInventoryLookup(
+            RecordManager recMan,
+            Guid? projectId, 
+            Dictionary<string, Article?> articleLookup)
         {
             var ids = articleLookup.Values
                 .Where(a => a?.Id != null)
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var available = RepositoryService.InventoryRepository.FindManyByProject(projectId)
+            var available = new InventoryRepository(recMan).FindManyByProject(projectId)
                 .Where(i => ids.Contains(i.Article))
                 .GroupBy(i => i.Article)
                 .ToDictionary(g => g.Key, g => g.ToArray());
@@ -262,6 +277,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
         }
 
         private static Dictionary<string, decimal> GetDemandLookup(
+            RecordManager recMan,
             Guid projectId, 
             Dictionary<string, Article?> articleLookup, 
             Dictionary<string, InventoryReservationEntry?> reservationLookup)
@@ -271,7 +287,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks.Reservations
                 .Select(a => a!.Id!.Value)
                 .ToHashSet();
 
-            var totalDemands = RepositoryService.PartListRepository.FindManyEntriesByProject(projectId, true)
+            var totalDemands = new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
                 .Where(e => ids.Contains(e.ArticleId))
                 .GroupBy(e => e.ArticleId)
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));

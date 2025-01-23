@@ -8,6 +8,9 @@ namespace WebVella.Erp.TypedRecords.Persistance
         where TList : TypedEntityRecordWrapper, new()
         where TEntry : TypedEntityRecordWrapper, new()
     {
+        protected TypedListRepositoryBase(RecordManager? recordManager = null)
+            : base(recordManager) { }
+
         protected string EntryEntity { get; } = new TEntry().EntityName;
 
         protected abstract string EntryParentIdPath { get; }
@@ -36,46 +39,46 @@ namespace WebVella.Erp.TypedRecords.Persistance
         }
 
         public TEntry? InsertEntry(TEntry record)
-            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(EntryEntity, record));
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(RecordManager, EntryEntity, record));
 
         public TEntry? FindEntry(Guid id, string select = "*")
-            => MapEntryToTypedRecord(RepositoryHelper.Find(EntryEntity, id, select));
+            => MapEntryToTypedRecord(RepositoryHelper.Find(RecordManager, EntryEntity, id, select));
 
         public bool EntryExists(Guid id)
-            => RepositoryHelper.Exists(EntryEntity, "id", id);
+            => RepositoryHelper.Exists(RecordManager, EntryEntity, "id", id);
 
         public TEntry? UpdateEntry(TEntry record)
-            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Update(EntryEntity, record));
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Update(RecordManager, EntryEntity, record));
 
         public TEntry? DeleteEntry(Guid id)
-            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Delete(EntryEntity, id));
+            => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Delete(RecordManager, EntryEntity, id));
 
         public List<TEntry> DeleteManyEntries(params Guid[] ids)
-            => RepositoryHelper.DeleteMany(EntryEntity, ids).Select(MapEntryToTypedRecord).ToList()!;
+            => RepositoryHelper.DeleteMany(RecordManager, EntryEntity, ids).Select(MapEntryToTypedRecord).ToList()!;
 
         protected TEntry? FindEntryBy(string property, object? value, string select = "*")
-            => MapEntryToTypedRecord(RepositoryHelper.FindBy(EntryEntity, property, value, select));
+            => MapEntryToTypedRecord(RepositoryHelper.FindBy(RecordManager, EntryEntity, property, value, select));
 
         protected bool EntryExistsBy(string property, object? value)
-            => RepositoryHelper.Exists(EntryEntity, property, value);
+            => RepositoryHelper.Exists(RecordManager, EntryEntity, property, value);
 
         protected List<TEntry> FindManyEntriesBy(string property, object? value, string select = "*")
-            => RepositoryHelper.FindManyBy(EntryEntity, property, value, select).Select(MapEntryToTypedRecord).ToList()!;
+            => RepositoryHelper.FindManyBy(RecordManager, EntryEntity, property, value, select).Select(MapEntryToTypedRecord).ToList()!;
 
         protected Dictionary<TKey, TEntry?> FindManyEntriesByUniqueArgs<TKey>(string property, string select = "*", params TKey[] args)
             where TKey : notnull
         {
-            return RepositoryHelper.FindManyByUniqueArgs(EntryEntity, property, select, args)
+            return RepositoryHelper.FindManyByUniqueArgs(RecordManager, EntryEntity, property, select, args)
                 .ToDictionary(kp => kp.Key, kp => MapEntryToTypedRecord(kp.Value));
         }
 
         protected bool EntryExistsByQuery(QueryObject query)
-            => RepositoryHelper.ExistsByQuery(EntryEntity, query);
+            => RepositoryHelper.ExistsByQuery(RecordManager, EntryEntity, query);
 
         protected List<TEntry> FindManyEntriesByQuery(QueryObject query, string select = "*")
-            => RepositoryHelper.FindManyByQuery(EntryEntity, query, select).Select(MapEntryToTypedRecord).ToList()!;
+            => RepositoryHelper.FindManyByQuery(RecordManager, EntryEntity, query, select).Select(MapEntryToTypedRecord).ToList()!;
 
         protected TEntry? FindEntryByQuery(QueryObject query, string select = "*")
-            => MapEntryToTypedRecord(RepositoryHelper.FindByQuery(EntryEntity, query, select));
+            => MapEntryToTypedRecord(RepositoryHelper.FindByQuery(RecordManager, EntryEntity, query, select));
     }
 }

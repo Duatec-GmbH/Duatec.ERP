@@ -3,7 +3,7 @@ using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
 {
-    internal static class EplanXmlService
+    internal static class EplanXml
     {
         public static List<EplanArticleDto> GetArticles(Stream stream)
         {

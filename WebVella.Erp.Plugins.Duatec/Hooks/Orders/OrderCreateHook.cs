@@ -4,7 +4,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Validation;
 using WebVella.Erp.Web.Hooks;
@@ -25,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
             foreach (var entry in entries)
                 entry.Order = record.Id!.Value;
 
-            var repository = RepositoryService.OrderRepository;
+            var repository = new OrderRepository();
 
             if (repository.Insert(record) == null)
                 throw new DbException("Could not create order record");

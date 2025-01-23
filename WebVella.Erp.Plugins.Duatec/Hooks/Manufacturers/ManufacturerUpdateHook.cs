@@ -5,6 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
@@ -13,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
     {
         protected override IActionResult? OnPreValidate(Company record, Entity? entity, RecordManagePageModel pageModel)
         {
-            var oldRec = RepositoryService.CompanyRepository.Find(record.Id!.Value);
+            var oldRec = new CompanyRepository().Find(record.Id!.Value);
             record.EplanId = oldRec!.EplanId;
 
             return null;

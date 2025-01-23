@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 {
@@ -23,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
 
         protected override IActionResult? OnPreValidate(PartListEntry record, Entity entity, RecordManagePageModel pageModel)
         {
-            var rec = RepositoryService.PartListRepository.FindEntry(pageModel.RecordId!.Value)!;
+            var rec = new PartListRepository().FindEntry(pageModel.RecordId!.Value)!;
             record.PartListId = rec.PartListId;
 
             return null;

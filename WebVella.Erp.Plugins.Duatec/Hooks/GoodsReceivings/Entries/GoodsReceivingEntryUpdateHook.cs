@@ -5,6 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
@@ -22,8 +23,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 
         protected override IActionResult? OnPreValidate(GoodsReceivingEntry record, Entity? entity, RecordManagePageModel pageModel)
         {
-            var oldRec = RepositoryService.GoodsReceivingRepository.FindEntry(record.Id!.Value);
+            var oldRec = new GoodsReceivingRepository().FindEntry(record.Id!.Value);
             record.GoodsReceiving = oldRec!.GoodsReceiving;
+
             if (record.Article == Guid.Empty)
                 record.Article = oldRec.Article;
 

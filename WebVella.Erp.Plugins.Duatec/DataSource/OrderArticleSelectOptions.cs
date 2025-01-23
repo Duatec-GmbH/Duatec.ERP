@@ -1,6 +1,7 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -27,12 +28,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!orderId.HasValue || orderId.Value == Guid.Empty)
                 return new List<SelectOption>();
 
-            var projectId = RepositoryService.OrderRepository.Find(orderId.Value)?.Project;
+            var recMan = new RecordManager();
+
+            var projectId = new OrderRepository(recMan).Find(orderId.Value)?.Project;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new List<SelectOption>();
 
-            return RepositoryService.PartListRepository
-                .FindManyEntriesByProject(projectId.Value, true, $"*, ${PartListEntry.Relations.Article}.*")
+            return new PartListRepository(recMan).FindManyEntriesByProject(projectId.Value, true, $"*, ${PartListEntry.Relations.Article}.*")
                 .Select(ple => ple.GetArticle())
                 .Where(a => a != null && a.Id.HasValue)
                 .DistinctBy(a => a!.Id)

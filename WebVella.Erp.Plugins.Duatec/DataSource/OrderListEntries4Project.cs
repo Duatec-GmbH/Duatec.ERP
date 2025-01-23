@@ -1,5 +1,7 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords;
 
@@ -143,18 +145,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private IEnumerable<EntityRecord> GetRecords(Guid projectId)
         {
-            if (RepositoryService.ProjectRepository.Find(projectId) is not Project project)
+            var recMan = new RecordManager();
+
+            if (new ProjectRepository(recMan).Find(projectId) is not Project project)
                 return [];
 
-            var projectOrderEntries = RepositoryService.OrderRepository.FindManyEntriesByProject(projectId);
-            var orderEntries = RepositoryService.OrderRepository.FindManyByProject(projectId)
+            var orderRepository = new OrderRepository(recMan);
+
+            var projectOrderEntries = orderRepository.FindManyEntriesByProject(projectId);
+            var orderEntries = orderRepository.FindManyByProject(projectId)
                 .ToDictionary(r => r.Id!.Value, r => r);
 
             var orderedAmountLookup = projectOrderEntries
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var receivedAmountLookup = RepositoryService.GoodsReceivingRepository.FindManyEntriesByProject(projectId)
+            var receivedAmountLookup = new GoodsReceivingRepository(recMan).FindManyEntriesByProject(projectId)
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
@@ -162,15 +168,15 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[r.Order]).ToList());
 
-            var inventoryAmountLookup = RepositoryService.InventoryRepository.FindManyReservationEntriesByProject(projectId)
+            var inventoryAmountLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var partListEntries = !ArticleId.HasValue
-                ? RepositoryService.PartListRepository.FindManyEntriesByProject(projectId, true)
-                : RepositoryService.PartListRepository.FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true);
+                ? new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
+                : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true);
 
-            var articleLookup = GetArticleLookup(partListEntries);
+            var articleLookup = GetArticleLookup(recMan, partListEntries);
 
             return partListEntries
                 .GroupBy(ple => ple.ArticleId)
@@ -180,7 +186,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .OrderBy(r => GetArticle(r).PartNumber.ToString());
         }
 
-        private static Dictionary<Guid, Article?> GetArticleLookup(List<PartListEntry> partListEntries)
+        private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, List<PartListEntry> partListEntries)
         {
             const string select = $"*, " +
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
@@ -191,7 +197,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .Distinct()
                 .ToArray();
 
-            return RepositoryService.ArticleRepository.FindMany(select, articleIds);
+            return new ArticleRepository(recMan).FindMany(select, articleIds);
         }
 
         private static EntityRecord RecordFromGroup(

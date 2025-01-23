@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 return Error(pageModel, "File not found");
 
             using var stream = new MemoryStream(file.GetBytes());
-            var articles = EplanXmlService.GetArticles(stream);
+            var articles = EplanXml.GetArticles(stream);
 
             fsRepository.Delete(filePath);
 

@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
@@ -26,7 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
-            var project = RepositoryService.ProjectRepository.Find(projectId.Value);
+            var project = new ProjectRepository().Find(projectId.Value);
             if (project == null)
                 return new EntityRecordList();
 

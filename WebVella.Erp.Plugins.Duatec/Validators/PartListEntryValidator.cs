@@ -1,5 +1,7 @@
-﻿using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.TypedRecords.Attributes;
@@ -38,12 +40,14 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             if (record.ArticleId == Guid.Empty)
                 result.Add(new ValidationError(Fields.Article, "Part list entry 'article' is required"));
 
-            if (result.Count == 0 && RepositoryService.PartListRepository.EntryExistsWithinList(record.PartListId, record.ArticleId, id))
+            var recMan = new RecordManager();
+
+            if (result.Count == 0 && new PartListRepository(recMan).EntryExistsWithinList(record.PartListId, record.ArticleId, id))
                 result.Add(new ValidationError(Fields.Article, "Part list entry with the same article already exists within part list"));
 
             if (record.ArticleId != Guid.Empty)
             {
-                var type = RepositoryService.ArticleRepository.FindTypeByArticleId(record.ArticleId);
+                var type = new ArticleRepository(recMan).FindTypeByArticleId(record.ArticleId);
                 var amountValidator = GetNumberFormatValidator(Fields.Amount, type);
 
                 result.AddRange(amountValidator.Validate(record.Amount, Fields.Amount));

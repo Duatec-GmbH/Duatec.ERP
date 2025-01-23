@@ -2,6 +2,7 @@
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.Utilities;
@@ -21,14 +22,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
                 PutInvalidArg(pageModel);
             else
             {
+                var repo = new CompanyRepository();
+
                 var manufacturer = EplanDataPortal.GetManufacturers()
                     .SingleOrDefault(m => m.EplanId == eplanId);
 
                 if (manufacturer == null)
                     PutInvalidArg(pageModel);
-                else if (!RepositoryService.CompanyRepository.CanBeImported(manufacturer))
+                else if (!repo.CanBeImported(manufacturer))
                     pageModel.PutMessage(ScreenMessageType.Error, $"Can not import manufacturer '{manufacturer}' due to unique constraints.");
-                else Import(pageModel, manufacturer);
+                else Import(repo, pageModel, manufacturer);
             }
 
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
@@ -42,11 +45,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
             return null;
         }
 
-        private static void Import(BaseErpPageModel pageModel, DataPortalManufacturerDto manufacturer)
+        private static void Import(CompanyRepository repo, BaseErpPageModel pageModel, DataPortalManufacturerDto manufacturer)
         {
             void TransactionalAction()
             {
-                if (RepositoryService.CompanyRepository.Insert(manufacturer) == null)
+                if (repo.Insert(manufacturer) == null)
                     throw new DbException($"Failed to import manufacturer '{manufacturer.Name}'");
             }
 

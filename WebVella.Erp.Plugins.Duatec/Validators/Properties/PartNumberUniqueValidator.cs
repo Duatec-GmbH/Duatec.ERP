@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Util;
 
@@ -44,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && RepositoryService.CompanyRepository.FindByShortName(shortName) == null)
+                    if (shortNameErrors.Count == 0 && new CompanyRepository().FindByShortName(shortName) == null)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
 
                     if (checkPartNumberWithEplanApi && EplanDataPortal.GetArticleByPartNumber(value) != null)

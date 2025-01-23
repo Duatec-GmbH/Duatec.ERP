@@ -8,6 +8,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class CompanyRepository : TypedRepositoryBase<Company>
     {
+        public CompanyRepository(RecordManager? recordManager = null)
+            : base(recordManager) { }
+
         public Dictionary<string, Company?> FindManyByShortName(params string[] shortNames)
             => FindManyByUniqueArgs(Company.Fields.ShortName, "*", shortNames);
 

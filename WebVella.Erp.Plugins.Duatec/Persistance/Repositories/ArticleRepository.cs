@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
@@ -9,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class ArticleRepository : TypedRepositoryBase<Article>
     {
-        public static class Alternatives
+        private static class Alternatives
         {
             public const string Entity = "article_equivalent";
 
@@ -19,6 +20,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 public const string Target = "target";
             }
         }
+
+        public ArticleRepository(RecordManager? recordManager = null)
+            : base(recordManager) { }
 
         public bool Exists(long eplanId)
             => ExistsBy(Article.Fields.EplanId, eplanId.ToString());

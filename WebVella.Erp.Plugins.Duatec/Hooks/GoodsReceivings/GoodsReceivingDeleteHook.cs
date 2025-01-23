@@ -2,11 +2,11 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
 {
@@ -15,9 +15,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings
     {
         protected override IActionResult? OnPostModification(GoodsReceiving record, Entity? entity, BaseErpPageModel pageModel)
         {
-            if (RepositoryService.GoodsReceivingRepository.FindManyEntriesByGoodsReceiving(record.Id!.Value, "id").Count > 0)
+            var repo = new GoodsReceivingRepository();
+
+            if (repo.FindManyEntriesByGoodsReceiving(record.Id!.Value, "id").Count > 0)
                 pageModel.PutMessage(ScreenMessageType.Error, "Can not delete goods receiving when there are still items atached");
-            else if (RepositoryService.GoodsReceivingRepository.Delete(record.Id.Value) == null)
+            else if (repo.Delete(record.Id.Value) == null)
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete goods receiving");
             else
                 return pageModel.LocalRedirect(pageModel.EntityListUrl());

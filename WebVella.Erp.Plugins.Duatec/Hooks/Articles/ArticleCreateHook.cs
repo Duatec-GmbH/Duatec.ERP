@@ -5,6 +5,7 @@ using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
@@ -15,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             var shortName = record.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
-            record.ManufacturerId = RepositoryService.CompanyRepository.FindByShortName(shortName)!.Id!.Value;
+            record.ManufacturerId = new CompanyRepository().FindByShortName(shortName)!.Id!.Value;
 
             return base.OnValidationSuccess(record, entity, pageModel);
         }

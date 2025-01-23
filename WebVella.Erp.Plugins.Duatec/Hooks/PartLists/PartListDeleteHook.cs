@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
 {
@@ -14,7 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
     {
         protected override IActionResult? OnValidationSuccess(PartList record, Entity entity, BaseErpPageModel pageModel)
         {
-            if (RepositoryService.PartListRepository.Delete(record.Id!.Value) == null)
+            if (new PartListRepository().Delete(record.Id!.Value) == null)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));

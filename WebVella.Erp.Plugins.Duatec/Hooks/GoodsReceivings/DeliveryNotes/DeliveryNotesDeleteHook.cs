@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
@@ -20,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
             if (!Guid.TryParse(pageModel.GetFormValue("id"), out Guid deliveryNoteId))
                 return pageModel.BadRequest();
 
-            var rec = RepositoryService.GoodsReceivingRepository.DeleteDeliveryNote(deliveryNoteId);
+            var rec = new GoodsReceivingRepository().DeleteDeliveryNote(deliveryNoteId);
 
             if(rec == null)
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete delivery note");

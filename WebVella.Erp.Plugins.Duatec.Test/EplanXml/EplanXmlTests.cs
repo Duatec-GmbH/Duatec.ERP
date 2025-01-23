@@ -21,7 +21,7 @@
 
             using var stream = StreamFromString(text);
 
-            var result = Services.EplanXmlService.GetArticles(stream);
+            var result = Services.EplanXml.GetArticles(stream);
 
             Assert.That(result, Has.Count.EqualTo(1));
             var article = result[0];

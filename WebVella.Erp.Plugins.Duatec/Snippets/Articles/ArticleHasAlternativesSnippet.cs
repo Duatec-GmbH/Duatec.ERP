@@ -1,4 +1,4 @@
-﻿using WebVella.Erp.Plugins.Duatec.Services;
+﻿using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 
@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Articles
         {
             if (!pageModel.RecordId.HasValue)
                 return false;
-            return RepositoryService.ArticleRepository.ArticleHasAlternatives(pageModel.RecordId.Value);
+            return new ArticleRepository().ArticleHasAlternatives(pageModel.RecordId.Value);
         }
     }
 }

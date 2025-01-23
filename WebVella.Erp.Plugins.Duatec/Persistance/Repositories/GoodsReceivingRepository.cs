@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
-using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
@@ -10,6 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class GoodsReceivingRepository : TypedListRepositoryBase<GoodsReceiving, GoodsReceivingEntry>
     {
+        public GoodsReceivingRepository(RecordManager? recordManager = null)
+            : base(recordManager) { }
+
         protected override string EntryParentIdPath => GoodsReceivingEntry.Fields.GoodsReceiving;
 
         public List<GoodsReceiving> FindManyByOrder(Guid orderId, string select = "*")
@@ -17,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<GoodsReceiving> FindManyByProject(Guid projectId, string select = "*")
         {
-            var subQuery = RepositoryService.OrderRepository.FindManyByProject(projectId, $"id")
+            var subQuery = new OrderRepository(RecordManager).FindManyByProject(projectId, $"id")
                 .Select(o => o.Id!.Value)
                 .Distinct()
                 .Select(oId => new QueryObject()

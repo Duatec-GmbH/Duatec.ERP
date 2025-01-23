@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
@@ -67,13 +69,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         {
             void TransactionalAction()
             {
+                var recMan = new RecordManager();
+
+                var companyRepo = new CompanyRepository(recMan);
+                var articleRepo = new ArticleRepository(recMan);
+
                 foreach (var article in articles)
                 {
-                    var manufacturer = RepositoryService.CompanyRepository.FindByShortName(article!.Manufacturer.ShortName)?.Id
-                        ?? RepositoryService.CompanyRepository.Insert(article.Manufacturer)?.Id
+                    var manufacturer = companyRepo.FindByShortName(article!.Manufacturer.ShortName)?.Id
+                        ?? companyRepo.Insert(article.Manufacturer)?.Id
                         ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
 
-                    if (RepositoryService.ArticleRepository.Insert(article, manufacturer, types[article.PartNumber]) == null)
+                    if (articleRepo.Insert(article, manufacturer, types[article.PartNumber]) == null)
                         throw new DbException($"Could not create article '{article.PartNumber}'.");
                 }
             }

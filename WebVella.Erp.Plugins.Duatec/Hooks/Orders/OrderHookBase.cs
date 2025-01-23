@@ -1,7 +1,8 @@
-﻿using WebVella.Erp.Exceptions;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
 using WebVella.Erp.Web.Models;
 
@@ -37,12 +38,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
 
         protected override IEnumerable<ValidationError> ValidateEntries(Order record, List<OrderEntry> entries)
         {
+            var recMan = new RecordManager();
+
             var articleIds = entries.Select(e => e.Article)
                 .Where(g => g != Guid.Empty)
                 .Distinct()
                 .ToArray();
 
-            var typeLookup = RepositoryService.ArticleRepository.FindMany($"*, ${Article.Relations.Type}.*", articleIds)
+
+
+            var typeLookup = new ArticleRepository(recMan).FindMany($"*, ${Article.Relations.Type}.*", articleIds)
                 .ToDictionary(kp => kp.Key, kp => kp.Value?.GetArticleType());
 
             for (var i = 0; i < entries.Count; i++)
@@ -54,7 +59,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
             foreach (var error in GetArticleUniquenessErrors(entries, articleIds))
                 yield return error;
 
-            foreach (var error in GetConsistencyErrors(record, entries))
+            foreach (var error in GetConsistencyErrors(recMan, record, entries))
                 yield return error;
 
         }
@@ -68,9 +73,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
             return result;
         }
 
-        private static IEnumerable<ValidationError> GetConsistencyErrors(Order record, List<OrderEntry> entries)
+        private static IEnumerable<ValidationError> GetConsistencyErrors(RecordManager recMan, Order record, List<OrderEntry> entries)
         {
-            var demandedArticles = RepositoryService.PartListRepository.FindManyEntriesByProject(record.Project, true)
+            var demandedArticles = new PartListRepository(recMan).FindManyEntriesByProject(record.Project, true)
                 .Select(ple => ple.ArticleId)
                 .Distinct()
                 .ToHashSet();

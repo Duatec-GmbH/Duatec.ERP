@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords.Persistance;
 
@@ -6,6 +7,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class WarehouseRepository : TypedListRepositoryBase<Warehouse, WarehouseLocation>
     {
+        public WarehouseRepository(RecordManager? recordManager = null)
+            : base(recordManager) { }
+
         protected override string EntryParentIdPath => WarehouseLocation.Fields.Warehouse;
 
         public bool EntryExistsWithinWarehouse(Guid warehouseId, string designation, Guid? excludedId)

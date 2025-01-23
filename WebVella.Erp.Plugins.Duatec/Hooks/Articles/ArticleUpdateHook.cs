@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
 {
@@ -15,7 +16,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
         protected override IActionResult? OnPostModification(Article record, Entity entity, RecordManagePageModel pageModel)
         {
             var recordId = record.Id!.Value;
-            var oldAlternatives = RepositoryService.ArticleRepository.FindAlternativeIds(recordId);
+            var articleRepo = new ArticleRepository();
+            var oldAlternatives = articleRepo.FindAlternativeIds(recordId);
 
             var currentAlternatives = pageModel.GetFormValue("equivalents")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -35,10 +37,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 void TransactionalAction()
                 {
                     foreach (var id in toDelete)
-                        RepositoryService.ArticleRepository.DeleteAlternativeMapping(recordId, id);
+                        articleRepo.DeleteAlternativeMapping(recordId, id);
 
                     foreach (var id in toAdd)
-                        RepositoryService.ArticleRepository.InsertAlternativeMapping(recordId, id);
+                        articleRepo.InsertAlternativeMapping(recordId, id);
                 }
 
                 Transactional.TryExecute(pageModel, TransactionalAction);

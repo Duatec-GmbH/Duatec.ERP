@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Orders
             foreach (var entry in entries)
                 entry.Order = record.Id!.Value;
 
-            var repository = RepositoryService.OrderRepository;
+            var repository = new OrderRepository();
 
             if (repository.Update(record) == null)
                 throw new DbException("Could not update order record");

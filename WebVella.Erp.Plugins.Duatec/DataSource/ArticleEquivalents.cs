@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -31,7 +31,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!arguments.TryGetValue(Arguments.Id, out var objId) || objId is not Guid id)
                 return result;
 
-            IEnumerable<Article> articles = RepositoryService.ArticleRepository.FindAlternatives(id, $"*, ${Article.Relations.Manufacturer}.name");
+            IEnumerable<Article> articles = new ArticleRepository()
+                .FindAlternatives(id, $"*, ${Article.Relations.Manufacturer}.name");
 
             var sortBy = (string)arguments[Arguments.SortBy];
             var sortOrder = (string)arguments[Arguments.SortOrder];

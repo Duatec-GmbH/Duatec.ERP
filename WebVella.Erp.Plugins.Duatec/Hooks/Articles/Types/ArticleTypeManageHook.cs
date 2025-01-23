@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Hooks.Base;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
@@ -9,6 +10,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Types
     public class ArticleTypeManageHook : ManageOnListHookBase
     {
         protected override EntityRecord? Find(Guid id)
-            => RepositoryService.ArticleRepository.FindType(id);
+            => new ArticleRepository().FindType(id);
     }
 }

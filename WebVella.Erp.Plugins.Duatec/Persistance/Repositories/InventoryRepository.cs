@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
@@ -9,6 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
     internal class InventoryRepository : TypedRepositoryBase<InventoryEntry>
     {
+        public InventoryRepository(RecordManager? recordManager = null)
+            : base(recordManager) { }
+
         public List<InventoryEntry> FindManyByArticle(Guid articleId)
             => FindManyBy(InventoryEntry.Fields.Article, articleId);
 
