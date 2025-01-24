@@ -8,7 +8,7 @@ namespace WebVella.Erp.TypedRecords.Util
         public static string FancyName(this Entity entity)
             => FancyfyPascalCase(entity.Name);
 
-        private static string FancyfyPascalCase(string text)
+        internal static string FancyfyPascalCase(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return string.Empty;

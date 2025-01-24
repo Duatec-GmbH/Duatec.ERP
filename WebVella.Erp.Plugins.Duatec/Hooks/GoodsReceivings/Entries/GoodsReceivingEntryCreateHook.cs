@@ -13,16 +13,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
     {
         private const string listArg = "grId";
 
-        protected override IActionResult? OnPostModification(GoodsReceivingEntry record, Entity entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnPostCreate(GoodsReceivingEntry record, RecordCreatePageModel pageModel)
         {
-            base.OnPostModification(record, entity, pageModel);
+            base.OnPostCreate(record, pageModel);
 
             var listId = Guid.Parse(pageModel.Request.Query[listArg]!);
             var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
             return pageModel.LocalRedirect(url);
         }
 
-        protected override IActionResult? OnPreValidate(GoodsReceivingEntry record, Entity? entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnPreValidate(GoodsReceivingEntry record, RecordCreatePageModel pageModel)
         {
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();

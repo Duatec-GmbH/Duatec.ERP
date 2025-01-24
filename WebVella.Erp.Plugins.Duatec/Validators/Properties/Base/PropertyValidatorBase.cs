@@ -35,6 +35,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
             return result;
         }
 
-        protected abstract bool CharIsAllowed(char c);
+        protected virtual bool CharIsAllowed(char c) => true;
     }
 }

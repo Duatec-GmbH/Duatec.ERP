@@ -25,6 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Create = "article_stock_create";
                 public const string Update = "article_stock_update";
                 public const string Move = "article_stock_move";
+                public const string TakeOut = "article_stock_take_out";
 
                 public static class Reservations
                 {

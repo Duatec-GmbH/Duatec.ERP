@@ -1,11 +1,10 @@
 ﻿using WebVella.Erp.Eql;
 using WebVella.Erp.Exceptions;
-using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
     internal class NameUniqueValidator(string entity, string entityProperty)
-        : NameFormatValidatorBase(entity, entityProperty, true)
+        : NameFormatValidator(entity, entityProperty, true)
     {
         protected bool RecordExists(string value, Guid id = default)
         {

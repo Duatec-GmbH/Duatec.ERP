@@ -32,7 +32,7 @@
         // TODO make possible for other fields
     };
 
-    var tableClass = "table editable-grid";
+    var tableClass = "table editable-grid table-hover";
     var divClass = "erp-list table-responsive-md";
 
     if (options.Striped)
@@ -73,13 +73,13 @@
                         var style = string.IsNullOrWhiteSpace(column.Width)
                             ? null : $"width:{column.Width};";
 
-                        <wv-th class="@column.Class" style="@style">
+                        <th name="@column.Name" class="@column.Class" style="@style">
                             @column.Label
-                        </wv-th>
+                        </th>
                     }
                     @if (options.HasDeleteButtons)
                     {
-                        <wv-th style="width:@actionColumnWidth;"></wv-th>
+                        <th style="width:@actionColumnWidth;"></th>
                     }
                 </thead>
             }

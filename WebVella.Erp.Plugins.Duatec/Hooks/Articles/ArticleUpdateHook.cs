@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
@@ -12,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
     [HookAttachment(key: HookKeys.Article.Update)]
     internal class ArticleUpdateHook : TypedValidatedUpdateHook<Article>
     {
-        protected override IActionResult? OnPostModification(Article record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnPostUpdate(Article record, RecordManagePageModel pageModel)
         {
             var recordId = record.Id!.Value;
             var articleRepo = new ArticleRepository();
@@ -45,7 +44,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
                 Transactional.TryExecute(pageModel, TransactionalAction);
             }
 
-            return base.OnPostModification(record, entity, pageModel);
+            return base.OnPostUpdate(record, pageModel);
         }
     }
 }

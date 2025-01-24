@@ -11,13 +11,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles
     [HookAttachment(key: HookKeys.Article.Create)]
     public class ArticleCreateHook : TypedValidatedCreateHook<Article>
     {
-        protected override IActionResult? OnValidationSuccess(Article record, Entity entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnValidationSuccess(Article record, RecordCreatePageModel pageModel)
         {
             var shortName = record.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
             record.ManufacturerId = new CompanyRepository().FindByShortName(shortName)!.Id!.Value;
 
-            return base.OnValidationSuccess(record, entity, pageModel);
+            return base.OnValidationSuccess(record, pageModel);
         }
     }
 }

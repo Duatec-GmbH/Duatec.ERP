@@ -14,7 +14,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
 
         protected abstract List<ValidationError> Validate(TRecord record, Entity entity, TModel pageModel);
 
-        protected IActionResult? Execute(TRecord record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)
+        protected virtual IActionResult? Execute(TRecord record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)
         {
             var result = OnPreValidate(record, entity, pageModel);
             if (result != null)

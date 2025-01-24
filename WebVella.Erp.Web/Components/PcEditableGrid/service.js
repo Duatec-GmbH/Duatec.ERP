@@ -412,9 +412,14 @@
 			let result = [];
 
 			for (let h of headers) {
-				let val = h.innerText?.trim();
+				let val;
 
-				if (val === null || val === '')
+				var name = h.getAttribute('name');
+				if (name && name.trim() != '')
+					val = name.trim();
+				else val = h.innerText?.trim();
+
+				if (val === undefined || val === null || val === '')
 					result[result.length] = '';
 				else
 					result[result.length] = val;

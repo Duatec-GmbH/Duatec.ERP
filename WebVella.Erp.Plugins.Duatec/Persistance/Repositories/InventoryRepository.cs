@@ -147,6 +147,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
 #pragma warning disable CA1822 // Mark members as static
+
+        public InventoryBooking? InsertBooking(InventoryBooking record)
+        {
+            record.Amount = Math.Round(record.Amount, 2);
+            return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(record.EntityName, record));
+        }
+
         public InventoryReservationList? FindReservationListByProject(Guid projectId, string select = "*")
         {
             var rec = RepositoryHelper.FindBy(InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);

@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
     [HookAttachment(key: HookKeys.Article.Stock.Create)]
     internal class ArticleStockCreateHook : TypedValidatedCreateHook<InventoryEntry>
     {
-        protected override IActionResult? OnValidationSuccess(InventoryEntry record, Entity entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnValidationSuccess(InventoryEntry record, RecordCreatePageModel pageModel)
         {
             var result = new InventoryRepository().Insert(record);
 
@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
             }
 
-            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(result.Id!.Value));
         }
     }

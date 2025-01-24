@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Models;
@@ -11,9 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists.Entries
     [HookAttachment(key: HookKeys.PartList.Entry.Update)]
     internal class PartListEntryUpdateHook : TypedValidatedUpdateHook<PartListEntry>
     {
-        protected override IActionResult? OnPostModification(PartListEntry record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnPostUpdate(PartListEntry record, RecordManagePageModel pageModel)
         {
-            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
 
             var context = pageModel.ErpRequestContext;
             var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartListId}/detail";

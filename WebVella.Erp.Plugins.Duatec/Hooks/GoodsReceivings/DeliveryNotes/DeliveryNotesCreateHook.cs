@@ -13,18 +13,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.DeliveryNotes
     {
         private const string listArg = "grId";
 
-        protected override IActionResult? OnPostModification(DeliveryNote record, Entity entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnPostCreate(DeliveryNote record, RecordCreatePageModel pageModel)
         {
             var listId = pageModel.Request.Query[listArg];
 
             var context = pageModel.ErpRequestContext;
             var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{listId}/detail";
-            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
 
             return pageModel.LocalRedirect(url);
         }
 
-        protected override IActionResult? OnPreValidate(DeliveryNote record, Entity? entity, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnPreValidate(DeliveryNote record, RecordCreatePageModel pageModel)
         {
             if (!pageModel.Request.Query.TryGetValue(listArg, out var idVal) || !Guid.TryParse(idVal, out var listId))
                 return pageModel.BadRequest();

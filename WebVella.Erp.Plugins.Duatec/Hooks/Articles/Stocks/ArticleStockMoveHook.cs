@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
@@ -8,7 +7,6 @@ using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks;
-using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 {
@@ -19,25 +17,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
 
         protected override string ActionNameInPastTense => "moved";
 
-        protected override List<ValidationError> Validate(InventoryEntry record, Entity entity, RecordManagePageModel pageModel)
+        protected override List<ValidationError> Validate(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
-            var result = base.Validate(record, entity, pageModel);
+            var result = base.Validate(record, unmodified, pageModel);
 
-            var recMan = new RecordManager();
-            var inventoryRepo = new InventoryRepository(recMan);
-            var unchanged = inventoryRepo.Find(record.Id!.Value)!;
-
-            if (OriginAndTargetAreSame(record, unchanged))
+            if (OriginAndTargetAreSame(record, unmodified))
                 result.Add(new ValidationError(string.Empty, "Can not move article without changes at project and/or location"));
 
-            var max = unchanged.Amount;
+            var max = unmodified.Amount;
             var amount = record.Amount;
 
             if (amount >= max + eps)
             {
-                var articleRepo = new ArticleRepository(recMan);
+                var articleRepo = new ArticleRepository();
 
-                var type = articleRepo.FindTypeByArticleId(unchanged.Article)!;
+                var type = articleRepo.FindTypeByArticleId(unmodified.Article)!;
                 var isInt = type.IsInteger;
                 var maxVal = isInt ? $"{max:0}" : $"{max:0.00}";
                 result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {maxVal} {type.Unit}"));
@@ -46,21 +40,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
             return result;
         }
 
-        protected override IActionResult? OnValidationSuccess(InventoryEntry record, Entity entity, RecordManagePageModel pageModel)
+        protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
-            var recMan = new RecordManager();
-            var repo = new InventoryRepository(recMan);
-
-            var unchanged = repo.Find(record.Id!.Value)!;
-
-            var result = record.Amount >= unchanged.Amount - eps
-                ? CompleteMove(repo, record, pageModel)
-                : PartialMove(repo, record, pageModel);
+            var result = record.Amount >= unmodified.Amount - eps
+                ? CompleteMove(record, pageModel)
+                : PartialMove(record, pageModel);
 
             if (result != null)
                 return result;
 
-            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+            pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
 
@@ -72,18 +61,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Articles.Stocks
                 && a.Project.HasValue && a.Project.Value == b.Project!.Value;
         }
 
-        private static LocalRedirectResult? CompleteMove(InventoryRepository inventoryRepo, InventoryEntry record, BaseErpPageModel pageModel)
+        private static LocalRedirectResult? CompleteMove(InventoryEntry record, BaseErpPageModel pageModel)
         {
-            if(inventoryRepo.Update(record) != null)
+            if(new InventoryRepository().Update(record) != null)
                 return null;
 
             pageModel.PutMessage(ScreenMessageType.Error, "Could not update inventory entry");
             return pageModel.LocalRedirect(pageModel.CurrentUrl);
         }
 
-        private static LocalRedirectResult? PartialMove(InventoryRepository inventoryRepo, InventoryEntry record, BaseErpPageModel pageModel)
+        private static LocalRedirectResult? PartialMove(InventoryEntry record, BaseErpPageModel pageModel)
         {
-            if(inventoryRepo.MovePartial(record) != null)
+            if(new InventoryRepository().MovePartial(record) != null)
                 return null;
 
             pageModel.PutMessage(ScreenMessageType.Error, "Could not move inventory entry");
