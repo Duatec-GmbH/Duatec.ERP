@@ -4,7 +4,6 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
 {
@@ -18,17 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.GoodsReceivings.Entries
             var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/goods-receiving/r/{record.GoodsReceiving}/detail";
 
             return pageModel.LocalRedirect(url);
-        }
-
-        protected override IActionResult? OnPreValidate(GoodsReceivingEntry record, Entity? entity, RecordManagePageModel pageModel)
-        {
-            var oldRec = new GoodsReceivingRepository().FindEntry(record.Id!.Value);
-            record.GoodsReceiving = oldRec!.GoodsReceiving;
-
-            if (record.Article == Guid.Empty)
-                record.Article = oldRec.Article;
-
-            return null;
         }
     }
 }

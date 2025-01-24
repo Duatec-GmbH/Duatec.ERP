@@ -8,6 +8,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Manufacturers
 {
+    [Obsolete]
     [HookAttachment(key: HookKeys.Manufacturer.Update)]
     internal class ManufacturerUpdateHook : TypedValidatedUpdateHook<Company>
     {
