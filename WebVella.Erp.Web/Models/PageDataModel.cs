@@ -574,7 +574,7 @@ namespace WebVella.Erp.Web.Models
 				//try to get property with full key (after http post object are entered with no . split
 				if (parentPropName == "Record" && idx == 1)
 				{
-					if (pName.StartsWith('$') && !currentPropDict.ContainsKey(pName))
+					if (pName.StartsWith('$'))
 					{
 						var entity = properties["Entity"].Value as Entity;
 						var result = properties["Record"].Value;
@@ -681,7 +681,7 @@ namespace WebVella.Erp.Web.Models
 
 				if (parentPropName == "RowRecord" && idx == 1)
 				{
-					if (pName.StartsWith('$') && !currentPropDict.ContainsKey(pName))
+					if (pName.StartsWith('$'))
 					{
 						var result = properties["RowRecord"].Value;
 

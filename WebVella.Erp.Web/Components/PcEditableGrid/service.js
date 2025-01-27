@@ -546,28 +546,9 @@
 				n.classList.add('select2-container--bootstrap4');
 		}
 
-		function deleteScripts(node) {
-
-			if (!(node instanceof HTMLElement)) return;
-
-			for (let script of node.getElementsByTagName('script')) {
-				script.parentElement.removeChild(script);
-			}
-		}
-
 		function addDeleteButtonEvents(node) {
 			for (let delBtn of node.getElementsByClassName('editable-grid-delete-button')) {
 				addDeleteCallback(delBtn);
-			}
-		}
-
-		function setDisabled(node) {
-			for (let input of node.getElementsByTagName('input')) {
-				input.setAttribute('disabled', true);
-			}
-
-			for (let sel of node.getElementsByTagName('select')) {
-				sel.setAttribute('disabled', true);
 			}
 		}
 

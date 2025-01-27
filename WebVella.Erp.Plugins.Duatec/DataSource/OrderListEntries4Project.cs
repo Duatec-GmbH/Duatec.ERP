@@ -165,7 +165,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var ordersLookup = projectOrderEntries
                 .GroupBy(r => r.Article)
-                .ToDictionary(g => g.Key, g => g.Select(r => orderEntries[r.Order]).ToList());
+                .ToDictionary(g => g.Key, g => g
+                    .Select(r => orderEntries.TryGetValue(r.Order, out var v) ? v : null)
+                    .Where(v => v != null)
+                    .ToList()!);
 
             var inventoryAmountLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
                 .GroupBy(r => r.Article)
@@ -180,7 +183,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return partListEntries
                 .GroupBy(ple => ple.ArticleId)
                 .Select(g => RecordFromGroup(g, project, 
-                    articleLookup, ordersLookup, 
+                    articleLookup, ordersLookup!, 
                     orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
                 .OrderBy(r => GetArticle(r).PartNumber.ToString());
         }

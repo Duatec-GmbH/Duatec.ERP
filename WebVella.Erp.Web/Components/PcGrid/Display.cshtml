@@ -17,6 +17,7 @@
 	var pageSize = (int)ViewBag.PageSize;
 	var records = (List<EntityRecord>)ViewBag.Records;
 	var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
+    var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
 }
 
 <wv-grid striped="@options.Striped" small="@options.Small" bordered="@options.Bordered" borderless="@options.Borderless"
@@ -123,4 +124,9 @@
 		</tr>
 	</tbody>
 	}
+
 </wv-grid>
+@if (!string.IsNullOrWhiteSpace(meta.ServiceJsUrl))
+{
+    <script src=@meta.ServiceJsUrl></script>
+}

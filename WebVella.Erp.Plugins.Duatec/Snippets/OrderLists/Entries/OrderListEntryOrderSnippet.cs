@@ -19,7 +19,17 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
             if (orders == null || orders.Count == 0)
                 return string.Empty;
 
-            return string.Join(", ", orders.Select(o => o[Order.Fields.Number].ToString()).Order());
+            var links = orders
+                .OrderBy(o => o[Order.Fields.Number].ToString())
+                .Select(AnchorTag);
+
+            return string.Join(", ", links);
         }
+
+        private static string AnchorTag(EntityRecord record)
+            => $"<a target=\"_blank\" href=\"{Url(record)}\">{record[Order.Fields.Number]}</a>";
+
+        private static string Url(EntityRecord record)
+            => $"/order-management/orders/orders/r/{record["id"]}/detail";
     }
 }
