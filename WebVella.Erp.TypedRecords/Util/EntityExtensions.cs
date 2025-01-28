@@ -6,24 +6,33 @@ namespace WebVella.Erp.TypedRecords.Util
     public static class EntityExtensions
     {
         public static string FancyName(this Entity entity)
-            => FancyfyPascalCase(entity.Name);
+            => FancyfySnakeCase(entity.Name);
 
-        internal static string FancyfyPascalCase(string text)
+        public static string FancyfySnakeCase(string s)
         {
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrWhiteSpace(s))
                 return string.Empty;
 
-            if (text.Length == 1)
-                return text;
-
-            var sb = new StringBuilder(text.Length * 2);
-
-            sb.Append(text[0]);
-            foreach (var c in text.Skip(1))
+            var sb = new StringBuilder();
+            var idx = 0;
+            while(idx < s.Length)
             {
-                if (char.IsUpper(c))
-                    sb.Append($" {c}");
-                else sb.Append(c);
+                var nextCharIdx = idx;
+                while (nextCharIdx < s.Length && s[nextCharIdx] == '_')
+                    nextCharIdx++;
+
+                if (nextCharIdx == idx)
+                {
+                    sb.Append(s[idx]);
+                    idx++;
+                }
+                else if (nextCharIdx < s.Length)
+                {
+                    sb.Append(' ');
+                    sb.Append(s[nextCharIdx]);
+                    idx = nextCharIdx + 1;
+                }
+                else break;
             }
             return sb.ToString();
         }

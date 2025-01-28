@@ -5,7 +5,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
     internal enum ArticleImportState
     {
         UnknownArticle,
+        InvalidDbArticle,
         BlockedArticle,
+        InvalidEplanArticle,
         EplanArticle,
         DbArticle,
     }

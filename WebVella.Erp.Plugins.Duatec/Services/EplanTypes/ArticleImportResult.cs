@@ -7,8 +7,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
 {
     internal class ArticleImportResult
     {
-        public ArticleImportResult(
-            string partNumber, string typeNumber, string orderNumber, string designation, Guid type,
+        private ArticleImportResult(
+            string partNumber, string typeNumber, string orderNumber, string designation, Guid type, decimal amount, List<string> deviceTags,
             ArticleImportState importState, string action, string[] availableActions)
         {
             PartNumber = partNumber;
@@ -16,9 +16,11 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
             OrderNumber = orderNumber;
             Designation = designation;
             ImportState = importState;
+            Amount = amount;
             Type = type;
             Action = action;
             AvailableActions = availableActions;
+            DeviceTags = deviceTags;
         }
 
         public string PartNumber { get; }
@@ -28,6 +30,10 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
         public string OrderNumber { get; }
 
         public string Designation { get; }
+
+        public decimal Amount { get; }
+
+        public List<string> DeviceTags { get; }
 
         public Guid Type { get; }
 
@@ -65,6 +71,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
                     orderNumber: article.OrderNumber,
                     designation: article.Description,
                     type: typeId,
+                    deviceTags: article.DeviceTags,
+                    amount: article.Amount,
                     importState: importState,
                     action: ArticleImportAction.Default(importState),
                     availableActions: ArticleImportAction.AvailableActions(importState));
@@ -110,17 +118,29 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
         private static ArticleImportState GetArticleState(EplanArticleDto article,
             DataPortalArticleDto? edpArticle, EntityRecord? dbRecord)
         {
-            if (IsDbArticle(article, dbRecord))
+            if (IsValidDbArticle(article, dbRecord))
             {
                 return (bool)dbRecord![Article.Fields.IsBlocked]
                     ? ArticleImportState.BlockedArticle
                     : ArticleImportState.DbArticle;
             }
 
+            if (IsDbArticle(article, dbRecord))
+                return ArticleImportState.InvalidDbArticle;
+
             if (IsValidEplanArticle(article, edpArticle))
                 return ArticleImportState.EplanArticle;
 
+            if (IsEplanArticle(article, edpArticle))
+                return ArticleImportState.InvalidEplanArticle;
+
             return ArticleImportState.UnknownArticle;
+        }
+
+        private static bool IsEplanArticle(EplanArticleDto article, DataPortalArticleDto? edpArticle)
+        {
+            return edpArticle != null
+                && article.PartNumber == edpArticle.PartNumber;
         }
 
         private static bool IsValidEplanArticle(EplanArticleDto article, DataPortalArticleDto? edpArticle)
@@ -132,6 +152,12 @@ namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
         }
 
         private static bool IsDbArticle(EplanArticleDto article, EntityRecord? dbArticle)
+        {
+            return dbArticle != null
+                && article.PartNumber.Equals(dbArticle[Article.Fields.PartNumber]);
+        }
+
+        private static bool IsValidDbArticle(EplanArticleDto article, EntityRecord? dbArticle)
         {
             return dbArticle != null
                 && article.PartNumber.Equals(dbArticle[Article.Fields.PartNumber])

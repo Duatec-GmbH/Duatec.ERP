@@ -13,9 +13,17 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.PartLists.Entries
             var deviceTag = pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")?
                 [PartListEntry.Fields.DeviceTag] as string;
 
-            return deviceTag?
-                .Replace("\r", string.Empty)
-                .Replace("\n", "<br/>");
+            if (string.IsNullOrEmpty(deviceTag))
+                return string.Empty;
+
+            var tags = deviceTag.Split('\n')
+                .Select(dt => dt.TrimEnd('\r').Trim())
+                .ToArray();
+
+            if (tags.Length > 3)
+                return string.Join("<br/>", tags.Take(3)) + " ...";
+
+            return string.Join("<br/>", tags);
         }
     }
 }

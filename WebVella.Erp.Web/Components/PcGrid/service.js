@@ -52,7 +52,7 @@
 	let documentProcessed;
 	let grids = getGrids();
 
-	if (documentProcessed !== true && grids.some()) {
+	if (documentProcessed !== true && grids.length > 0) {
 
 		documentProcessed = true;
 
@@ -72,6 +72,7 @@
 					}
 				});
 			}
+			console.log('grid found');
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {

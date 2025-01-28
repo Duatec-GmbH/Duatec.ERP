@@ -21,6 +21,8 @@
                 ArticleImportState.BlockedArticle => [NoAction],
                 ArticleImportState.EplanArticle => [Import, Skip],
                 ArticleImportState.UnknownArticle => [Skip],
+                ArticleImportState.InvalidEplanArticle => [Skip, Import],
+                ArticleImportState.InvalidDbArticle => [NoAction],
                 _ => throw new NotImplementedException($"{state} is not implemented")
             };
         }
@@ -33,6 +35,8 @@
                 ArticleImportState.BlockedArticle => NoAction,
                 ArticleImportState.EplanArticle => Import,
                 ArticleImportState.UnknownArticle => Skip,
+                ArticleImportState.InvalidEplanArticle => Skip,
+                ArticleImportState.InvalidDbArticle => NoAction,
                 _ => throw new NotImplementedException($"{state} is not implemented")
             };
         }

@@ -13,7 +13,9 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Eplan
             [ArticleImportState.EplanArticle] = "fas fa-check go-green",
             [ArticleImportState.DbArticle] = "fas fa-check go-green",
             [ArticleImportState.UnknownArticle] = "fas fa-times go-red",
-            [ArticleImportState.BlockedArticle] = "fas fa-times go-red"
+            [ArticleImportState.BlockedArticle] = "fas fa-times go-red",
+            [ArticleImportState.InvalidEplanArticle] = "fas fa-times go-red",
+            [ArticleImportState.InvalidDbArticle] = "fas fa-times go-red",
         };
 
         protected override object? GetValue(BaseErpPageModel pageModel)

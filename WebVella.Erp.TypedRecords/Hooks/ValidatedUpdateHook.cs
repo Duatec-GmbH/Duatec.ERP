@@ -59,7 +59,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
 
         protected static string SuccessMessage(string entity)
         {
-            entity = EntityExtensions.FancyfyPascalCase(entity);
+            entity = EntityExtensions.FancyfySnakeCase(entity);
             return $"Successfully updated {entity}";
         }
     }

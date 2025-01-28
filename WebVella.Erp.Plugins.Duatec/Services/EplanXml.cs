@@ -8,8 +8,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         public static List<EplanArticleDto> GetArticles(Stream stream)
         {
             return GetParts(XElement.Load(stream))
-                .DistinctBy(a => (a.PartNumber, a.OrderNumber, a.TypeNumber, a.Description))
-                .Select(EplanArticleDto.FromPart)
+                .GroupBy(a => (a.PartNumber, a.OrderNumber, a.TypeNumber, a.Description))
+                .Select(g => EplanArticleDto.FromPart(g.First(), GetDeviceTags(g), g.Count()))
                 .ToList();
         }
 
@@ -34,6 +34,14 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             return element.Elements()
                 .SelectMany(All)
                 .Prepend(element);
+        }
+
+        private static List<string> GetDeviceTags(IEnumerable<EplanPartDto> parts)
+        {
+            return parts.Where(p => !string.IsNullOrWhiteSpace(p.DeviceTag))
+                .Select(p => p.DeviceTag)
+                .Order()
+                .ToList();
         }
     }
 }

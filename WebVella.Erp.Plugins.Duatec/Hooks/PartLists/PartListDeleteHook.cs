@@ -14,14 +14,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.PartLists
     {
         protected override IActionResult? OnValidationSuccess(PartList record, Entity entity, BaseErpPageModel pageModel)
         {
-            if (new PartListRepository().Delete(record.Id!.Value) == null)
+            if (new PartListRepository().Delete(record.Id!.Value) is not PartList deleted)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
-            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{record.Project}";
+            var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{deleted.Project}";
             return pageModel.LocalRedirect(returnUrl);
         }
     }
