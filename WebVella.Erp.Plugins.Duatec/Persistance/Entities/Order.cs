@@ -10,25 +10,17 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public static class Relations
         {
-            public const string Supplier = "order_supplier";
             public const string Project = "order_project";
             public const string Entries = OrderEntry.Relations.Order;
         }
 
         public static class Fields
         {
-            public const string Supplier = "supplier_id";
             public const string Number = "order_number";
             public const string Project = "project_id";
         }
 
         public override string EntityName => Entity;
-
-        public Guid Supplier
-        {
-            get => Get<Guid>(Fields.Supplier);
-            set => Properties[Fields.Supplier] = value;
-        }
 
         public string Number
         {

@@ -11,12 +11,13 @@
 	let cDown = false;
 	let vDown = false;
 	let xDown = false;
+	let ctrlDown = false;
 
-	let documentProcessed;
+	// !!!!!!!! must be VAR otherwhise gets initialized for every editable grid
+	var editableGridsInitialized;
 
-	if (documentProcessed !== true) {
-
-		documentProcessed = true;
+	if (editableGridsInitialized !== true) {
+		editableGridsInitialized = true;
 
 		document.addEventListener("DOMContentLoaded", () => {
 
@@ -42,6 +43,7 @@
 				}
 
 				updateFieldNames(body);
+				updateNoRecordsMessage(body);
 			}
 
 			// initialize add entry buttons
@@ -51,6 +53,14 @@
 
 			document.addEventListener('keydown', e => {
 
+				if (e.key == 'Control') ctrlDown = true;
+
+				if (e.key == 'Shift' && mouseOverRow && document.activeElement.tagName !== 'input') {
+
+					for (let table of getEditableGridTables())
+						table.classList.add('user-select-none');
+				}
+
 				if (e.key == 'Escape') {
 					clearAllSelections();
 				}
@@ -59,19 +69,24 @@
 					let body = getTargetBody();
 					if (body && body.getAttribute('add') === 'true')
 						addNew(body);
-					updateFieldNames(body);
 				}
 				else if (e.key == 'Delete') {
 					let body = getTargetBody();
 					if (body && body.getAttribute('delete') === 'true') {
-						let rows = body.getElementsByClassName('row-selected');
-						for (let row of rows)
-							row.parentElement.removeChild(row);
+
+						for (let i = body.children.length - 1; i > 0; i--) {
+
+							let row = body.children[i];
+							if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+								body.removeChild(row);
+						}
+
 						updateFieldNames(body);
+						updateNoRecordsMessage(body);
 					}
 				}
 				else if (e.key == 'c') {
-					if (e.ctrlKey && !cDown) {
+					if (e.ctrlKey && !cDown && !hasSomethingSelected()) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('copy') === 'true')
 							putDataToClipboard(body);
@@ -79,14 +94,21 @@
 					cDown = true;
 				}
 				else if (e.key == 'x') {
-					if (e.ctrlKey && !xDown) {
+					if (e.ctrlKey && !xDown && !hasSomethingSelected()) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('delete') === 'true') {
+
 							putDataToClipboard(body)?.then(() => {
-								let rows = body.getElementsByClassName('row-selected');
-								for (let row of rows)
-									body.removeChild(row);
+
+								for (let i = body.children.length - 1; i > 0; i--) {
+
+									let row = body.children[i];
+									if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+										body.removeChild(row);
+								}
+
 								updateFieldNames(body);
+								updateNoRecordsMessage(body);
 							});
 						}
 					}
@@ -130,12 +152,13 @@
 													e = node;
 												}
 												updateFieldNames(body);
+												updateNoRecordsMessage(body);
 											}
 
 										}
 										catch (e) {
 											updateFieldNames(body);
-											alert(e);
+											updateNoRecordsMessage(body);
 										}
 									});
 							}
@@ -150,6 +173,15 @@
 				if (e.key == 'c') cDown = false;
 				if (e.key == 'v') vDown = false;
 				if (e.key == 'x') xDown = false;
+				if (e.key == 'Control') ctrlDown = false;
+
+				if (e.key == 'Shift') {
+
+					if (!ctrlDown) {
+						for (let table of getEditableGridTables())
+							table.classList.remove('user-select-none');
+					}
+				}
 			});
 
 			document.addEventListener('click', e => {
@@ -205,6 +237,10 @@
 			}, true);
 		});
 
+		function hasSomethingSelected() {
+			return document.getSelection().toString().trim().length > 0;
+		}
+
 		function isCompatible(body, compatibility) {
 			let bodyComp = body.getAttribute('compatibility');
 
@@ -226,7 +262,7 @@
 			let idx = 0;
 
 			for (let elem of body.children) {
-				if (!elem.classList.contains('d-none')) {
+				if (!elem.classList.contains('d-none') && !elem.getElementsByClassName('alert-info')[0]) {
 
 					for (let select of elem.getElementsByTagName('select')) {
 						updateFieldName(select, idx);
@@ -236,6 +272,48 @@
 						updateFieldName(input, idx);
 					}
 					idx++;
+				}
+			}
+		}
+
+		function updateNoRecordsMessage(body) {
+
+			let cnt = 0;
+			let containsAlert = false;
+
+			for (let tr of body.children) {
+
+				if (tr.getElementsByClassName('alert-info')[0])
+					containsAlert = true;
+				else if (!tr.classList.contains('d-none'))
+					cnt++;
+			}
+
+			if (cnt == 0 && !containsAlert) {
+
+				let tr = document.createElement('tr');
+				let td = document.createElement('td');
+				tr.appendChild(td);
+
+				let span = getHeaders(body).length.toString();
+				td.setAttribute('colspan', span);
+
+				let div = document.createElement('div');
+				td.appendChild(div);
+
+				div.innerHTML = 'No Entries';
+				div.classList.add('alert');
+				div.classList.add('alert-info');
+				div.classList.add('m-0');
+
+				body.appendChild(tr);
+			}
+			else if (cnt > 0 && containsAlert)
+			{
+				let alert = body.getElementsByClassName('alert-info')[0];
+				if (alert) {
+					let row = alert.parentElement.parentElement;
+					row.parentElement.removeChild(row);
 				}
 			}
 		}
@@ -477,7 +555,7 @@
 		}
 
 		function markAsSelected(row) {
-			if (!row.classList.contains('row-selected'))
+			if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
 				row.classList.add('row-selected');
 		}
 
@@ -487,7 +565,7 @@
 		}
 
 		function toggleSelection(row) {
-			if (!row.classList.contains('row-selected'))
+			if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
 				row.classList.add('row-selected');
 			else
 				row.classList.remove('row-selected');
@@ -510,6 +588,7 @@
 			if (node) {
 				body.appendChild(node);
 				updateFieldNames(body);
+				updateNoRecordsMessage(body);
 			}
 		}
 
@@ -578,7 +657,7 @@
 
 		function addRowEvents(row) {
 
-			if (!row.classList.contains('d-none')) {
+			if (!row.classList.contains('d-none') && !row.getElementsByClassName('alert-info')[0]) {
 
 				row.addEventListener('mouseenter', _ => {
 					if (mouseOverRow !== row) {
@@ -609,6 +688,7 @@
 						let body = row.parentElement;
 						body.removeChild(row);
 						updateFieldNames(body);
+						updateNoRecordsMessage(body);
 					}
 				});
 			}

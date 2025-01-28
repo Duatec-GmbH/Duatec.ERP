@@ -39,6 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 public const string OrderedAmount = "ordered_amount";
                 public const string ReceivedAmount = "received_amount";
                 public const string InventoryAmount = "inventory_amount";
+                public const string ToOrder = "to_order";
                 public const string State = "state";
             }
         }
@@ -232,11 +233,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orderedAmount = GetAmount(orderedAmountLookup, articleId);
             var receivedAmount = GetAmount(receivedAmountLookup, articleId);
             var inventoryAmount = GetAmount(inventoryAmountLookup, articleId);
+            var toOrder = Math.Max(0m, demand - orderedAmount - inventoryAmount);
 
             rec[Record.Fields.Demand] = demand;
             rec[Record.Fields.OrderedAmount] = orderedAmount;
             rec[Record.Fields.ReceivedAmount] = receivedAmount;
             rec[Record.Fields.InventoryAmount] = inventoryAmount;
+            rec[Record.Fields.ToOrder] = toOrder;
             rec[Record.Fields.State] = GetState(demand, orderedAmount, receivedAmount, inventoryAmount);
 
             return rec;

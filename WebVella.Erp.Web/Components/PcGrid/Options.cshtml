@@ -21,6 +21,9 @@
 	<wv-column span="4">
 		<wv-field-text name="id" value="@options.Id" label-text="Id"></wv-field-text>
 	</wv-column>
+    <wv-column span="4">
+        <wv-field-checkbox name="allow-copy" value="@options.AllowCopy" label-text="Allow Copy" text-true="allow copy"></wv-field-checkbox>
+    </wv-column>
 </wv-row>
 <wv-row>
 	<wv-column span="4">
@@ -87,6 +90,11 @@
     <wv-column span="4">
         <wv-field-datasource name="detail_path" value="@options.DetailPath" label-text="Detail Path Without ID"></wv-field-datasource>
 	</wv-column>
+</wv-row>
+<wv-row>
+    <wv-column span="4">
+        <wv-field-text name="compatibility" value="@options.Compatibility" label-text="Compatibility (for copy-paste compatibility with other grids)"></wv-field-text>
+    </wv-column>
 </wv-row>
 
 <div class="alert alert-info p-2">

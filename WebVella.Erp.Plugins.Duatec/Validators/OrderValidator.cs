@@ -30,8 +30,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             if (record.Project == Guid.Empty)
                 result.Add(new ValidationError(Fields.Project, "Order field 'project' is required"));
-            if (record.Supplier == Guid.Empty)
-                result.Add(new ValidationError(Fields.Supplier, "Order field 'supplier' is required"));
             return result;
         }
 

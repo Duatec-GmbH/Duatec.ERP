@@ -3,58 +3,19 @@
 /// Your code goes below
 ///////////////////////////////////////////////////////////////////////////////////
 
-//function ColumnCountChange(e) {
-//	var oldValue = e.target.getAttribute("data-old-value");
-//	var value = e.target.value;
-//	if (value.toString() !== oldValue.toString()) {
-//		e.target.setAttribute("data-old-value",value);
-//		$('#modal-component-options div[id^="section-column"]').addClass("d-none");
-//		for (var i = 1; i <= value; i++) {
-//			$('#modal-component-options #section-column'+ i).removeClass("d-none");
-//		}	
-//	}
-//}
-
-//	document.addEventListener("WvPbManager_Design_Loaded", function (event) {
-//		if (event && event.payload && event.payload.component_name === "WebVella.Erp.Web.Components.PcGrid"){
-//			console.log("WebVella.Erp.Web.Components.PcRecordList Design loaded");
-//		}
-//	});
-
-//	document.addEventListener("WvPbManager_Design_Unloaded", function (event) {
-//		if (event && event.payload && event.payload.component_name === "WebVella.Erp.Web.Components.PcGrid"){
-//			console.log("WebVella.Erp.Web.Components.PcRecordList Design unloaded");
-//		}
-//	});
-//document.addEventListener("WvPbManager_Options_Loaded", function (event) {
-//	if (event && event.payload && event.payload.component_name === "WebVella.Erp.Web.Components.PcGrid"){
-//		window.setTimeout(function () {
-//			var visibleColumnsCount = document.querySelector('#modal-component-options .modal-body input[name="visible_columns"]');
-//			visibleColumnsCount.setAttribute("data-old-value",visibleColumnsCount.value);
-//			visibleColumnsCount.addEventListener("blur", ColumnCountChange);
-//		},500);
-//	}
-//});
-
-//document.addEventListener("WvPbManager_Options_Unloaded", function (event) {
-//	if (event && event.payload && event.payload.component_name === "WebVella.Erp.Web.Components.PcGrid"){
-//	console.log("WebVella.Erp.Web.Components.PcGrid UnLoad");
-//		var visibleColumnsCount = document.querySelector('#modal-component-options .modal-body input[name="visible_columns"]');
-//		visibleColumnsCount.removeEventListener("blur", ColumnCountChange);
-//	}
-//});
-
 {
 	let mouseOverRow = null;
 	let shiftAnchor = null;
 	let cDown = false;
+	let ctrlDown = false;
 
-	let documentProcessed;
 	let grids = getGrids();
 
-	if (documentProcessed !== true && grids.length > 0) {
+	// !!!!!!! must be VAR otherwhise script runs more often
+	var gridsInitialized;
 
-		documentProcessed = true;
+	if (gridsInitialized !== true && grids.length > 0) {
+		gridsInitialized = true;
 
 		for (let grid of grids) {
 
@@ -72,24 +33,46 @@
 					}
 				});
 			}
-			console.log('grid found');
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
 
 			document.addEventListener('keyup', e => {
+
 				if (e.key == 'c') cDown = false;
+				if (e.key == 'Control') ctrlDown = false;
+
+				if (e.key == 'Shift') {
+
+					if (!ctrlDown) {
+						for (let table of getGrids())
+							table.classList.remove('user-select-none');
+
+						if(mouseOverRow)
+							document.getSelection().empty();
+					}
+				}
 			});
 
 			document.addEventListener('keydown', e => {
+
+				if (e.key == 'Control')
+					ctrlDown = true;
+
+				if (e.key == 'Shift') {
+
+					for (let table of getGrids())
+						table.classList.add('user-select-none');
+				}
 
 				if (e.key == 'Escape') {
 					clearAllSelections();
 				}
 				else if (e.key == 'c') {
-					if (e.ctrlKey && !cDown) {
+					if (e.ctrlKey && !cDown && !hasSomethingSelected()) {
 						let body = getTargetBody();
-						if (body && body.getAttribute('copy') === 'true')
+
+						if(body)
 							putDataToClipboard(body);
 					}
 					cDown = true;
@@ -155,6 +138,10 @@
 
 	}
 
+	function hasSomethingSelected() {
+		return document.getSelection().toString().trim().length > 0;
+	}
+
 	function getValue(col) {
 
 		for (let i = 0; i < col.children.length; i++) {
@@ -210,10 +197,11 @@
 		for (let h of headers) {
 			let val;
 
-			var name = h.getAttribute('name');
+			// this should be name not data filter name....
+			let name = h.getAttribute('data-filter-name');
+
 			if (name && name.trim() != '')
 				val = name.trim();
-			else val = h.innerText?.trim();
 
 			if (val === undefined || val === null || val === '')
 				result[result.length] = '';
@@ -254,7 +242,7 @@
 				}
 
 				let obj = {
-					compatibility: body.getAttribute('compatibility'),
+					compatibility: body.parentElement.getAttribute('compatibility'),
 					data: Array.from(map.entries())
 				};
 
@@ -273,7 +261,7 @@
 			return mouseOverRow.parentElement;
 		}
 
-		var rows = document.getElementsByClassName('row-selected');
+		let rows = document.getElementsByClassName('row-selected');
 		if (rows && rows.length > 0 && rows.every(r => r.parentElement === rows[0].parentElement)) {
 			return rows[0].parentElement;
 		}
@@ -287,7 +275,7 @@
 		for (let table of allTables) {
 			if (!table.classList.contains('editable-grid')
 				&& table.parentElement.classList.contains('erp-list')
-				&& table.parentElement.getAttribute('copy') === 'true') {
+				&& table.getAttribute('copy') === 'true') {
 
 				tables[tables.length] = table;
 			}

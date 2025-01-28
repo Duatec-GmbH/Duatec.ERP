@@ -45,6 +45,8 @@ namespace WebVella.Erp.Web.Models
 
 				properties.Add("$exists", new MPW(MPT.Function, new ExistsFunction(this)));
 				properties.Add("$not", new MPW(MPT.Function, new NotFunction(this)));
+				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
+				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -533,10 +535,21 @@ namespace WebVella.Erp.Web.Models
 			propName = propName.Trim();
 			var name = propName.Replace("$index", "0");
 
+			if(propName.StartsWith('"') && propName.EndsWith('"'))
+				return propName[1..(propName.Length - 1)];
+
+			if (decimal.TryParse(propName, out var dec))
+				return dec;
+
+			if(bool.TryParse(propName, out var b))
+				return b;
+
+			if(Guid.TryParse(propName, out var id))
+				return id;
+
 			if (propName.StartsWith('$') && propName.EndsWith(')'))
 				return ExecFunction(propName);
 
-			// TODO before making it possible to nest functions refactor this because then spliting is not enough anymore
 			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 			var completePropChain = new List<string>();
 
@@ -1153,6 +1166,174 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		private sealed class OrderByFunction : QueryFunction
+		{
+			public OrderByFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "orderBy";
+
+			protected override int ParamCount => -1;
+
+			protected override object Execute(object[] parameters)
+			{
+				if (parameters.Length < 2)
+					throw new PropertyDoesNotExistException($"function {Name} requires at least 2 arguments");
+
+				if (parameters[0] is not List<EntityRecord> l)
+					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> at first argument");
+
+				if (l.Count == 0)
+					return l;
+
+				IOrderedEnumerable<EntityRecord> query = null;
+
+				var idx = 1;
+				while(idx < parameters.Length)
+				{
+					if (parameters[idx] is not string propName)
+						throw new PropertyDoesNotExistException($"function {Name} requires string at argument '{idx}'");
+
+					if (idx == 1)
+					{
+						if (IsDesc(propName))
+							query = l.OrderByDescending(QueryPath(propName));
+						else
+							query = l.OrderBy(QueryPath(propName));
+					}
+					else
+					{
+						if (IsDesc(propName))
+							query = query.ThenByDescending(QueryPath(propName));
+						else
+							query = query.ThenBy(QueryPath(propName));
+					}
+
+					idx++;
+				}
+
+
+				return query.ToList();
+			}
+
+			private static bool IsDesc(object o)
+			{
+				return o is string s
+					&& s.ToUpper().EndsWith(" DESC");
+			}
+
+			private static Func<EntityRecord, object> QueryPath(string path)
+			{
+				var pathSegments = path.Replace(" ", string.Empty)
+					.Replace("[0]", string.Empty)
+					.Split('.');
+
+				object GetProperty(EntityRecord rec)
+				{
+					object result = rec;
+
+					foreach(var segment in pathSegments)
+					{
+						if(result is List<EntityRecord> l)
+						{
+							if (segment.Contains('['))
+							{
+								if (!int.TryParse(segment[(segment.IndexOf('[') + 1)..segment.LastIndexOf(']')], out var idx))
+									return null;
+
+								if (idx < 0 || idx >= l.Count)
+									return null;
+
+								result = l[idx];
+								continue;
+							}
+
+							if (l.Count == 0) 
+								return null;
+							result = l[0];
+						}
+
+						if (result is not EntityRecord r)
+							return null;
+
+						if (!r.Properties.TryGetValue(segment, out result))
+							return null;
+					}
+
+					return result;
+				}
+
+				return GetProperty;
+			}
+		}
+
+		private sealed class IncludeFunction : QueryFunction
+		{
+			public IncludeFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "include";
+
+			protected override int ParamCount => 2;
+
+			protected override object Execute(object[] parameters)
+			{
+				if (parameters[0] is not List<EntityRecord> l)
+					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> as first argument");
+
+				if (parameters[1] is not string relationName)
+					throw new PropertyDoesNotExistException($"function {Name} requires string as second argument");
+
+				if (!relationName.StartsWith('$'))
+					throw new PropertyDoesNotExistException($"function {Name} second argument requires a relation");
+
+				if (l.Count == 0)
+					return l;
+
+				relationName = relationName.TrimStart('$');
+
+				var relation = DataModel.relMan.Read().Object
+					.Single(r => r.Name == relationName);
+
+				var ids = l.Select(r => (Guid)r[relation.TargetFieldName])
+					.Distinct()
+					.ToArray();
+
+				var subQuery = ids.Select(id =>
+					new QueryObject()
+					{
+						QueryType = QueryType.EQ,
+						FieldName = relation.OriginFieldName,
+						FieldValue = id,
+					}).ToList();
+
+				var query = new QueryObject()
+				{
+					QueryType = QueryType.OR,
+					SubQueries = subQuery
+				};
+
+				var response = DataModel.recMan.Find(new EntityQuery(relation.OriginEntityName, "*", query));
+
+				if(response.Success && response.Object?.Data != null)
+				{
+					var lookup = response.Object.Data
+						.ToDictionary(r => (Guid)r[relation.OriginFieldName], r => r);
+
+					foreach(var r in l)
+					{
+						var id = (Guid)r[relation.TargetFieldName];
+						if (lookup.TryGetValue(id, out var relatedRec))
+							r[$"${relationName}"] = relatedRec;
+
+					}
+				}
+
+				return l;
+			}
+		}
 		
 		#endregion
 	}

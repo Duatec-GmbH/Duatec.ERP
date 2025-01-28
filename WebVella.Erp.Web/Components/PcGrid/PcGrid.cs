@@ -28,12 +28,6 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "is_visible")]
 			public string IsVisible { get; set; } = "";
 
-			//[JsonProperty(PropertyName = "pager")]
-			//public string Pager { get; set; } = "1";
-
-			//[JsonProperty(PropertyName = "total_count")]
-			//public string TotalCount { get; set; } = "0";
-
 			[JsonProperty(PropertyName = "page_size")]
 			public int? PageSize { get; set; } = 10;
 
@@ -105,6 +99,12 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "empty_text")]
 			public string EmptyText { get; set; } = "No records";
+
+			[JsonProperty(PropertyName = "allow-copy")]
+			public bool AllowCopy { get; set; } = false;
+
+			[JsonProperty(PropertyName = "compatibility")]
+			public string Compatibility { get; set; } = string.Empty;
 
 			#region << container1 >>
 			[JsonProperty(PropertyName = "container1_id")]

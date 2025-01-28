@@ -8,24 +8,27 @@
 @using WebVella.Erp.Api.Models;
 @using WebVella.TagHelpers.Models;
 @{
-	var options = (PcGrid.PcGridOptions)ViewBag.Options;
-	var node = (PageBodyNode)ViewBag.Node;
-	var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
-	var componentContext = (PageComponentContext)ViewBag.ComponentContext;
-	var pager = (int)ViewBag.Page;
-	var totalCount = (int)ViewBag.TotalCount;
-	var pageSize = (int)ViewBag.PageSize;
-	var records = (List<EntityRecord>)ViewBag.Records;
-	var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
+    var options = (PcGrid.PcGridOptions)ViewBag.Options;
+    var node = (PageBodyNode)ViewBag.Node;
+    var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
+    var componentContext = (PageComponentContext)ViewBag.ComponentContext;
+    var pager = (int)ViewBag.Page;
+    var totalCount = (int)ViewBag.TotalCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var records = (List<EntityRecord>)ViewBag.Records;
+    var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
     var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
+
+    var allowCopy = options.AllowCopy.ToString().ToLower();
+
 }
 
 <wv-grid striped="@options.Striped" small="@options.Small" bordered="@options.Bordered" borderless="@options.Borderless"
 		 hover="@options.Hover" responsive-breakpoint="@options.ResponsiveBreakpoint" id="@options.Id" prefix="@options.Prefix"
 		 name="@options.Name" culture="@options.Culture" class="@options.Class" query-string-sortby="@options.QueryStringSortBy"
 		 query-string-sort-order="@options.QueryStringSortOrder" query-string-page="@options.QueryStringPage" columns="columns"
-		  page="@pager" total-count="@totalCount" page-size="@pageSize" has-thead="@options.HasThead" has-tfoot="@options.HasTfoot"
-        is-visible="(bool)ViewBag.IsVisible" no-total="@options.NoTotal">
+		 page="@pager" total-count="@totalCount" page-size="@pageSize" has-thead="@options.HasThead" has-tfoot="@options.HasTfoot"
+         is-visible="(bool)ViewBag.IsVisible" no-total="@options.NoTotal" copy="@allowCopy" compatibility="@options.Compatibility">
 
     @{
         foreach(var record in records)
