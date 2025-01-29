@@ -94,7 +94,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (subQueries.Count == 0)
                 return [];
 
-            var query = new QueryObject()
+            var query = subQueries.Count == 1 ? subQueries[0] : new QueryObject()
             {
                 QueryType = QueryType.OR,
                 SubQueries = subQueries
@@ -111,6 +111,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (subQueries.Count == 0)
                 return [];
 
+            var subQuery = subQueries.Count == 1 ? subQueries[0] : new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = subQueries
+            };
+
             var query = new QueryObject()
             {
                 QueryType = QueryType.AND,
@@ -122,11 +128,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         FieldName = PartListEntry.Fields.Article,
                         FieldValue = articleId
                     },
-                    new()
-                    {
-                        QueryType = QueryType.OR,
-                        SubQueries = subQueries
-                    }
+                    subQuery
                 ]
             };
             return FindManyEntriesByQuery(query, select);

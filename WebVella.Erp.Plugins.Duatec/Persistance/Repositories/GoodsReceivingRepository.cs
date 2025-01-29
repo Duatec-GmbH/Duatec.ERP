@@ -2,7 +2,6 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
@@ -30,7 +29,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     QueryType = QueryType.EQ,
                 }).ToList();
 
-            var query = new QueryObject()
+            if (subQuery.Count == 0)
+                return [];
+
+            var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
             {
                 QueryType = QueryType.OR,
                 SubQueries = subQuery,
@@ -39,14 +41,94 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return FindManyByQuery(query, select);
         }
 
+        public List<GoodsReceiving> FindManyByOrders(string select = "*", params Guid[] orders)
+        {
+            var subQuery = orders
+                .Select(oId => new QueryObject()
+                {
+                    FieldName = GoodsReceiving.Fields.Order,
+                    FieldValue = oId,
+                    QueryType = QueryType.EQ,
+
+                }).ToList();
+
+            if (subQuery.Count == 0)
+                return [];
+
+            var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = subQuery,
+            };
+
+            return FindManyByQuery(query, select);
+        }
+
+        public List<GoodsReceivingEntry> FindManyEntriesByOrder(Guid orderId, string select = "*")
+        {
+            var subQuery = FindManyByOrder(orderId, "id")
+                .Select(gr => gr.Id!.Value)
+                .Distinct()
+                .Select(id => new QueryObject()
+                {
+                    FieldName = GoodsReceivingEntry.Fields.GoodsReceiving,
+                    FieldValue = id,
+                    QueryType = QueryType.EQ,
+                }).ToList();
+
+            if (subQuery.Count == 0)
+                return [];
+
+            var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = subQuery,
+            };
+
+            return FindManyEntriesByQuery(query, select);
+        }
+
+        public List<GoodsReceivingEntry> FindManyEntriesByOrders(string select = "*", params Guid[] orders)
+        {
+            var subQuery = FindManyByOrders("id", orders)
+                .Select(gr => gr.Id)
+                .Distinct()
+                .Select(grId => new QueryObject()
+                {
+                    FieldName = GoodsReceivingEntry.Fields.GoodsReceiving,
+                    FieldValue = grId,
+                    QueryType = QueryType.EQ,
+                }).ToList();
+
+            if (subQuery.Count == 0)
+                return [];
+
+            var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = subQuery,
+            };
+
+            return FindManyEntriesByQuery(query, select);
+        }
+
         public List<GoodsReceivingEntry> FindManyEntriesByGoodsReceiving(Guid goodsReceivingId, string select = "*")
             => FindManyEntriesBy(GoodsReceivingEntry.Fields.GoodsReceiving, goodsReceivingId, select);
 
         public List<GoodsReceivingEntry> FindManyEntriesByProject(Guid projectId, string select = "*")
-            => FindManyEntriesByQuery(GetFindManyEntriesByProjectQuery(projectId), select);
+        {
+            var query = GetFindManyEntriesByProjectQuery(projectId);
+            if (query == null)
+                return [];
+            return FindManyEntriesByQuery(query, select);
+        }
 
         public List<GoodsReceivingEntry> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
         {
+            var projectQuery = GetFindManyEntriesByProjectQuery(projectId);
+            if(projectQuery == null) 
+                return [];
+
             var query = new QueryObject()
             {
                 QueryType = QueryType.AND,
@@ -58,9 +140,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         FieldName = GoodsReceivingEntry.Fields.Article,
                         FieldValue = articleId
                     },
-                    GetFindManyEntriesByProjectQuery(projectId)
+                    projectQuery
                 ]
             };
+
             return FindManyEntriesByQuery(query, select);
         }
 
@@ -91,7 +174,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return EntryExistsByQuery(query);
         }
 
-        private QueryObject GetFindManyEntriesByProjectQuery(Guid projectId)
+        private QueryObject? GetFindManyEntriesByProjectQuery(Guid projectId)
         {
             var subQuery = FindManyByProject(projectId, "id")
                 .Select(gr => gr.Id!.Value)
@@ -103,24 +186,23 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     FieldValue = grId
                 }).ToList();
 
-            return new QueryObject()
+            if (subQuery.Count == 0)
+                return null;
+
+            return subQuery.Count == 1 ? subQuery[0] : new QueryObject()
             {
                 QueryType = QueryType.OR,
                 SubQueries = subQuery,
             };
         }
 
-#pragma warning disable CA1822 // Mark members as static
-
         public DeliveryNote? FindDeliveryNote(Guid id, string select = "*")
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Find(DeliveryNote.Entity, id, select));
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Find(RecordManager, DeliveryNote.Entity, id, select));
 
         public DeliveryNote? InsertDeliveryNote(DeliveryNote record)
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Insert(DeliveryNote.Entity, record));
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Insert(RecordManager, DeliveryNote.Entity, record));
 
         public DeliveryNote? DeleteDeliveryNote(Guid id)
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Delete(DeliveryNote.Entity, id));
-
-#pragma warning restore CA1822 // Mark members as static
+            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Delete(RecordManager, DeliveryNote.Entity, id));
     }
 }

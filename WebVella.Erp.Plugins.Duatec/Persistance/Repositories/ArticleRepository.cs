@@ -1,7 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -68,11 +67,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return Insert(rec);
         }
 
-#pragma warning disable CA1822 // Mark members as static
-
         public ArticleType? FindType(Guid typeId)
         {
-            var rec = RepositoryHelper.FindBy(ArticleType.Entity, "id", typeId);
+            var rec = RepositoryHelper.FindBy(RecordManager, ArticleType.Entity, "id", typeId);
             return TypedEntityRecordWrapper.WrapElseDefault<ArticleType>(rec);
         }
 
@@ -87,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public Dictionary<Guid, ArticleType?> FindManyTypesById(params Guid[] ids)
         {
-            var dict = RepositoryHelper.FindManyByUniqueArgs(ArticleType.Entity, "id", "*", ids);
+            var dict = RepositoryHelper.FindManyByUniqueArgs(RecordManager, ArticleType.Entity, "id", "*", ids);
             var result = new Dictionary<Guid, ArticleType?>(dict.Count);
 
             foreach (var (key, val) in dict)
@@ -97,11 +94,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
         public bool ArticleHasAlternatives(Guid id)
-            => RepositoryHelper.Exists(Alternatives.Entity, Alternatives.Fields.Source, id);
+            => RepositoryHelper.Exists(RecordManager, Alternatives.Entity, Alternatives.Fields.Source, id);
 
         public List<Guid> FindAlternativeIds(Guid id)
         {
-            return RepositoryHelper.FindManyBy(Alternatives.Entity, Alternatives.Fields.Source, id)
+            return RepositoryHelper.FindManyBy(RecordManager, Alternatives.Entity, Alternatives.Fields.Source, id)
                 .Select(r => (Guid)r[Alternatives.Fields.Target])
                 .ToList();
         }
@@ -130,9 +127,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             DeleteAlternativeEntry(b, a);
         }
 
-#pragma warning restore CA1822 // Mark members as static
-
-        private static void InsertAlternativeEntry(Guid source, Guid target)
+        private void InsertAlternativeEntry(Guid source, Guid target)
         {
             var id = FindAlternative(source, target)?["id"] as Guid?;
             if (id.HasValue)
@@ -142,19 +137,19 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             rec[Alternatives.Fields.Source] = source;
             rec[Alternatives.Fields.Target] = target;
 
-            RepositoryHelper.Insert(Alternatives.Entity, rec);
+            RepositoryHelper.Insert(RecordManager, Alternatives.Entity, rec);
         }
 
-        private static void DeleteAlternativeEntry(Guid source, Guid target)
+        private void DeleteAlternativeEntry(Guid source, Guid target)
         {
             var id = FindAlternative(source, target)?["id"] as Guid?;
             if (!id.HasValue)
                 return;
 
-            RepositoryHelper.Delete(Alternatives.Entity, id.Value);
+            RepositoryHelper.Delete(RecordManager, Alternatives.Entity, id.Value);
         }
 
-        private static EntityRecord? FindAlternative(Guid source, Guid target)
+        private EntityRecord? FindAlternative(Guid source, Guid target)
         {
             var query = new QueryObject()
             {
@@ -175,7 +170,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     },
                 ]
             };
-            return RepositoryHelper.FindByQuery(Alternatives.Entity, query);
+            return RepositoryHelper.FindByQuery(RecordManager, Alternatives.Entity, query);
         }
     }
 }

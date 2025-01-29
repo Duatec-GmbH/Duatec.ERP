@@ -47,6 +47,8 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$not", new MPW(MPT.Function, new NotFunction(this)));
 				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
 				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
+				properties.Add("$coalesce", new MPW(MPT.Function, new CoalesceFunction(this)));
+				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -383,6 +385,12 @@ namespace WebVella.Erp.Web.Models
 		{
 			alreadyResolvedRecordProperties.Clear();
 			properties["Record"] = new MPW(MPT.EntityRecord, record);
+		}
+
+		public void SetEntity(Entity entity)
+		{
+			alreadyResolvedRecordProperties.Clear();
+			properties["Entity"] = new MPW(MPT.Object, entity);
 		}
 
 		private void InitDataSources(ErpPage page)
@@ -1074,7 +1082,10 @@ namespace WebVella.Erp.Web.Models
 
 			protected PageDataModel DataModel { get; }
 
-			protected abstract int ParamCount { get; }
+			protected abstract int MinParameters { get; }
+
+			protected abstract int MaxParameters { get; }
+
 
 			public abstract string Name { get; }
 
@@ -1113,8 +1124,14 @@ namespace WebVella.Erp.Web.Models
 			public object Execute(string paramsString)
 			{
 				var parameters = ParseParams(paramsString);
-				if (parameters.Count != ParamCount && ParamCount > -1)
-					throw new PropertyDoesNotExistException($"Function '{Name}' requires exactly {ParamCount} arguments");
+				if (parameters.Count < MinParameters || MaxParameters > -1 && parameters.Count > MaxParameters)
+				{
+					if(MinParameters == MaxParameters)
+						throw new PropertyDoesNotExistException($"Function '{Name}' requires exactly {MinParameters} arguments");
+					if(MaxParameters > MinParameters)
+						throw new PropertyDoesNotExistException($"Function '{Name}' requires {MinParameters} - {MaxParameters} arguments");
+					throw new PropertyDoesNotExistException($"Function '{Name}' requires at least {MinParameters}");
+				}
 
 				var args = parameters.Select(DataModel.GetProperty)
 					.ToArray();
@@ -1133,7 +1150,9 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "exists";
 
-			protected override int ParamCount => 1;
+			protected override int MinParameters => 1;
+
+			protected override int MaxParameters => MinParameters;
 
 			protected override object Execute(object[] parameters)
 			{
@@ -1157,7 +1176,9 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "not";
 
-			protected override int ParamCount => 1;
+			protected override int MinParameters => 1;
+
+			protected override int MaxParameters => MinParameters;
 
 			protected override object Execute(object[] parameters)
 			{
@@ -1174,13 +1195,12 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "orderBy";
 
-			protected override int ParamCount => -1;
+			protected override int MinParameters => 2;
+
+			protected override int MaxParameters => -1;
 
 			protected override object Execute(object[] parameters)
 			{
-				if (parameters.Length < 2)
-					throw new PropertyDoesNotExistException($"function {Name} requires at least 2 arguments");
-
 				if (parameters[0] is not List<EntityRecord> l)
 					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> at first argument");
 
@@ -1195,16 +1215,19 @@ namespace WebVella.Erp.Web.Models
 					if (parameters[idx] is not string propName)
 						throw new PropertyDoesNotExistException($"function {Name} requires string at argument '{idx}'");
 
+					var isDesc = IsDesc(propName);
+					propName = RemoveDirection(propName);
+
 					if (idx == 1)
 					{
-						if (IsDesc(propName))
+						if (isDesc)
 							query = l.OrderByDescending(QueryPath(propName));
 						else
 							query = l.OrderBy(QueryPath(propName));
 					}
 					else
 					{
-						if (IsDesc(propName))
+						if (isDesc)
 							query = query.ThenByDescending(QueryPath(propName));
 						else
 							query = query.ThenBy(QueryPath(propName));
@@ -1213,7 +1236,6 @@ namespace WebVella.Erp.Web.Models
 					idx++;
 				}
 
-
 				return query.ToList();
 			}
 
@@ -1221,6 +1243,17 @@ namespace WebVella.Erp.Web.Models
 			{
 				return o is string s
 					&& s.ToUpper().EndsWith(" DESC");
+			}
+
+			private static string RemoveDirection(string s)
+			{
+				var upper = s.ToUpper();
+				if (upper.EndsWith(" DESC"))
+					return s[..(s.Length - 5)].Trim();
+				if (upper.EndsWith(" ASC"))
+					return s[..(s.Length - 4)].Trim();
+
+				return s;
 			}
 
 			private static Func<EntityRecord, object> QueryPath(string path)
@@ -1268,6 +1301,29 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		private sealed class CoalesceFunction : QueryFunction
+		{
+			public CoalesceFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "coalesce";
+
+			protected override int MinParameters => 2;
+
+			protected override int MaxParameters => -1;
+
+			protected override object Execute(object[] parameters)
+			{
+				foreach(var val in parameters)
+				{
+					if (val != null && (val is not IEnumerable en || !en.Any()))
+						return val;
+				}
+				return null;
+			}
+		}
+
 		private sealed class IncludeFunction : QueryFunction
 		{
 			public IncludeFunction(PageDataModel dataModel)
@@ -1276,7 +1332,9 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "include";
 
-			protected override int ParamCount => 2;
+			protected override int MinParameters => 2;
+
+			protected override int MaxParameters => MinParameters;
 
 			protected override object Execute(object[] parameters)
 			{
@@ -1309,7 +1367,7 @@ namespace WebVella.Erp.Web.Models
 						FieldValue = id,
 					}).ToList();
 
-				var query = new QueryObject()
+				var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
 				{
 					QueryType = QueryType.OR,
 					SubQueries = subQuery
@@ -1334,7 +1392,28 @@ namespace WebVella.Erp.Web.Models
 				return l;
 			}
 		}
-		
+
+		private sealed class WhenFunction : QueryFunction
+		{
+			public WhenFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "when";
+
+			protected override int MinParameters => 2;
+
+			protected override int MaxParameters => 3;
+
+			protected override object Execute(object[] parameters)
+			{
+				if (parameters[0] is not bool contidion)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires a boolean value at first argument");
+
+				return contidion ? parameters[1] : parameters[2];
+			}
+		}
+
 		#endregion
 	}
 

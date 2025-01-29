@@ -5,6 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
+    [Obsolete]
     internal class OrderArticleSelectOptions : CodeDataSource
     {
         public static class Arguments

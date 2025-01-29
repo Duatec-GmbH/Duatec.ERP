@@ -2,7 +2,6 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories.Base;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
@@ -146,17 +145,15 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return FindByQuery(query, select);
         }
 
-#pragma warning disable CA1822 // Mark members as static
-
         public InventoryBooking? InsertBooking(InventoryBooking record)
         {
             record.Amount = Math.Round(record.Amount, 2);
-            return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(record.EntityName, record));
+            return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(RecordManager, record.EntityName, record));
         }
 
         public InventoryReservationList? FindReservationListByProject(Guid projectId, string select = "*")
         {
-            var rec = RepositoryHelper.FindBy(InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
+            var rec = RepositoryHelper.FindBy(RecordManager, InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationList>(rec);
         }
 
@@ -166,7 +163,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (!list.HasValue || list == Guid.Empty)
                 return [];
 
-            return RepositoryHelper.FindManyBy(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
+            return RepositoryHelper.FindManyBy(RecordManager, InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
                 .Select(TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>)
                 .ToList()!;
         }
@@ -193,9 +190,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             }
             return result;
         }
-
-
-#pragma warning restore CA1822 // Mark members as static
 
         private static string? GetPartNumberFromInventoryReservationEntry(InventoryReservationEntry rec)
         {

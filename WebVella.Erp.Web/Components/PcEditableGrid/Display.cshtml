@@ -23,16 +23,10 @@
     var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
     var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
 
-    var allowedComponents = new string[]
-    {
-        typeof(PcFieldText).FullName,
-        typeof(PcFieldSelect).FullName,
-        typeof(PcFieldCheckbox).FullName,
-        typeof(PcFieldNumber).FullName,
-        // TODO make possible for other fields
-    };
+    var tableClass = "table editable-grid";
+    if (options.AllowCopy || options.AllowDelete || options.AllowPaste)
+        tableClass += " table-hover";
 
-    var tableClass = "table editable-grid table-hover";
     var divClass = "erp-list table-responsive-md";
 
     if (options.Striped)
@@ -126,9 +120,6 @@
                                             }
                                             if (!String.IsNullOrWhiteSpace(nodeComponentName))
                                             {
-                                                if (!allowedComponents.Contains(childNode.ComponentName))
-                                                    throw new NotSupportedException($"Editable grid does not support '{childNode.ComponentName}' yet");
-
                                                 var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
 
                                                 if (idx >= 0)

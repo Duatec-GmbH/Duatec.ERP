@@ -17,17 +17,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<Order> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
         {
-            var entries = FindManyEntriesByProjectAndArticle(projectId, articleId);
-            if (entries.Count == 0)
+            var entries = FindManyEntriesByProjectAndArticle(projectId, articleId)
+                .Select(e => e.Order)
+                .Distinct()
+                .ToArray();
+
+            if (entries.Length == 0)
                 return [];
 
             var query = new QueryObject()
             {
                 QueryType = QueryType.OR,
-                SubQueries = entries
-                    .Select(e => e.Order)
-                    .Distinct()
-                    .Select(id => new QueryObject()
+                SubQueries = entries.Select(id => new QueryObject()
                     {
                         QueryType = QueryType.EQ,
                         FieldName = "id",
@@ -71,11 +72,17 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public List<OrderEntry> FindManyEntriesByProject(Guid projectId, string select = "*")
         {
             var query = OrdersByProjectQuery(projectId);
+            if (query == null)
+                return [];
             return FindManyEntriesByQuery(query, select);
         }
 
         public List<OrderEntry> FindManyEntriesByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
         {
+            var ordersByProjectQuery = OrdersByProjectQuery(projectId);
+            if (ordersByProjectQuery == null)
+                return [];
+
             var query = new QueryObject()
             {
                 QueryType = QueryType.AND,
@@ -87,25 +94,30 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         FieldName = OrderEntry.Fields.Article,
                         FieldValue = articleId
                     },
-                    OrdersByProjectQuery(projectId)
+                    ordersByProjectQuery
                 ]
             };
 
             return FindManyEntriesByQuery(query, select);
         }
 
-        private QueryObject OrdersByProjectQuery(Guid projectId)
+        private QueryObject? OrdersByProjectQuery(Guid projectId)
         {
-            return new()
+            var subQuery = FindManyByProject(projectId)
+                .Select(o => new QueryObject()
+                {
+                    QueryType = QueryType.EQ,
+                    FieldName = OrderEntry.Fields.Order,
+                    FieldValue = o.Id!.Value
+                }).ToList();
+
+            if (subQuery.Count == 0)
+                return null;
+
+            return subQuery.Count == 1 ? subQuery[0] : new()
             {
                 QueryType = QueryType.OR,
-                SubQueries = FindManyByProject(projectId)
-                    .Select(o => new QueryObject()
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = OrderEntry.Fields.Order,
-                        FieldValue = o.Id!.Value
-                    }).ToList()
+                SubQueries = subQuery
             };
         }
     }

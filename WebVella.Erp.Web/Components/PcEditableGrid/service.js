@@ -555,8 +555,14 @@
 		}
 
 		function markAsSelected(row) {
-			if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
-				row.classList.add('row-selected');
+
+			let body = row.parentElement;
+
+			if (body.getAttribute('delete') === 'true' || body.getAttribute('copy') === 'true' || body.getAttribute('paste') === 'true') {
+
+				if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+					row.classList.add('row-selected');
+			}
 		}
 
 		function unmarkAsSelected(row) {
@@ -565,8 +571,9 @@
 		}
 
 		function toggleSelection(row) {
+
 			if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
-				row.classList.add('row-selected');
+				markAsSelected(row);
 			else
 				row.classList.remove('row-selected');
 		}

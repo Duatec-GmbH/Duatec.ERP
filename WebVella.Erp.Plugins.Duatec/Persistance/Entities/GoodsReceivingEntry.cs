@@ -40,5 +40,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get<decimal>(Fields.Amount);
             set => Properties[Fields.Amount] = value;
         }
+
+        internal GoodsReceiving? GetGoodsReceiving()
+            => GetSingleByRelation<GoodsReceiving>(Relations.GoodsReceiving);
     }
 }

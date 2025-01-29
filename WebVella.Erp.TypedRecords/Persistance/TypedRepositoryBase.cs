@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.TypedRecords.Common;
 
 namespace WebVella.Erp.TypedRecords.Persistance
 {
@@ -32,6 +31,15 @@ namespace WebVella.Erp.TypedRecords.Persistance
 
         public virtual List<T> DeleteMany(params Guid[] ids)
             => RepositoryHelper.DeleteMany(RecordManager, Entity, ids).Select(TypedEntityRecordWrapper.Wrap<T>).ToList();
+
+        public List<T> FindAll(string select = "*")
+            => RepositoryHelper.FindMany(RecordManager, Entity, select).Select(TypedEntityRecordWrapper.Wrap<T>).ToList();
+
+        public Dictionary<Guid, T?> FindMany(string select = "*", params Guid[] ids)
+        {
+            return RepositoryHelper.FindManyByUniqueArgs(RecordManager, Entity, "id", select, ids)
+                .ToDictionary(kp => kp.Key, kp => TypedEntityRecordWrapper.WrapElseDefault<T>(kp.Value));
+        }
 
         protected T? FindBy(string property, object? value, string select = "*")
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.FindBy(RecordManager, Entity, property, value, select));

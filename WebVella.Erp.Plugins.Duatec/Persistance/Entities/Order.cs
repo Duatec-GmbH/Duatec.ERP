@@ -34,6 +34,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Project] = value;
         }
 
+        public Project? GetProject()
+            => GetSingleByRelation<Project>(Relations.Project);
 
         public IEnumerable<OrderEntry> GetEntries()
             => GetManyByRelation<OrderEntry>(Relations.Entries);

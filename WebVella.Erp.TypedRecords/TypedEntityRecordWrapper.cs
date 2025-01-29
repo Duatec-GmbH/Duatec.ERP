@@ -50,7 +50,7 @@ namespace WebVella.Erp.TypedRecords
 
         protected void SetRelationValue(string relationName, EntityRecord value)
         {
-            Properties[$"${relationName}"] = value;
+            Properties[$"${relationName}"] = new List<EntityRecord>() { value };
         }
 
         protected void SetRelationValues(string relationName, IEnumerable<EntityRecord> values)
