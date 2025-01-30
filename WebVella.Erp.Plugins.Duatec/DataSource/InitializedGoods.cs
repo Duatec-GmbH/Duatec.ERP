@@ -33,39 +33,55 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
+            return Execute(id, page, pageSize);
+        }
+
+        public static EntityRecordList Execute(Guid orderId, int page = 1, int pageSize = int.MaxValue)
+        {
+
             var recMan = new RecordManager();
 
             var orderRepo = new OrderRepository(recMan);
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
-            var articleRepos = new ArticleRepository(recMan);
+            var articleRepo = new ArticleRepository(recMan);
+            var manufacturerRepo = new CompanyRepository(recMan);
 
-            var allEntries = orderRepo.FindManyEntriesByOrder(id, $"*, ${OrderEntry.Relations.Article}.*");
+            var allEntries = orderRepo.FindManyEntriesByOrder(orderId, $"*, ${OrderEntry.Relations.Article}.*");
 
             const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
-            var recievedAmountLookup = goodsReceivingRepo.FindManyEntriesByOrder(id, receivedQuery)
+            var recievedAmountLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
                 .GroupBy(e => e.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
 
             var typeIds = allEntries
-                .Select(oe => oe.GetArticle()!.TypeId)
+                .Select(oe => oe.GetArticle().TypeId)
                 .Distinct()
                 .ToArray();
 
-            var typeLookup = articleRepos.FindManyTypesById(typeIds);
+            var manufacturerIds = allEntries
+                .Select(oe => oe.GetArticle().ManufacturerId)
+                .Distinct()
+                .ToArray();
+
+            var typeLookup = articleRepo.FindManyTypesById(typeIds);
+            var manufacturerLookup = manufacturerRepo.FindMany("id, name", manufacturerIds);
 
             var entries = new List<EntityRecord>();
-            foreach (var orderEntry in allEntries.OrderBy(oe => oe.GetArticle()!.PartNumber))
+            foreach (var orderEntry in allEntries.OrderBy(oe => oe.GetArticle().PartNumber))
             {
                 var received = recievedAmountLookup.TryGetValue(orderEntry.Article, out var d) ? d : 0m;
-                if(received < orderEntry.Amount)
+                if (received < orderEntry.Amount)
                 {
                     orderEntry.Amount -= received;
                     entries.Add(orderEntry);
 
-                    var article = orderEntry.GetArticle()!;
+                    var article = orderEntry.GetArticle();
 
                     if (typeLookup.TryGetValue(article.TypeId, out var type) && type != null)
                         article.SetArticleType(type);
+
+                    if (manufacturerLookup.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
+                        article.SetManufacturer(manufacturer);
                 }
             }
 

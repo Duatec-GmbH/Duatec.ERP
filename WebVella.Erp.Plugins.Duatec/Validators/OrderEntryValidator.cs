@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         private static List<ValidationError> ValidateAmount(OrderEntry record)
         {
-            var isInt = record.GetArticle()?.GetArticleType()?.IsInteger ?? false;
+            var isInt = record.GetArticle().GetArticleType()?.IsInteger ?? false;
 
             var validator = new NumberFormatValidator(record.EntityName, Fields.Amount, isInt, true, false);
 

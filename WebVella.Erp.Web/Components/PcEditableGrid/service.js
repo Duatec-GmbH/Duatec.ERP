@@ -628,8 +628,20 @@
 			for (let n of toDelete)
 				n.parentElement.removeChild(n);
 
-			for (let n of select2Containers)
-				n.classList.add('select2-container--bootstrap4');
+			for (let n of select2Containers) {
+
+				n.classList.remove('select2-container--below')
+				n.classList.remove('select2-container--focus')
+				n.setAttribute('style', null);
+
+				mayAddClass(n, 'select2-container--bootstrap4');
+				mayAddClass(n, 'select2-container--default');
+			}
+		}
+
+		function mayAddClass(elem, cl) {
+			if (!elem.classList.contains(cl))
+				elem.classList.add(cl);
 		}
 
 		function addDeleteButtonEvents(node) {

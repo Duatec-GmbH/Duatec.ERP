@@ -63,12 +63,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var allEntries = orderRepo.FindManyEntriesByOrder(id, $"*, ${OrderEntry.Relations.Article}.*");
 
             var manufacturerIds = allEntries
-                .Select(oe => oe.GetArticle()!.ManufacturerId)
+                .Select(oe => oe.GetArticle().ManufacturerId)
                 .Distinct()
                 .ToArray();
 
             var typeIds = allEntries
-                .Select(oe => oe.GetArticle()!.TypeId)
+                .Select(oe => oe.GetArticle().TypeId)
                 .Distinct()
                 .ToArray();
 
@@ -83,7 +83,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             foreach(var orderEntry in allEntries)
             {
-                var article = orderEntry.GetArticle()!;
+                var article = orderEntry.GetArticle();
 
                 if(manufacturers.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
                     article.SetManufacturer(manufacturer);
@@ -117,24 +117,24 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var state = arguments[Arguments.State] as string;
 
             if (!string.IsNullOrEmpty(partNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle()!.PartNumber.Contains(partNumber, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.GetArticle().PartNumber.Contains(partNumber, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(typeNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle()!.TypeNumber.Contains(typeNumber, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.GetArticle().TypeNumber.Contains(typeNumber, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(orderNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle()!.OrderNumber.Contains(orderNumber, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.GetArticle().OrderNumber.Contains(orderNumber, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(manufacturer))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle()!.GetManufacturer()!.Name.Contains(manufacturer, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.GetArticle().GetManufacturer().Name.Contains(manufacturer, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(designation))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle()!.Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.GetArticle().Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(state))
                 orderEntries = orderEntries.Where(oe => ((string)oe[OrderEntryExtensions.State]).Contains(state, StringComparison.OrdinalIgnoreCase));
 
-            return orderEntries.OrderBy(oe => oe.GetArticle()!.PartNumber);
+            return orderEntries.OrderBy(oe => oe.GetArticle().PartNumber);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
@@ -300,8 +302,6 @@ namespace WebVella.Erp.Plugins.Duatec
                                 throw new Exception("System error 10060. Entity: user_file Delete. Message:" + response.Message);
                         }
                     }
-                    #endregion
-
                     #endregion
 
                     #region << ***Delete entity*** Entity Name: task >>

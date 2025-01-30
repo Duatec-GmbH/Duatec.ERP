@@ -70,7 +70,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var receivedSelect = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
             var receivedEntries = goodsReceivingRepo.FindManyEntriesByOrders(receivedSelect, orderEntries.Keys.ToArray())
-                .GroupBy(e => e.GetGoodsReceiving()!.Order)
+                .GroupBy(e => e.GetGoodsReceiving().Order)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
 

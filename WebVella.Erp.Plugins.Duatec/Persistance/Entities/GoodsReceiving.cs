@@ -11,6 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public static class Relations
         {
             public const string Order = "goods_receiving_order";
+            public const string Entries = GoodsReceivingEntry.Relations.GoodsReceiving;
         }
 
         public static class Fields
@@ -32,5 +33,14 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get<DateTime>(Fields.TimeStamp);
             set => Properties[Fields.TimeStamp] = value;
         }
+
+        public IEnumerable<GoodsReceivingEntry> GetEntries()
+            => GetManyByRelation<GoodsReceivingEntry>(Relations.Entries);
+
+        public void SetEntries(IEnumerable<GoodsReceivingEntry> entries)
+            => SetRelationValues(Relations.Entries, entries);
+
+        internal Order GetOrder()
+            => GetSingleByRelation<Order>(Relations.Entries)!;
     }
 }

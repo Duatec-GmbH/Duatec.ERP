@@ -20,19 +20,22 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
         public List<ValidationError> ValidateOnUpdate(GoodsReceivingEntry record)
         {
-            var result = new List<ValidationError>();
-            if (record.Id.HasValue && record.Id.Value != Guid.Empty)
-                result.AddRange(Validate(record, record.Id.Value));
-            else
-            {
-                result.Add(new ValidationError(string.Empty, $"Goods Receiving entry 'id' is required"));
-                result.AddRange(Validate(record, null));
-            }
+            var result = Validate(record, record.Id!.Value);
+            if (record.Amount > 0 && record.Amount < record.StoredAmount)
+                result.Add(new ValidationError(Fields.Amount, $"Can not reduce amount to a value lower than {record.StoredAmount} since these have already been stored"));
+
             return result;
         }
 
         public List<ValidationError> ValidateOnDelete(GoodsReceivingEntry record)
-            => [];
+        {
+            var result = new List<ValidationError>();
+
+            if (record.Amount > 0 && record.Amount < record.StoredAmount)
+                result.Add(new ValidationError(Fields.Amount, $"There are already {record.StoredAmount} stored in the system"));
+
+            return result;
+        }
 
         private static List<ValidationError> Validate(GoodsReceivingEntry record, Guid? id)
         {

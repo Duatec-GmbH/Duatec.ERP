@@ -387,12 +387,6 @@ namespace WebVella.Erp.Web.Models
 			properties["Record"] = new MPW(MPT.EntityRecord, record);
 		}
 
-		public void SetEntity(Entity entity)
-		{
-			alreadyResolvedRecordProperties.Clear();
-			properties["Entity"] = new MPW(MPT.Object, entity);
-		}
-
 		private void InitDataSources(ErpPage page)
 		{
 			var pageDataSources = new PageService().GetPageDataSources(page.Id);

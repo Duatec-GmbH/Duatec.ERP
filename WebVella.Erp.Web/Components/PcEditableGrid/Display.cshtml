@@ -85,8 +85,7 @@
                 add="@options.AllowAdd.ToString().ToLower()">
                 @{
 
-                    if(options.AllowCopy || options.AllowPaste)
-                        await CreateRow(new EntityRecord());
+                    await CreateRow(new EntityRecord());
 
                     for(var i = 0; i < records.Count; i++)
                         await CreateRow(records[i], i);

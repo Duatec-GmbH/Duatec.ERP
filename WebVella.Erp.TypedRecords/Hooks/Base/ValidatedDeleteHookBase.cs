@@ -20,11 +20,10 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
 
         protected IActionResult? Execute(TModel pageModel)
         {
-            var entity = GetEntity(pageModel);
-            var record = MapRecord(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
+            var recMan = new RecordManager();
 
-            if (!record.Properties.ContainsKey("id"))
-                record.Properties["id"] = pageModel.RecordId;
+            var entity = GetEntity(pageModel);
+            var record = MapRecord(GetRecord(pageModel, recMan, entity));
 
             var errors = new List<ValidationError>();
             var result = Execute(record, entity, pageModel, errors);
@@ -35,8 +34,6 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
 
             if (errors.Count == 0)
             {
-                var recMan = new RecordManager();
-
                 var response = recMan.DeleteRecord(entity, pageModel.RecordId!.Value);
                 if (!response.Success || response.Object?.Data == null || response.Object.Data.Count != 1)
                     return OnError(pageModel, entity, response);
@@ -53,6 +50,23 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
 
             url = Url.RemoveParameters(pageModel.CurrentUrl);
             return pageModel.LocalRedirect(url);
+        }
+
+        private EntityRecord GetRecord(TModel pageModel, RecordManager recMan, Entity entity)
+        {
+            var record = MapRecord(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
+            if (!record.Properties.ContainsKey("id"))
+                record.Properties["id"] = pageModel.RecordId;
+
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.EQ,
+                FieldName = "id",
+                FieldValue = (Guid)record["id"]
+            };
+
+            return recMan.Find(new EntityQuery(entity.Name, "*", query)).Object.Data
+                .Single();
         }
 
         protected virtual IActionResult? OnError(TModel pageModel, Entity entity, QueryResponse response)
