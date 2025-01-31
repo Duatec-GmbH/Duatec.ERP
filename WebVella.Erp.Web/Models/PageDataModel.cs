@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using WebVella.Erp.Api;
@@ -27,6 +26,7 @@ namespace WebVella.Erp.Web.Models
 		private readonly Dictionary<string, MPW> properties = [];
 		// improvement to not load same values multiple times, since it can't be stored within record
 		private readonly Dictionary<string, (List<EntityRecord> Result, Entity Entity)> alreadyResolvedRecordProperties = [];
+		private readonly Dictionary<string, object> dataSourceResults = [];
 
 		internal PageDataModel(BaseErpPageModel erpPageModel)
 		{
@@ -549,8 +549,15 @@ namespace WebVella.Erp.Web.Models
 			if(Guid.TryParse(propName, out var id))
 				return id;
 
-			if (propName.StartsWith('$') && propName.EndsWith(')'))
-				return ExecFunction(propName);
+			if (propName.StartsWith('$'))
+			{
+				if (properties.TryGetValue(propName, out var mpv) && mpv.Value is QueryFunction fun)
+					return fun;
+
+				if (propName.EndsWith(')'))
+					return ExecFunction(propName);
+			}
+
 
 			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 			var completePropChain = new List<string>();
@@ -823,6 +830,12 @@ namespace WebVella.Erp.Web.Models
 
 		private object ExecDataSource(DSW dsWrapper)
 		{
+			var name = dsWrapper.DataSource?.Name;
+			if (!string.IsNullOrEmpty(name) && dataSourceResults.TryGetValue(name, out var v))
+				return v;
+
+			object result;
+
 			if (dsWrapper.DataSource.Type == DataSourceType.CODE)
 			{
 				var arguments = new Dictionary<string, object>();
@@ -868,10 +881,11 @@ namespace WebVella.Erp.Web.Models
 
 				arguments["PageModel"] = this;
 				var codeDS = (CodeDataSource)dsWrapper.DataSource;
+
 				if (SafeCodeDataVariable)
-					try { return codeDS.Execute(arguments); } catch { return null; }
+					try { result = codeDS.Execute(arguments); } catch { return null; }
 				else
-					return codeDS.Execute(arguments);
+					result = codeDS.Execute(arguments);
 			}
 			else if (dsWrapper.DataSource.Type == DataSourceType.DATABASE)
 			{
@@ -918,10 +932,14 @@ namespace WebVella.Erp.Web.Models
 				}
 
 				DatabaseDataSource dbDs = (DatabaseDataSource)dsWrapper.DataSource;
-				return dsMan.Execute(dbDs.Id, eqlParameters);
+				result = dsMan.Execute(dbDs.Id, eqlParameters);
 			}
 			else
 				throw new Exception("Not supported data source type.");
+
+			if (!string.IsNullOrEmpty(name))
+				dataSourceResults.Add(name, result);
+			return result;
 		}
 
 		private static string CheckProcessDefaultValue(string value)
@@ -1066,9 +1084,36 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		public sealed class LazyObject
+		{
+			private bool _executed = false;
+			private object _value;
+			private readonly Func<object> _evalFun;
+
+			public LazyObject(Func<object> func)
+			{
+				_evalFun = func;
+			}
+
+			public object Value
+			{
+				get
+				{
+					if (!_executed)
+					{
+						_value = _evalFun();
+						_executed = true;
+					}
+					return _value;
+				}
+			}
+		}
+
+
 		//FunctionWrapper
 		private abstract class QueryFunction
 		{
+
 			protected QueryFunction(PageDataModel dataModel)
 			{
 				DataModel = dataModel;
@@ -1076,10 +1121,9 @@ namespace WebVella.Erp.Web.Models
 
 			protected PageDataModel DataModel { get; }
 
-			protected abstract int MinParameters { get; }
+			public abstract int MinParameters { get; }
 
-			protected abstract int MaxParameters { get; }
-
+			public abstract int MaxParameters { get; }
 
 			public abstract string Name { get; }
 
@@ -1127,13 +1171,13 @@ namespace WebVella.Erp.Web.Models
 					throw new PropertyDoesNotExistException($"Function '{Name}' requires at least {MinParameters}");
 				}
 
-				var args = parameters.Select(DataModel.GetProperty)
+				var args = parameters.Select(p => new LazyObject(() => DataModel.GetProperty(p)))
 					.ToArray();
 
 				return Execute(args);
 			}
 
-			protected abstract object Execute(object[] parameters);
+			public abstract object Execute(LazyObject[] parameters);
 		}
 
 		private sealed class ExistsFunction : QueryFunction
@@ -1144,13 +1188,13 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "exists";
 
-			protected override int MinParameters => 1;
+			public override int MinParameters => 1;
 
-			protected override int MaxParameters => MinParameters;
+			public override int MaxParameters => MinParameters;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				var para = parameters[0];
+				var para = parameters[0].Value;
 				var result = para is EntityRecord
 					|| para is string s && !string.IsNullOrWhiteSpace(s)
 					|| para is IEnumerable en && en is not string && en.Any()
@@ -1170,13 +1214,13 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "not";
 
-			protected override int MinParameters => 1;
+			public override int MinParameters => 1;
 
-			protected override int MaxParameters => MinParameters;
+			public override int MaxParameters => MinParameters;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				return parameters[0] is bool b ? !b
+				return parameters[0].Value is bool b ? !b
 					: throw new PropertyDoesNotExistException($"function {Name} requires boolean");
 			}
 		}
@@ -1189,13 +1233,13 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "orderBy";
 
-			protected override int MinParameters => 2;
+			public override int MinParameters => 2;
 
-			protected override int MaxParameters => -1;
+			public override int MaxParameters => -1;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				if (parameters[0] is not List<EntityRecord> l)
+				if (parameters[0].Value is not List<EntityRecord> l)
 					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> at first argument");
 
 				if (l.Count == 0)
@@ -1206,7 +1250,7 @@ namespace WebVella.Erp.Web.Models
 				var idx = 1;
 				while(idx < parameters.Length)
 				{
-					if (parameters[idx] is not string propName)
+					if (parameters[idx].Value is not string propName)
 						throw new PropertyDoesNotExistException($"function {Name} requires string at argument '{idx}'");
 
 					var isDesc = IsDesc(propName);
@@ -1303,13 +1347,13 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "coalesce";
 
-			protected override int MinParameters => 2;
+			public override int MinParameters => 2;
 
-			protected override int MaxParameters => -1;
+			public override int MaxParameters => -1;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				foreach(var val in parameters)
+				foreach(var val in parameters.Select(p => p.Value))
 				{
 					if (val != null && (val is not IEnumerable en || !en.Any()))
 						return val;
@@ -1326,16 +1370,16 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "include";
 
-			protected override int MinParameters => 2;
+			public override int MinParameters => 2;
 
-			protected override int MaxParameters => MinParameters;
+			public override int MaxParameters => MinParameters;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				if (parameters[0] is not List<EntityRecord> l)
+				if (parameters[0].Value is not List<EntityRecord> l)
 					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> as first argument");
 
-				if (parameters[1] is not string relationName)
+				if (parameters[1].Value is not string relationName)
 					throw new PropertyDoesNotExistException($"function {Name} requires string as second argument");
 
 				if (!relationName.StartsWith('$'))
@@ -1395,16 +1439,16 @@ namespace WebVella.Erp.Web.Models
 
 			public override string Name => "when";
 
-			protected override int MinParameters => 2;
+			public override int MinParameters => 2;
 
-			protected override int MaxParameters => 3;
+			public override int MaxParameters => 3;
 
-			protected override object Execute(object[] parameters)
+			public override object Execute(LazyObject[] parameters)
 			{
-				if (parameters[0] is not bool contidion)
+				if (parameters[0].Value is not bool contidion)
 					throw new PropertyDoesNotExistException($"function '{Name}' requires a boolean value at first argument");
 
-				return contidion ? parameters[1] : parameters[2];
+				return contidion ? parameters[1].Value : parameters[2].Value;
 			}
 		}
 

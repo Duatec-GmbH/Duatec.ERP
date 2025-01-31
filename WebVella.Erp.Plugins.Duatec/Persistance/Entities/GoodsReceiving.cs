@@ -41,6 +41,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             => SetRelationValues(Relations.Entries, entries);
 
         internal Order GetOrder()
-            => GetSingleByRelation<Order>(Relations.Entries)!;
+            => GetSingleByRelation<Order>(Relations.Order)!;
     }
 }

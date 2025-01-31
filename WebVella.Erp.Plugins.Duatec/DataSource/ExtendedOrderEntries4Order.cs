@@ -24,6 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             public const string State = "state";
             public const string ReceivedAmount = "received_amount";
+            public const string StoredAmount = "stored_amount";
         }
 
         public ExtendedOrderEntries4Order()
@@ -75,9 +76,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var manufacturers = manufacturerRepo.FindMany($"id, {Company.Fields.Name}", manufacturerIds);
 
             const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
-            var recievedAmountLookup = goodsReceivingRepo.FindManyEntriesByOrder(id, receivedQuery)
+
+            var recievedAmountsLookup = goodsReceivingRepo.FindManyEntriesByOrder(id, receivedQuery)
                 .GroupBy(e => e.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+                .ToDictionary(g => g.Key, g => new { Amount = g.Sum(e => e.Amount), Stored = g.Sum(e => e.StoredAmount )});
+
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
 
@@ -91,10 +94,18 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 if (typeLookup.TryGetValue(article.TypeId, out var type) && type != null)
                     article.SetArticleType(type);
 
-                var amount = recievedAmountLookup.TryGetValue(orderEntry.Article, out var d) ? d : 0m;
+                var receivedAmount = 0m;
+                var storedAmount = 0m;
 
-                orderEntry[OrderEntryExtensions.ReceivedAmount] = amount;
-                orderEntry[OrderEntryExtensions.State] = orderEntry.Amount <= amount 
+                if(recievedAmountsLookup.TryGetValue(orderEntry.Article, out var tuple))
+                {
+                    receivedAmount = tuple.Amount;
+                    storedAmount = tuple.Stored;
+                }
+                    
+                orderEntry[OrderEntryExtensions.ReceivedAmount] = receivedAmount;
+                orderEntry[OrderEntryExtensions.StoredAmount] = storedAmount;
+                orderEntry[OrderEntryExtensions.State] = orderEntry.Amount <= receivedAmount && storedAmount >= receivedAmount
                     ? "Complete" : "Incomming";
             }
 

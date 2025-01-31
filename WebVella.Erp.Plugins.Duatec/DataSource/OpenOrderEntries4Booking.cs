@@ -5,7 +5,7 @@ using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
-    internal class InitializedGoods : CodeDataSource
+    internal class OpenOrderEntries4Booking : CodeDataSource
     {
         public static class Arguments
         {
@@ -14,9 +14,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string Order = "order";
         }
 
-        public InitializedGoods() : base()
+        public OpenOrderEntries4Booking() : base()
         {
-            Name = nameof(InitializedGoods);
+            Name = nameof(OpenOrderEntries4Booking);
             ResultModel = nameof(EntityRecordList);
             Id = new Guid("1a0750b2-5dd4-4beb-9e4a-5ba774d2d268");
 
@@ -33,13 +33,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
-            return Execute(id, page, pageSize);
+            var allEntries = Execute(id).ToArray();
+            var result = new EntityRecordList();
+
+            result.AddRange(allEntries
+                .OrderBy(oe => oe.GetArticle().PartNumber)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize));
+
+            result.TotalCount = allEntries.Length;
+
+            return result;
         }
 
-        public static EntityRecordList Execute(Guid orderId, int page = 1, int pageSize = int.MaxValue)
+        public static IEnumerable<OrderEntry> Execute(Guid orderId, RecordManager? recMan = null)
         {
-
-            var recMan = new RecordManager();
+            recMan ??= new RecordManager();
 
             var orderRepo = new OrderRepository(recMan);
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
@@ -64,16 +73,14 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .ToArray();
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
-            var manufacturerLookup = manufacturerRepo.FindMany("id, name", manufacturerIds);
+            var manufacturerLookup = manufacturerRepo.FindMany($"id, {Company.Fields.Name}", manufacturerIds);
 
-            var entries = new List<EntityRecord>();
-            foreach (var orderEntry in allEntries.OrderBy(oe => oe.GetArticle().PartNumber))
+            foreach (var orderEntry in allEntries)
             {
                 var received = recievedAmountLookup.TryGetValue(orderEntry.Article, out var d) ? d : 0m;
                 if (received < orderEntry.Amount)
                 {
                     orderEntry.Amount -= received;
-                    entries.Add(orderEntry);
 
                     var article = orderEntry.GetArticle();
 
@@ -82,14 +89,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
                     if (manufacturerLookup.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
                         article.SetManufacturer(manufacturer);
+
+                    yield return orderEntry;
                 }
             }
-
-            var result = new EntityRecordList();
-            result.AddRange(entries.Skip((page - 1) * pageSize).Take(pageSize));
-            result.TotalCount = entries.Count;
-
-            return result;
         }
     }
 }

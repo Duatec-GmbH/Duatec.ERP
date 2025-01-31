@@ -32,9 +32,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<string, Article?> FindMany(string select = "*", params string[] partNumbers)
             => FindManyByUniqueArgs(Article.Fields.PartNumber, select, partNumbers);
 
-        public Dictionary<Guid, Article?> FindMany(string select = "*", params Guid[] ids)
-            => FindManyByUniqueArgs("id", select, ids);
-
         public override Article? Delete(Guid id)
         {
             var alternatives = FindAlternativeIds(id);

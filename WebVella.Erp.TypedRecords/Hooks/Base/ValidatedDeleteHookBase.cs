@@ -48,6 +48,8 @@ namespace WebVella.Erp.TypedRecords.Hooks.Base
                 return pageModel.LocalRedirect(url);
             }
 
+            pageModel.PutMessage(ScreenMessageType.Error, string.Join(Environment.NewLine, errors.Select(e => e.Message)));
+
             url = Url.RemoveParameters(pageModel.CurrentUrl);
             return pageModel.LocalRedirect(url);
         }

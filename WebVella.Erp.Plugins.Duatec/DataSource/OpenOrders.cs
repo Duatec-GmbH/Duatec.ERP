@@ -84,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 {
                     var storedArticlesLookup = received
                         .GroupBy(r => r.Article)
-                        .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
+                        .ToDictionary(g => g.Key, g => g.Sum(r => r.StoredAmount));
 
                     if (entries.Exists(e => e.Amount > 0 && (!storedArticlesLookup.TryGetValue(e.Article, out var storedAmount) || storedAmount < e.Amount)))
                         openOrders.Add(orderId);

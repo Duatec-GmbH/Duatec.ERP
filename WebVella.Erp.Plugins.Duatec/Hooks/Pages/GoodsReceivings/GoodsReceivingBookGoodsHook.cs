@@ -29,14 +29,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             var key = $"${Order.Relations.Entries}";
             if (!record.Properties.TryGetValue(key, out var l) || l == null)
-                record[key] = InitializedGoods.Execute((Guid)record["id"]);
+                record[key] = OpenOrderEntries4Booking.Execute((Guid)record["id"]).Select(gre => (EntityRecord)gre).ToList();
 
             return null;
         }
 
         protected override IActionResult? OnPreUpdate(Order record, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var demandedEntries = InitializedGoods.Execute(record.Id!.Value)
+            var demandedEntries = OpenOrderEntries4Booking.Execute(record.Id!.Value)
                 .Select(TypedEntityRecordWrapper.Wrap<OrderEntry>)
                 .ToDictionary(oe => oe.Article, oe => oe);
 
@@ -87,6 +87,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 SetUpErrorPage(record, pageModel, demandedEntries.Values, updateInfos);
                 return pageModel.Page();
             }
+
+            pageModel.PutMessage(ScreenMessageType.Success, "Successfully booked goods");
 
             var context = pageModel.ErpRequestContext;
             return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/" +

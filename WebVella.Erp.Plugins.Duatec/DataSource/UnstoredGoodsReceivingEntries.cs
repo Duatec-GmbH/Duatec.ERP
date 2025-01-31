@@ -5,18 +5,18 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
-    internal class InitializedGoodsToStore : CodeDataSource
+    internal class UnstoredGoodsReceivingEntries : CodeDataSource
     {
         public static class Arguments
         {
             public const string Page = "page";
             public const string PageSize = "pageSize";
-            public const string GoodsReceiving = "goods_receiving";
+            public const string GoodsReceiving = "goodsReceiving";
         }
 
-        public InitializedGoodsToStore() : base()
+        public UnstoredGoodsReceivingEntries() : base()
         {
-            Name = nameof(InitializedGoodsToStore);
+            Name = nameof(UnstoredGoodsReceivingEntries);
             ResultModel = nameof(EntityRecordList);
             Id = new Guid("535733e1-a48f-4f64-974b-59e4caffdfdd");
 
@@ -33,12 +33,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
-            return Execute(id, page, pageSize);
+            var result = new EntityRecordList();
+            var allEntries = Execute(id).ToArray();
+
+            result.AddRange(allEntries
+                .OrderBy(gr => gr.GetArticle().PartNumber)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize));
+
+            result.TotalCount = allEntries.Length;
+
+            return result;
         }
 
-        public static EntityRecordList Execute(Guid goodsReceivingId, int page = 1, int pageSize = int.MaxValue)
+        public static IEnumerable<GoodsReceivingEntry> Execute(Guid goodsReceivingId, RecordManager? recMan = null)
         {
-            var recMan = new RecordManager();
+            recMan ??= new RecordManager();
 
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
             var articleRepo = new ArticleRepository(recMan);
@@ -56,11 +66,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .ToArray();
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
-            var manufacturerLookup = manufacturerRepo.FindMany("id, name", manufacturerIds);
+            var manufacturerLookup = manufacturerRepo.FindMany($"id, {Company.Fields.Name}", manufacturerIds);
 
-            var entries = new List<EntityRecord>();
-
-            foreach (var entry in allEntries.Where(e => e.Amount > e.StoredAmount).OrderBy(gr => gr.GetArticle().PartNumber))
+            foreach (var entry in allEntries.Where(e => e.Amount > e.StoredAmount))
             {
                 entry.Amount -= entry.StoredAmount;
 
@@ -72,14 +80,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 if (manufacturerLookup.TryGetValue(article.ManufacturerId, out var man) && man != null)
                     article.SetManufacturer(man);
 
-                entries.Add(entry);                
+                yield return entry;              
             }
-
-            var result = new EntityRecordList();
-            result.AddRange(entries.Skip((page - 1) * pageSize).Take(pageSize));
-            result.TotalCount = entries.Count;
-
-            return result;
         }
     }
 }

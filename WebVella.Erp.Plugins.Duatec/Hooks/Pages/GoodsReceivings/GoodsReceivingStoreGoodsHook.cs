@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
@@ -15,103 +17,224 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
-    using UpdateInfo = (Guid ArticleId, Guid WarehouseLocation, decimal Amount, int Index);
+    using UpdateInfo = (Guid ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
     {
+        const string entryKey = $"${GoodsReceiving.Relations.Entries}";
+
         public IActionResult? OnPost(BaseErpPageModel pageModel)
             => null;
 
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
-            var record = pageModel.TryGetDataSourceProperty<EntityRecord>("Record")!;
+            var record = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
+            
+            if (!record.Properties.TryGetValue(entryKey, out var l) || l == null)
+            {
+                var gr = TypedEntityRecordWrapper.Wrap<GoodsReceiving>(record);
 
-            var key = $"${GoodsReceiving.Relations.Entries}";
-            if (!record.Properties.TryGetValue(key, out var l) || l == null)
-                record[key] = InitializedGoodsToStore.Execute((Guid)record["id"]);
+                var records = GetDefaultEntries(gr)
+                    .Select(ie => (EntityRecord)ie)
+                    .ToList();
+
+                gr[entryKey] = records;
+
+                pageModel.DataModel.SetRecord(gr);
+            }
 
             return null;
         }
 
         protected override IActionResult? OnPreUpdate(GoodsReceiving record, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
-            var demandedEntries = InitializedGoodsToStore.Execute(record.Id!.Value)
-                .Select(TypedEntityRecordWrapper.Wrap<GoodsReceivingEntry>)
-                .ToDictionary(gre => gre.Article, gre => gre);
+            var recMan = new RecordManager();
+
+            var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
+            record = goodsReceivingRepo.Find(record.Id!.Value)!;
+
+            var defaultEntries = GetDefaultEntries(record, recMan)
+                .GroupBy(ie => ie.Article)
+                .ToDictionary(g => g.Key, g => g.ToArray());
 
             var updateInfos = GetUpdateInfo(pageModel)
                 .ToArray();
 
-            validationErrors.AddRange(Validate(demandedEntries, updateInfos));
+            validationErrors.AddRange(Validate(updateInfos, defaultEntries));
 
             if(validationErrors.Count > 0)
             {
-                SetUpErrorPage(record, pageModel, demandedEntries, updateInfos);
+                SetUpErrorPage(record, pageModel, defaultEntries, updateInfos);
                 return null;
             }
 
-            // TODO fix this shit
-            var projectId = record.GetOrder().Project;
-
-            var entries = updateInfos
-                .Where(t => t.Amount > 0)
-                .GroupBy(t => (t.ArticleId, t.WarehouseLocation))
-                .Select(g => new InventoryEntry()
-                {
-                    Amount = g.Sum(t => t.Amount),
-                    Article = g.Key.ArticleId,
-                    WarehouseLocation = g.Key.WarehouseLocation,
-                    Project = projectId,
-                    Id = Guid.NewGuid()
-                });
-
             void TransactionalAction()
             {
-                var repo = new InventoryRepository();
-                foreach(var entry in entries)
+                var repo = new InventoryRepository(recMan);
+                var entries = goodsReceivingRepo.FindManyEntriesByGoodsReceiving(record.Id!.Value)
+                    .ToDictionary(gre => gre.Article, gre => gre);
+
+                foreach(var g in BuildInventoryEntries(updateInfos).GroupBy(ie => ie.Article).ToArray())
                 {
-                    if (repo.Insert(entry) == null)
-                        throw new DbException("Could not insert inventory entry record");
+                    var receivingEntry = entries[g.Key];
+                    receivingEntry.StoredAmount = g.Sum(ie => ie.Amount);
+
+                    if (receivingEntry.StoredAmount != receivingEntry.Amount)
+                        throw new InvalidOperationException("Fatal error data anomaly found within receiving entry stored amounts");
+
+                    if (goodsReceivingRepo.UpdateEntry(receivingEntry) == null)
+                        throw new DbException("Failed to update receiving entry record");
+
+                    foreach(var entry in g)
+                    {
+                        if (repo.Insert(entry) == null)
+                            throw new DbException("Could not insert inventory entry record");
+                    }
+
                 }
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))
             {
-                SetUpErrorPage(record, pageModel, demandedEntries, updateInfos);
+                SetUpErrorPage(record, pageModel, defaultEntries, updateInfos);
                 return pageModel.Page();
             }
 
+            pageModel.PutMessage(ScreenMessageType.Success, "Successfully stored goods");
+
             var context = pageModel.ErpRequestContext;
-            return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/orders/l/orders");
+            return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/open-orders/r/{record.Order}/detail");
         }
 
-        private static IEnumerable<ValidationError> Validate(Dictionary<Guid, GoodsReceivingEntry> demandedEntries, UpdateInfo[] updateInfos)
+        private static decimal GetAmount<T>(Dictionary<T, decimal> dict, T key) where T : notnull
+            => dict.TryGetValue(key, out var amount) ? amount : 0m;
+
+        private static IEnumerable<InventoryEntry> GetDefaultEntries(GoodsReceiving record, RecordManager? recMan = null)
         {
-            if (!Array.Exists(updateInfos, t => t.Amount > 0))
-                yield return new ValidationError(string.Empty, "Something must be selected");
+            recMan ??= new RecordManager();
+            
+            var partListRepo = new PartListRepository(recMan);
+            var inventoryRepo = new InventoryRepository(recMan);
+            var receivingRepo = new GoodsReceivingRepository(recMan);
+            var projectId = record.GetOrder().Project;
 
-            foreach (var (articleId, warehouseLocationId, amount, index) in updateInfos.Where(t => t.Amount > 0))
+            var demands = partListRepo.FindManyEntriesByProject(projectId, true)
+                .GroupBy(ple => ple.ArticleId)
+                .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
+
+            var reservedAmounts = inventoryRepo.FindManyReservationEntriesByProject(projectId)
+                .GroupBy(re => re.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(re => re.Amount));
+
+            var alreadyStoredAmounts = receivingRepo.FindManyEntriesByProject(projectId)
+                .GroupBy(gre => gre.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(oe => oe.StoredAmount));
+
+            var unstoredEntries = UnstoredGoodsReceivingEntries.Execute(record.Id!.Value)
+                .OrderBy(gre => gre.GetArticle().PartNumber);
+
+            foreach (var entry in unstoredEntries)
             {
-                if (articleId == Guid.Empty)
-                    yield return ArticleError(index, "Article is required");
+                var projectDemand = GetAmount(demands, entry.Article)
+                    - GetAmount(reservedAmounts, entry.Article)
+                    - GetAmount(alreadyStoredAmounts, entry.Article);
 
+                var inventoryEntry = new InventoryEntry()
+                {
+                    Id = Guid.NewGuid(),
+                    Amount = entry.Amount,
+                    Article = entry.Article,
+                    Project = projectId,
+                };
+
+                inventoryEntry.SetArticle(entry.GetArticle());
+
+                if (projectDemand <= 0)
+                {
+                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    inventoryEntry.Project = Guid.Empty;
+                    yield return inventoryEntry;
+                }
+                else if (inventoryEntry.Amount <= projectDemand)
+                {
+                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    yield return inventoryEntry;
+                }
+                else
+                {
+                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    var goesToDefaultProject = new InventoryEntry()
+                    {
+                        Id = Guid.NewGuid(),
+                        Amount = inventoryEntry.Amount - projectDemand,
+                        Project = Guid.Empty,
+                        Article = entry.Article,
+                        WarehouseLocation = Guid.Empty,
+                    };
+                    goesToDefaultProject.WarehouseLocation = Guid.Empty;// TODO make smart selection
+
+                    inventoryEntry.Amount = projectDemand;
+
+                    yield return inventoryEntry;
+                    yield return goesToDefaultProject;
+                }
+            }
+        }
+
+        private static IEnumerable<InventoryEntry> BuildInventoryEntries(UpdateInfo[] updateInfos)
+        {
+            return updateInfos.Where(t => t.Amount > 0)
+                .Select(t => new InventoryEntry()
+                {
+                    Project = t.ProjectId,
+                    Article = t.ArticleId,
+                    WarehouseLocation = t.WarehouseLocationId,
+                    Amount = t.Amount,
+                });
+        }
+
+        private static IEnumerable<ValidationError> Validate(UpdateInfo[] updateInfos, Dictionary<Guid, InventoryEntry[]> defaultLookup)
+        {
+            var projectSetPoint = defaultLookup
+                .First().Value[0].Project;
+
+            foreach (var (projectId, articleId, warehouseLocationId, amount, index) in updateInfos.Where(t => t.Amount > 0))
+            {
                 if (warehouseLocationId == Guid.Empty)
                     yield return WarehouseLocationError(index, "Warehouse location is required");
 
-                var duplicates = updateInfos
-                    .Where(t => t.Amount > 0 && t.ArticleId == articleId && t.Index != index);
+                if (projectId != Guid.Empty && projectId != projectSetPoint)
+                    yield return ProjectError(index, "Fatal error project id missmatch");
 
-                var totalAmount = duplicates.Aggregate(amount, (val, cur) => val + cur.Amount);
+                if (articleId == Guid.Empty)
+                    yield return ArticleError(index, "Article is required");
 
-                if (!demandedEntries.TryGetValue(articleId, out var gre) && totalAmount > 0)
-                    yield return ArticleError(index, "There is no goods receiving entry for this article");
+                else if (!defaultLookup.TryGetValue(articleId, out var entries) || entries.Length == 0)
+                    yield return ArticleError(index, "There is no booking for this article");
+
                 else
                 {
-                    if (totalAmount > gre!.Amount)
-                        yield return AmountError(index, $"$Amount must not be greater than ordered amount ({gre.Amount})");
+                    var equivalentArticles = updateInfos
+                        .Where(t => t.Amount > 0 && t.ArticleId == articleId)
+                        .ToArray();
 
-                    var isInt = gre.GetArticle().GetArticleType().IsInteger;
+                    var totalAmount = equivalentArticles
+                        .Aggregate(0m, (sum, current) => sum + current.Amount);
+
+                    var max = entries.Sum(t => t.Amount);
+
+                    if (totalAmount != max)
+                        yield return AmountError(index, $"Sum of amounts for given article must be equal to booked amount ({max})");
+
+                    var projectMax = entries
+                        .Where(ie => ie.Project == projectId)
+                        .Aggregate(0m, (sum, current) => sum + current.Amount);
+
+                    if (totalAmount != projectMax)
+                        yield return AmountError(index, $"Sum of amounts for given article for given project must be equal to demand ({projectMax})");
+
+                    var isInt = entries[0].GetArticle().GetArticleType().IsInteger;
                     if (isInt && amount % 1 != 0)
                         yield return AmountError(index, "Amount is expected to be an integer value");
                 }
@@ -127,42 +250,55 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         private static ValidationError AmountError(int index, string message)
             => new($"amount[{index}]", message);
 
-        private static void SetUpErrorPage(GoodsReceiving record, BaseErpPageModel pageModel, Dictionary<Guid, GoodsReceivingEntry> demandedEntries, UpdateInfo[] updateInfos)
+        private static ValidationError ProjectError(int index, string message)
+            => new($"project_id[{index}]", message);
+
+        private static void SetUpErrorPage(
+            GoodsReceiving record,  BaseErpPageModel pageModel, 
+            Dictionary<Guid, InventoryEntry[]> bookedEntries, UpdateInfo[] updateInfos)
         {
-            var entries = updateInfos.Select(t => new GoodsReceivingEntry()
+            var entries = updateInfos.Select(t => new InventoryEntry()
             {
                 Id = Guid.NewGuid(),
-                Amount = t.Amount,
                 Article = t.ArticleId,
-                GoodsReceiving = record.Id!.Value,
-                StoredAmount = 0,
+                Project = t.ProjectId,
+                WarehouseLocation = t.WarehouseLocationId,
+                Amount = t.Amount,
+
             }).ToList();
 
             foreach(var entry in entries)
             {
-                if (demandedEntries.TryGetValue(entry.Article, out var gre) && gre?.GetArticle() is Article article)
+                if (bookedEntries.TryGetValue(entry.Article, out var gre) && gre[0].GetArticle() is Article article)
                     entry.SetArticle(article);
             }
 
-            record.SetEntries(entries.OrderBy(e => e.GetArticle().PartNumber));
+            record[entryKey] = entries
+                .Select(ie => (EntityRecord)ie)
+                .ToList();
+
             pageModel.DataModel.SetRecord(record);
         }
 
         private static IEnumerable<UpdateInfo> GetUpdateInfo(BaseErpPageModel pageModel)
         {
             var i = 0;
-            while (pageModel.Request.Form.TryGetValue($"article_id[{i}]", out var articleIdVal))
+            var form = pageModel.Request.Form;
+            while (form.TryGetValue($"article_id[{i}]", out var articleIdVal))
             {
                 var articleId = Guid.TryParse(articleIdVal, out var id)
                     ? id : Guid.Empty;
 
-                var warehouseLocationId = Guid.TryParse(pageModel.Request.Form[$"warehouse_location_id[{i}]"], out var g)
-                    ? g : Guid.Empty;
+                var projectId = Guid.TryParse(form[$"project_id[{i}]"], out id)
+                    ? id : Guid.Empty;
 
-                var amount = decimal.TryParse(pageModel.Request.Form[$"amount[{i}]"], out var d)
+                var warehouseLocationId = Guid.TryParse(form[$"warehouse_location_id[{i}]"], out id)
+                    ? id : Guid.Empty;
+
+                var amount = decimal.TryParse(form[$"amount[{i}]"], out var d)
                     ? d : 0m;
 
-                yield return (articleId, warehouseLocationId, amount, i);
+                yield return (projectId, articleId, warehouseLocationId, amount, i);
 
                 i++;
             }
