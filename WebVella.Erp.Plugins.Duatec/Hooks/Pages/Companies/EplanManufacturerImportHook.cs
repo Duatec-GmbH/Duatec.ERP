@@ -11,8 +11,8 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Manufacturers
 {
-    [HookAttachment(key: HookKeys.Manufacturer.EplanImport)]
-    internal class ManufacturerEplanImportHook : IPageHook
+    [HookAttachment(key: HookKeys.Company.EplanImport)]
+    internal class EplanManufacturerImportHook : IPageHook
     {
         private const string EplanIdArg = "hEplanId";
 

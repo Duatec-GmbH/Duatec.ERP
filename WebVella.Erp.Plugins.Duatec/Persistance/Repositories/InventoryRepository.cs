@@ -159,7 +159,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<InventoryReservationEntry> FindManyReservationEntriesByProject(Guid projectId, string select = "*")
         {
-            var list = FindReservationListByProject(projectId)?.Id;
+            var list = FindReservationListByProject(projectId, "id")?.Id;
             if (!list.HasValue || list == Guid.Empty)
                 return [];
 

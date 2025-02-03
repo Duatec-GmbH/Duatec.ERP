@@ -19,19 +19,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Delete = "article_type_delete";
                 public const string Update = "article_type_update";
             }
+        }
 
-            public static class Stock
-            {
-                public const string Create = "article_stock_create";
-                public const string Update = "article_stock_update";
-                public const string Move = "article_stock_move";
-                public const string TakeOut = "article_stock_take_out";
-
-                public static class Reservations
-                {
-                    public const string MassReservation = "article_stock_reservation_mass_reservation";
-                }
-            }
+        public static class Inventory
+        {
+            public const string Create = "article_stock_create";
+            public const string Update = "article_stock_update";
+            public const string Move = "article_stock_move";
+            public const string TakeOut = "article_stock_take_out";
+            public const string MassReservation = "article_stock_reservation_mass_reservation";
         }
 
         public static class GoodsReceiving
@@ -57,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Store = "goods_receiving_store";
         }
 
-        public static class Manufacturer
+        public static class Company
         {
             public const string Create = "manufacturer_create";
             public const string Update = "manufacturer_update";

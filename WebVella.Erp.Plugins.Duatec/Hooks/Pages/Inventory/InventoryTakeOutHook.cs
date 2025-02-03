@@ -9,10 +9,10 @@ using WebVella.Erp.TypedRecords.Hooks;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles.Stocks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
-    [HookAttachment(key: HookKeys.Article.Stock.TakeOut)]
-    internal class ArticleStockTakeOutHook : TypedValidatedManageHook<InventoryEntry>
+    [HookAttachment(key: HookKeys.Inventory.TakeOut)]
+    internal class InventoryTakeOutHook : TypedValidatedManageHook<InventoryEntry>
     {
         protected override List<ValidationError> Validate(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {

@@ -12,13 +12,13 @@ using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles.Stocks.Reservations
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.Reservations
 {
     using FormValues = (string PartNumber, decimal Amount);
 
 
-    [HookAttachment(key: HookKeys.Article.Stock.Reservations.MassReservation)]
-    internal class ArticleStockReservationMassReservationHook : IRecordDetailsPageHook
+    [HookAttachment(key: HookKeys.Inventory.MassReservation)]
+    internal class InventoryMassReservationHook : IRecordDetailsPageHook
     {
         public IActionResult? OnPost(RecordDetailsPageModel pageModel)
         {

@@ -8,10 +8,10 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles.Stocks
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
-    [HookAttachment(key: HookKeys.Article.Stock.Create)]
-    internal class ArticleStockCreateHook : TypedValidatedCreateHook<InventoryEntry>
+    [HookAttachment(key: HookKeys.Inventory.Create)]
+    internal class InventoryEntryCreateHook : TypedValidatedCreateHook<InventoryEntry>
     {
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, RecordCreatePageModel pageModel)
         {
