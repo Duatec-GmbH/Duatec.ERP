@@ -3,16 +3,16 @@ using WebVella.Erp.Hooks;
 
 namespace WebVella.Erp.TypedRecords.Hooks.Api
 {
-    public abstract class TypedPostCreateHook<T> : IErpPostCreateRecordHook where T : TypedEntityRecordWrapper, new()
+    public interface ITypedPostCreateHook<in T> : IErpPostCreateRecordHook where T : TypedEntityRecordWrapper, new()
     {
-        private readonly string _entityName = new T().EntityName;
+        string EntityName { get; }
 
         void IErpPostCreateRecordHook.OnPostCreateRecord(string entityName, EntityRecord record)
         {
-            if (entityName == _entityName)
+            if (entityName == EntityName)
                 OnPostCreateRecord(TypedEntityRecordWrapper.Wrap<T>(record));
         }
 
-        protected abstract void OnPostCreateRecord(T record);
+        void OnPostCreateRecord(T record);
     }
 }

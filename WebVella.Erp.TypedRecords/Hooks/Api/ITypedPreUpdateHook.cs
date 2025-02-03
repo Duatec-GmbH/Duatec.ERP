@@ -3,13 +3,13 @@ using WebVella.Erp.Hooks;
 
 namespace WebVella.Erp.TypedRecords.Hooks.Api
 {
-    public abstract class TypedPreUpdateHook<T> : IErpPreUpdateRecordHook where T : TypedEntityRecordWrapper, new()
+    public interface ITypedPreUpdateHook<in T> : IErpPreUpdateRecordHook where T : TypedEntityRecordWrapper, new()
     {
-        private readonly string _entityName = new T().EntityName;
+        string EntityName { get; }
 
         void IErpPreUpdateRecordHook.OnPreUpdateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
         {
-            if (entityName == _entityName)
+            if (entityName == EntityName)
                 errors.AddRange(OnPreUpdateRecord(TypedEntityRecordWrapper.Wrap<T>(record)));
         }
 
