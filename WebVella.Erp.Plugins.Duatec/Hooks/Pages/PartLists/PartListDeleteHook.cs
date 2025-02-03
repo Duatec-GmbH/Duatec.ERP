@@ -4,8 +4,8 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
-using WebVella.Erp.TypedRecords.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.TypedRecords.Hooks.Page;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {

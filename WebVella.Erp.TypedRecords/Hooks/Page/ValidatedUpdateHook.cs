@@ -9,7 +9,7 @@ using WebVella.Erp.Api;
 using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.TypedRecords.Hooks
+namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
     [HookAttachment(key: "validated-update")]
     internal class ValidatedUpdateHook : IRecordManagePageHook

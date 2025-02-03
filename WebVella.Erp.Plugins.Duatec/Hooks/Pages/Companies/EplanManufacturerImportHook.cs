@@ -9,7 +9,7 @@ using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Manufacturers
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Companies
 {
     [HookAttachment(key: HookKeys.Company.EplanImport)]
     internal class EplanManufacturerImportHook : IPageHook

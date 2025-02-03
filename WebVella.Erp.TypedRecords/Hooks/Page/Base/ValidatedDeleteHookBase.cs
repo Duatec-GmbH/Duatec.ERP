@@ -7,7 +7,7 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.TypedRecords.Util;
 
-namespace WebVella.Erp.TypedRecords.Hooks.Base
+namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
 {
     public abstract class ValidatedDeleteHookBase<TRecord, TModel> : ValidatedModificationHookBase<TRecord, TModel>
         where TRecord : EntityRecord

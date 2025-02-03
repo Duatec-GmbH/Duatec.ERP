@@ -3,7 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.TypedRecords;
-using WebVella.Erp.TypedRecords.Hooks.Base;
+using WebVella.Erp.TypedRecords.Hooks.Page.Base;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
 

@@ -8,7 +8,7 @@ using WebVella.Erp.Api;
 using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Web.Models;
 
-namespace WebVella.Erp.TypedRecords.Hooks
+namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
     public class TypedValidatedManageHook<T> : IRecordManagePageHook
         where T : TypedEntityRecordWrapper, new()
@@ -46,7 +46,7 @@ namespace WebVella.Erp.TypedRecords.Hooks
         {
             var unmodified = GetUnmodified(record.Id!.Value, record.EntityName);
 
-            if(AutoSetUntouchedFields)
+            if (AutoSetUntouchedFields)
                 SetNotPresentProperties(record, unmodified);
 
             var result = OnPreValidate(record, unmodified, pageModel);

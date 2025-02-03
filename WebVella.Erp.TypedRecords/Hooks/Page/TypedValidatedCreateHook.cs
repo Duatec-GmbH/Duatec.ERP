@@ -7,7 +7,7 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Api.Models;
 
-namespace WebVella.Erp.TypedRecords.Hooks
+namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
     public class TypedValidatedCreateHook<T> : IRecordCreatePageHook
         where T : TypedEntityRecordWrapper, new()

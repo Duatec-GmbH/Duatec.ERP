@@ -8,7 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Create = "article_create";
             public const string EplanImport = "article_eplan_import";
             public const string Update = "article_update";
-            public const string Delete = "article_delete";
             public const string FileUpload = "article_file_upload";
             public const string FileImport = "article_file_import";
 
@@ -24,7 +23,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
         public static class Inventory
         {
             public const string Create = "article_stock_create";
-            public const string Update = "article_stock_update";
             public const string Move = "article_stock_move";
             public const string TakeOut = "article_stock_take_out";
             public const string MassReservation = "article_stock_reservation_mass_reservation";
@@ -45,18 +43,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
                 public const string Update = "goods_receiving_entry_update";
             }
 
-            public const string Create = "goods_receiving_create";
-            public const string Update = "goods_receiving_update";
             public const string Delete = "goods_receiving_delete";
-
             public const string Book = "goods_receiving_book";
             public const string Store = "goods_receiving_store";
         }
 
         public static class Company
         {
-            public const string Create = "manufacturer_create";
-            public const string Update = "manufacturer_update";
             public const string EplanImport = "manufacturer_eplan_import";
         }
 
@@ -76,14 +69,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             }
         }
 
-        public static class Project
-        {
-            public const string Create = "project_create";
-            public const string Update = "project_update";
-            public const string Complete = "project_complete";
-            public const string OrderList = "project_order_list";
-        }
-
         public static class PartList
         {
             public static class Entry
@@ -94,7 +79,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             }
 
             public const string Create = "part_list_create";
-            public const string Update = "part_list_update";
             public const string Delete = "part_list_delete";
             public const string Import = "part_list_file_import";
             public const string Upload = "part_list_file_upload";

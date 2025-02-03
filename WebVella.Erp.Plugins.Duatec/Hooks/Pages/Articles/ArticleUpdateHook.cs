@@ -3,8 +3,8 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.Erp.TypedRecords.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.TypedRecords.Hooks.Page;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 {

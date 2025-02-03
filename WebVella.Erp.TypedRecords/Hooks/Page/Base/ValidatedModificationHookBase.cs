@@ -4,9 +4,9 @@ using WebVella.Erp.Exceptions;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.TypedRecords.Util;
 
-namespace WebVella.Erp.TypedRecords.Hooks.Base
+namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
 {
-    public abstract class ValidatedModificationHookBase<TRecord, TModel> 
+    public abstract class ValidatedModificationHookBase<TRecord, TModel>
         where TRecord : EntityRecord
         where TModel : BaseErpPageModel
     {

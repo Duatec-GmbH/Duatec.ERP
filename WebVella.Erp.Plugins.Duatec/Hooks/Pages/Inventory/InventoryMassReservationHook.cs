@@ -12,7 +12,7 @@ using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.Reservations
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
     using FormValues = (string PartNumber, decimal Amount);
 

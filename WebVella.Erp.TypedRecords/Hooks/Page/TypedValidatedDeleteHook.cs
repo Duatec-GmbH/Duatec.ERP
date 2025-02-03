@@ -3,10 +3,10 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
-using WebVella.Erp.TypedRecords.Hooks.Base;
 using WebVella.Erp.TypedRecords.Validation;
+using WebVella.Erp.TypedRecords.Hooks.Page.Base;
 
-namespace WebVella.Erp.TypedRecords.Hooks
+namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
     public class TypedValidatedDeleteHook<T> : ValidatedDeleteHookBase<T, BaseErpPageModel>, IPageHook
         where T : TypedEntityRecordWrapper, new()

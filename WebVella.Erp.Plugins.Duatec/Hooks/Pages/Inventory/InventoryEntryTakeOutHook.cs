@@ -5,14 +5,14 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
     [HookAttachment(key: HookKeys.Inventory.TakeOut)]
-    internal class InventoryTakeOutHook : TypedValidatedManageHook<InventoryEntry>
+    internal class InventoryEntryTakeOutHook : TypedValidatedManageHook<InventoryEntry>
     {
         protected override List<ValidationError> Validate(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {

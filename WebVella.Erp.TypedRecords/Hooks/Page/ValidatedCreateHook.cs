@@ -4,10 +4,10 @@ using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Pages.Application;
-using WebVella.Erp.TypedRecords.Hooks.Base;
 using WebVella.Erp.TypedRecords.Validation;
+using WebVella.Erp.TypedRecords.Hooks.Page.Base;
 
-namespace WebVella.Erp.TypedRecords.Hooks
+namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
     [HookAttachment(key: "validated-create")]
     internal class ValidatedCreateHook : ValidatedModificationHookBase<EntityRecord, RecordCreatePageModel>, IRecordCreatePageHook

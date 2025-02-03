@@ -6,12 +6,12 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.TypedRecords.Hooks;
+using WebVella.Erp.TypedRecords.Hooks.Page;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
     [HookAttachment(key: HookKeys.Inventory.Move)]
-    internal class InventoryMoveHook : TypedValidatedManageHook<InventoryEntry>
+    internal class InventoryEntryMoveHook : TypedValidatedManageHook<InventoryEntry>
     {
         const decimal eps = 0.005m;
 

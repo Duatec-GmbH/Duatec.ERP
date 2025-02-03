@@ -33,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Hooks\Api\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
