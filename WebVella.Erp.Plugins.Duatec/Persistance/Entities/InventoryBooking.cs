@@ -12,6 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string ProjectId = "project_id";
             public const string ArticleId = "article_id";
+            public const string Timestamp = "timestamp";
             public const string UserId = "user_id";
             public const string Amount = "amount";
         }
@@ -45,6 +46,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<decimal>(Fields.Amount);
             set => Properties[Fields.Amount] = value;
+        }
+
+        public DateTime Timestamp
+        {
+            get => Get<DateTime>(Fields.Timestamp);
+            set => Properties[Fields.Timestamp] = value;
         }
     }
 }

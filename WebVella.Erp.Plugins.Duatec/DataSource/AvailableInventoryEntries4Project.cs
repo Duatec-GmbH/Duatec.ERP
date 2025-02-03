@@ -13,6 +13,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string Project = "project";
         }
 
+        public static class FieldExtensions
+        {
+            public const string AvailableAmount = "available";
+            public const string Demand = "demand";
+        }
+
         public AvailableInventoryEntries4Project() : base()
         {
             Id = new Guid("151d911a-f2fd-4cd5-95c6-ea6e8eb2a66a");
@@ -23,30 +29,33 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
         }
 
+        public static IEnumerable<InventoryEntry> Execute(Guid projectId)
+        {
+            var recMan = new RecordManager();
+
+            var demandLookup = GetDemandLookup(recMan, projectId);
+            var inventoryEntries = new InventoryRepository(recMan).FindManyByProject(null)
+                .Where(r => demandLookup.ContainsKey(r.Article))
+                .ToArray();
+
+            if (inventoryEntries.Length == 0)
+                return [];
+
+            var articleLookup = GetArticleLookup(recMan, inventoryEntries);
+            return inventoryEntries
+                .GroupBy(s => s.Article)
+                .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
+                .OrderBy(r => GetArticle(r).PartNumber);
+        }
+
         public override object Execute(Dictionary<string, object> arguments)
         {
             var projectId = arguments[Arguments.Project] as Guid?;
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
-            var recMan = new RecordManager();
-
-            var demandLookup = GetDemandLookup(recMan, projectId.Value);
-            var inventoryEntries = new InventoryRepository(recMan).FindManyByProject(null)
-                .Where(r => demandLookup.ContainsKey(r.Article))
-                .ToArray();
-
-            if (inventoryEntries.Length == 0)
-                return new EntityRecordList();
-
-            var articleLookup = GetArticleLookup(recMan, inventoryEntries);
-            var records = inventoryEntries
-                .GroupBy(s => s.Article)
-                .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
-                .OrderBy(r => GetArticle(r).PartNumber);
-
             var result = new EntityRecordList();
-            result.AddRange(records);
+            result.AddRange(Execute(projectId.Value));
             result.TotalCount = result.Count;
             return result;
         }
@@ -94,7 +103,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return new ArticleRepository(recMan).FindMany(select, articleIds);
         }
 
-        private static EntityRecord RecordFromGroup(
+        private static InventoryEntry RecordFromGroup(
             IGrouping<Guid, InventoryEntry> g, 
             Dictionary<Guid, Article?> articleLookup, 
             Dictionary<Guid, decimal> demandLookup)
@@ -103,16 +112,19 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var demand = demandLookup[articleId];
 
             var available = g.Sum(r => r.Amount);
-            var articles = new List<EntityRecord>();
-            if (articleLookup[articleId] is EntityRecord article)
-                articles.Add(article);
 
-            var rec = new EntityRecord();
-            rec["id"] = articleId;
-            rec[$"${InventoryReservationEntry.Relations.Article}"] = articles;
-            rec["available"] = available;
-            rec["demand"] = demand;
-            rec[InventoryReservationEntry.Fields.Amount] = Math.Min(available, demand);
+            var rec = new InventoryEntry
+            {
+                Id = Guid.Empty,
+                Article = articleId,
+                Amount = Math.Min(available, demand),
+            };
+
+            if (articleLookup[articleId] is Article article)
+                rec.SetArticle(article);
+
+            rec[FieldExtensions.AvailableAmount] = available;
+            rec[FieldExtensions.Demand] = demand;
 
             return rec;
         }

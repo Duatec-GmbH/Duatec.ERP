@@ -6,6 +6,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
@@ -19,7 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var result = base.Validate(record, unmodified, pageModel);
 
             if (record.Amount > unmodified.Amount)
-                result.Add(new ValidationError(InventoryEntry.Fields.Amount, "Can't take out more than amount in inventory"));
+                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Can't take out more than amount in inventory ({unmodified.Amount})"));
 
             return result;
         }
@@ -27,27 +28,29 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
             var repo = new InventoryRepository();
-
-            var amount = unmodified.Amount - record.Amount;
-            InventoryEntry? result = null;
-
+            var amount = record.Amount = Math.Max(0m, Math.Round(record.Amount, 2));
 
             void TransactionalAction()
             {
-                if (amount <= 0.005m)
-                    result = repo.Delete(record.Id!.Value);
+                if (amount >= unmodified.Amount)
+                {
+                    if (repo.Delete(record.Id!.Value) == null)
+                        throw new DbException("Could not delete inventory entry");
+                }
                 else
-                    result = repo.MovePartial(record);
-
-                if (result == null)
-                    throw new DbException("Could not make database action");
+                {
+                    record.Amount = unmodified.Amount - amount;
+                    if (repo.Update(record) == null)
+                        throw new DbException("Could not update inventory entry");
+                }
 
                 var booking = new InventoryBooking()
                 {
                     Amount = amount,
-                    ArticleId = record.Article,
-                    ProjectId = record.Project,
-                    UserId = pageModel.CurrentUser.Id
+                    ArticleId = unmodified.Article,
+                    ProjectId = unmodified.Project,
+                    UserId = pageModel.CurrentUser.Id,
+                    Timestamp = DateTime.UtcNow,
                 };
                 if (repo.InsertBooking(booking) == null)
                     throw new DbException("Could not insert booking");
@@ -56,8 +59,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
                 return pageModel.Page();
 
-            OnPostUpdate(record, pageModel);
-            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(result!.Id!.Value));
+            pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles");
+            return pageModel.LocalRedirect(pageModel.EntityListUrl());
         }
     }
 }

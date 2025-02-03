@@ -1,62 +1,64 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
+using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
-    using FormValues = (string PartNumber, decimal Amount);
-
+    using FormValues = (Guid ArticleId, decimal Amount, int Index);
+    using ArticleInfo = (ArticleType Type, decimal AvailableAmount);
 
     [HookAttachment(key: HookKeys.Inventory.MassReservation)]
-    internal class InventoryMassReservationHook : IRecordDetailsPageHook
+    internal class InventoryMassReservationHook : TypedValidatedManageHook<Project>, IPageHook
     {
-        public IActionResult? OnPost(RecordDetailsPageModel pageModel)
+        const string entryKey = "entries";
+
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
-            var partNumbers = pageModel.GetFormValues("part_number");
-            var amounts = GetAmounts(pageModel);
+            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record") ?? new EntityRecord();
+            if (!rec.Properties.ContainsKey(entryKey))
+                rec[entryKey] = new List<EntityRecord>(AvailableInventoryEntries4Project.Execute((Guid)rec["id"]));
 
-            if (partNumbers.Distinct().Count() != partNumbers.Length)
-                return pageModel.BadRequest();
+            pageModel.DataModel.SetRecord(rec);
+            return null;
+        }
 
-            if (!pageModel.RecordId.HasValue)
-                return pageModel.BadRequest();
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
+            => null;
 
-            if (partNumbers.Length != amounts.Length)
-                return Error(pageModel, "Amount can not be empty");
+        protected override IActionResult? OnPreUpdate(Project record, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
+        {
+            var projectId = record.Id!.Value;
+            var formData = GetFormData(pageModel);
 
-            if (partNumbers.Length == 0 || Array.TrueForAll(amounts, d => d <= 0))
+            if(formData.Count == 0 || formData.TrueForAll(fv => fv.Amount == 0))
                 return Info(pageModel, "Nothing to do here");
 
-            if (Array.Exists(amounts, d => d < 0))
-                return Error(pageModel, "Amount must be greater than or equal '0'");
+            var availableArticles = AvailableInventoryEntries4Project.Execute(projectId);
+            var articleInfo = availableArticles
+                .GroupBy(ie => ie.Article)
+                .ToDictionary(g => g.Key, g => new ArticleInfo(
+                    g.First().GetArticle().GetArticleType(),
+                    g.Sum(ie => (decimal)ie[AvailableInventoryEntries4Project.FieldExtensions.AvailableAmount])));
 
-            var recMan = new RecordManager();
-            var projectRepo = new ProjectRepository(recMan);
-
-            var projectId = pageModel.RecordId.Value;
-            if (!projectRepo.Exists(projectId))
-                return pageModel.BadRequest();
-
-            var formData = new List<FormValues>(partNumbers.Length);
-
-            for (int i = 0; i < partNumbers.Length; i++)
+            validationErrors.AddRange(Validate(formData, articleInfo));
+            if(validationErrors.Count > 0)
             {
-                var amount = amounts[i];
-                if (amount > 0m)
-                    formData.Add((partNumbers[i], amount));
+
             }
 
-            var transactionalAction = BuildAction(recMan, projectId, formData);
+            var transactionalAction = BuildAction(projectId, formData);
 
             if (Transactional.TryExecute(pageModel, transactionalAction))
                 return Success(pageModel);
@@ -64,65 +66,25 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return ReturnToProject(pageModel);
         }
 
-
-        private static Action BuildAction(RecordManager recMan, Guid projectId, List<FormValues> formData)
+        private static List<FormValues> GetFormData(BaseErpPageModel pageModel)
         {
-            var partNumbersToProcess = formData
-                .Select(v => v.PartNumber)
-                .ToArray();
+            var form = pageModel.Request.Form;
+            var i = 0;
+            var result = new List<FormValues>();
 
-            const string select = $"*, " +
-                $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
-                $"${Article.Relations.Type}.*";
 
-            var articleRepo = new ArticleRepository(recMan);
-            var inventoryRepo = new InventoryRepository(recMan);
-
-            var articleLookup = articleRepo.FindMany(select, partNumbersToProcess);
-            var reservationsLookup = inventoryRepo
-                .FindManyReservationEntriesByProjectAndArticle(projectId, partNumbersToProcess);
-
-            var demandLookup = GetDemandLookup(recMan, projectId, articleLookup, reservationsLookup);
-            var reservedInventoryLookup = GetInventoryLookup(recMan, projectId, articleLookup);
-            var availableInventoryLookup = GetInventoryLookup(recMan, null, articleLookup);
-
-            var list = inventoryRepo.FindReservationListByProject(projectId);
-
-            return () =>
+            while(form.TryGetValue($"article_id[{i}]", out var articleIdVal))
             {
-                list ??= CreateList(projectId);
-                var listId = (Guid)list["id"];
+                var articleId = Guid.TryParse(articleIdVal, out var id) ? id : Guid.Empty;
+                var amount = decimal.TryParse(form[$"amount[{i}]"], out var d) ? d : 0m;
 
-                foreach (var (partNumber, amount) in formData)
-                {
-                    var article = articleLookup[partNumber]
-                        ?? throw new DbException($"Article with part number '{partNumber}' does not exist");
+                result.Add((articleId, amount, i));
 
-                    Validate(amount, article.GetArticleType());
+                i++;
+            }
 
-                    var demand = demandLookup[partNumber];
-
-                    if (demand <= 0m)
-                        throw new DbException($"There is no demand on article '{partNumber}'");
-
-                    if (amount > demand)
-                        throw new DbException($"Amount can not be greater than demand");
-
-                    var reservation = reservationsLookup[partNumber];
-
-                    if (reservation == null)
-                        CreateNewEntry(listId, article.Id!.Value, amount);
-                    else
-                        IncreaseAmount(reservation, amount);
-
-                    var availableInventory = availableInventoryLookup[partNumber];
-                    var reservedInventory = reservedInventoryLookup[partNumber];
-
-                    ReserveInventory(recMan, projectId, amount, availableInventory, reservedInventory);
-                }
-            };
+            return result;
         }
-
 
         private static void ReserveInventory(RecordManager recMan, Guid projectId, decimal amount, InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
@@ -140,10 +102,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         }
 
         private static decimal Reserve(
-            RecordManager recMan,
-            Guid projectId,
-            decimal amount,
-            decimal current,
+            RecordManager recMan, Guid projectId, 
+            decimal amount, decimal current,
             IEnumerable<InventoryEntry> availableEntries)
         {
             if (current >= amount)
@@ -201,137 +161,34 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 throw new DbException("Could not partially move inventory entry");
         }
 
-        private static InventoryReservationList CreateList(Guid projectId)
+
+        private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<Guid, ArticleInfo> articleInfos)
         {
-            var list = new InventoryReservationList
+            foreach(var (articleId, amount, index) in formData)
             {
-                Id = Guid.NewGuid(),
-                Project = projectId
-            };
+                ArticleType? type = null;
+                decimal available = 0m;
 
-            return Create(InventoryReservationList.Entity, list);
-        }
+                if(articleInfos.TryGetValue(articleId, out var articleInfo))
+                    (type, available) = articleInfo;
 
-        private static void CreateNewEntry(Guid listId, Guid articleId, decimal amount)
-        {
-            var rec = new InventoryReservationEntry()
-            {
-                Id = Guid.NewGuid(),
-                InventoryReservationList = listId,
-                Article = articleId,
-                Amount = amount
-            };
-            Create(InventoryReservationEntry.Entity, rec);
-        }
-
-        private static void IncreaseAmount(InventoryReservationEntry rec, decimal amount)
-        {
-            rec.Amount += amount;
-            Create(InventoryReservationEntry.Entity, rec);
-        }
-
-        private static T Create<T>(string entity, T rec) where T : EntityRecord
-        {
-            var recMan = new RecordManager();
-            var response = recMan.CreateRecord(entity, rec);
-
-            if (!response.Success)
-                throw new DbException("Could not create record");
-            return rec;
-        }
-
-        private static Dictionary<string, InventoryEntry[]> GetInventoryLookup(
-            RecordManager recMan,
-            Guid? projectId,
-            Dictionary<string, Article?> articleLookup)
-        {
-            var ids = articleLookup.Values
-                .Where(a => a?.Id != null)
-                .Select(a => a!.Id!.Value)
-                .ToHashSet();
-
-            var available = new InventoryRepository(recMan).FindManyByProject(projectId)
-                .Where(i => ids.Contains(i.Article))
-                .GroupBy(i => i.Article)
-                .ToDictionary(g => g.Key, g => g.ToArray());
-
-            var result = new Dictionary<string, InventoryEntry[]>(articleLookup.Count);
-
-            foreach (var (key, value) in articleLookup)
-            {
-                if (value?.Id == null || !available.TryGetValue(value.Id.Value, out var entries))
-                    result[key] = [];
-                else
-                    result[key] = entries;
+                foreach (var error in ValidateAmount(amount, available, type, index))
+                    yield return error;
             }
-
-            return result;
         }
 
-        private static Dictionary<string, decimal> GetDemandLookup(
-            RecordManager recMan,
-            Guid projectId,
-            Dictionary<string, Article?> articleLookup,
-            Dictionary<string, InventoryReservationEntry?> reservationLookup)
+        private static IEnumerable<ValidationError> ValidateAmount(decimal amount, decimal max, ArticleType? type, int index)
         {
-            var ids = articleLookup.Values
-                .Where(a => a?.Id != null)!
-                .Select(a => a!.Id!.Value)
-                .ToHashSet();
+            var field = $"amount[{index}]";
+            var isInt = type?.IsInteger is true;
+            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.Amount, isInt, true)
+                .Validate(amount, field);
 
-            var totalDemands = new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
-                .Where(e => ids.Contains(e.ArticleId))
-                .GroupBy(e => e.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+            foreach (var error in errors)
+                yield return error;
 
-            var result = new Dictionary<string, decimal>();
-
-            foreach (var (key, value) in articleLookup)
-            {
-                if (value?.Id == null)
-                    result[key] = 0m;
-                else
-                {
-                    var alreadyReserved = reservationLookup.TryGetValue(key, out var entry) && entry != null
-                        ? entry.Amount : 0m;
-
-                    var totalDemand = totalDemands.TryGetValue(value.Id.Value, out var total)
-                        ? total : 0m;
-
-                    result[key] = Math.Max(0m, totalDemand - alreadyReserved);
-                }
-            }
-
-            return result;
-        }
-
-        private static void Validate(decimal amount, ArticleType type)
-        {
-            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.Amount, type.IsInteger, true)
-                .Validate(amount, string.Empty);
-
-            if (errors.Count > 0)
-                throw new DbException(string.Join(Environment.NewLine, errors.Select(e => e.Message)));
-        }
-
-        private static decimal[] GetAmounts(BaseErpPageModel pageModel)
-        {
-            return pageModel.GetFormValues("amount")
-                .Select(decimal.Parse)
-                .ToArray();
-        }
-
-        private static bool[] GetReserveFlags(BaseErpPageModel pageModel)
-        {
-            return pageModel.GetFormValues("auto_reserve")
-                .Select(bool.Parse)
-                .ToArray();
-        }
-
-        private static LocalRedirectResult Error(BaseErpPageModel pageModel, string message)
-        {
-            pageModel.PutMessage(ScreenMessageType.Error, message);
-            return ReturnToProject(pageModel);
+            if(amount > max)
+                yield return new ValidationError(field, $"amount must not be greater than available amount ({amount})");
         }
 
         private static LocalRedirectResult Info(BaseErpPageModel pageModel, string message)
