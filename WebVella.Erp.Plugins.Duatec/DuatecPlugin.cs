@@ -636,7 +636,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create entity*** Entity name: article_stock_reservation >>
+                    #region << ***Create entity*** Entity name: inventory_reservation >>
                     {
                         #region << entity >>
                         {
@@ -644,7 +644,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var systemFieldIdDictionary = new Dictionary<string, Guid>();
                             systemFieldIdDictionary["id"] = new Guid("4ca3e862-6af1-4613-9042-c73c76e93932");
                             entity.Id = new Guid("852dcf56-a8ad-4a58-8fda-7068ce0e5959");
-                            entity.Name = "article_stock_reservation";
+                            entity.Name = "inventory_reservation";
                             entity.Label = "Inventory Reservations";
                             entity.LabelPlural = "Inventory Reservations";
                             entity.System = false;
@@ -669,14 +669,14 @@ namespace WebVella.Erp.Plugins.Duatec
                             {
                                 var response = entMan.CreateEntity(entity, systemFieldIdDictionary);
                                 if (!response.Success)
-                                    throw new Exception("System error 10050. Entity: article_stock_reservation creation Message: " + response.Message);
+                                    throw new Exception("System error 10050. Entity: inventory_reservation creation Message: " + response.Message);
                             }
                         }
                         #endregion
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock_reservation Field Name: project_id >>
+                    #region << ***Create field***  Entity: inventory_reservation Field Name: project_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("3a358cac-9a96-44f2-b08c-1148b99ddcf9");
@@ -701,7 +701,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("852dcf56-a8ad-4a58-8fda-7068ce0e5959"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock_reservation Field: project_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_reservation Field: project_id Message:" + response.Message);
                         }
                     }
                     #endregion
@@ -1461,7 +1461,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create entity*** Entity name: article_stock_reservation_entry >>
+                    #region << ***Create entity*** Entity name: inventory_reservation_entry >>
                     {
                         #region << entity >>
                         {
@@ -1469,7 +1469,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var systemFieldIdDictionary = new Dictionary<string, Guid>();
                             systemFieldIdDictionary["id"] = new Guid("ea315988-e374-4af3-a668-bd6a34a02202");
                             entity.Id = new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf");
-                            entity.Name = "article_stock_reservation_entry";
+                            entity.Name = "inventory_reservation_entry";
                             entity.Label = "Inventory Reservation Entry";
                             entity.LabelPlural = "Inventory Reservation Entries";
                             entity.System = false;
@@ -1494,14 +1494,14 @@ namespace WebVella.Erp.Plugins.Duatec
                             {
                                 var response = entMan.CreateEntity(entity, systemFieldIdDictionary);
                                 if (!response.Success)
-                                    throw new Exception("System error 10050. Entity: article_stock_reservation_entry creation Message: " + response.Message);
+                                    throw new Exception("System error 10050. Entity: inventory_reservation_entry creation Message: " + response.Message);
                             }
                         }
                         #endregion
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock_reservation_entry Field Name: article_id >>
+                    #region << ***Create field***  Entity: inventory_reservation_entry Field Name: article_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("1d25df8b-23c7-4b1f-b19f-be04b11d199d");
@@ -1526,12 +1526,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock_reservation_entry Field: article_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_reservation_entry Field: article_id Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock_reservation_entry Field Name: amount >>
+                    #region << ***Create field***  Entity: inventory_reservation_entry Field Name: amount >>
                     {
                         InputNumberField numberField = new InputNumberField();
                         numberField.Id = new Guid("ab562c4b-fea8-49b4-aaa6-89253040f744");
@@ -1558,16 +1558,16 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf"), numberField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock_reservation_entry Field: amount Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_reservation_entry Field: amount Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock_reservation_entry Field Name: article_stock_reservation_id >>
+                    #region << ***Create field***  Entity: inventory_reservation_entry Field Name: inventory_reservation_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("50f5827a-0caf-42bf-a7d5-3d9623e7e359");
-                        guidField.Name = "article_stock_reservation_id";
+                        guidField.Name = "inventory_reservation_id";
                         guidField.Label = "Inventory Reservation";
                         guidField.PlaceholderText = null;
                         guidField.Description = null;
@@ -1588,7 +1588,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock_reservation_entry Field: article_stock_reservation_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_reservation_entry Field: inventory_reservation_id Message:" + response.Message);
                         }
                     }
                     #endregion
@@ -2126,7 +2126,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create entity*** Entity name: article_stock >>
+                    #region << ***Create entity*** Entity name: inventory_entry >>
                     {
                         #region << entity >>
                         {
@@ -2134,9 +2134,9 @@ namespace WebVella.Erp.Plugins.Duatec
                             var systemFieldIdDictionary = new Dictionary<string, Guid>();
                             systemFieldIdDictionary["id"] = new Guid("9d239e96-711a-4257-a017-2b7936de6cda");
                             entity.Id = new Guid("ab790595-caed-4773-a57f-b022d23a4fc9");
-                            entity.Name = "article_stock";
-                            entity.Label = "Article Stock";
-                            entity.LabelPlural = "Article Stocks";
+                            entity.Name = "inventory_entry";
+                            entity.Label = "Inventory";
+                            entity.LabelPlural = "Inventory";
                             entity.System = false;
                             entity.IconName = "fa fa-database";
                             entity.Color = "";
@@ -2159,14 +2159,14 @@ namespace WebVella.Erp.Plugins.Duatec
                             {
                                 var response = entMan.CreateEntity(entity, systemFieldIdDictionary);
                                 if (!response.Success)
-                                    throw new Exception("System error 10050. Entity: article_stock creation Message: " + response.Message);
+                                    throw new Exception("System error 10050. Entity: inventory_entry creation Message: " + response.Message);
                             }
                         }
                         #endregion
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock Field Name: article_id >>
+                    #region << ***Create field***  Entity: inventory_entry Field Name: article_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("56abf9d6-6f8e-42bc-b023-d52598ab06ba");
@@ -2191,12 +2191,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("ab790595-caed-4773-a57f-b022d23a4fc9"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock Field: article_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_entry Field: article_id Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock Field Name: warehouse_location_id >>
+                    #region << ***Create field***  Entity: inventory_entry Field Name: warehouse_location_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("db8cdcd7-afaa-4422-8a1d-9b50cb215ff7");
@@ -2221,12 +2221,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("ab790595-caed-4773-a57f-b022d23a4fc9"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock Field: warehouse_location_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_entry Field: warehouse_location_id Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock Field Name: project_id >>
+                    #region << ***Create field***  Entity: inventory_entry Field Name: project_id >>
                     {
                         InputGuidField guidField = new InputGuidField();
                         guidField.Id = new Guid("c5096d50-55ac-476f-8f22-de75724316d0");
@@ -2251,12 +2251,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("ab790595-caed-4773-a57f-b022d23a4fc9"), guidField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock Field: project_id Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_entry Field: project_id Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create field***  Entity: article_stock Field Name: amount >>
+                    #region << ***Create field***  Entity: inventory_entry Field Name: amount >>
                     {
                         InputNumberField numberField = new InputNumberField();
                         numberField.Id = new Guid("2d252aea-ec2e-486f-b175-2d716642698e");
@@ -2283,7 +2283,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = entMan.CreateField(new Guid("ab790595-caed-4773-a57f-b022d23a4fc9"), numberField, false);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Entity: article_stock Field: amount Message:" + response.Message);
+                                throw new Exception("System error 10060. Entity: inventory_entry Field: amount Message:" + response.Message);
                         }
                     }
                     #endregion
@@ -3249,7 +3249,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create relation*** Relation name: article_stock_reservation_project >>
+                    #region << ***Create relation*** Relation name: inventory_reservation_project >>
                     {
                         var relation = new EntityRelation();
                         var originEntity = entMan.ReadEntity(new Guid("95eab1ff-a6a8-4634-bc82-62535d5c5f12")).Object;
@@ -3257,8 +3257,8 @@ namespace WebVella.Erp.Plugins.Duatec
                         var targetEntity = entMan.ReadEntity(new Guid("852dcf56-a8ad-4a58-8fda-7068ce0e5959")).Object;
                         var targetField = targetEntity.Fields.SingleOrDefault(x => x.Name == "project_id");
                         relation.Id = new Guid("f042427b-817c-4309-a3be-04b3a3a905d8");
-                        relation.Name = "article_stock_reservation_project";
-                        relation.Label = "article_stock_reservation_project";
+                        relation.Name = "inventory_reservation_project";
+                        relation.Label = "inventory_reservation_project";
                         relation.Description = "";
                         relation.System = false;
                         relation.RelationType = EntityRelationType.OneToMany;
@@ -3273,21 +3273,21 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = relMan.Create(relation);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Relation: article_stock_reservation_project Create. Message:" + response.Message);
+                                throw new Exception("System error 10060. Relation: inventory_reservation_project Create. Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create relation*** Relation name: article_stock_reservation_entry_article_stock_reservation >>
+                    #region << ***Create relation*** Relation name: inventory_reservation_entry_inventory_reservation >>
                     {
                         var relation = new EntityRelation();
                         var originEntity = entMan.ReadEntity(new Guid("852dcf56-a8ad-4a58-8fda-7068ce0e5959")).Object;
                         var originField = originEntity.Fields.SingleOrDefault(x => x.Name == "id");
                         var targetEntity = entMan.ReadEntity(new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf")).Object;
-                        var targetField = targetEntity.Fields.SingleOrDefault(x => x.Name == "article_stock_reservation_id");
+                        var targetField = targetEntity.Fields.SingleOrDefault(x => x.Name == "inventory_reservation_id");
                         relation.Id = new Guid("d3df9238-8619-4e64-95cb-cf24d650a8ea");
-                        relation.Name = "article_stock_reservation_entry_article_stock_reservation";
-                        relation.Label = "article_stock_reservation_entry_article_stock_reservation";
+                        relation.Name = "inventory_reservation_entry_inventory_reservation";
+                        relation.Label = "inventory_reservation_entry_inventory_reservation";
                         relation.Description = "";
                         relation.System = false;
                         relation.RelationType = EntityRelationType.OneToMany;
@@ -3302,12 +3302,12 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = relMan.Create(relation);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Relation: article_stock_reservation_entry_article_stock_reservation Create. Message:" + response.Message);
+                                throw new Exception("System error 10060. Relation: inventory_reservation_entry_inventory_reservation Create. Message:" + response.Message);
                         }
                     }
                     #endregion
 
-                    #region << ***Create relation*** Relation name: article_stock_reservation_entry_article >>
+                    #region << ***Create relation*** Relation name: inventory_reservation_entry_article >>
                     {
                         var relation = new EntityRelation();
                         var originEntity = entMan.ReadEntity(new Guid("14640617-3a63-4065-b96a-8ae586e5b68b")).Object;
@@ -3315,8 +3315,8 @@ namespace WebVella.Erp.Plugins.Duatec
                         var targetEntity = entMan.ReadEntity(new Guid("71d6eee3-82ff-4ec0-b9cf-9dd280cfe8cf")).Object;
                         var targetField = targetEntity.Fields.SingleOrDefault(x => x.Name == "article_id");
                         relation.Id = new Guid("8d176cc8-be96-4c74-b433-62cbf9f501cd");
-                        relation.Name = "article_stock_reservation_entry_article";
-                        relation.Label = "article_stock_reservation_entry_article";
+                        relation.Name = "inventory_reservation_entry_article";
+                        relation.Label = "inventory_reservation_entry_article";
                         relation.Description = "";
                         relation.System = false;
                         relation.RelationType = EntityRelationType.OneToMany;
@@ -3331,7 +3331,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         {
                             var response = relMan.Create(relation);
                             if (!response.Success)
-                                throw new Exception("System error 10060. Relation: article_stock_reservation_entry_article Create. Message:" + response.Message);
+                                throw new Exception("System error 10060. Relation: inventory_reservation_entry_article Create. Message:" + response.Message);
                         }
                     }
                     #endregion
@@ -3387,11 +3387,11 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create app*** App name: stock-management >>
+                    #region << ***Create app*** App name: inventory-management >>
                     {
                         var id = new Guid("c131f33e-4a80-4513-ac90-c04bb0e7c65f");
-                        var name = "stock-management";
-                        var label = "Stock Management";
+                        var name = "inventory-management";
+                        var label = "Inventory Management";
                         string description = null;
                         var iconClass = "icon fas fa-boxes";
                         var author = "Duatec";
@@ -3590,12 +3590,12 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create sitemap area*** Sitemap area name: stocks >>
+                    #region << ***Create sitemap area*** Sitemap area name: inventory >>
                     {
                         var id = new Guid("7b4167e1-c29f-49fb-b103-aae384fdda2d");
                         var appId = new Guid("c131f33e-4a80-4513-ac90-c04bb0e7c65f");
-                        var name = "stocks";
-                        var label = "Stocks";
+                        var name = "inventory";
+                        var label = "Inventory";
                         var description = @"";
                         var iconClass = "fas fa-boxes";
                         var color = "";
@@ -3925,14 +3925,14 @@ namespace WebVella.Erp.Plugins.Duatec
                     }
                     #endregion
 
-                    #region << ***Create sitemap node*** Sitemap node name: stocks >>
+                    #region << ***Create sitemap node*** Sitemap node name: inventory >>
                     {
                         var id = new Guid("161f40e7-1f07-4bec-9a7b-dbffc35296cd");
                         Guid? parentId = null;
                         var areaId = new Guid("7b4167e1-c29f-49fb-b103-aae384fdda2d");
                         Guid? entityId = new Guid("ab790595-caed-4773-a57f-b022d23a4fc9");
-                        var name = "stocks";
-                        var label = "Article Stocks";
+                        var name = "inventory";
+                        var label = "Inventory";
                         var url = "";
                         var iconClass = "fas fa-boxes";
                         var weight = 1;
@@ -4205,7 +4205,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     {
                         var id = new Guid("af1a45fd-0f75-4412-827f-99e3627c39b0");
                         var name = @"detail";
-                        var label = "Article Stock Detail";
+                        var label = "Inventory Entry Detail";
                         string iconClass = null;
                         var system = false;
                         var layout = @"";
@@ -4227,7 +4227,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     {
                         var id = new Guid("17cf8661-3965-45ad-b490-512b23ed9dfd");
                         var name = @"manage";
-                        var label = "Manage Stock";
+                        var label = "Manage Inventory Entry";
                         string iconClass = null;
                         var system = false;
                         var layout = @"";
@@ -4249,7 +4249,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     {
                         var id = new Guid("49939f02-8cd3-4165-bf64-290ab31d965a");
                         var name = @"all";
-                        var label = "Stock";
+                        var label = "Inventory";
                         string iconClass = null;
                         var system = false;
                         var layout = @"";
@@ -4293,7 +4293,7 @@ namespace WebVella.Erp.Plugins.Duatec
                     {
                         var id = new Guid("c028c7ca-70c1-43a8-8b4a-2ed33d5b1e28");
                         var name = @"create";
-                        var label = "Place into Stock";
+                        var label = "Add to Inventory";
                         string iconClass = null;
                         var system = false;
                         var layout = @"";
@@ -10469,7 +10469,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_visible"": """",
   ""id"": ""wv-1461f5a7-21a6-4569-a62a-c891351007d5"",
   ""name"": ""CreateRecord"",
-  ""hook_key"": ""article_stock_create"",
+  ""hook_key"": ""inventory_entry_create"",
   ""method"": ""post"",
   ""label_mode"": ""1"",
   ""mode"": ""1"",
@@ -18761,7 +18761,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_visible"": ""{\""type\"":\""3\"",\""string\"":\""WebVella.Erp.Plugins.Duatec.Snippets.QueryDoesNotHaveAnyParametersSnippet\"",\""default\"":\""\""}"",
   ""id"": ""wv-52a93358-247f-4613-9034-366d1d1c7399"",
   ""name"": ""move_form"",
-  ""hook_key"": ""article_stock_move"",
+  ""hook_key"": ""inventory_entry_move"",
   ""method"": ""post"",
   ""label_mode"": ""1"",
   ""mode"": ""1"",
@@ -20237,7 +20237,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         var containerId = "column1";
                         var options = @"{
   ""type"": ""2"",
-  ""text"": ""Add to Stock"",
+  ""text"": ""Add to Inventory"",
   ""color"": ""0"",
   ""size"": ""1"",
   ""class"": ""text-nowrap w-100 mt-1 mb-1"",
@@ -24112,7 +24112,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_visible"": """",
   ""id"": """",
   ""visible_columns"": 6,
-  ""records"": ""{\""type\"":\""0\"",\""string\"":\""AllArticleStocks\"",\""default\"":\""\""}"",
+  ""records"": ""{\""type\"":\""0\"",\""string\"":\""AllInventoryEntries\"",\""default\"":\""\""}"",
   ""page_size"": 10,
   ""name"": """",
   ""prefix"": """",
@@ -24123,7 +24123,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""borderless"": ""false"",
   ""hover"": ""true"",
   ""responsive_breakpoint"": ""0"",
-  ""empty_text"": ""No Stocks"",
+  ""empty_text"": ""No Inventory Entries"",
   ""has_thead"": ""true"",
   ""has_tfoot"": ""true"",
   ""no_total"": ""false"",
@@ -24169,7 +24169,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""container5_class"": """",
   ""container5_vertical_align"": ""3"",
   ""container5_horizontal_align"": ""2"",
-  ""container6_label"": ""Stock"",
+  ""container6_label"": ""Inventory"",
   ""container6_width"": """",
   ""container6_name"": """",
   ""container6_nowrap"": ""true"",
@@ -26169,7 +26169,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].type_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].type_number\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -26198,7 +26198,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         var containerId = "column1";
                         var options = @"{
   ""is_visible"": """",
-  ""source"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].preview\"",\""default\"":\""\""}"",
+  ""source"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].preview\"",\""default\"":\""\""}"",
   ""width"": ""50"",
   ""height"": ""50"",
   ""class"": """",
@@ -26224,7 +26224,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].order_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].order_number\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -26257,7 +26257,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].designation\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].designation\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -26290,7 +26290,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].$article_manufacturer[0].name\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].$article_manufacturer[0].name\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -26323,7 +26323,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].part_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].part_number\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -26356,7 +26356,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.amount}} {{RowRecord.$article_stock_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.amount}} {{RowRecord.$inventory_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27007,7 +27007,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_visible"": """",
   ""id"": ""wv-b0f7a4d2-c27d-49cb-a123-b6e88b186bab"",
   ""name"": ""form"",
-  ""hook_key"": ""article_stock_reservation_mass_reservation"",
+  ""hook_key"": ""inventory_reservation_mass_reservation"",
   ""method"": ""post"",
   ""label_mode"": ""1"",
   ""mode"": ""1"",
@@ -27065,7 +27065,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""is_visible"": """",
   ""id"": """",
   ""visible_columns"": 7,
-  ""records"": ""{\""type\"":\""0\"",\""string\"":\""AvailableStocks4Project\"",\""default\"":\""\""}"",
+  ""records"": ""{\""type\"":\""0\"",\""string\"":\""AvailableInventoryEntries4Project\"",\""default\"":\""\""}"",
   ""page_size"": 10,
   ""name"": """",
   ""prefix"": """",
@@ -27199,7 +27199,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].order_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].order_number\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27232,7 +27232,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].type_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].type_number\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27265,7 +27265,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.available}} {{RowRecord.$article_stock_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.available}} {{RowRecord.$inventory_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27298,7 +27298,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""0"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].part_number\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].part_number\"",\""default\"":\""\""}"",
   ""name"": ""part_number"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27331,7 +27331,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$article_stock_reservation_entry_article[0].designation\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""RowRecord.$inventory_reservation_entry_article[0].designation\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -27364,7 +27364,7 @@ namespace WebVella.Erp.Plugins.Duatec
   ""label_text"": """",
   ""link"": """",
   ""mode"": ""4"",
-  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.demand}} {{RowRecord.$article_stock_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
+  ""value"": ""{\""type\"":\""0\"",\""string\"":\""{{RowRecord.demand}} {{RowRecord.$inventory_reservation_entry_article[0].$article_article_type[0].unit}}\"",\""default\"":\""\""}"",
   ""name"": ""field"",
   ""class"": """",
   ""maxlength"": 0,
@@ -38170,22 +38170,22 @@ OFFSET 0
                         var name = @"AllInventoryReservationLists4Project";
                         var description = @"";
                         var eqlText = @"SELECT *
-FROM article_stock_reservation
+FROM inventory_reservation
 WHERE project_id = @project";
                         var sqlText = @"SELECT row_to_json( X ) FROM (
 SELECT 
-	 rec_article_stock_reservation.""id"" AS ""id"",
-	 rec_article_stock_reservation.""project_id"" AS ""project_id"",
+	 rec_inventory_reservation.""id"" AS ""id"",
+	 rec_inventory_reservation.""project_id"" AS ""project_id"",
 	 COUNT(*) OVER() AS ___total_count___
-FROM rec_article_stock_reservation
-WHERE  ( rec_article_stock_reservation.""project_id"" IS NULL ) 
+FROM rec_inventory_reservation
+WHERE  ( rec_inventory_reservation.""project_id"" IS NULL ) 
 ) X
 ";
                         var parametersJson = @"[{""name"":""project"",""type"":""guid"",""value"":""null"",""ignore_parse_errors"":false}]";
                         var fieldsJson = @"[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""project_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]}]";
                         var weight = 10;
                         var returnTotal = true;
-                        var entityName = @"article_stock_reservation";
+                        var entityName = @"inventory_reservation";
 
                         new WebVella.Erp.Database.DbDataSourceRepository().Create(id, name, description, weight, eqlText, sqlText, parametersJson, fieldsJson, entityName, returnTotal);
                     }
@@ -38463,13 +38463,13 @@ OFFSET 0
                     }
                     #endregion
 
-                    #region << ***Create data source*** Name: AllArticleStocks >>
+                    #region << ***Create data source*** Name: AllInventoryEntries >>
                     {
                         var id = new Guid("c9b5a6bd-09bf-426f-bcbc-4b48f5972dab");
-                        var name = @"AllArticleStocks";
-                        var description = @"All Article Stocks";
+                        var name = @"AllInventoryEntries";
+                        var description = @"All Inventory Entries";
                         var eqlText = @"SELECT *, $article.part_number, $article.preview, $article.$article_article_type.unit, $article.$article_article_type.is_integer, $warehouse_location.designation, $warehouse_location.$warehouse.designation, $project.number
-FROM article_stock
+FROM inventory_entry
 WHERE (@warehouseLocation = null or $warehouse_location.designation ~* @warehouseLocation)
     AND (@warehouse = null or $warehouse_location.$warehouse.designation ~* @warehouse)
     AND (@partNumber = null or $article.part_number ~* @partNumber)
@@ -38480,11 +38480,11 @@ PAGESIZE @pageSize
 ";
                         var sqlText = @"SELECT row_to_json( X ) FROM (
 SELECT 
-	 rec_article_stock.""id"" AS ""id"",
-	 rec_article_stock.""article_id"" AS ""article_id"",
-	 rec_article_stock.""warehouse_location_id"" AS ""warehouse_location_id"",
-	 rec_article_stock.""project_id"" AS ""project_id"",
-	 rec_article_stock.""amount"" AS ""amount"",
+	 rec_inventory_entry.""id"" AS ""id"",
+	 rec_inventory_entry.""article_id"" AS ""article_id"",
+	 rec_inventory_entry.""warehouse_location_id"" AS ""warehouse_location_id"",
+	 rec_inventory_entry.""project_id"" AS ""project_id"",
+	 rec_inventory_entry.""amount"" AS ""amount"",
 	 COUNT(*) OVER() AS ___total_count___,
 	------->: $article
 	(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
@@ -38503,7 +38503,7 @@ SELECT
 		-------< $article_article_type
 
 	 FROM rec_article article
-	 WHERE article.id = rec_article_stock.article_id ) d )::jsonb AS ""$article"",
+	 WHERE article.id = rec_inventory_entry.article_id ) d )::jsonb AS ""$article"",
 	-------< $article
 	------->: $warehouse_location
 	(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
@@ -38520,7 +38520,7 @@ SELECT
 		-------< $warehouse
 
 	 FROM rec_warehouse_location warehouse_location
-	 WHERE warehouse_location.id = rec_article_stock.warehouse_location_id ) d )::jsonb AS ""$warehouse_location"",
+	 WHERE warehouse_location.id = rec_inventory_entry.warehouse_location_id ) d )::jsonb AS ""$warehouse_location"",
 	-------< $warehouse_location
 	------->: $project
 	(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
@@ -38528,15 +38528,15 @@ SELECT
 		 project.""id"" AS ""id"",
 		 project.""number"" AS ""number""
 	 FROM rec_project project
-	 WHERE project.id = rec_article_stock.project_id ) d )::jsonb AS ""$project""	
+	 WHERE project.id = rec_inventory_entry.project_id ) d )::jsonb AS ""$project""	
 	-------< $project
 
-FROM rec_article_stock
+FROM rec_inventory_entry
 
-LEFT OUTER JOIN  rec_article article_tar_org ON article_tar_org.id = rec_article_stock.article_id
-LEFT OUTER JOIN  rec_warehouse_location warehouse_location_tar_org ON warehouse_location_tar_org.id = rec_article_stock.warehouse_location_id
+LEFT OUTER JOIN  rec_article article_tar_org ON article_tar_org.id = rec_inventory_entry.article_id
+LEFT OUTER JOIN  rec_warehouse_location warehouse_location_tar_org ON warehouse_location_tar_org.id = rec_inventory_entry.warehouse_location_id
 LEFT OUTER JOIN  rec_warehouse warehouse_tar_org ON warehouse_tar_org.id = warehouse_location_tar_org.warehouse_id
-LEFT OUTER JOIN  rec_project project_tar_org ON project_tar_org.id = rec_article_stock.project_id
+LEFT OUTER JOIN  rec_project project_tar_org ON project_tar_org.id = rec_inventory_entry.project_id
 WHERE  (  (  (  (  ( @warehouseLocation IS NULL )  OR  ( warehouse_location_tar_org.""designation"" ~* @warehouseLocation )  )  AND  (  ( @warehouse IS NULL )  OR  ( warehouse_tar_org.""designation"" ~* @warehouse )  )  )  AND  (  ( @partNumber IS NULL )  OR  ( article_tar_org.""part_number"" ~* @partNumber )  )  )  AND  (  ( @project IS NULL )  OR  ( project_tar_org.""number""  ILIKE CONCAT ( @project,'%'  ) )  )  ) 
 ORDER BY article_tar_org.""part_number"" ASC , warehouse_tar_org.""designation"" ASC , warehouse_location_tar_org.""designation"" ASC
 LIMIT 10
@@ -38547,7 +38547,7 @@ OFFSET 0
                         var fieldsJson = @"[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""warehouse_location_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""project_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""amount"",""type"":12,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$article"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""part_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""preview"",""type"":19,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$article_article_type"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""unit"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""is_integer"",""type"":2,""entity_name"":"""",""relation_name"":null,""children"":[]}]}]},{""name"":""$warehouse_location"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""designation"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$warehouse"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""designation"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]}]}]},{""name"":""$project"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]}]}]";
                         var weight = 10;
                         var returnTotal = true;
-                        var entityName = @"article_stock";
+                        var entityName = @"inventory_entry";
 
                         new WebVella.Erp.Database.DbDataSourceRepository().Create(id, name, description, weight, eqlText, sqlText, parametersJson, fieldsJson, entityName, returnTotal);
                     }
@@ -38739,44 +38739,44 @@ OFFSET 0
                         var id = new Guid("b94aca59-f998-4529-a94a-01c2856abe2f");
                         var name = @"AllInventoryReservationEntries4InventoryReservationList";
                         var description = @"All inventory reservation entries for given inventory reservation list";
-                        var eqlText = @"SELECT *, $article_stock_reservation_entry_article.*, $article_stock_reservation_entry_article.$article_manufacturer.name, $article_stock_reservation_entry_article.$article_article_type.*
-FROM article_stock_reservation_entry
-WHERE article_stock_reservation_id = @id
-    AND (@partNumber = null OR $article_stock_reservation_entry_article.part_number ~* @partNumber)
-    AND (@typeNumber = null OR $article_stock_reservation_entry_article.type_number ~* @typeNumber)
-    AND (@orderNumber = null OR $article_stock_reservation_entry_article.order_number ~* @orderNumber)
-    AND (@designation = null OR $article_stock_reservation_entry_article.designation ~* @designation)
-    AND (@manufacturer = null OR $article_stock_reservation_entry_article.$article_manufacturer.name ~* @manufacturer)
-ORDER BY $article_stock_reservation_entry_article.part_number
+                        var eqlText = @"SELECT *, $inventory_reservation_entry_article.*, $inventory_reservation_entry_article.$article_manufacturer.name, $inventory_reservation_entry_article.$article_article_type.*
+FROM inventory_reservation_entry
+WHERE inventory_reservation_id = @id
+    AND (@partNumber = null OR $inventory_reservation_entry_article.part_number ~* @partNumber)
+    AND (@typeNumber = null OR $inventory_reservation_entry_article.type_number ~* @typeNumber)
+    AND (@orderNumber = null OR $inventory_reservation_entry_article.order_number ~* @orderNumber)
+    AND (@designation = null OR $inventory_reservation_entry_article.designation ~* @designation)
+    AND (@manufacturer = null OR $inventory_reservation_entry_article.$article_manufacturer.name ~* @manufacturer)
+ORDER BY $inventory_reservation_entry_article.part_number
 PAGE @page
 PAGESIZE @pageSize";
                         var sqlText = @"SELECT row_to_json( X ) FROM (
 SELECT 
-	 rec_article_stock_reservation_entry.""id"" AS ""id"",
-	 rec_article_stock_reservation_entry.""article_id"" AS ""article_id"",
-	 rec_article_stock_reservation_entry.""amount"" AS ""amount"",
-	 rec_article_stock_reservation_entry.""article_stock_reservation_id"" AS ""article_stock_reservation_id"",
+	 rec_inventory_reservation_entry.""id"" AS ""id"",
+	 rec_inventory_reservation_entry.""article_id"" AS ""article_id"",
+	 rec_inventory_reservation_entry.""amount"" AS ""amount"",
+	 rec_inventory_reservation_entry.""inventory_reservation_id"" AS ""inventory_reservation_id"",
 	 COUNT(*) OVER() AS ___total_count___,
-	------->: $article_stock_reservation_entry_article
+	------->: $inventory_reservation_entry_article
 	(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
 	 SELECT 
-		 article_stock_reservation_entry_article.""id"" AS ""id"",
-		 article_stock_reservation_entry_article.""manufacturer_id"" AS ""manufacturer_id"",
-		 article_stock_reservation_entry_article.""preview"" AS ""preview"",
-		 article_stock_reservation_entry_article.""part_number"" AS ""part_number"",
-		 article_stock_reservation_entry_article.""eplan_id"" AS ""eplan_id"",
-		 article_stock_reservation_entry_article.""designation"" AS ""designation"",
-		 article_stock_reservation_entry_article.""is_blocked"" AS ""is_blocked"",
-		 article_stock_reservation_entry_article.""article_type"" AS ""article_type"",
-		 article_stock_reservation_entry_article.""type_number"" AS ""type_number"",
-		 article_stock_reservation_entry_article.""order_number"" AS ""order_number"",
+		 inventory_reservation_entry_article.""id"" AS ""id"",
+		 inventory_reservation_entry_article.""manufacturer_id"" AS ""manufacturer_id"",
+		 inventory_reservation_entry_article.""preview"" AS ""preview"",
+		 inventory_reservation_entry_article.""part_number"" AS ""part_number"",
+		 inventory_reservation_entry_article.""eplan_id"" AS ""eplan_id"",
+		 inventory_reservation_entry_article.""designation"" AS ""designation"",
+		 inventory_reservation_entry_article.""is_blocked"" AS ""is_blocked"",
+		 inventory_reservation_entry_article.""article_type"" AS ""article_type"",
+		 inventory_reservation_entry_article.""type_number"" AS ""type_number"",
+		 inventory_reservation_entry_article.""order_number"" AS ""order_number"",
 		------->: $article_manufacturer
 		(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
 		 SELECT 
 			 article_manufacturer.""id"" AS ""id"",
 			 article_manufacturer.""name"" AS ""name""
 		 FROM rec_manufacturer article_manufacturer
-		 WHERE article_manufacturer.id = article_stock_reservation_entry_article.manufacturer_id ) d )::jsonb AS ""$article_manufacturer"",
+		 WHERE article_manufacturer.id = inventory_reservation_entry_article.manufacturer_id ) d )::jsonb AS ""$article_manufacturer"",
 		-------< $article_manufacturer
 		------->: $article_article_type
 		(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM (
@@ -38786,28 +38786,28 @@ SELECT
 			 article_article_type.""label"" AS ""label"",
 			 article_article_type.""is_integer"" AS ""is_integer""
 		 FROM rec_article_type article_article_type
-		 WHERE article_article_type.id = article_stock_reservation_entry_article.article_type ) d )::jsonb AS ""$article_article_type""		
+		 WHERE article_article_type.id = inventory_reservation_entry_article.article_type ) d )::jsonb AS ""$article_article_type""		
 		-------< $article_article_type
 
-	 FROM rec_article article_stock_reservation_entry_article
-	 WHERE article_stock_reservation_entry_article.id = rec_article_stock_reservation_entry.article_id ) d )::jsonb AS ""$article_stock_reservation_entry_article""	
-	-------< $article_stock_reservation_entry_article
+	 FROM rec_article inventory_reservation_entry_article
+	 WHERE inventory_reservation_entry_article.id = rec_inventory_reservation_entry.article_id ) d )::jsonb AS ""$inventory_reservation_entry_article""	
+	-------< $inventory_reservation_entry_article
 
-FROM rec_article_stock_reservation_entry
+FROM rec_inventory_reservation_entry
 
-LEFT OUTER JOIN  rec_article article_stock_reservation_entry_article_tar_org ON article_stock_reservation_entry_article_tar_org.id = rec_article_stock_reservation_entry.article_id
-LEFT OUTER JOIN  rec_manufacturer article_manufacturer_tar_org ON article_manufacturer_tar_org.id = article_stock_reservation_entry_article_tar_org.manufacturer_id
-WHERE  (  (  (  (  (  ( rec_article_stock_reservation_entry.""article_stock_reservation_id"" IS NULL )  AND  (  ( @partNumber IS NULL )  OR  ( article_stock_reservation_entry_article_tar_org.""part_number"" ~* @partNumber )  )  )  AND  (  ( @typeNumber IS NULL )  OR  ( article_stock_reservation_entry_article_tar_org.""type_number"" ~* @typeNumber )  )  )  AND  (  ( @orderNumber IS NULL )  OR  ( article_stock_reservation_entry_article_tar_org.""order_number"" ~* @orderNumber )  )  )  AND  (  ( @designation IS NULL )  OR  ( article_stock_reservation_entry_article_tar_org.""designation"" ~* @designation )  )  )  AND  (  ( @manufacturer IS NULL )  OR  ( article_manufacturer_tar_org.""name"" ~* @manufacturer )  )  ) 
-ORDER BY article_stock_reservation_entry_article_tar_org.""part_number"" ASC
+LEFT OUTER JOIN  rec_article inventory_reservation_entry_article_tar_org ON inventory_reservation_entry_article_tar_org.id = rec_inventory_reservation_entry.article_id
+LEFT OUTER JOIN  rec_manufacturer article_manufacturer_tar_org ON article_manufacturer_tar_org.id = inventory_reservation_entry_article_tar_org.manufacturer_id
+WHERE  (  (  (  (  (  ( rec_inventory_reservation_entry.""inventory_reservation_id"" IS NULL )  AND  (  ( @partNumber IS NULL )  OR  ( inventory_reservation_entry_article_tar_org.""part_number"" ~* @partNumber )  )  )  AND  (  ( @typeNumber IS NULL )  OR  ( inventory_reservation_entry_article_tar_org.""type_number"" ~* @typeNumber )  )  )  AND  (  ( @orderNumber IS NULL )  OR  ( inventory_reservation_entry_article_tar_org.""order_number"" ~* @orderNumber )  )  )  AND  (  ( @designation IS NULL )  OR  ( inventory_reservation_entry_article_tar_org.""designation"" ~* @designation )  )  )  AND  (  ( @manufacturer IS NULL )  OR  ( article_manufacturer_tar_org.""name"" ~* @manufacturer )  )  ) 
+ORDER BY inventory_reservation_entry_article_tar_org.""part_number"" ASC
 LIMIT 10
 OFFSET 0
 ) X
 ";
                         var parametersJson = @"[{""name"":""id"",""type"":""guid"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""partNumber"",""type"":""text"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""typeNumber"",""type"":""text"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""orderNumber"",""type"":""text"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""designation"",""type"":""text"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""manufacturer"",""type"":""text"",""value"":""null"",""ignore_parse_errors"":false},{""name"":""page"",""type"":""int"",""value"":""1"",""ignore_parse_errors"":false},{""name"":""pageSize"",""type"":""int"",""value"":""10"",""ignore_parse_errors"":false}]";
-                        var fieldsJson = @"[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""amount"",""type"":12,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_stock_reservation_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$article_stock_reservation_entry_article"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""manufacturer_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""preview"",""type"":19,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""part_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""eplan_id"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""designation"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""is_blocked"",""type"":2,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_type"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""type_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""order_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$article_manufacturer"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""name"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]}]},{""name"":""$article_article_type"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""unit"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""label"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""is_integer"",""type"":2,""entity_name"":"""",""relation_name"":null,""children"":[]}]}]}]";
+                        var fieldsJson = @"[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""amount"",""type"":12,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""inventory_reservation_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$inventory_reservation_entry_article"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""manufacturer_id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""preview"",""type"":19,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""part_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""eplan_id"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""designation"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""is_blocked"",""type"":2,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""article_type"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""type_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""order_number"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""$article_manufacturer"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""name"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]}]},{""name"":""$article_article_type"",""type"":20,""entity_name"":"""",""relation_name"":null,""children"":[{""name"":""id"",""type"":16,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""unit"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""label"",""type"":18,""entity_name"":"""",""relation_name"":null,""children"":[]},{""name"":""is_integer"",""type"":2,""entity_name"":"""",""relation_name"":null,""children"":[]}]}]}]";
                         var weight = 10;
                         var returnTotal = true;
-                        var entityName = @"article_stock_reservation_entry";
+                        var entityName = @"inventory_reservation_entry";
 
                         new WebVella.Erp.Database.DbDataSourceRepository().Create(id, name, description, weight, eqlText, sqlText, parametersJson, fieldsJson, entityName, returnTotal);
                     }
@@ -39462,12 +39462,12 @@ OFFSET 0
                     }
                     #endregion
 
-                    #region << ***Create page data source*** Name: AllArticleStocks >>
+                    #region << ***Create page data source*** Name: AllInventoryEntries >>
                     {
                         var id = new Guid("6d8e58b1-6e96-44e5-b752-be867eeb8d6e");
                         var pageId = new Guid("49939f02-8cd3-4165-bf64-290ab31d965a");
                         var dataSourceId = new Guid("c9b5a6bd-09bf-426f-bcbc-4b48f5972dab");
-                        var name = @"AllArticleStocks";
+                        var name = @"AllInventoryEntries";
                         var parameters = @"[{""name"":""warehouse"",""type"":""text"",""value"":""{{RequestQuery.q_warehouse_v}}"",""ignore_parse_errors"":false},{""name"":""warehouseLocation"",""type"":""text"",""value"":""{{RequestQuery.q_warehouse_location_v}}"",""ignore_parse_errors"":false},{""name"":""partNumber"",""type"":""text"",""value"":""{{RequestQuery.q_part_number_v}}"",""ignore_parse_errors"":false},{""name"":""project"",""type"":""text"",""value"":""{{RequestQuery.q_project_v}}"",""ignore_parse_errors"":false},{""name"":""page"",""type"":""int"",""value"":""{{RequestQuery.page}}"",""ignore_parse_errors"":false}]";
 
                         new WebVella.Erp.Web.Services.PageService(ErpSettings.ConnectionString).CreatePageDataSource(id, pageId, dataSourceId, name, parameters, WebVella.Erp.Database.DbContext.Current.Transaction);
@@ -39930,12 +39930,12 @@ OFFSET 0
                     }
                     #endregion
 
-                    #region << ***Create page data source*** Name: AvailableStocks4Project >>
+                    #region << ***Create page data source*** Name: AvailableInventoryEntries4Project >>
                     {
                         var id = new Guid("077bf5dd-f209-4628-87f5-033598334352");
                         var pageId = new Guid("ee952f02-57f0-4967-ac79-f6093d70d16a");
                         var dataSourceId = new Guid("151d911a-f2fd-4cd5-95c6-ea6e8eb2a66a");
-                        var name = @"AvailableStocks4Project";
+                        var name = @"AvailableInventoryEntries4Project";
                         var parameters = @"[{""name"":""project"",""type"":""guid"",""value"":""{{RecordId}}"",""ignore_parse_errors"":false}]";
 
                         new WebVella.Erp.Web.Services.PageService(ErpSettings.ConnectionString).CreatePageDataSource(id, pageId, dataSourceId, name, parameters, WebVella.Erp.Database.DbContext.Current.Transaction);

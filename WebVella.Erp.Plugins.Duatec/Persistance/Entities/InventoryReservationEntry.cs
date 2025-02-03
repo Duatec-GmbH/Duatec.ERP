@@ -6,17 +6,17 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
     [TypedEntity(Entity)]
     internal class InventoryReservationEntry : TypedEntityRecordWrapper
     {
-        public const string Entity = "article_stock_reservation_entry";
+        public const string Entity = "inventory_reservation_entry";
 
         public static class Relations
         {
-            public const string InventoryReservationList = "article_stock_reservation_entry_article_stock_reservation";
-            public const string Article = "article_stock_reservation_entry_article";
+            public const string InventoryReservationList = "inventory_reservation_entry_inventory_reservation";
+            public const string Article = "inventory_reservation_entry_article";
         }
 
         public static class Fields
         {
-            public const string InventoryReservationList = "article_stock_reservation_id";
+            public const string InventoryReservationList = "inventory_reservation_id";
             public const string Article = Entities.Article.AsForeignKey;
             public const string Amount = "amount";
         }

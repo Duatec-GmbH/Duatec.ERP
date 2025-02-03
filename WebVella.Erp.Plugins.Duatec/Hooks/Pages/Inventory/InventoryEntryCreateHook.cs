@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             if (result == null)
             {
-                pageModel.PutMessage(ScreenMessageType.Error, "Could not create stock entry");
+                pageModel.PutMessage(ScreenMessageType.Error, "Could not create inventory entry");
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
             }
 

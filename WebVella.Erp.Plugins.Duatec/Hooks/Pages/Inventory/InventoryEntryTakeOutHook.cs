@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var result = base.Validate(record, unmodified, pageModel);
 
             if (record.Amount > unmodified.Amount)
-                result.Add(new ValidationError(InventoryEntry.Fields.Amount, "Can't take out more than stocked amount"));
+                result.Add(new ValidationError(InventoryEntry.Fields.Amount, "Can't take out more than amount in inventory"));
 
             return result;
         }

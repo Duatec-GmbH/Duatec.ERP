@@ -22,10 +22,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public static class Inventory
         {
-            public const string Create = "article_stock_create";
-            public const string Move = "article_stock_move";
-            public const string TakeOut = "article_stock_take_out";
-            public const string MassReservation = "article_stock_reservation_mass_reservation";
+            public const string Create = "inventory_entry_create";
+            public const string Move = "inventory_entry_move";
+            public const string TakeOut = "inventory_entry_take_out";
+            public const string MassReservation = "inventory_reservation_mass_reservation";
         }
 
         public static class GoodsReceiving

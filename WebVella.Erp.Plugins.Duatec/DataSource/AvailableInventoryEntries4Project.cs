@@ -6,18 +6,18 @@ using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
-    internal class AvailableStocks4Project : CodeDataSource
+    internal class AvailableInventoryEntries4Project : CodeDataSource
     {
         public static class Arguments
         {
             public const string Project = "project";
         }
 
-        public AvailableStocks4Project() : base()
+        public AvailableInventoryEntries4Project() : base()
         {
             Id = new Guid("151d911a-f2fd-4cd5-95c6-ea6e8eb2a66a");
-            Name = nameof(AvailableStocks4Project);
-            Description = "List of all available stocks for given project";
+            Name = nameof(AvailableInventoryEntries4Project);
+            Description = "List of all available inventory entries for given project";
             ResultModel = nameof(EntityRecordList);
 
             Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
@@ -32,15 +32,15 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var recMan = new RecordManager();
 
             var demandLookup = GetDemandLookup(recMan, projectId.Value);
-            var stocks = new InventoryRepository(recMan).FindManyByProject(null)
+            var inventoryEntries = new InventoryRepository(recMan).FindManyByProject(null)
                 .Where(r => demandLookup.ContainsKey(r.Article))
                 .ToArray();
 
-            if (stocks.Length == 0)
+            if (inventoryEntries.Length == 0)
                 return new EntityRecordList();
 
-            var articleLookup = GetArticleLookup(recMan, stocks);
-            var records = stocks
+            var articleLookup = GetArticleLookup(recMan, inventoryEntries);
+            var records = inventoryEntries
                 .GroupBy(s => s.Article)
                 .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
                 .OrderBy(r => GetArticle(r).PartNumber);
@@ -70,9 +70,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             foreach(var (key, val) in demandLookup)
             {
                 var orderVal = orderedLookup.TryGetValue(key, out var d) ? d : 0m;
-                var fromStock = inventoryLookup.TryGetValue(key, out d) ? d : 0m;
+                var fromInventory = inventoryLookup.TryGetValue(key, out d) ? d : 0m;
 
-                var demand = val - orderVal - fromStock;
+                var demand = val - orderVal - fromInventory;
                 if (demand > 0)
                     result.Add(key, demand);
             }
@@ -80,13 +80,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, InventoryEntry[] stocks)
+        private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, InventoryEntry[] inventoryEntries)
         {
             const string select = $"*, " +
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
-            var articleIds = stocks
+            var articleIds = inventoryEntries
                 .Select(r => r.Article)
                 .Distinct()
                 .ToArray();
