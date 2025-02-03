@@ -21,6 +21,15 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public bool ExistsByProject(Guid projectId)
             => ExistsBy(InventoryEntry.Fields.Project, projectId);
 
+        public bool ReservationsExistByProject(Guid projectId)
+        {
+            var list = FindReservationListByProject(projectId);
+            if (list == null)
+                return false;
+
+            return RepositoryHelper.Exists(RecordManager, InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list.Id);
+        }
+
         public override InventoryEntry? Insert(InventoryEntry record)
         {
             RoundAmount(record);

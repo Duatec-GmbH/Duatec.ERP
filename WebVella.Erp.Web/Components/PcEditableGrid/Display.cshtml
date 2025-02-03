@@ -13,7 +13,6 @@
     const string unit = "px";
 
     var actionButtonWidth = $"{btnWidth}{unit}";
-    var actionColumnWidth = $"{btnWidth + 16}{unit}";
 
     var options = (PcEditableGrid.PcEditableGridOptions)ViewBag.Options;
     var node = (PageBodyNode)ViewBag.Node;
@@ -53,7 +52,7 @@
             var style = $"width:{actionButtonWidth};";
 
             <wv-button icon-class="fa fa-plus go-green"
-                       text="Add Entry"
+                       text="Add"
                        class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
                        style=@style>
             </wv-button>            
@@ -73,7 +72,7 @@
                     }
                     @if (options.HasDeleteButtons)
                     {
-                        <th style="width:@actionColumnWidth;"></th>
+                        <th></th>
                     }
                 </thead>
             }
@@ -138,10 +137,10 @@
 
                         @if(options.HasDeleteButtons)
                         {
-                            var style = $"vertical-align:middle;text-align:right;width:{actionColumnWidth};";
+                            var style = $"vertical-align:middle;horizontal-align:right;text-align:right;";
 
                             <td style="@style">
-                                <button class="btn btn-sm btn-red text-nowrap w-100 editable-grid-delete-button" type="button">
+                                    <button class="btn btn-sm btn-red text-nowrap editable-grid-delete-button" type="button" style="width:@actionButtonWidth;">
                                     <i class="far fa-trash-alt icon"></i>
                                     Delete
                                 </button>

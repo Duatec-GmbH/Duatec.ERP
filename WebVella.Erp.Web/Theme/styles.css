@@ -5131,6 +5131,17 @@ input{
 	top: 3px !important;
 }
 
+.article-amount{
+	min-width: 80px;
+	max-width: 120px;
+}
+
+.article-select {
+	max-width: 600px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 
 
 

@@ -830,12 +830,6 @@ namespace WebVella.Erp.Web.Models
 
 		private object ExecDataSource(DSW dsWrapper)
 		{
-			var name = dsWrapper.DataSource?.Name;
-			if (!string.IsNullOrEmpty(name) && dataSourceResults.TryGetValue(name, out var v))
-				return v;
-
-			object result;
-
 			if (dsWrapper.DataSource.Type == DataSourceType.CODE)
 			{
 				var arguments = new Dictionary<string, object>();
@@ -883,9 +877,9 @@ namespace WebVella.Erp.Web.Models
 				var codeDS = (CodeDataSource)dsWrapper.DataSource;
 
 				if (SafeCodeDataVariable)
-					try { result = codeDS.Execute(arguments); } catch { return null; }
+					try { return codeDS.Execute(arguments); } catch { return null; }
 				else
-					result = codeDS.Execute(arguments);
+					return codeDS.Execute(arguments);
 			}
 			else if (dsWrapper.DataSource.Type == DataSourceType.DATABASE)
 			{
@@ -932,14 +926,10 @@ namespace WebVella.Erp.Web.Models
 				}
 
 				DatabaseDataSource dbDs = (DatabaseDataSource)dsWrapper.DataSource;
-				result = dsMan.Execute(dbDs.Id, eqlParameters);
+				return dsMan.Execute(dbDs.Id, eqlParameters);
 			}
 			else
 				throw new Exception("Not supported data source type.");
-
-			if (!string.IsNullOrEmpty(name))
-				dataSourceResults.Add(name, result);
-			return result;
 		}
 
 		private static string CheckProcessDefaultValue(string value)
