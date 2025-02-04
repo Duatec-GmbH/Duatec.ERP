@@ -177,33 +177,50 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 .ToList()!;
         }
 
-        public Dictionary<string, InventoryReservationEntry?> FindManyReservationEntriesByProjectAndArticle(
-            Guid projectId, params string[] partNumbers)
+        public InventoryReservationEntry? FindReservationEntryByProjectAndArticle(Guid projectId, Guid articleId)
         {
-            const string articleRelation = $"${InventoryReservationEntry.Relations.Article}";
-            const string select = $"{articleRelation}.{Article.Fields.PartNumber}";
+            var listId = FindReservationListByProject(projectId)?.Id;
+            if (!listId.HasValue)
+                return null;
 
-            var partNumberLookup = partNumbers.ToHashSet();
-            var entries = FindManyReservationEntriesByProject(projectId, select)
-                .Where(r => GetPartNumberFromInventoryReservationEntry(r) is string pn && partNumberLookup.Contains(pn));
-
-            var result = partNumbers.ToDictionary(pn => pn, _ => default(InventoryReservationEntry));
-            foreach (var entry in entries)
+            var query = new QueryObject()
             {
-                var pn = GetPartNumberFromInventoryReservationEntry(entry);
-                if (pn == null || result[pn] != null)
-                    throw new DbException($"Inconsistent data at entity '{Entity}' part number '{pn}'");
+                QueryType = QueryType.AND,
+                SubQueries =
+                [
+                    new(){
+                        QueryType = QueryType.EQ,
+                        FieldName = InventoryReservationEntry.Fields.Article,
+                        FieldValue = articleId,
+                    },
+                    new(){
+                        QueryType = QueryType.EQ,
+                        FieldName = InventoryReservationEntry.Fields.InventoryReservationList,
+                        FieldValue = listId.Value
+                    }
+                ]
+            };
 
-                entry.Properties.Remove(articleRelation);
-                result[pn] = entry;
-            }
-            return result;
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
+                RepositoryHelper.FindByQuery(RecordManager, InventoryReservationEntry.Entity, query));
         }
 
-        private static string? GetPartNumberFromInventoryReservationEntry(InventoryReservationEntry rec)
+        public InventoryReservationList? InsertReservationList(InventoryReservationList record)
         {
-            const string articleRelation = $"${InventoryReservationEntry.Relations.Article}";
-            return (rec[articleRelation] as List<EntityRecord>)?.FirstOrDefault()?[Article.Fields.PartNumber] as string;
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationList>(
+                RepositoryHelper.Insert(RecordManager, InventoryReservationList.Entity, record));
+        }
+
+        public InventoryReservationEntry? UpdateReservationEntry(InventoryReservationEntry record)
+        {
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
+                RepositoryHelper.Update(RecordManager, InventoryReservationEntry.Entity, record));
+        }
+
+        public InventoryReservationEntry? InsertReservationEntry(InventoryReservationEntry record)
+        {
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
+                RepositoryHelper.Insert(RecordManager, InventoryReservationEntry.Entity, record));
         }
 
         private static void RoundAmount(InventoryEntry record)

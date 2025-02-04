@@ -48,7 +48,8 @@ namespace WebVella.Erp.Web.Models
 		public List<SitemapNode> Nodes { get; set; } = new List<SitemapNode>(); //can have hardcoded URL
 
 		[JsonProperty("access")]
-		public List<Guid> Access { get; set; } = new List<Guid>(); //show in menu for the added roles, or for all if no roles are selected
+		public List<Guid> Access { get; 
+			set; } = new List<Guid>(); //show in menu for the added roles, or for all if no roles are selected
 
 	}
 }

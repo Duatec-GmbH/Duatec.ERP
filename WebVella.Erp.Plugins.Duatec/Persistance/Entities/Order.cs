@@ -18,6 +18,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string Number = "order_number";
             public const string Project = "project_id";
+            public const string Order = "order";
+            public const string Offer = "offer";
+            public const string Confirmation = "confirmation";
         }
 
         public override string EntityName => Entity;
@@ -28,14 +31,32 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Number] = value;
         }
 
+        public string OfferFile
+        {
+            get => Get(Fields.Offer, string.Empty);
+            set => Properties[Fields.Offer] = value;
+        }
+
+        public string OrderFile
+        {
+            get => Get(Fields.Order, string.Empty);
+            set => Properties[Fields.Order] = value;
+        }
+
+        public string ConfirmationFile
+        {
+            get => Get(Fields.Confirmation, string.Empty);
+            set => Properties[Fields.Confirmation] = value;
+        }
+
         public Guid Project
         {
             get => Get<Guid>(Fields.Project);
             set => Properties[Fields.Project] = value;
         }
 
-        public Project? GetProject()
-            => GetSingleByRelation<Project>(Relations.Project);
+        public Project GetProject()
+            => GetSingleByRelation<Project>(Relations.Project)!;
 
         public IEnumerable<OrderEntry> GetEntries()
             => GetManyByRelation<OrderEntry>(Relations.Entries);

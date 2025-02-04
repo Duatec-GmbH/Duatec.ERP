@@ -1,7 +1,9 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -18,13 +20,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string State = "state";
             public const string Page = "page";
             public const string PageSize = "pageSize";
-        }
-
-        public static class OrderEntryExtensions
-        {
-            public const string State = "state";
-            public const string ReceivedAmount = "received_amount";
-            public const string StoredAmount = "stored_amount";
         }
 
         public ExtendedOrderEntries4Order()
@@ -45,7 +40,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
 
-
         public override object Execute(Dictionary<string, object> arguments)
         {
             if (!arguments.TryGetValue(Arguments.Order, out var idVal) || idVal is not Guid id || id == Guid.Empty)
@@ -54,6 +48,17 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
+            var resultList = ApplyFilters(arguments, Execute(id)).ToList();
+
+            var result = new EntityRecordList();
+            result.AddRange(resultList.Skip((page - 1) * pageSize).Take(pageSize));
+            result.TotalCount = resultList.Count;
+
+            return result;
+        }
+
+        public static IEnumerable<ExtendedOrderEntry> Execute(Guid orderId)
+        {
             var recMan = new RecordManager();
 
             var orderRepo = new OrderRepository(recMan);
@@ -61,7 +66,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var manufacturerRepo = new CompanyRepository(recMan);
             var articleRepo = new ArticleRepository(recMan);
 
-            var allEntries = orderRepo.FindManyEntriesByOrder(id, $"*, ${OrderEntry.Relations.Article}.*");
+            var allEntries = orderRepo.FindManyEntriesByOrder(orderId, $"*, ${OrderEntry.Relations.Article}.*")
+                .Select(TypedEntityRecordWrapper.Wrap<ExtendedOrderEntry>);
 
             var manufacturerIds = allEntries
                 .Select(oe => oe.GetArticle().ManufacturerId)
@@ -77,18 +83,18 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
 
-            var recievedAmountsLookup = goodsReceivingRepo.FindManyEntriesByOrder(id, receivedQuery)
+            var recievedAmountsLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
                 .GroupBy(e => e.Article)
-                .ToDictionary(g => g.Key, g => new { Amount = g.Sum(e => e.Amount), Stored = g.Sum(e => e.StoredAmount )});
+                .ToDictionary(g => g.Key, g => new { Amount = g.Sum(e => e.Amount), Stored = g.Sum(e => e.StoredAmount) });
 
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
 
-            foreach(var orderEntry in allEntries)
+            foreach (var orderEntry in allEntries)
             {
                 var article = orderEntry.GetArticle();
 
-                if(manufacturers.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
+                if (manufacturers.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
                     article.SetManufacturer(manufacturer);
 
                 if (typeLookup.TryGetValue(article.TypeId, out var type) && type != null)
@@ -97,28 +103,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 var receivedAmount = 0m;
                 var storedAmount = 0m;
 
-                if(recievedAmountsLookup.TryGetValue(orderEntry.Article, out var tuple))
+                if (recievedAmountsLookup.TryGetValue(orderEntry.Article, out var tuple))
                 {
                     receivedAmount = tuple.Amount;
                     storedAmount = tuple.Stored;
                 }
-                    
-                orderEntry[OrderEntryExtensions.ReceivedAmount] = receivedAmount;
-                orderEntry[OrderEntryExtensions.StoredAmount] = storedAmount;
-                orderEntry[OrderEntryExtensions.State] = orderEntry.Amount <= receivedAmount && storedAmount >= receivedAmount
+
+                orderEntry.ReceivedAmount = receivedAmount;
+                orderEntry.StoredAmount = storedAmount;
+                orderEntry.State = orderEntry.Amount <= receivedAmount && storedAmount >= receivedAmount
                     ? "Complete" : "Incomming";
+
+                yield return orderEntry;
             }
-
-            var resultList = ApplyFilters(arguments, allEntries).ToList();
-
-            var result = new EntityRecordList();
-            result.AddRange(resultList.Skip((page - 1) * pageSize).Take(pageSize));
-            result.TotalCount = resultList.Count;
-
-            return result;
         }
 
-        private static IEnumerable<OrderEntry> ApplyFilters(Dictionary<string, object> arguments, IEnumerable<OrderEntry> orderEntries)
+        private static IEnumerable<ExtendedOrderEntry> ApplyFilters(Dictionary<string, object> arguments, IEnumerable<ExtendedOrderEntry> orderEntries)
         {
             var partNumber = arguments[Arguments.PartNumber] as string;
             var typeNumber = arguments[Arguments.TypeNumber] as string;
@@ -143,7 +143,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 orderEntries = orderEntries.Where(oe => oe.GetArticle().Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(state))
-                orderEntries = orderEntries.Where(oe => ((string)oe[OrderEntryExtensions.State]).Contains(state, StringComparison.OrdinalIgnoreCase));
+                orderEntries = orderEntries.Where(oe => oe.State.Contains(state, StringComparison.OrdinalIgnoreCase));
 
             return orderEntries.OrderBy(oe => oe.GetArticle().PartNumber);
         }

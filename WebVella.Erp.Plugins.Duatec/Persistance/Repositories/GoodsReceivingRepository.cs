@@ -14,22 +14,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         protected override string EntryParentIdPath => GoodsReceivingEntry.Fields.GoodsReceiving;
 
-        public override GoodsReceiving? Delete(Guid id)
-        {
-            var deliveryNotes = FindManyDeliveryNotesByGoodsReceiving(id, "id")
-                .Select(r => r.Id!.Value)
-                .ToArray();
-
-            if (deliveryNotes.Length == 0)
-                return base.Delete(id);
-
-            var response = RecordManager.DeleteRecords(DeliveryNote.Entity, deliveryNotes);
-            if (response.Success)
-                return base.Delete(id);
-
-            return null;
-        }
-
         public List<GoodsReceiving> FindManyByOrder(Guid orderId, string select = "*")
             => FindManyBy(GoodsReceiving.Fields.Order, orderId, select);
 
@@ -211,21 +195,5 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 SubQueries = subQuery,
             };
         }
-
-        public DeliveryNote? FindDeliveryNote(Guid id, string select = "*")
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Find(RecordManager, DeliveryNote.Entity, id, select));
-
-        public List<DeliveryNote> FindManyDeliveryNotesByGoodsReceiving(Guid goodsReceivingId, string select = "*")
-        {
-            return RepositoryHelper.FindManyBy(RecordManager, DeliveryNote.Entity, DeliveryNote.Fields.GoodsReceiving, goodsReceivingId, select)
-                .Select(TypedEntityRecordWrapper.Wrap<DeliveryNote>)
-                .ToList();
-        }
-
-        public DeliveryNote? InsertDeliveryNote(DeliveryNote record)
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Insert(RecordManager, DeliveryNote.Entity, record));
-
-        public DeliveryNote? DeleteDeliveryNote(Guid id)
-            => TypedEntityRecordWrapper.WrapElseDefault<DeliveryNote>(RepositoryHelper.Delete(RecordManager, DeliveryNote.Entity, id));
     }
 }

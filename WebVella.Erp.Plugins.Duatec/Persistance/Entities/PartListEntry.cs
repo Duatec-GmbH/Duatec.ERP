@@ -48,7 +48,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Amount] = value;
         }
 
-        public Article? GetArticle()
-            => GetSingleByRelation<Article>(Relations.Article);
+        public Article GetArticle()
+            => GetSingleByRelation<Article>(Relations.Article)!;
     }
 }

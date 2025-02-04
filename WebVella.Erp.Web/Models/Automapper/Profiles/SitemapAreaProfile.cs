@@ -45,9 +45,9 @@ namespace WebVella.Erp.Web.Models.AutoMapper.Profiles
 				model.DescriptionTranslations = new List<TranslationResource>();
 
 			model.Access = new List<Guid>();
-			if (data["access"] != null)
+			if (data["access_roles"] != null)
 			{
-				foreach (var rId in data["access"].AsJEnumerable())
+				foreach (var rId in data["access_roles"].AsJEnumerable())
 					model.Access.Add(new Guid(rId.ToString()));
 			}
 

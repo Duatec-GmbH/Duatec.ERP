@@ -43,6 +43,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             var updateInfos = GetUpdateInfo(pageModel)
                 .ToArray();
 
+            var deliveryNoteKey = GoodsReceiving.Fields.DeliveryNote;
+
+            if (!pageModel.Request.Form.TryGetValue(deliveryNoteKey, out var deliveryNotePath) || string.IsNullOrEmpty(deliveryNotePath))
+                validationErrors.Add(new ValidationError(deliveryNoteKey, "Delivery note is required"));
+
             validationErrors.AddRange(Validate(demandedEntries, updateInfos));
 
             if (validationErrors.Count > 0)
@@ -56,6 +61,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 Id = Guid.NewGuid(),
                 Order = record.Id.Value,
                 TimeStamp = DateTime.Now,
+                DeliveryNote = deliveryNotePath,
             };
 
             var entries = updateInfos

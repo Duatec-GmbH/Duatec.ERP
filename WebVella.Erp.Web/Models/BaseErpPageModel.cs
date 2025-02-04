@@ -268,7 +268,7 @@ namespace WebVella.Erp.Web.Models
 					}
 				}
 				//Convert to MenuItem
-				foreach (var area in sitemap.Areas.Where(a => a.Weight < 1000))
+				foreach (var area in sitemap.Areas.Where(a => a.Weight < 1000 && a.Access.Count == 0 || CurrentUser.Roles.Exists(r => a.Access.Exists(id => id == r.Id))))
 				{
 					var nodeCount = area.Nodes.Count(n => n.Weight < 1000);
 					if (nodeCount == 0)
@@ -307,7 +307,7 @@ namespace WebVella.Erp.Web.Models
 							});
 						}
 					}
-					else if (nodeCount == 1)
+					else
 					{
 						var areaLink = $"<a href=\"{area.Nodes[0].Url}\" title=\"{area.Label}\">";
 						areaLink += $"<span class=\"menu-label\">{area.Label}</span>";

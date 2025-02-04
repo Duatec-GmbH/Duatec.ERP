@@ -1,8 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -11,12 +11,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         public static class Arguments
         {
             public const string Project = "project";
-        }
-
-        public static class FieldExtensions
-        {
-            public const string AvailableAmount = "available";
-            public const string Demand = "demand";
         }
 
         public AvailableInventoryEntries4Project() : base()
@@ -29,7 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
         }
 
-        public static IEnumerable<InventoryEntry> Execute(Guid projectId)
+        public static IEnumerable<AvailableInventoryArticle> Execute(Guid projectId)
         {
             var recMan = new RecordManager();
 
@@ -45,7 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return inventoryEntries
                 .GroupBy(s => s.Article)
                 .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
-                .OrderBy(r => GetArticle(r).PartNumber);
+                .OrderBy(r => r.GetArticle().PartNumber);
         }
 
         public override object Execute(Dictionary<string, object> arguments)
@@ -70,8 +64,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(oe => oe.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var inventoryLookup = new InventoryRepository(recMan).FindManyByProject(projectId)
-                .GroupBy(ie => ie.Article)
+            var reservedLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
+                .GroupBy(re => re.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var result = new Dictionary<Guid, decimal>(demandLookup.Count);
@@ -79,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             foreach(var (key, val) in demandLookup)
             {
                 var orderVal = orderedLookup.TryGetValue(key, out var d) ? d : 0m;
-                var fromInventory = inventoryLookup.TryGetValue(key, out d) ? d : 0m;
+                var fromInventory = reservedLookup.TryGetValue(key, out d) ? d : 0m;
 
                 var demand = val - orderVal - fromInventory;
                 if (demand > 0)
@@ -103,7 +97,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return new ArticleRepository(recMan).FindMany(select, articleIds);
         }
 
-        private static InventoryEntry RecordFromGroup(
+        private static AvailableInventoryArticle RecordFromGroup(
             IGrouping<Guid, InventoryEntry> g, 
             Dictionary<Guid, Article?> articleLookup, 
             Dictionary<Guid, decimal> demandLookup)
@@ -113,26 +107,19 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var available = g.Sum(r => r.Amount);
 
-            var rec = new InventoryEntry
+            var rec = new AvailableInventoryArticle
             {
                 Id = Guid.Empty,
-                Article = articleId,
+                ArticleId = articleId,
                 Amount = Math.Min(available, demand),
+                AvailableAmount = available,
+                Demand = demand
             };
 
             if (articleLookup[articleId] is Article article)
                 rec.SetArticle(article);
 
-            rec[FieldExtensions.AvailableAmount] = available;
-            rec[FieldExtensions.Demand] = demand;
-
             return rec;
-        }
-
-        private static Article GetArticle(EntityRecord rec)
-        {
-            var article = ((List<EntityRecord>)rec[$"${InventoryReservationEntry.Relations.Article}"])[0];
-            return TypedEntityRecordWrapper.WrapElseDefault<Article>(article)!;
         }
     }
 }

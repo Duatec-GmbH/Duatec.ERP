@@ -38,13 +38,13 @@ namespace WebVella.Erp.Web.Components
 			ViewBag.AppDefaultLink = "/";
 			if (currentApp != null) {
 				ViewBag.AppShortName = currentApp.Name.Replace("_", "");
-				if (currentApp.HomePages.Count > 0)
+				if (currentApp.HomePages.Exists(p => p.Weight <= 1000))
 				{
 					var homePages = currentApp.HomePages.OrderBy(x => x.Weight).ToList();
 					ViewBag.AppDefaultLink = $"/{currentApp.Name}/a/{homePages[0].Name}";
 				}
-				else if(currentApp.Sitemap.Areas.Count > 0){
-					var currentAreas = currentApp.Sitemap.Areas.OrderBy(x => x.Weight).ToList();
+				else if(currentApp.Sitemap.Areas.Exists(a => a.Weight <= 1000)){
+					var currentAreas = currentApp.Sitemap.Areas.Where(a => a.Weight <= 1000).OrderBy(x => x.Weight).ToList();
 					foreach (var area in currentAreas)
 					{
 						if (area.Nodes.Count > 0) {

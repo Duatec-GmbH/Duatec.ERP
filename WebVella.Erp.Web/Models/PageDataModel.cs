@@ -49,6 +49,7 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
 				properties.Add("$coalesce", new MPW(MPT.Function, new CoalesceFunction(this)));
 				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
+				properties.Add("$hasRole", new MPW(MPT.Function, new HasRoleFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -76,6 +77,7 @@ namespace WebVella.Erp.Web.Models
 					}
 				}
 
+				properties.Add("CurrentUrl", new MPW(MPT.Object, erpPageModel.CurrentUrl));
 				properties.Add("ReturnUrl", new MPW(MPT.Object, erpPageModel.ReturnUrl));
 
 				//this is the case of with related/parent entity and related/parent record id set
@@ -630,7 +632,11 @@ namespace WebVella.Erp.Web.Models
 								var relResponse = relMan.Read(relName);
 
 								if (!relResponse.Success || relResponse.Object == null)
+								{
+									if (i == completePropChain.Count - 1 && rec.Properties.TryGetValue(accessor, out var value))
+										return value;
 									throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
+								}
 
 								var (entityId, nextIdName, sourceIdName) = OtherSideOfRelation(relResponse.Object, entity);
 								var resultEntity = entMan.ReadEntity(entityId)?.Object
@@ -1100,7 +1106,7 @@ namespace WebVella.Erp.Web.Models
 		}
 
 
-		//FunctionWrapper
+		//Function classes
 		private abstract class QueryFunction
 		{
 
@@ -1294,9 +1300,9 @@ namespace WebVella.Erp.Web.Models
 				{
 					object result = rec;
 
-					foreach(var segment in pathSegments)
+					foreach (var segment in pathSegments)
 					{
-						if(result is List<EntityRecord> l)
+						if (result is List<EntityRecord> l)
 						{
 							if (segment.Contains('['))
 							{
@@ -1310,7 +1316,7 @@ namespace WebVella.Erp.Web.Models
 								continue;
 							}
 
-							if (l.Count == 0) 
+							if (l.Count == 0)
 								return null;
 							result = l[0];
 						}
@@ -1439,6 +1445,30 @@ namespace WebVella.Erp.Web.Models
 					throw new PropertyDoesNotExistException($"function '{Name}' requires a boolean value at first argument");
 
 				return contidion ? parameters[1].Value : parameters[2].Value;
+			}
+		}
+
+		private sealed class HasRoleFunction : QueryFunction
+		{
+			public HasRoleFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "hasRole";
+
+			public override int MinParameters => 1;
+
+			public override int MaxParameters => 1;
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (DataModel.GetProperty("CurrentUser") is not ErpUser user) 
+					return false;
+
+				if (parameters[0].Value is not string role || string.IsNullOrEmpty(role))
+					throw new PropertyDoesNotExistException($"function '{Name}' requires string as argument");
+
+				return user.Roles.Exists(r => r.Name == "administrator" || r.Name == role);
 			}
 		}
 

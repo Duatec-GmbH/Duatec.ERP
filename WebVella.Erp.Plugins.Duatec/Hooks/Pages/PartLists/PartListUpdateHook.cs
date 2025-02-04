@@ -1,0 +1,116 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
+using WebVella.Erp.Exceptions;
+using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common;
+using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.TypedRecords;
+using WebVella.Erp.TypedRecords.Hooks.Page;
+using WebVella.Erp.Web.Hooks;
+using WebVella.Erp.Web.Models;
+using WebVella.Erp.Web.Pages.Application;
+using WebVella.Erp.Web.Utils;
+
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
+{
+    [HookAttachment(key: HookKeys.PartList.Update)]
+    internal class PartListUpdateHook : TypedValidatedManageHook<PartList>, IPageHook
+    {
+        public IActionResult? OnGet(BaseErpPageModel pageModel)
+        {
+            var partList = TypedEntityRecordWrapper.Wrap<PartList>(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
+            const string entryKey = $"${PartListEntry.Relations.PartsList}";
+
+            if (!partList.Properties.ContainsKey(entryKey))
+            {
+                const string select = $"*, ${PartListEntry.Relations.Article}.part_number";
+                var entries = new PartListRepository().FindManyEntriesByPartList(partList.Id!.Value, select)
+                    .OrderBy(e => e.GetArticle().PartNumber);
+
+                partList.SetEntries(entries);
+
+                pageModel.DataModel.SetRecord(partList);
+            }
+
+            return null;
+        }
+
+        public IActionResult? OnPost(BaseErpPageModel pageModel)
+            => null;
+
+
+        protected override List<ValidationError> Validate(PartList record, PartList unmodified, RecordManagePageModel pageModel)
+        {
+            var errors = base.Validate(record, unmodified, pageModel);
+            errors.AddRange(PartListHook.ValidateEntries(pageModel));
+            pageModel.Validation.Errors = errors;
+            return errors;
+        }
+
+        protected override IActionResult? OnValidationFailure(PartList record, PartList unmodified, RecordManagePageModel pageModel)
+        {
+            PartListHook.SetUpErrorPage(pageModel, record);
+            return pageModel.Page();
+        }
+
+        protected override IActionResult? OnValidationSuccess(PartList record, PartList unmodified, RecordManagePageModel pageModel)
+        {
+            var formValues = PartListHook.GetEntryFormValues(pageModel).ToArray();
+            var repo = new PartListRepository();
+            var oldPartListEntries = repo.FindManyEntriesByPartList(record.Id!.Value);
+
+            var toAdd = formValues
+                .Where(t => !oldPartListEntries.Exists(ple => ple.ArticleId == t.ArticleId));
+
+            var toUpdate = oldPartListEntries
+                .Where(ple => Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId));
+
+            var toDelete = oldPartListEntries
+                .Where(ple => !Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId))
+                .Select(ple => ple.Id!.Value)
+                .ToArray();
+            
+            void TransactionalAction()
+            {
+                if (toDelete.Length > 0 && repo.DeleteManyEntries(toDelete).Count == 0)
+                    throw new DbException($"Could not delete part list entry records");
+
+                foreach (var (articleId, amount, _) in toAdd)
+                {
+                    var entry = new PartListEntry()
+                    {
+                        Amount = amount,
+                        ArticleId = articleId,
+                        DeviceTag = string.Empty,
+                        PartListId = record.Id.Value
+                    };
+
+                    if (repo.InsertEntry(entry) == null)
+                        throw new DbException("Could not insert part list entry record");
+                }
+
+                foreach(var entry in toUpdate)
+                {
+                    var amount = Array.Find(formValues, t => t.ArticleId == entry.ArticleId).Amount;
+                    if(entry.Amount != amount)
+                    {
+                        entry.Amount = amount;
+                        if (repo.UpdateEntry(entry) == null)
+                            throw new DbException("Could not update record");
+                    }
+                }
+            }
+
+            if(!Transactional.TryExecute(pageModel, TransactionalAction))
+            {
+                PartListHook.SetUpErrorPage(pageModel, record);
+                return pageModel.Page();
+            }
+
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
+        }
+    }
+}

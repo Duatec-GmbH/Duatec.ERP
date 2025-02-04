@@ -17,7 +17,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles.Types
             {
                 Label = string.Empty,
                 Unit = string.Empty,
-                IsInteger = false
+                IsInteger = true
             };
         }
     }

@@ -243,7 +243,7 @@
 
 				let obj = {
 					compatibility: body.parentElement.getAttribute('compatibility'),
-					data: Array.from(map.entries())
+					data: Array.from(map.entries().filter(kp => kp[1].some(v => v != null && v != undefined)))
 				};
 
 				return navigator.clipboard.writeText(JSON.stringify(obj));

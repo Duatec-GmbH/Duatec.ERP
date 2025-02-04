@@ -109,7 +109,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!string.IsNullOrWhiteSpace(projectName))
                 orders = orders.Where(o => o.GetProject()!.Name.Contains(projectName, StringComparison.OrdinalIgnoreCase));
 
-            return orders.OrderByDescending(o => o.GetProject()!.Number)
+            return orders.OrderByDescending(o => o.GetProject().Number)
                 .ThenBy(o => o.Number);
         }
     }

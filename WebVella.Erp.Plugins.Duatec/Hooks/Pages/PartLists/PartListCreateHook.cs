@@ -3,6 +3,12 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.TypedRecords.Hooks.Page;
+using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Database;
+using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {
@@ -17,6 +23,56 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             record.Project = projectId;
 
             return null;
+        }
+
+        protected override List<ValidationError> Validate(PartList record, RecordCreatePageModel pageModel)
+        {
+            var errors = base.Validate(record, pageModel);
+            errors.AddRange(PartListHook.ValidateEntries(pageModel));
+            pageModel.Validation.Errors = errors;
+            return errors;
+        }
+
+        protected override IActionResult? OnValidationFailure(PartList record, RecordCreatePageModel pageModel)
+        {
+            PartListHook.SetUpErrorPage(pageModel, record);
+            pageModel.BeforeRender();
+            return pageModel.Page();
+        }
+
+        protected override IActionResult? OnValidationSuccess(PartList record, RecordCreatePageModel pageModel)
+        {
+            var formValues = PartListHook.GetEntryFormValues(pageModel);
+
+            void TransactionalAction()
+            {
+                var repo = new PartListRepository();
+                record = repo.Insert(record)
+                    ?? throw new DbException("Could not insert part list record");
+
+                foreach (var (articleId, amount, _) in formValues)
+                {
+                    var entry = new PartListEntry()
+                    {
+                        Amount = amount,
+                        ArticleId = articleId,
+                        DeviceTag = string.Empty,
+                        PartListId = record.Id!.Value
+                    };
+
+                    if (repo.InsertEntry(entry) == null)
+                        throw new DbException("Could not insert part list entry record");
+                }
+            }
+
+            if (!Transactional.TryExecute(pageModel, TransactionalAction))
+            {
+                PartListHook.SetUpErrorPage(pageModel, record);
+                pageModel.BeforeRender();
+                return pageModel.Page();
+            }
+
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
     }
 }

@@ -40,5 +40,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get<bool>(Fields.IsActive);
             set => Properties[Fields.IsActive] = value;
         }
+
+        public IEnumerable<PartListEntry> GetEntries()
+            => GetManyByRelation<PartListEntry>(Relations.Entries);
+
+        public void SetEntries(IEnumerable<PartListEntry> entries)
+            => SetRelationValues(Relations.Entries, entries);
     }
 }
