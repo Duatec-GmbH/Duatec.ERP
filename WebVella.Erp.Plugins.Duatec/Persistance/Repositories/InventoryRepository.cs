@@ -15,8 +15,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public List<InventoryEntry> FindManyByArticle(Guid articleId)
             => FindManyBy(InventoryEntry.Fields.Article, articleId);
 
-        public List<InventoryEntry> FindManyByProject(Guid? projectId)
-            => FindManyBy(InventoryEntry.Fields.Project, projectId);
+        public List<InventoryEntry> FindManyByProject(Guid? projectId, string select = "*")
+            => FindManyBy(InventoryEntry.Fields.Project, projectId, select);
 
         public bool ExistsByProject(Guid projectId)
             => ExistsBy(InventoryEntry.Fields.Project, projectId);
@@ -221,6 +221,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         {
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
                 RepositoryHelper.Insert(RecordManager, InventoryReservationEntry.Entity, record));
+        }
+
+        public InventoryReservationEntry? DeleteReservationEntry(Guid inventoryReservationId)
+        {
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
+                RepositoryHelper.Delete(RecordManager, InventoryReservationEntry.Entity, inventoryReservationId));
         }
 
         private static void RoundAmount(InventoryEntry record)

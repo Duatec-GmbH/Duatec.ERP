@@ -13,6 +13,6 @@ namespace WebVella.Erp.TypedRecords.Hooks.Api
                 errors.AddRange(OnPreUpdateRecord(TypedEntityRecordWrapper.Wrap<T>(record)));
         }
 
-        protected abstract List<ErrorModel> OnPreUpdateRecord(T record);
+        protected abstract IEnumerable<ErrorModel> OnPreUpdateRecord(T record);
     }
 }

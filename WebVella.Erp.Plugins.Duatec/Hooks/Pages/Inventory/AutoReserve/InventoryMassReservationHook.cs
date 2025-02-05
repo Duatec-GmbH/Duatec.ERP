@@ -6,53 +6,38 @@ using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.DataTransfere;
+using WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties;
-using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
+namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 {
     using FormValues = (Guid ArticleId, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.Inventory.MassReservation)]
-    internal class InventoryMassReservationHook : IRecordManagePageHook, IPageHook
+    internal class InventoryMassReservationHook : AutoReserveHook
     {
-        const string entryKey = "$entries";
+        protected override IEnumerable<EntityRecord> GetEntries(Guid projectId)
+            => AvailableInventoryEntries4Project.Execute(projectId);
 
-        public IActionResult? OnGet(BaseErpPageModel pageModel)
-        {
-            var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record") ?? new EntityRecord();
-            if (!rec.Properties.TryGetValue(entryKey, out var l) || l == null)
-                rec[entryKey] = new List<EntityRecord>(AvailableInventoryEntries4Project.Execute((Guid)rec["id"]));
-
-            pageModel.DataModel.SetRecord(rec);
-            return null;
-        }
-
-        public IActionResult? OnPost(BaseErpPageModel pageModel)
-            => null;
-
-        public IActionResult? OnPostManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel)
-            => null;
-
-        public IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
+        public override IActionResult? OnPreManageRecord(EntityRecord record, Entity entity, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var projectId = pageModel.RecordId!.Value;
             var formData = GetFormData(pageModel);
 
-            if(formData.Count == 0 || formData.TrueForAll(fv => fv.Amount == 0))
+            if (formData.Count == 0 || formData.TrueForAll(fv => fv.Amount == 0))
                 return Info(pageModel, "Nothing to do here");
 
             var availableArticleLookup = AvailableInventoryEntries4Project.Execute(projectId)
-                .ToDictionary(aie => aie.ArticleId, aie => aie);
+                .ToDictionary(aie => aie.ArticleId);
 
             validationErrors.AddRange(Validate(formData, availableArticleLookup));
 
-            if(validationErrors.Count > 0)
+            if (validationErrors.Count > 0)
             {
                 BuildErrorPage(projectId, pageModel, formData, availableArticleLookup);
                 return pageModel.Page();
@@ -75,9 +60,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     ?? inventoryRepo.InsertReservationList(new InventoryReservation() { Project = projectId })
                     ?? throw new DbException("Could not create inventory reservation list record");
 
-                foreach(var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
+                foreach (var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
                 {
-                    var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr) 
+                    var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr)
                         ? arr : [];
 
                     var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out arr)
@@ -86,7 +71,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     ReserveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries);
                     var entry = inventoryRepo.FindReservationEntryByProjectAndArticle(projectId, articleId);
 
-                    if (entry != null)                   
+                    if (entry != null)
                     {
                         entry.Amount += amount;
                         if (inventoryRepo.UpdateReservationEntry(entry) == null)
@@ -110,30 +95,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (Transactional.TryExecute(pageModel, TransactionalAction))
                 return Success(pageModel);
 
-            return ReturnToProject(pageModel);
+            BuildErrorPage(projectId, pageModel, formData, availableArticleLookup);
+            return pageModel.Page();
         }
 
-        private static List<FormValues> GetFormData(BaseErpPageModel pageModel)
-        {
-            var form = pageModel.Request.Form;
-            var i = 0;
-            var result = new List<FormValues>();
-
-
-            while(form.TryGetValue($"article_id[{i}]", out var articleIdVal))
-            {
-                var articleId = Guid.TryParse(articleIdVal, out var id) ? id : Guid.Empty;
-                var amount = decimal.TryParse(form[$"amount[{i}]"], out var d) ? d : 0m;
-
-                result.Add((articleId, amount, i));
-
-                i++;
-            }
-
-            return result;
-        }
-
-        private static void ReserveInventory(RecordManager recMan, Guid projectId, decimal amount, InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
+        private static void ReserveInventory(
+            RecordManager recMan, Guid projectId, decimal amount,
+            InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
             var available = availableEntries.Aggregate(0m, (sum, entry) => sum + entry.Amount);
 
@@ -154,20 +122,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     ae => !Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
                 var current = Reserve(recMan, projectId, amount, 0m, availableWithinLocation);
-                Reserve(recMan, projectId, amount, current, otherAvailables);
+                current = Reserve(recMan, projectId, amount, current, otherAvailables);
+
+                if (current != amount)
+                    throw new DbException("Could not reserve all entries");
             }
         }
 
         private static decimal Reserve(
-            RecordManager recMan, Guid projectId, 
-            decimal amount, decimal current, 
+            RecordManager recMan, Guid projectId, decimal amount, decimal current,
             IEnumerable<InventoryEntry> availableEntries)
         {
             if (current >= amount)
                 return current;
-
-            IEnumerable<InventoryEntry> toMove = [];
-            InventoryEntry? toSplit = null;
 
             foreach (var entry in availableEntries)
             {
@@ -175,43 +142,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 if (entry.Amount <= demand)
                 {
-                    toMove = toMove.Append(entry);
+                    Move(recMan, projectId, entry);
                     current += entry.Amount;
 
                     if (current >= amount)
-                        break;
+                        return current;
                 }
                 else
                 {
-                    toSplit = entry;
-                    break;
+                    MovePartial(recMan, projectId, entry, demand);
+                    return 0;
                 }
             }
-
-            foreach (var entry in toMove)
-                Move(recMan, projectId, entry);
-
-            if (toSplit != null)
-            {
-                MovePartial(recMan, projectId, toSplit, amount - current);
-                current = 0;
-            }
             return current;
-        }
-
-        private static void Move(RecordManager recMan, Guid projectId, InventoryEntry entry)
-        {
-            entry.Project = projectId;
-            if (new InventoryRepository(recMan).Update(entry) == null)
-                throw new DbException("Could not move inventory entry");
-        }
-
-        private static void MovePartial(RecordManager recMan, Guid projectId, InventoryEntry entry, decimal amount)
-        {
-            entry.Project = projectId;
-            entry.Amount = amount;
-            if (new InventoryRepository(recMan).MovePartial(entry) == null)
-                throw new DbException("Could not partially move inventory entry");
         }
 
         private static void BuildErrorPage(Guid projectId, BaseErpPageModel pageModel,
@@ -219,22 +162,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         {
             var records = new List<EntityRecord>(formValues.Count);
 
-            foreach(var (articleId, amount, _) in formValues)
+            foreach (var (articleId, amount, _) in formValues)
             {
-                var entry = new AvailableInventoryArticle()
+                if (availableArticleInfo.TryGetValue(articleId, out var aie))
                 {
-                    ArticleId = articleId,
-                    Amount = amount,
-                };
-
-                if(availableArticleInfo.TryGetValue(articleId, out var aie))
-                {
+                    var entry = new AvailableInventoryArticle()
+                    {
+                        ArticleId = articleId,
+                        Amount = amount,
+                        Demand = aie.Demand,
+                        AvailableAmount = aie.AvailableAmount
+                    };
                     entry.SetArticle(aie.GetArticle());
-                    entry.Demand = aie.Demand;
-                    entry.AvailableAmount = aie.AvailableAmount;
+                    records.Add(entry);
                 }
-
-                records.Add(entry);
             }
 
             var project = new ProjectRepository().Find(projectId)!;
@@ -247,12 +188,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
         private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<Guid, AvailableInventoryArticle> availableArticleInfos)
         {
-            foreach(var (articleId, amount, index) in formData)
+            foreach (var (articleId, amount, index) in formData)
             {
                 ArticleType? type = null;
                 decimal available = 0m;
 
-                if(availableArticleInfos.TryGetValue(articleId, out var articleInfo))
+                if (availableArticleInfos.TryGetValue(articleId, out var articleInfo))
                 {
                     type = articleInfo.GetArticle().GetArticleType();
                     available = articleInfo.AvailableAmount;
@@ -273,29 +214,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             foreach (var error in errors)
                 yield return error;
 
-            if(amount > max)
-                yield return new ValidationError(field, $"amount must not be greater than available amount ({amount})");
-        }
-
-        private static LocalRedirectResult Info(BaseErpPageModel pageModel, string message)
-        {
-            pageModel.PutMessage(ScreenMessageType.Info, message);
-            return ReturnToProject(pageModel);
-        }
-
-        private static LocalRedirectResult Success(BaseErpPageModel pageModel)
-        {
-            pageModel.PutMessage(ScreenMessageType.Success, "Successfully performed Inventory reservations");
-            return ReturnToProject(pageModel);
-        }
-
-        private static LocalRedirectResult ReturnToProject(BaseErpPageModel pageModel)
-        {
-            var id = pageModel.RecordId;
-            var appName = pageModel.ErpRequestContext.App.Name;
-            var area = pageModel.ErpRequestContext?.SitemapArea?.Name;
-
-            return pageModel.LocalRedirect($"/{appName}/{area}/projects/r/{id}");
+            if (amount > max)
+                yield return new ValidationError(field, $"amount must not be greater than available amount ({max})");
         }
     }
 }

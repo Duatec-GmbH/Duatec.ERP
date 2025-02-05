@@ -33,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Hooks\Api\Orders\Entries\Common\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

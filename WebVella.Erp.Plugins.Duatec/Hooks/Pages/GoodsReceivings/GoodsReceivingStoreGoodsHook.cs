@@ -17,7 +17,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
-    using UpdateInfo = (Guid ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
+    using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
@@ -169,7 +169,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 if (projectDemand <= 0)
                 {
                     inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
-                    inventoryEntry.Project = Guid.Empty;
+                    inventoryEntry.Project = null;
                     yield return inventoryEntry;
                 }
                 else if (inventoryEntry.Amount <= projectDemand)
@@ -184,7 +184,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     {
                         Id = Guid.NewGuid(),
                         Amount = inventoryEntry.Amount - projectDemand,
-                        Project = Guid.Empty,
+                        Project = null,
                         Article = entry.Article,
                         WarehouseLocation = Guid.Empty,
                     };
@@ -250,6 +250,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     if (totalAmount != projectMax)
                         yield return AmountError(index, $"Sum of amounts for given article for given project must be equal to demand ({projectMax})");
 
+
                     var isInt = entries[0].GetArticle().GetArticleType().IsInteger;
                     if (isInt && amount % 1 != 0)
                         yield return AmountError(index, "Amount is expected to be an integer value");
@@ -306,8 +307,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 var articleId = Guid.TryParse(articleIdVal, out var id)
                     ? id : Guid.Empty;
 
-                var projectId = Guid.TryParse(form[$"project_id[{i}]"], out id)
-                    ? id : Guid.Empty;
+                Guid? projectId = Guid.TryParse(form[$"project_id[{i}]"], out id) && id != Guid.Empty
+                    ? id : null;
 
                 var warehouseLocationId = Guid.TryParse(form[$"warehouse_location_id[{i}]"], out id)
                     ? id : Guid.Empty;
