@@ -108,6 +108,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             record.SetEntries(demandedEntries.OrderBy(e => e.GetArticle().PartNumber));
             pageModel.DataModel.SetRecord(record);
+            pageModel.BeforeRender();
         }
 
         private static IEnumerable<ValidationError> Validate(Dictionary<Guid, OrderEntry> demandedEntries, UpdateInfo[] updateInfos)

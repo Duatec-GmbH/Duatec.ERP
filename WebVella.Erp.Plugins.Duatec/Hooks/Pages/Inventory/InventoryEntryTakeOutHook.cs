@@ -46,7 +46,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 var booking = new InventoryBooking()
                 {
-                    Amount = amount,
+                    Amount = -amount,
                     ArticleId = unmodified.Article,
                     ProjectId = unmodified.Project,
                     UserId = pageModel.CurrentUser.Id,
@@ -57,7 +57,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
+            {
+                pageModel.BeforeRender();
                 return pageModel.Page();
+            }
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles");
             return pageModel.LocalRedirect(pageModel.EntityListUrl());

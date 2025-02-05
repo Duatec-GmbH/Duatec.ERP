@@ -2,7 +2,6 @@
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
@@ -195,5 +194,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 SubQueries = subQuery,
             };
         }
+
+        internal bool EntryWithUnstoredItemsExists(Guid goodsReceivingId)
+            => FindManyEntriesByGoodsReceiving(goodsReceivingId).Exists(e => e.Amount > e.StoredAmount);
+        
     }
 }

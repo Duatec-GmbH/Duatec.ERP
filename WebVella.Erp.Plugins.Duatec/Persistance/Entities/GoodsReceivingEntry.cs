@@ -51,9 +51,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         internal Article GetArticle()
             => GetSingleByRelation<Article>(Relations.Article)!;
 
-        public void SetArticle(Article article)
-            => SetRelationValue(Relations.Article, article);
-
         internal GoodsReceiving GetGoodsReceiving()
             => GetSingleByRelation<GoodsReceiving>(Relations.GoodsReceiving)!;
     }

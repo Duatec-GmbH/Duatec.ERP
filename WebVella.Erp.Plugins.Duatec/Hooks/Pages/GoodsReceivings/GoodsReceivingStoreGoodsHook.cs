@@ -52,6 +52,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             var recMan = new RecordManager();
 
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
+            record = goodsReceivingRepo.Find(pageModel.RecordId!.Value, $"*, ${GoodsReceiving.Relations.Order}.*")!;
+            var projectId = record.GetOrder().Project;
+
+            var userId = pageModel.TryGetDataSourceProperty<ErpUser>("CurrentUser")!.Id;
+
             record = goodsReceivingRepo.Find(record.Id!.Value)!;
 
             var defaultEntries = GetDefaultEntries(record, recMan)
@@ -90,8 +95,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     {
                         if (repo.Insert(entry) == null)
                             throw new DbException("Could not insert inventory entry record");
-                    }
 
+                        var booking = new InventoryBooking()
+                        {
+                            Amount = entry.Amount,
+                            ArticleId = entry.Article,
+                            ProjectId = projectId,
+                            Timestamp = DateTime.UtcNow,
+                            UserId = userId,
+                        };
+
+                        if (repo.InsertBooking(booking) == null)
+                            throw new DbException("Could not insert booking");
+                    }
                 }
             }
 
@@ -278,6 +294,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 .ToList();
 
             pageModel.DataModel.SetRecord(record);
+            pageModel.BeforeRender();
         }
 
         private static IEnumerable<UpdateInfo> GetUpdateInfo(BaseErpPageModel pageModel)

@@ -34,7 +34,7 @@ namespace WebVella.Erp.TypedRecords.Persistance
             return base.Delete(id);
         }
 
-        public TEntry? InsertEntry(TEntry record)
+        public virtual TEntry? InsertEntry(TEntry record)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(RecordManager, EntryEntity, record));
 
         public TEntry? FindEntry(Guid id, string select = "*")
@@ -43,13 +43,13 @@ namespace WebVella.Erp.TypedRecords.Persistance
         public bool EntryExists(Guid id)
             => RepositoryHelper.Exists(RecordManager, EntryEntity, "id", id);
 
-        public TEntry? UpdateEntry(TEntry record)
+        public virtual TEntry? UpdateEntry(TEntry record)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Update(RecordManager, EntryEntity, record));
 
-        public TEntry? DeleteEntry(Guid id)
+        public virtual TEntry? DeleteEntry(Guid id)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Delete(RecordManager, EntryEntity, id));
 
-        public List<TEntry> DeleteManyEntries(params Guid[] ids)
+        public virtual List<TEntry> DeleteManyEntries(params Guid[] ids)
             => RepositoryHelper.DeleteMany(RecordManager, EntryEntity, ids).Select(TypedEntityRecordWrapper.Wrap<TEntry>).ToList();
 
         protected TEntry? FindEntryBy(string property, object? value, string select = "*")

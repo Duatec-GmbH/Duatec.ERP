@@ -4,7 +4,7 @@ using WebVella.Erp.TypedRecords.Attributes;
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     [TypedEntity(Entity)]
-    internal class InventoryReservationList : TypedEntityRecordWrapper
+    internal class InventoryReservation : TypedEntityRecordWrapper
     {
         public const string Entity = "inventory_reservation";
 
@@ -16,6 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public static class Fields
         {
             public const string Project = "project_id";
+            public const string LastUpdate = "last_update";
         }
 
         public override string EntityName => Entity;

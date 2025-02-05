@@ -44,9 +44,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public IEnumerable<GoodsReceivingEntry> GetEntries()
             => GetManyByRelation<GoodsReceivingEntry>(Relations.Entries);
 
-        public void SetEntries(IEnumerable<GoodsReceivingEntry> entries)
-            => SetRelationValues(Relations.Entries, entries);
-
         internal Order GetOrder()
             => GetSingleByRelation<Order>(Relations.Order)!;
     }

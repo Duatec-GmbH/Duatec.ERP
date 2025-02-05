@@ -23,7 +23,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))
+            {
+                pageModel.BeforeRender();
                 return pageModel.Page();
+            }
 
             base.OnPostModification(record, entity, pageModel);
             return pageModel.LocalRedirect(pageModel.EntityListUrl());

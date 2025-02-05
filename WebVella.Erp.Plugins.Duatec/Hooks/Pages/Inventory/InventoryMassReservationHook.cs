@@ -72,7 +72,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             void TransactionalAction()
             {
                 var list = inventoryRepo.FindReservationListByProject(projectId)
-                    ?? inventoryRepo.InsertReservationList(new InventoryReservationList() { Project = projectId })
+                    ?? inventoryRepo.InsertReservationList(new InventoryReservation() { Project = projectId })
                     ?? throw new DbException("Could not create inventory reservation list record");
 
                 foreach(var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
@@ -241,6 +241,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             project[entryKey] = records;
 
             pageModel.DataModel.SetRecord(project);
+            pageModel.BeforeRender();
         }
 
 

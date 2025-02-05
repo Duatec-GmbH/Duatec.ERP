@@ -5,6 +5,42 @@ namespace WebVella.Erp.TypedRecords.Persistance
 {
     public static class RepositoryHelper
     {
+        public static EntityRecord? Insert(RecordManager recMan, string entity, EntityRecord rec)
+        {
+            if (!rec.Properties.TryGetValue("id", out var val) || val is not Guid)
+                rec["id"] = Guid.NewGuid();
+
+            var result = recMan.CreateRecord(entity, rec);
+
+            return result.Success
+                ? result.Object.Data.Single() : null;
+        }
+
+        public static EntityRecord? Delete(RecordManager recMan, string entity, Guid id)
+        {
+            var response = recMan.DeleteRecord(entity, id);
+
+            return response.Success
+                ? response.Object.Data.Single() : null;
+        }
+
+        public static List<EntityRecord> DeleteMany(RecordManager recMan, string entity, params Guid[] ids)
+        {
+            var response = recMan.DeleteRecords(entity, ids);
+
+            return response.Object?.Data ?? [];
+        }
+
+        public static EntityRecord? Update(RecordManager recMan, string entity, EntityRecord record)
+        {
+            var response = recMan.UpdateRecord(entity, record);
+
+            return response.Success
+                ? response.Object.Data.Single()
+                : null;
+        }
+
+
         public static bool Exists(RecordManager recMan, string entity, string field, object? fieldValue)
         {
             var response = recMan.Count(new EntityQuery(entity, "*",
@@ -37,35 +73,9 @@ namespace WebVella.Erp.TypedRecords.Persistance
             return response.Object?.Data ?? [];
         }
 
-        public static EntityRecord? Insert(RecordManager recMan, string entity, EntityRecord rec)
-        {
-            if (!rec.Properties.TryGetValue("id", out var val) || val is not Guid)
-                rec["id"] = Guid.NewGuid();
-
-            var result = recMan.CreateRecord(entity, rec);
-
-            return result.Success
-                ? result.Object.Data.Single() : null;
-        }
-
-        public static EntityRecord? Delete(RecordManager recMan, string entity, Guid id)
-        {
-            var response = recMan.DeleteRecord(entity, id);
-
-            return response.Success
-                ? response.Object.Data.Single() : null;
-        }
-
         public static List<EntityRecord> FindMany(RecordManager recMan, string entity, string select = "*")
         {
             var response = recMan.Find(new EntityQuery(entity, select));
-
-            return response.Object?.Data ?? [];
-        }
-
-        public static List<EntityRecord> DeleteMany(RecordManager recMan, string entity, params Guid[] ids)
-        {
-            var response = recMan.DeleteRecords(entity, ids);
 
             return response.Object?.Data ?? [];
         }
@@ -120,15 +130,6 @@ namespace WebVella.Erp.TypedRecords.Persistance
             }
 
             return result;
-        }
-
-        public static EntityRecord? Update(RecordManager recMan, string entity, EntityRecord record)
-        {
-            var response = recMan.UpdateRecord(entity, record);
-
-            return response.Success
-                ? response.Object.Data.Single()
-                : null;
         }
     }
 }

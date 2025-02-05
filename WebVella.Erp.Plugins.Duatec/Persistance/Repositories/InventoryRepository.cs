@@ -160,10 +160,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(RecordManager, record.EntityName, record));
         }
 
-        public InventoryReservationList? FindReservationListByProject(Guid projectId, string select = "*")
+        public InventoryReservation? FindReservationListByProject(Guid projectId, string select = "*")
         {
-            var rec = RepositoryHelper.FindBy(RecordManager, InventoryReservationList.Entity, InventoryReservationList.Fields.Project, projectId, select);
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationList>(rec);
+            var rec = RepositoryHelper.FindBy(RecordManager, InventoryReservation.Entity, InventoryReservation.Fields.Project, projectId, select);
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservation>(rec);
         }
 
         public List<InventoryReservationEntry> FindManyReservationEntriesByProject(Guid projectId, string select = "*")
@@ -205,10 +205,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 RepositoryHelper.FindByQuery(RecordManager, InventoryReservationEntry.Entity, query));
         }
 
-        public InventoryReservationList? InsertReservationList(InventoryReservationList record)
+        public InventoryReservation? InsertReservationList(InventoryReservation record)
         {
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationList>(
-                RepositoryHelper.Insert(RecordManager, InventoryReservationList.Entity, record));
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservation>(
+                RepositoryHelper.Insert(RecordManager, InventoryReservation.Entity, record));
         }
 
         public InventoryReservationEntry? UpdateReservationEntry(InventoryReservationEntry record)

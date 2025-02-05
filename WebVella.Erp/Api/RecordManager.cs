@@ -22,7 +22,7 @@ namespace WebVella.Erp.Api
 		private readonly DbRelationRepository relationRepository;
 		private List<EntityRelation> relations = null;
 		private bool ignoreSecurity = false;
-		private readonly bool executeHooks = true;
+		private readonly bool executeHooks;
 		private readonly DbContext suppliedContext = null;
 
 		private DbContext CurrentContext

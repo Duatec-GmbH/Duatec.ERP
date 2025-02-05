@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
@@ -15,16 +18,38 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
     {
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, RecordCreatePageModel pageModel)
         {
-            var result = new InventoryRepository().Insert(record);
+            var userId = pageModel.TryGetDataSourceProperty<ErpUser>("CurrentUser")!.Id;
 
-            if (result == null)
+            var id = Guid.NewGuid();
+            record.Id = id;
+
+            void TransactionalAction()
+            {
+                var repo = new InventoryRepository();
+                if (repo.Insert(record) == null)
+                    throw new DbException("Could not create inventory entry record");
+
+                var booking = new InventoryBooking()
+                {
+                    ArticleId = record.Article,
+                    Amount = record.Amount,
+                    UserId = userId,
+                    ProjectId = record.Project,
+                    Timestamp = DateTime.UtcNow,
+                };
+
+                if (repo.InsertBooking(booking) == null)
+                    throw new DbException("Could not create inventory booking");
+            }
+
+            if (!Transactional.TryExecute(TransactionalAction))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not create inventory entry");
                 return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
-            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(result.Id!.Value));
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
         }
     }
 }

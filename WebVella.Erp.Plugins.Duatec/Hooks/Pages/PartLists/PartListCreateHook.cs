@@ -36,7 +36,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
         protected override IActionResult? OnValidationFailure(PartList record, RecordCreatePageModel pageModel)
         {
             PartListHook.SetUpErrorPage(pageModel, record);
-            pageModel.BeforeRender();
             return pageModel.Page();
         }
 
@@ -68,7 +67,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
             {
                 PartListHook.SetUpErrorPage(pageModel, record);
-                pageModel.BeforeRender();
                 return pageModel.Page();
             }
 
