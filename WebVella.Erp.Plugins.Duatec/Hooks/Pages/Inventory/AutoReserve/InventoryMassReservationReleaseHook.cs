@@ -36,6 +36,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             var superfluousArticleLookup = InventoryEntriesToRelease4Project.Execute(projectId)
                 .ToDictionary(sai => sai.ArticleId);
 
+            if (formData.TrueForAll(fd => superfluousArticleLookup.TryGetValue(fd.ArticleId, out var rie) && fd.Amount == rie.Amount))
+                return Info(pageModel, "Nothing to do here");
+
             validationErrors.AddRange(Validate(formData, superfluousArticleLookup));
 
             if (validationErrors.Count > 0)

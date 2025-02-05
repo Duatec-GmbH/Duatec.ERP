@@ -8,6 +8,6 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
     internal class ProjectHasAvailableInventoryEntriesSnippet : SnippetBase
     {
         protected override object? GetValue(BaseErpPageModel pageModel)
-            => AvailableInventoryEntries4Project.Execute(pageModel.RecordId!.Value);
+            => AvailableInventoryEntries4Project.Execute(pageModel.RecordId!.Value).Any();
     }
 }
