@@ -32,9 +32,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.ChangeTracking
 
             var entry = new ChangeTrackingEntry()
             {
+                Id = Guid.NewGuid(),
                 Action = action.ToString().ToLower(),
                 Object = record.ToJson(),
                 UserId = SecurityContext.CurrentUser.Id,
+                Timestamp = DateTime.UtcNow,
                 EntityId = entMan.ReadEntities().Object.Find(e => e.Name == entityName)!.Id
             };
 

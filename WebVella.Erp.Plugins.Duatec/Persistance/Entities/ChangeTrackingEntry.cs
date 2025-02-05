@@ -10,6 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string EntityId = "entity_id";
             public const string Object = "object";
             public const string Action = "action";
+            public const string Timestamp = "timestamp";
         }
 
         public static class Relations
@@ -31,6 +32,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<Guid>(Fields.EntityId);
             set => Properties[Fields.EntityId] = value;
+        }
+
+        public DateTime Timestamp
+        {
+            get => Get<DateTime>(Fields.Timestamp);
+            set => Properties[Fields.Timestamp] = value;
         }
 
         public string Action
