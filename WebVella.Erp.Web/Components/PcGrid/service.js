@@ -21,17 +21,19 @@
 
 			for (let row of grid.getElementsByTagName('TR')) {
 
-				row.addEventListener('mouseenter', _ => {
-					if (mouseOverRow !== row) {
-						mouseOverRow = row;
-					}
-				});
+				if (row.parentElement.tagName === 'TBODY') {
+					row.addEventListener('mouseenter', _ => {
+						if (mouseOverRow !== row) {
+							mouseOverRow = row;
+						}
+					});
 
-				row.addEventListener('mouseleave', _ => {
-					if (mouseOverRow === row) {
-						mouseOverRow = null;
-					}
-				});
+					row.addEventListener('mouseleave', _ => {
+						if (mouseOverRow === row) {
+							mouseOverRow = null;
+						}
+					});
+				}
 			}
 		}
 
@@ -298,8 +300,11 @@
 	}
 
 	function markAsSelected(row) {
-		if (!row.classList.contains('row-selected'))
-			row.classList.add('row-selected');
+
+		if (row.parentElement.tagName === 'TBODY') {
+			if (!row.classList.contains('row-selected'))
+				row.classList.add('row-selected');
+		} 
 	}
 
 	function unmarkAsSelected(row) {
@@ -309,7 +314,7 @@
 
 	function toggleSelection(row) {
 		if (!row.classList.contains('row-selected'))
-			row.classList.add('row-selected');
+			markAsSelected(row);
 		else
 			row.classList.remove('row-selected');
 	}

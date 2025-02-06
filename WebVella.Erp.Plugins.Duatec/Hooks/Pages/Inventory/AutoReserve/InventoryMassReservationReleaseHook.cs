@@ -36,7 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             var superfluousArticleLookup = InventoryEntriesToRelease4Project.Execute(projectId)
                 .ToDictionary(sai => sai.ArticleId);
 
-            if (formData.TrueForAll(fd => superfluousArticleLookup.TryGetValue(fd.ArticleId, out var rie) && fd.Amount == rie.Amount))
+            if (formData.TrueForAll(fd => superfluousArticleLookup.TryGetValue(fd.ArticleId, out var rie) && fd.Amount == rie.ReservedAmount))
                 return Info(pageModel, "Nothing to do here");
 
             validationErrors.AddRange(Validate(formData, superfluousArticleLookup));
@@ -60,7 +60,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
             void TransactionalAction()
             {
-
                 foreach (var (articleId, amount, _) in formData)
                 {
                     var reseredInventoryEntries = projectInventoryLookup[articleId];
@@ -73,20 +72,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                         var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
                             ? arr : [];
 
-                        UnreserveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries);
+                        MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries);
 
                         var entry = inventoryRepo.FindReservationEntryByProjectAndArticle(projectId, articleId)!;
-                        if (amount <= 0)
-                        {
-                            if (inventoryRepo.DeleteReservationEntry(entry.Id!.Value) == null)
-                                throw new DbException("Could not delete inventory reservation entry record");
-                        }
-                        else
-                        {
-                            entry.Amount = amount;
-                            if (inventoryRepo.UpdateReservationEntry(entry) == null)
-                                throw new DbException("Could not update inventory reservation entry record");
-                        }
+                        if (inventoryRepo.Unreserve(entry, diff) == null)
+                            throw new DbException("Could not unreserve inventory");
                     }
                 }
             }
@@ -98,7 +88,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             return pageModel.Page();
         }
 
-        private static void UnreserveInventory(
+        private static void MoveInventory(
             RecordManager recMan, decimal amount,
             InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
@@ -116,15 +106,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = reservedEntries.Where(
                     rie => !Array.Exists(availableEntries, aie => aie.WarehouseLocation == rie.WarehouseLocation));
 
-                var current = Unreserve(recMan, amount, amount, availableWithinLocation);
-                current = Unreserve(recMan, amount, current, otherAvailables);
+                var current = MoveInventory(recMan, amount, amount, availableWithinLocation);
+                current = MoveInventory(recMan, amount, current, otherAvailables);
 
                 if (current != 0)
                     throw new DbException("Could not unreserve all entries");
             }
         }
 
-        private static decimal Unreserve(
+        private static decimal MoveInventory(
             RecordManager recMan, decimal amount, decimal current,
             IEnumerable<InventoryEntry> availableInventoryEntries)
         {

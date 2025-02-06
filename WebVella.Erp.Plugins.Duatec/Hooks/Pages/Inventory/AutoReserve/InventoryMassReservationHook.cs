@@ -56,10 +56,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
             void TransactionalAction()
             {
-                var list = inventoryRepo.FindReservationListByProject(projectId)
-                    ?? inventoryRepo.InsertReservationList(new InventoryReservation() { Project = projectId })
-                    ?? throw new DbException("Could not create inventory reservation list record");
-
                 foreach (var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
                 {
                     var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr)
@@ -68,27 +64,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                     var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out arr)
                         ? arr : [];
 
-                    ReserveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries);
-                    var entry = inventoryRepo.FindReservationEntryByProjectAndArticle(projectId, articleId);
+                    MoveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries);
 
-                    if (entry != null)
-                    {
-                        entry.Amount += amount;
-                        if (inventoryRepo.UpdateReservationEntry(entry) == null)
-                            throw new DbException("Could not update inventory reservation entry record");
-                    }
-                    else
-                    {
-                        entry = new InventoryReservationEntry()
-                        {
-                            Amount = amount,
-                            Article = articleId,
-                            InventoryReservationList = list.Id!.Value
-                        };
-
-                        if (inventoryRepo.InsertReservationEntry(entry) == null)
-                            throw new DbException("Could not insert inventory reservation entry record");
-                    }
+                    if (inventoryRepo.Reserve(articleId, projectId, amount) == null)
+                        throw new DbException("Could not reserve inventory");
                 }
             }
 
@@ -99,7 +78,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             return pageModel.Page();
         }
 
-        private static void ReserveInventory(
+        private static void MoveInventory(
             RecordManager recMan, Guid projectId, decimal amount,
             InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
@@ -121,15 +100,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = availableEntries.Where(
                     ae => !Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
-                var current = Reserve(recMan, projectId, amount, 0m, availableWithinLocation);
-                current = Reserve(recMan, projectId, amount, current, otherAvailables);
+                var current = MoveInventory(recMan, projectId, amount, 0m, availableWithinLocation);
+                current = MoveInventory(recMan, projectId, amount, current, otherAvailables);
 
                 if (current != amount)
                     throw new DbException("Could not reserve all entries");
             }
         }
 
-        private static decimal Reserve(
+        private static decimal MoveInventory(
             RecordManager recMan, Guid projectId, decimal amount, decimal current,
             IEnumerable<InventoryEntry> availableEntries)
         {
@@ -151,7 +130,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 else
                 {
                     MovePartial(recMan, projectId, entry, demand);
-                    return 0;
+                    return demand;
                 }
             }
             return current;

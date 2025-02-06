@@ -33,11 +33,35 @@ namespace WebVella.Erp.TypedRecords.Persistance
 
         public static EntityRecord? Update(RecordManager recMan, string entity, EntityRecord record)
         {
+            var unchanged = Find(recMan, entity, (Guid)record["id"]);
+
+            if (AreEqual(record, unchanged!))
+                return unchanged;
+
             var response = recMan.UpdateRecord(entity, record);
 
             return response.Success
                 ? response.Object.Data.Single()
                 : null;
+        }
+
+        private static bool AreEqual(EntityRecord a, EntityRecord b)
+        {
+            if (a.Properties.Count != b.Properties.Count)
+                return false;
+
+            foreach(var (key, value) in a.Properties)
+            {
+                if (!b.Properties.TryGetValue(key, out var otherVal))
+                    return false;
+
+                if (value == null ^ otherVal == null)
+                    return false;
+
+                if (value != null && !value.Equals(otherVal))
+                    return false;
+            }
+            return true;
         }
 
 

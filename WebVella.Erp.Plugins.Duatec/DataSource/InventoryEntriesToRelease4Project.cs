@@ -39,9 +39,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             var recMan = new RecordManager();
 
-            var reservedLookup = new InventoryRepository(recMan).FindManyByProject(projectId)
-                .GroupBy(ie => ie.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(ie => ie.Amount));
+            var reservedLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
+                .ToDictionary(re => re.Article, re => re.Amount);
 
             if (reservedLookup.Count == 0)
                 yield break;

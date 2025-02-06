@@ -26,11 +26,10 @@ namespace WebVella.Erp.Web.Models
 		private readonly Dictionary<string, MPW> properties = [];
 		// improvement to not load same values multiple times, since it can't be stored within record
 		private readonly Dictionary<string, (List<EntityRecord> Result, Entity Entity)> alreadyResolvedRecordProperties = [];
-		private readonly Dictionary<string, object> dataSourceResults = [];
 
 		internal PageDataModel(BaseErpPageModel erpPageModel)
 		{
-			this.erpPageModel = erpPageModel ?? throw new NullReferenceException(nameof(erpPageModel));
+			this.erpPageModel = erpPageModel ?? throw new ArgumentException(nameof(erpPageModel));
 			InitContextRelatedData(erpPageModel);
 			if (erpPageModel.ErpRequestContext != null && erpPageModel.ErpRequestContext.Page != null)
 				InitDataSources(erpPageModel.ErpRequestContext.Page);
@@ -50,6 +49,9 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$coalesce", new MPW(MPT.Function, new CoalesceFunction(this)));
 				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
 				properties.Add("$hasRole", new MPW(MPT.Function, new HasRoleFunction(this)));
+				properties.Add("$areEqual", new MPW(MPT.Function, new AreEqualFunction(this)));
+				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
+				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -1470,6 +1472,66 @@ namespace WebVella.Erp.Web.Models
 
 				return user.Roles.Exists(r => r.Name == "administrator" || r.Name == role);
 			}
+		}
+
+		private sealed class AreEqualFunction : QueryFunction
+		{
+			public AreEqualFunction(PageDataModel dataModel)
+				: base(dataModel) 
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "areEqual";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				var a = parameters[0].Value;
+				var b = parameters[1].Value;
+
+				if (a == null ^ b == null)
+					return false;
+
+				if (a == null)
+					return true;
+
+				return a is IEnumerable enA && b is IEnumerable enB && enA.SequenceEquals(enB)
+					|| a.Equals(b);
+			}
+		}
+
+		private sealed class AndFunction : QueryFunction
+		{
+			public AndFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => -1;
+
+			public override string Name => "and";
+
+			public override object Execute(LazyObject[] parameters)
+				=> Array.TrueForAll(parameters, param => param.Value is bool b && b);
+		}
+
+		private sealed class OrFunction : QueryFunction
+		{
+			public OrFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => -1;
+
+			public override string Name => "or";
+
+			public override object Execute(LazyObject[] parameters)
+				=> Array.Exists(parameters, param => param.Value is bool b && b);
 		}
 
 		#endregion

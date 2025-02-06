@@ -29,6 +29,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 if (repo.Insert(record) == null)
                     throw new DbException("Could not create inventory entry record");
 
+                if (record.Project.HasValue && record.Project != Guid.Empty)
+                {
+                    if (repo.Reserve(record.Article, record.Project.Value, record.Amount) == null)
+                        throw new DbException("Could not reserve inventory");
+                }
+
                 var booking = new InventoryBooking()
                 {
                     ArticleId = record.Article,
@@ -49,7 +55,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
-            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(id));
+            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
     }
 }

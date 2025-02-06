@@ -168,18 +168,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
                 if (projectDemand <= 0)
                 {
-                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    inventoryEntry.WarehouseLocation 
+                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
                     inventoryEntry.Project = null;
                     yield return inventoryEntry;
                 }
                 else if (inventoryEntry.Amount <= projectDemand)
                 {
-                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    inventoryEntry.WarehouseLocation
+                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
                     yield return inventoryEntry;
                 }
                 else
                 {
-                    inventoryEntry.WarehouseLocation = Guid.Empty;// TODO make smart selection
+                    inventoryEntry.WarehouseLocation
+                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
                     var goesToDefaultProject = new InventoryEntry()
                     {
                         Id = Guid.NewGuid(),
@@ -188,7 +191,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                         Article = entry.Article,
                         WarehouseLocation = Guid.Empty,
                     };
-                    goesToDefaultProject.WarehouseLocation = Guid.Empty;// TODO make smart selection
+
+                    goesToDefaultProject.WarehouseLocation
+                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
 
                     inventoryEntry.Amount = projectDemand;
 
@@ -196,6 +201,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     yield return goesToDefaultProject;
                 }
             }
+        }
+
+        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Guid articleId, Guid? projectid)
+        {
+            return repo.FindManyByArticleAndProject(articleId, projectid)
+                .FirstOrDefault()?.WarehouseLocation ?? Guid.Empty;
         }
 
         private static IEnumerable<InventoryEntry> BuildInventoryEntries(UpdateInfo[] updateInfos)

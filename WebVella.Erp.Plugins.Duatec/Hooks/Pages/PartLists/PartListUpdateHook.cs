@@ -66,7 +66,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 .Where(t => !oldPartListEntries.Exists(ple => ple.ArticleId == t.ArticleId));
 
             var toUpdate = oldPartListEntries
-                .Where(ple => Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId));
+                .Where(ple => Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId && fv.Amount != ple.Amount));
 
             var toDelete = oldPartListEntries
                 .Where(ple => !Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId))
@@ -75,6 +75,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             
             void TransactionalAction()
             {
+                if (repo.Update(record) == null)
+                    throw new DbException($"could not update record");
+
                 if (toDelete.Length > 0 && repo.DeleteManyEntries(toDelete).Count == 0)
                     throw new DbException($"Could not delete part list entry records");
 

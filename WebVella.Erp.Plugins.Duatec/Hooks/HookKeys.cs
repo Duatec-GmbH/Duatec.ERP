@@ -31,12 +31,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public static class GoodsReceiving
         {
-            public static class DeliveryNotes
-            {
-                public const string Create = "delivery_notes_create";
-                public const string Delete = "delivery_notes_delete";
-            }
-
             public static class Entry
             {
                 public const string Create = "goods_receiving_entry_create";
@@ -84,6 +78,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Delete = "part_list_delete";
             public const string Import = "part_list_file_import";
             public const string Upload = "part_list_file_upload";
+            public const string Compare = "part_list_compare";
         }
 
         public static class Order

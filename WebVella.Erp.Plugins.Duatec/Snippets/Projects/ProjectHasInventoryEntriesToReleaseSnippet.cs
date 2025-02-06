@@ -14,9 +14,8 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Projects
             var inventoryRepo = new InventoryRepository(recMan);
             var partListRepo = new PartListRepository(recMan);
 
-            var reserved = inventoryRepo.FindManyByProject(pageModel.RecordId!.Value)
-                .GroupBy(ie => ie.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(ie => ie.Amount));
+            var reserved = inventoryRepo.FindManyReservationEntriesByProject(pageModel.RecordId!.Value)
+                .ToDictionary(re => re.Article, re => re.Amount);
 
             var demands = partListRepo.FindManyEntriesByProject(pageModel.RecordId.Value, true)
                 .GroupBy(ple => ple.ArticleId)

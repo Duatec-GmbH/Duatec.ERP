@@ -7,6 +7,8 @@ using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
+using WebVella.Erp.Database;
+using WebVella.Erp.Plugins.Duatec.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
@@ -42,12 +44,35 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
-            var result = record.Amount >= unmodified.Amount - eps
-                ? CompleteMove(record, pageModel)
-                : PartialMove(record, pageModel);
+            void TransactionalAction()
+            {
+                var repo = new InventoryRepository();
+                record = (record.Amount >= unmodified.Amount - eps
+                    ? repo.Update(record)
+                    : repo.MovePartial(record))!;
 
-            if (result != null)
-                return result;
+                if (record == null)
+                    throw new DbException("Could not move inventory entry");
+
+                if (record.Project != unmodified.Project)
+                {
+                    if (unmodified.Project.HasValue)
+                    {
+                        var reservation = repo.FindReservationEntryByProjectAndArticle(unmodified.Project.Value, unmodified.Article);
+                        if (reservation != null && repo.Unreserve(reservation, record.Amount) == null)
+                            throw new DbException("Could not release reservation");
+                    }    
+
+                    if (record.Project.HasValue && repo.Reserve(record.Article, record.Project.Value, record.Amount) == null)
+                        throw new DbException("Could not reserve inventory");
+                }
+            }
+
+            if(!Transactional.TryExecute(pageModel, TransactionalAction))
+            {
+                pageModel.BeforeRender();
+                return pageModel.Page();
+            }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
@@ -57,26 +82,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         private static bool OriginAndTargetAreSame(InventoryEntry a, InventoryEntry b)
         {
             return a.WarehouseLocation == b.WarehouseLocation
-                && !(a.Project.HasValue ^ b.Project.HasValue)
-                && a.Project.HasValue && a.Project.Value == b.Project!.Value;
+                && (NullOrEmpty(a.Project) && NullOrEmpty(b.Project)
+                || a.Project == b.Project);
         }
 
-        private static LocalRedirectResult? CompleteMove(InventoryEntry record, BaseErpPageModel pageModel)
-        {
-            if (new InventoryRepository().Update(record) != null)
-                return null;
-
-            pageModel.PutMessage(ScreenMessageType.Error, "Could not update inventory entry");
-            return pageModel.LocalRedirect(pageModel.CurrentUrl);
-        }
-
-        private static LocalRedirectResult? PartialMove(InventoryEntry record, BaseErpPageModel pageModel)
-        {
-            if (new InventoryRepository().MovePartial(record) != null)
-                return null;
-
-            pageModel.PutMessage(ScreenMessageType.Error, "Could not move inventory entry");
-            return pageModel.LocalRedirect(pageModel.CurrentUrl);
-        }
+        private static bool NullOrEmpty(Guid? id)
+            => !id.HasValue || id.Value == Guid.Empty;
     }
 }

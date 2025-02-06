@@ -48,7 +48,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
                 return record;
             }
-            return base.Insert(record);
+            var result = base.Insert(record);
+
+            return result;
         }
 
         public InventoryEntry? MovePartial(InventoryEntry record)
@@ -205,25 +207,61 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 RepositoryHelper.FindByQuery(RecordManager, InventoryReservationEntry.Entity, query));
         }
 
-        public InventoryReservation? InsertReservationList(InventoryReservation record)
+        public InventoryReservationEntry? Reserve(Guid articleId, Guid projectId, decimal amount)
+        {
+            var reservation = FindReservationEntryByProjectAndArticle(projectId, articleId);
+            if(reservation == null)
+            {
+                var list = FindReservationListByProject(projectId)
+                    ?? InsertReservationList(new InventoryReservation() { Id = Guid.NewGuid(), Project = projectId })
+                    ?? throw new DbException("Could not create reservation list");
+
+                reservation = new InventoryReservationEntry()
+                {
+                    Article = articleId,
+                    Amount = amount,
+                    InventoryReservationList = list.Id!.Value,
+                };
+                return InsertReservationEntry(reservation);
+            }
+            else
+            {
+                reservation.Amount += amount;
+                return UpdateReservationEntry(reservation);
+            }
+        }
+
+        public InventoryReservationEntry? Unreserve(InventoryReservationEntry reservation, decimal amount)
+        {
+            if (reservation.Amount == amount)
+                return DeleteReservationEntry(reservation.Id!.Value);
+            if (reservation.Amount > amount)
+            {
+                reservation.Amount -= amount;
+                return UpdateReservationEntry(reservation);
+            }
+            throw new ArgumentException($"Amount is greater than reserved amount ({reservation.Amount})");
+        }
+
+        private InventoryReservation? InsertReservationList(InventoryReservation record)
         {
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservation>(
                 RepositoryHelper.Insert(RecordManager, InventoryReservation.Entity, record));
         }
 
-        public InventoryReservationEntry? UpdateReservationEntry(InventoryReservationEntry record)
+        private InventoryReservationEntry? UpdateReservationEntry(InventoryReservationEntry record)
         {
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
                 RepositoryHelper.Update(RecordManager, InventoryReservationEntry.Entity, record));
         }
 
-        public InventoryReservationEntry? InsertReservationEntry(InventoryReservationEntry record)
+        private InventoryReservationEntry? InsertReservationEntry(InventoryReservationEntry record)
         {
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
                 RepositoryHelper.Insert(RecordManager, InventoryReservationEntry.Entity, record));
         }
 
-        public InventoryReservationEntry? DeleteReservationEntry(Guid inventoryReservationId)
+        private InventoryReservationEntry? DeleteReservationEntry(Guid inventoryReservationId)
         {
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
                 RepositoryHelper.Delete(RecordManager, InventoryReservationEntry.Entity, inventoryReservationId));
