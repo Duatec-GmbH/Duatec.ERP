@@ -30,12 +30,12 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             if (record.Project == Guid.Empty)
                 result.Add(new ValidationError(Fields.Project, "Project is required"));
-            if (string.IsNullOrEmpty(record.OfferFile))
-                result.Add(new ValidationError(Fields.Offer, "Offer is required"));
-            if (string.IsNullOrEmpty(record.OrderFile))
-                result.Add(new ValidationError(Fields.Order, "Order is required"));
-            if (string.IsNullOrEmpty(record.ConfirmationFile))
-                result.Add(new ValidationError(Fields.Confirmation, "Confirmation is required"));
+            //if (string.IsNullOrEmpty(record.OfferFile))
+            //    result.Add(new ValidationError(Fields.Offer, "Offer is required"));
+            //if (string.IsNullOrEmpty(record.OrderFile))
+            //    result.Add(new ValidationError(Fields.Order, "Order is required"));
+            //if (string.IsNullOrEmpty(record.ConfirmationFile))
+            //    result.Add(new ValidationError(Fields.Confirmation, "Confirmation is required"));
 
             return result;
         }
