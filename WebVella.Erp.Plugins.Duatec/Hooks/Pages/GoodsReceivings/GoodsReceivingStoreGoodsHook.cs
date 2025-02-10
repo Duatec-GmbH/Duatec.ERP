@@ -195,6 +195,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     goesToDefaultProject.WarehouseLocation
                         = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
 
+                    goesToDefaultProject.SetArticle(entry.GetArticle());
+
                     inventoryEntry.Amount = projectDemand;
 
                     yield return inventoryEntry;
@@ -231,7 +233,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 if (warehouseLocationId == Guid.Empty)
                     yield return WarehouseLocationError(index, "Warehouse location is required");
 
-                if (projectId != Guid.Empty && projectId != projectSetPoint)
+                if (projectId != Guid.Empty && projectId != null && projectId != projectSetPoint)
                     yield return ProjectError(index, "Fatal error project id missmatch");
 
                 if (articleId == Guid.Empty)
@@ -254,13 +256,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     if (totalAmount != max)
                         yield return AmountError(index, $"Sum of amounts for given article must be equal to booked amount ({max})");
 
-                    var projectMax = entries
+                    var totalProject = equivalentArticles
+                        .Where(ie => ie.ProjectId == projectId)
+                        .Aggregate(0m, (sum, current) => sum + current.Amount);
+
+                    var maxProject = entries
                         .Where(ie => ie.Project == projectId)
                         .Aggregate(0m, (sum, current) => sum + current.Amount);
 
-                    if (totalAmount != projectMax)
-                        yield return AmountError(index, $"Sum of amounts for given article for given project must be equal to demand ({projectMax})");
-
+                    if (totalProject != maxProject)
+                        yield return AmountError(index, $"Sum of amounts for given article for given project must be equal to project demand ({maxProject})");
 
                     var isInt = entries[0].GetArticle().GetArticleType().IsInteger;
                     if (isInt && amount % 1 != 0)
