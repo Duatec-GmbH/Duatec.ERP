@@ -1,8 +1,8 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Test.EplanXml
+﻿namespace WebVella.Erp.Plugins.Duatec.Test.Services.EplanXml
 {
     internal class EplanXmlResources
     {
-		public static readonly string SingleItemAsRoot = @"<part 
+        public static readonly string SingleItemAsRoot = @"<part 
 	P_DESIGNATION_PLANT=""RC4M40"" 
 	P_DESIGNATION_FULLPLANT=""RC4M40"" 
 	P_DESIGNATION_PLANT_DESCR=""??_??@Robot cell 4xM40;"" 

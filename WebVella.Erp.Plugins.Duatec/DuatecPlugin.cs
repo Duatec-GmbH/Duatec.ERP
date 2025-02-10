@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec
             ProcessPatches();
         }
 
-        private void ProcessPatches()
+        public void ProcessPatches()
         {
             var currentPluginSettings = new PluginSettings() { Version = 0 };
             string jsonData = GetPluginData();

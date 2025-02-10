@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Test.DataPortal
+﻿namespace WebVella.Erp.Plugins.Duatec.Test.Services.DataPortal
 {
     internal class ArticleResources
     {

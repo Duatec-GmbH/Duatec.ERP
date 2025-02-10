@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Test.EplanXml
+﻿namespace WebVella.Erp.Plugins.Duatec.Test.Services.EplanXml
 {
     [TestFixture]
     internal class EplanXmlTests
@@ -6,7 +6,7 @@
         private static MemoryStream StreamFromString(string text)
         {
             var stream = new MemoryStream();
-            using var writer = new StreamWriter(stream);
+            var writer = new StreamWriter(stream);
             writer.Write(text);
             writer.Flush();
             stream.Position = 0;
@@ -14,14 +14,14 @@
         }
 
 
-        [Test]  
+        [Test]
         public void SingleItemAsRootReturnsExpectedEntry()
         {
             var text = EplanXmlResources.SingleItemAsRoot;
 
             using var stream = StreamFromString(text);
 
-            var result = Services.EplanXml.GetArticles(stream);
+            var result = Duatec.Services.EplanXml.GetArticles(stream);
 
             Assert.That(result, Has.Count.EqualTo(1));
             var article = result[0];

@@ -19,6 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WebVella.Erp.Plugins.Duatec\WebVella.Erp.Plugins.Duatec.csproj" />
+    <ProjectReference Include="..\WebVella.Erp.Plugins.Mail\WebVella.Erp.Plugins.Mail.csproj" />
+    <ProjectReference Include="..\WebVella.Erp.Plugins.Next\WebVella.Erp.Plugins.Next.csproj" />
+    <ProjectReference Include="..\WebVella.Erp.Plugins.SDK\WebVella.Erp.Plugins.SDK.csproj" />
   </ItemGroup>
 
   <ItemGroup>
