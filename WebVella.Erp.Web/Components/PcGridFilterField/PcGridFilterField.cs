@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
@@ -47,6 +49,9 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "prefix")]
 			public string Prefix { get; set; } = "";
+
+			[JsonProperty(PropertyName = "data_type")]
+			public string DataType { get; set; } = "";
 		}
 
 		public async Task<IViewComponentResult> InvokeAsync(PageComponentContext context)
@@ -208,6 +213,13 @@ namespace WebVella.Erp.Web.Components
 								throw new Exception("No such field Type");
 						}
 					}
+				}
+				else if (!string.IsNullOrEmpty(options.DataType))
+				{
+					var type = TypeManager.GetEnum(options.DataType)
+						?? throw new Exception($"Type '{options.DataType}' not found");
+
+					ViewBag.ValueOptions = ModelExtensions.GetEnumAsSelectOptions(type);
 				}
 
 				switch (context.Mode)

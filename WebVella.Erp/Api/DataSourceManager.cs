@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 using WebVella.Erp.Eql;
 using System.Linq;
 using WebVella.Erp.Exceptions;
+using System.Reflection;
+using System.Net.NetworkInformation;
+using WebVella.Erp.Utilities;
 
 namespace WebVella.Erp.Api
 {
@@ -16,6 +19,7 @@ namespace WebVella.Erp.Api
 	{
 		private DbDataSourceRepository rep = new DbDataSourceRepository();
 		private static List<CodeDataSource> codeDataSources = new List<CodeDataSource>();
+		private static Dictionary<string, Type> enumTypes = new Dictionary<string, Type>();
 
 		#region <=== Cache Related ===>
 
@@ -457,9 +461,23 @@ namespace WebVella.Erp.Api
 						throw new Exception($"Invalid boolean value for parameter: " + dsParameter.Name);
 					}
 				default:
+
+					var enumT = TypeManager.GetEnum(dsParameter.Type);
+					if (enumT != null)
+					{
+						if (dsParameter.Value.ToLowerInvariant() == "null")
+							return null;
+
+						else if (Enum.TryParse(enumT, dsParameter.Value, true, out var val))
+							return val;
+
+						throw new Exception($"Invalid enum value form parameter: " + dsParameter.Name);
+					}
+
 					throw new Exception($"Invalid parameter type '{dsParameter.Type}' for '{dsParameter.Name}'");
 			}
 		}
+
 
 		public void Delete(Guid id)
 		{

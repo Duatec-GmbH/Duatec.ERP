@@ -44,9 +44,13 @@ namespace WebVella.Erp.Web.Utils
 
 		public static List<SelectOption> GetEnumAsSelectOptions<T>()
 		{
+			return GetEnumAsSelectOptions(typeof(T));
+		}
+
+		public static List<SelectOption> GetEnumAsSelectOptions(Type type)
+		{
 			var selectOptions = new List<SelectOption>();
-			var values = Enum.GetValues(typeof(T));
-			var type = typeof(T);
+			var values = Enum.GetValues(type);
 			foreach (var val in values)
 			{
 				var memInfo = type.GetMember(type.GetEnumName(val));

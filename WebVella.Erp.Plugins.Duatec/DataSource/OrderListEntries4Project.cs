@@ -1,8 +1,9 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.TypedRecords;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -18,30 +19,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string Manufacturer = "manufacturer";
             public const string Order = "order";
             public const string State = "state";
+            public const string StateFilterType = "state_filter_type";
             public const string Page = "page";
             public const string PageSize = "pageSize";
-        }
-
-        public static class Record
-        {
-            public static class Relations
-            {
-                public const string Project = "order_list_entry_project";
-                public const string Article = "order_list_entry_article";
-                public const string Order = "order_list_entry_order";
-            }
-
-            public static class Fields
-            {
-                public const string Project = "project_id";
-                public const string Article = Persistance.Entities.Article.AsForeignKey;
-                public const string Demand = "demand";
-                public const string OrderedAmount = "ordered_amount";
-                public const string ReceivedAmount = "received_amount";
-                public const string InventoryAmount = "inventory_amount";
-                public const string ToOrder = "to_order";
-                public const string State = "state";
-            }
         }
 
         public OrderListEntries4Project(Guid articleId)
@@ -64,7 +44,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Order, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.State, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.State, Type = typeof(OrderListEntryState).FullName, Value = "null" });
+            Parameters.Add(new() { Name = Arguments.StateFilterType, Type = typeof(FilterType).FullName, Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
@@ -85,7 +66,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var designation = arguments[Arguments.Designation]?.ToString();
             var manufacturer = arguments[Arguments.Manufacturer]?.ToString();
             var order = arguments[Arguments.Order]?.ToString();
-            var state = arguments[Arguments.State]?.ToString();
+            var state = EnumValueFromParameter<OrderListEntryState?>(arguments[Arguments.State]);
+            var stateFilterType = EnumValueFromParameter<FilterType?>(arguments[Arguments.StateFilterType]);
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
@@ -95,7 +77,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             records = ApplyArticleFilter(designation, Article.Fields.Designation, records);
             records = ApplyManufacturerFilter(manufacturer, records);
             records = ApplyOrderFilter(order, records);
-            records = ApplyStateFilter(state, records);
+            records = ApplyStateFilter(state, stateFilterType, records);
 
             var filtered = records.ToList();
             
@@ -106,44 +88,47 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static IEnumerable<EntityRecord> ApplyArticleFilter(string? filterValue, string property, IEnumerable<EntityRecord> records)
+        private static IEnumerable<OrderListEntry> ApplyArticleFilter(string? filterValue, string property, IEnumerable<OrderListEntry> records)
         {
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
             return records
-                .Where(r => GetArticle(r)[property].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                .Where(r => r.GetArticle()[property].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static IEnumerable<EntityRecord> ApplyOrderFilter(string? filterValue, IEnumerable<EntityRecord> records)
+        private static IEnumerable<OrderListEntry> ApplyOrderFilter(string? filterValue, IEnumerable<OrderListEntry> records)
         {
-            const string orders = $"${Record.Relations.Order}";
-
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
-            return records.Where(r => ((List<EntityRecord>)r[orders]).Exists(
-                o => o[Order.Fields.Number].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
+            return records.Where(r => r.GetOrders().Any(
+                o => o.Number.Contains(filterValue, StringComparison.OrdinalIgnoreCase)));
         }
 
-        private static IEnumerable<EntityRecord> ApplyManufacturerFilter(string? filterValue, IEnumerable<EntityRecord> records)
+        private static IEnumerable<OrderListEntry> ApplyManufacturerFilter(string? filterValue, IEnumerable<OrderListEntry> records)
         {
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
             return records
-                .Where(r => GetManufacturer(r).Name.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                .Where(r => r.GetArticle().GetManufacturer().Name.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static IEnumerable<EntityRecord> ApplyStateFilter(string? filterValue, IEnumerable<EntityRecord> records)
+        private static IEnumerable<OrderListEntry> ApplyStateFilter(OrderListEntryState? filterValue, FilterType? filterType, IEnumerable<OrderListEntry> records)
         {
-            if (string.IsNullOrEmpty(filterValue))
+            if (filterValue == null)
                 return records;
 
-            return records.Where(r => ((string)r[Record.Fields.State]).Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+            if(filterType == null || filterType == FilterType.EQ)
+                return records.Where(r => filterValue.Value.Equals(r.State));
+            if (filterType == FilterType.NOT)
+                return records.Where(r => !filterValue.Value.Equals(r.State));
+
+            throw new NotImplementedException($"Filter type '{filterType}' not implemented");
         }
 
-        private IEnumerable<EntityRecord> GetRecords(Guid projectId)
+        private IEnumerable<OrderListEntry> GetRecords(Guid projectId)
         {
             var recMan = new RecordManager();
 
@@ -183,10 +168,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             return partListEntries
                 .GroupBy(ple => ple.ArticleId)
-                .Select(g => RecordFromGroup(g, project, 
+                .Select(g => RecordFromGroup(g, 
                     articleLookup, ordersLookup!, 
                     orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
-                .OrderBy(r => GetArticle(r).PartNumber.ToString());
+                .OrderBy(r => r.GetArticle().PartNumber.ToString());
         }
 
         private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, List<PartListEntry> partListEntries)
@@ -203,72 +188,52 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return new ArticleRepository(recMan).FindMany(select, articleIds);
         }
 
-        private static EntityRecord RecordFromGroup(
+        private static OrderListEntry RecordFromGroup(
             IGrouping<Guid, PartListEntry> group, 
-            Project project,
             Dictionary<Guid, Article?> articleLookup,
             Dictionary<Guid, List<Order>> ordersLookup, 
             Dictionary<Guid, decimal> orderedAmountLookup, 
             Dictionary<Guid, decimal> receivedAmountLookup, 
             Dictionary<Guid, decimal> inventoryAmountLookup)
         {
-            var rec = new EntityRecord();
 
             var commons = group.First();
             var articleId = commons.ArticleId;
             var article = articleLookup[articleId];
-            var articles = article == null ? [] : new List<EntityRecord>() { article };
             var demand = group.Sum(r => r.Amount);
-            var orders = new List<EntityRecord>();
-            orders.AddRange(GetOrders(articleId, ordersLookup));
 
-            rec["id"] = articleId;
-            rec[Record.Fields.Project] = (Guid)project["id"];
-            rec[Record.Fields.Article] = articleId;
-
-            rec[$"${Record.Relations.Article}"] = articles;
-            rec[$"${Record.Relations.Project}"] = new List<EntityRecord>() { project };
-            rec[$"${Record.Relations.Order}"] = orders;
-
+            var orders = ordersLookup.TryGetValue(articleId, out var l) ? l : [];
             var orderedAmount = GetAmount(orderedAmountLookup, articleId);
             var receivedAmount = GetAmount(receivedAmountLookup, articleId);
             var inventoryAmount = GetAmount(inventoryAmountLookup, articleId);
             var toOrder = Math.Max(0m, demand - orderedAmount - inventoryAmount);
 
-            rec[Record.Fields.Demand] = demand;
-            rec[Record.Fields.OrderedAmount] = orderedAmount;
-            rec[Record.Fields.ReceivedAmount] = receivedAmount;
-            rec[Record.Fields.InventoryAmount] = inventoryAmount;
-            rec[Record.Fields.ToOrder] = toOrder;
-            rec[Record.Fields.State] = GetState(demand, orderedAmount, receivedAmount, inventoryAmount);
+            var rec = new OrderListEntry()
+            {
+                Id = articleId,
+                ArticleId = articleId,
+                Demand = demand,
+                OrderedAmount = orderedAmount,
+                InventoryAmount = inventoryAmount,
+                ToOrder = toOrder,
+                ReceivedAmount = receivedAmount,
+                State = GetState(demand, orderedAmount, receivedAmount, inventoryAmount),
+            };
+
+            rec.SetArticle(article!);
+            rec.SetOrders(orders);
 
             return rec;
         }
 
-        private static string GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory)
+        private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory)
         {
             if (demand <= received + fromInventory)
-                return "Complete";
+                return OrderListEntryState.Complete;
             if (demand > ordered + fromInventory)
-                return "To Order";
-            return "Incomming";
+                return OrderListEntryState.ToOrder;
+            return OrderListEntryState.Incomplete;
         }
-
-        private static List<Order> GetOrders(Guid articleId, Dictionary<Guid, List<Order>> ordersLookup)
-        {
-            if (!ordersLookup.TryGetValue(articleId, out var orders))
-                return [];
-            return orders;
-        }
-
-        private static Article GetArticle(EntityRecord record)
-        {
-            var article = ((List<EntityRecord>)record[$"${Record.Relations.Article}"])[0];
-            return TypedEntityRecordWrapper.WrapElseDefault<Article>(article)!;
-        }
-
-        private static Company GetManufacturer(EntityRecord rec)
-            => GetArticle(rec).GetManufacturer();
 
         private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)
         {

@@ -21,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Util
             foreach (var c in text.Skip(1))
             {
                 if (char.IsUpper(c))
-                    sb.Append($" {c}");
+                    sb.Append($" {char.ToLower(c)}");
                 else sb.Append(c);
             }
             return sb.ToString();
