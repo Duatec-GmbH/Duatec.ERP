@@ -19,7 +19,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Article = Entities.Article.AsForeignKey;
             public const string GoodsReceiving = "goods_receiving_id";
             public const string Amount = "amount";
-            public const string StoredAmount = "stored_amount";
         }
 
         public override string EntityName => Entity;
@@ -42,11 +41,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Amount] = value;
         }
 
-        public decimal StoredAmount
-        {
-            get => Get<decimal>(Fields.StoredAmount);
-            set => Properties[Fields.StoredAmount] = value;
-        }
 
         internal Article GetArticle()
             => GetSingleByRelation<Article>(Relations.Article)!;

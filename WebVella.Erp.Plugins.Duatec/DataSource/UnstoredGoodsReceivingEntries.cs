@@ -5,6 +5,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
+    [Obsolete]
     internal class UnstoredGoodsReceivingEntries : CodeDataSource
     {
         public static class Arguments
@@ -68,10 +69,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
             var manufacturerLookup = manufacturerRepo.FindMany($"id, {Company.Fields.Name}", manufacturerIds);
 
-            foreach (var entry in allEntries.Where(e => e.Amount > e.StoredAmount))
+            foreach (var entry in allEntries)
             {
-                entry.Amount -= entry.StoredAmount;
-
                 var article = entry.GetArticle();
 
                 if (typeLookup.TryGetValue(article.TypeId, out var t) && t != null)

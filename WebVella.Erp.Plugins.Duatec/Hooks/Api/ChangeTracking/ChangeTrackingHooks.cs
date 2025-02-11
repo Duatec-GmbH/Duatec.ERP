@@ -18,17 +18,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.ChangeTracking
     [HookAttachment(key: GoodsReceivingEntry.Entity)]
     internal class GoodsReceivingEntryChangeTracker : ChangeTrackingHook { }
 
-    [HookAttachment(key: InventoryBooking.Entity)]
-    internal class InventoryBookingChangeTracker : ChangeTrackingHook { }
-
     [HookAttachment(key: InventoryEntry.Entity)]
     internal class InventoryEntryChangeTracker : ChangeTrackingHook { }
-
-    [HookAttachment(key: InventoryReservationEntry.Entity)]
-    internal class InventoryReservationEntryChangeTracker : ChangeTrackingHook { }
-
-    [HookAttachment(key: InventoryReservation.Entity)]
-    internal class InventoryReservationChangeTracker : ChangeTrackingHook { }
 
     [HookAttachment(key: Order.Entity)]
     internal class OrderChangeTracker : ChangeTrackingHook { }

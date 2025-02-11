@@ -16,8 +16,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings.Entries
         {
             base.OnPostCreate(record, pageModel);
 
-            record.StoredAmount = 0;
-
             var listId = Guid.Parse(pageModel.Request.Query[listArg]!);
             var url = Url.RemoveParameters(pageModel.CurrentUrl) + $"?{listArg}={listId}";
             return pageModel.LocalRedirect(url);

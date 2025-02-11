@@ -19,7 +19,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
     using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
-    [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
+    //[HookAttachment(key: HookKeys.GoodsReceiving.Store)]
+    [Obsolete]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
     {
         const string entryKey = $"${GoodsReceiving.Relations.Entries}";
@@ -83,10 +84,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 foreach(var g in BuildInventoryEntries(updateInfos).GroupBy(ie => ie.Article).ToArray())
                 {
                     var receivingEntry = entries[g.Key];
-                    receivingEntry.StoredAmount = g.Sum(ie => ie.Amount);
-
-                    if (receivingEntry.StoredAmount != receivingEntry.Amount)
-                        throw new InvalidOperationException("Fatal error data anomaly found within receiving entry stored amounts");
 
                     if (goodsReceivingRepo.UpdateEntry(receivingEntry) == null)
                         throw new DbException("Failed to update receiving entry record");
@@ -143,18 +140,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 .GroupBy(re => re.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(re => re.Amount));
 
-            var alreadyStoredAmounts = receivingRepo.FindManyEntriesByProject(projectId)
-                .GroupBy(gre => gre.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(oe => oe.StoredAmount));
-
             var unstoredEntries = UnstoredGoodsReceivingEntries.Execute(record.Id!.Value)
                 .OrderBy(gre => gre.GetArticle().PartNumber);
 
             foreach (var entry in unstoredEntries)
             {
                 var projectDemand = GetAmount(demands, entry.Article)
-                    - GetAmount(reservedAmounts, entry.Article)
-                    - GetAmount(alreadyStoredAmounts, entry.Article);
+                    - GetAmount(reservedAmounts, entry.Article);
 
                 var inventoryEntry = new InventoryEntry()
                 {

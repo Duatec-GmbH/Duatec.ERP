@@ -193,10 +193,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 QueryType = QueryType.OR,
                 SubQueries = subQuery,
             };
-        }
-
-        internal bool EntryWithUnstoredItemsExists(Guid goodsReceivingId)
-            => FindManyEntriesByGoodsReceiving(goodsReceivingId).Exists(e => e.Amount > e.StoredAmount);
-        
+        }        
     }
 }

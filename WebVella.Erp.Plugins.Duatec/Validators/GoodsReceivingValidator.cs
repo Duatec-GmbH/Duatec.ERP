@@ -17,10 +17,6 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
             => [];
 
         public List<ValidationError> ValidateOnDelete(GoodsReceiving record)
-        {
-            if (record.GetEntries().Any(e => e.StoredAmount > 0))
-                return [new ValidationError(string.Empty, "Can not delete goods receiving record because one or more entries are already stored")];
-            return [];
-        }
+            => [];
     }
 }

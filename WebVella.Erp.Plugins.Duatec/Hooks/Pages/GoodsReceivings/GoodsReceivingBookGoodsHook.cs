@@ -70,7 +70,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 {
                     Amount = t.Amount,
                     Article = t.ArticleId,
-                    StoredAmount = 0m,
                     GoodsReceiving = goodsReceiving.Id.Value
                 });
 
@@ -98,7 +97,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             var context = pageModel.ErpRequestContext;
             return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/" +
-                $"goods-receiving/m/{goodsReceiving.Id}/store-goods?hookKey={HookKeys.GoodsReceiving.Store}");
+                $"{context.SitemapNode?.Name}/r/{record.Id}/detail");
         }
 
         private static void SetUpErrorPage(Order record, BaseErpPageModel pageModel, IEnumerable<OrderEntry> demandedEntries, UpdateInfo[] updateInfos)

@@ -35,7 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.State, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.State, Type = typeof(OrderEntryState).FullName, Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
@@ -85,7 +85,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var recievedAmountsLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
                 .GroupBy(e => e.Article)
-                .ToDictionary(g => g.Key, g => new { Amount = g.Sum(e => e.Amount), Stored = g.Sum(e => e.StoredAmount) });
+                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
 
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
@@ -101,18 +101,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     article.SetArticleType(type);
 
                 var receivedAmount = 0m;
-                var storedAmount = 0m;
-
-                if (recievedAmountsLookup.TryGetValue(orderEntry.Article, out var tuple))
-                {
-                    receivedAmount = tuple.Amount;
-                    storedAmount = tuple.Stored;
-                }
+                if (recievedAmountsLookup.TryGetValue(orderEntry.Article, out var amount))
+                    receivedAmount = amount;
+                
 
                 orderEntry.ReceivedAmount = receivedAmount;
-                orderEntry.StoredAmount = storedAmount;
-                orderEntry.State = orderEntry.Amount <= receivedAmount && storedAmount >= receivedAmount
-                    ? "Complete" : "Incomming";
+                orderEntry.State = orderEntry.Amount <= receivedAmount
+                    ? OrderEntryState.Complete : OrderEntryState.Incomplete;
 
                 yield return orderEntry;
             }
@@ -125,7 +120,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orderNumber = arguments[Arguments.OrderNumber] as string;
             var manufacturer = arguments[Arguments.Manufacturer] as string;
             var designation = arguments[Arguments.Designation] as string;
-            var state = arguments[Arguments.State] as string;
+            var state = EnumValueFromParameter<OrderEntryState?>(arguments[Arguments.State]);
 
             if (!string.IsNullOrEmpty(partNumber))
                 orderEntries = orderEntries.Where(oe => oe.GetArticle().PartNumber.Contains(partNumber, StringComparison.OrdinalIgnoreCase));
@@ -142,8 +137,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!string.IsNullOrEmpty(designation))
                 orderEntries = orderEntries.Where(oe => oe.GetArticle().Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(state))
-                orderEntries = orderEntries.Where(oe => oe.State.Contains(state, StringComparison.OrdinalIgnoreCase));
+            if (state.HasValue)
+                orderEntries = orderEntries.Where(oe => oe.State == state.Value);
 
             return orderEntries.OrderBy(oe => oe.GetArticle().PartNumber);
         }

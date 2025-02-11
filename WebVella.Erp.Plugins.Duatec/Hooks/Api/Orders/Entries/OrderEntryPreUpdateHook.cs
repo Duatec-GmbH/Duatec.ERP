@@ -18,12 +18,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Orders.Entries
 
             if(article != Guid.Empty && id != Guid.Empty)
             {
-                var storedAmount = new GoodsReceivingRepository().FindManyEntriesByOrder(id)
+                var bookedAmount = new GoodsReceivingRepository().FindManyEntriesByOrder(id)
                     .Where(e => e.Article == article)
-                    .Aggregate(0m, (sum, e) => sum + e.StoredAmount);
+                    .Aggregate(0m, (sum, e) => sum + e.Amount);
 
-                if (storedAmount > 0 && record.Amount < storedAmount)
-                    yield return new ErrorModel() { Message = "Can not update order entry when articles have already been stored within warehouse" };
+                if (bookedAmount > 0 && record.Amount < bookedAmount)
+                    yield return new ErrorModel() { Message = "Can not update order entry when goods receiving has already been done" };
             }
         }
     }

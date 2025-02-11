@@ -8,12 +8,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             public const string State = "state";
             public const string ReceivedAmount = "received_amount";
-            public const string StoredAmount = "stored_amount";
         }
 
-        public string State
+        public OrderEntryState State
         {
-            get => Get(ExtendedFields.State, string.Empty);
+            get => Get<OrderEntryState>(ExtendedFields.State);
             set => Properties[ExtendedFields.State] = value;
         }
 
@@ -21,12 +20,6 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             get => Get<decimal>(ExtendedFields.ReceivedAmount);
             set => Properties[ExtendedFields.ReceivedAmount] = value;
-        }
-
-        public decimal StoredAmount
-        {
-            get => Get<decimal>(ExtendedFields.StoredAmount); 
-            set => Properties[ExtendedFields.StoredAmount] = value;
         }
     }
 }
