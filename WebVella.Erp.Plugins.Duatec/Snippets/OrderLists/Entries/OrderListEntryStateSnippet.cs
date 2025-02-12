@@ -14,6 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
             var state = (pageModel.TryGetDataSourceProperty<EntityRecord>("RowRecord")
                 ?[OrderListEntry.Fields.State]?.ToString())?.Trim();
 
+            // is calculated as string so it can also be used for other things e.g. OrderEntryState
             var stateAsLower = state?.ToLowerInvariant();
             if (string.IsNullOrEmpty(stateAsLower))
                 return string.Empty;
@@ -40,6 +41,11 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
             else if (state == "incomming" || state.Equals(OrderListEntryState.Incomplete.ToString(), comparison))
             {
                 typedState = OrderListEntryState.Incomplete;
+                imgClass = "fas fa-question go-gray";
+            }
+            else if (state == "abundance" || state.Equals(OrderListEntryState.Abundance.ToString(), comparison))
+            {
+                typedState = OrderListEntryState.Abundance;
                 imgClass = "fas fa-question go-gray";
             }
             else return string.Empty;

@@ -53,19 +53,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 if (record == null)
                     throw new DbException("Could not move inventory entry");
-
-                if (record.Project != unmodified.Project)
-                {
-                    if (unmodified.Project.HasValue)
-                    {
-                        var reservation = repo.FindReservationEntryByProjectAndArticle(unmodified.Project.Value, unmodified.Article);
-                        if (reservation != null && repo.Unreserve(reservation, record.Amount) == null)
-                            throw new DbException("Could not release reservation");
-                    }    
-
-                    if (record.Project.HasValue && repo.Reserve(record.Article, record.Project.Value, record.Amount) == null)
-                        throw new DbException("Could not reserve inventory");
-                }
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))

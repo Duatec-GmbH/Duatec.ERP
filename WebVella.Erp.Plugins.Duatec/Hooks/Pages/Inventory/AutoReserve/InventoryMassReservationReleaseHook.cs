@@ -34,9 +34,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 return Info(pageModel, "Nothing to do here");
 
             var superfluousArticleLookup = InventoryEntriesToRelease4Project.Execute(projectId)
-                .ToDictionary(sai => sai.ArticleId);
+                .ToDictionary(sia => sia.ArticleId);
 
-            if (formData.TrueForAll(fd => superfluousArticleLookup.TryGetValue(fd.ArticleId, out var rie) && fd.Amount == rie.ReservedAmount))
+            if (superfluousArticleLookup.Values.All(sia => sia.AvailableAmount == sia.SelectedAmount))
                 return Info(pageModel, "Nothing to do here");
 
             validationErrors.AddRange(Validate(formData, superfluousArticleLookup));
@@ -62,21 +62,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             {
                 foreach (var (articleId, amount, _) in formData)
                 {
-                    var reseredInventoryEntries = projectInventoryLookup[articleId];
-                    var diff = reseredInventoryEntries.Sum(rie => rie.Amount) - amount;
-
-                    if (diff < 0)
-                        throw new DbException("Fatal amount can not be smaller than sum of reserved amount");
-                    else if (diff > 0)
+                    if(superfluousArticleLookup.TryGetValue(articleId, out var articleInfo))
                     {
-                        var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
-                            ? arr : [];
+                        var diff = articleInfo.AvailableAmount - amount;
+                        if(diff > 0)
+                        {
+                            var reseredInventoryEntries = projectInventoryLookup[articleId];
+                            var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
+                                ? arr : [];
 
-                        MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries);
-
-                        var entry = inventoryRepo.FindReservationEntryByProjectAndArticle(projectId, articleId)!;
-                        if (inventoryRepo.Unreserve(entry, diff) == null)
-                            throw new DbException("Could not unreserve inventory");
+                            MoveInventory(recMan, amount, availableInventoryEntries, reseredInventoryEntries);
+                        }
                     }
                 }
             }
@@ -106,40 +102,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = reservedEntries.Where(
                     rie => !Array.Exists(availableEntries, aie => aie.WarehouseLocation == rie.WarehouseLocation));
 
-                var current = MoveInventory(recMan, amount, amount, availableWithinLocation);
-                current = MoveInventory(recMan, amount, current, otherAvailables);
+                amount = MoveInventory(recMan, amount, null, availableWithinLocation);
+                amount = MoveInventory(recMan, amount, null, otherAvailables);
 
-                if (current != 0)
-                    throw new DbException("Could not unreserve all entries");
+                if (amount != 0)
+                    throw new DbException($"Could not unreserve all entries");
             }
-        }
-
-        private static decimal MoveInventory(
-            RecordManager recMan, decimal amount, decimal current,
-            IEnumerable<InventoryEntry> availableInventoryEntries)
-        {
-            if (current <= 0)
-                return current;
-
-            foreach (var entry in availableInventoryEntries)
-            {
-                var demand = amount - current;
-
-                if (entry.Amount <= demand)
-                {
-                    Move(recMan, null, entry);
-                    current -= entry.Amount;
-
-                    if (current <= 0)
-                        return current;
-                }
-                else
-                {
-                    MovePartial(recMan, null, entry, demand);
-                    return 0;
-                }
-            }
-            return current;
         }
 
         private static void BuildErrorPage(Guid projectId, BaseErpPageModel pageModel,
@@ -149,18 +117,28 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
             foreach (var (articleId, amount, _) in formValues)
             {
+                var availableAmount = 0m;
+                var relativeDemand = 0m;
+                Article? article = null;
+
                 if (superfluousArticleInfo.TryGetValue(articleId, out var sai))
                 {
-                    var entry = new SuperfluousInventoryArticle()
-                    {
-                        ArticleId = articleId,
-                        Amount = amount,
-                        Demand = sai.Demand,
-                        ReservedAmount = sai.ReservedAmount,
-                    };
-                    entry.SetArticle(sai.GetArticle());
-                    records.Add(entry);
+                    availableAmount = sai.AvailableAmount;
+                    relativeDemand = sai.RelativeDemand;
+                    article = sai.GetArticle();
                 }
+
+                var rec = new SuperfluousInventoryArticle()
+                {
+                    ArticleId = articleId,
+                    SelectedAmount = amount,
+                    AvailableAmount = availableAmount,
+                    RelativeDemand = relativeDemand,
+                };
+
+                if (article != null)
+                    rec.SetArticle(article);
+                records.Add(rec);
             }
 
             var project = new ProjectRepository().Find(projectId)!;
@@ -175,31 +153,36 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             foreach (var (articleId, amount, index) in formData)
             {
                 ArticleType? type = null;
-                var demand = 0m;
+                var available = 0m;
+                var relativeDemand = 0m;
 
                 if (superfluousArticleLookup.TryGetValue(articleId, out var articleInfo))
                 {
                     type = articleInfo.GetArticle().GetArticleType();
-                    demand = articleInfo.Demand;
+                    available = articleInfo.AvailableAmount;
+                    relativeDemand = articleInfo.RelativeDemand;
                 }
 
-                foreach (var error in ValidateAmount(amount, demand, type, index))
+                foreach (var error in ValidateAmount(amount, available, relativeDemand, type, index))
                     yield return error;
             }
         }
 
-        private static IEnumerable<ValidationError> ValidateAmount(decimal amount, decimal demand, ArticleType? type, int index)
+        private static IEnumerable<ValidationError> ValidateAmount(decimal amount, decimal available, decimal relativeDemand, ArticleType? type, int index)
         {
             var field = $"amount[{index}]";
             var isInt = type?.IsInteger is true;
-            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.Amount, isInt, true)
+            var errors = new NumberFormatValidator("inventory_article", SuperfluousInventoryArticle.Fields.SelectedAmount, isInt, true)
                 .Validate(amount, field);
 
             foreach (var error in errors)
                 yield return error;
 
-            if (amount > demand)
-                yield return new ValidationError(field, $"amount must not be greater than demand ({demand})");
+            if (amount > available)
+                yield return new ValidationError(field, $"amount must not be greater than available amount ({available})");
+
+            if (amount < relativeDemand)
+                yield return new ValidationError(field, $"amount must not be smaller than relative demand ({relativeDemand})");
         }
     }
 }

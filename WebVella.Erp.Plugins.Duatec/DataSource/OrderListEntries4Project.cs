@@ -80,8 +80,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             records = ApplyStateFilter(state, stateFilterType, records);
 
             var filtered = records.ToList();
-            
             var result = new EntityRecordList();
+
+            if (pageSize <= 0)
+                pageSize = filtered.Count;
             result.AddRange(filtered.Skip((page - 1) * pageSize).Take(pageSize));
             result.TotalCount = filtered.Count;
 
@@ -132,10 +134,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             var recMan = new RecordManager();
 
-            if (new ProjectRepository(recMan).Find(projectId) is not Project project)
-                return [];
-
             var orderRepository = new OrderRepository(recMan);
+            var inventoryRepo = new InventoryRepository(recMan);
+            var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
 
             var projectOrderEntries = orderRepository.FindManyEntriesByProject(projectId);
             var orderEntries = orderRepository.FindManyByProject(projectId)
@@ -145,7 +146,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var receivedAmountLookup = new GoodsReceivingRepository(recMan).FindManyEntriesByProject(projectId)
+            var receivedAmountLookup = goodsReceivingRepo.FindManyEntriesByProject(projectId)
                 .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
@@ -156,40 +157,48 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     .Where(v => v != null)
                     .ToList()!);
 
-            var inventoryAmountLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
-                .GroupBy(r => r.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
+            var inventoryAmountLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
-            var partListEntries = !ArticleId.HasValue
+            var entriesFromPartList = (!ArticleId.HasValue
                 ? new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
-                : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true);
-
-            var articleLookup = GetArticleLookup(recMan, partListEntries);
-
-            return partListEntries
+                : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true))
                 .GroupBy(ple => ple.ArticleId)
-                .Select(g => RecordFromGroup(g, 
-                    articleLookup, ordersLookup!, 
-                    orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
+                .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
+
+            var articleIds = projectOrderEntries.Select(oe => oe.Article)
+                .Concat(inventoryAmountLookup.Keys)
+                .Concat(entriesFromPartList.Keys)
+                .Distinct()
+                .ToArray();
+
+            var articleLookup = GetArticleLookup(recMan, articleIds);
+
+            var entriesFromOrder = orderedAmountLookup
+                .Where(kp => !entriesFromPartList.ContainsKey(kp.Key))
+                .Select(kp => new KeyValuePair<Guid, decimal>(kp.Key, 0m));
+
+            var entriesFromInventory = inventoryAmountLookup
+                .Where(kp => !orderedAmountLookup.ContainsKey(kp.Key) && !entriesFromPartList.ContainsKey(kp.Key))
+                .Select(kp => new KeyValuePair<Guid, decimal>(kp.Key, 0m));
+
+            return entriesFromPartList
+                .Concat(entriesFromOrder)
+                .Concat(entriesFromInventory)
+                .Select(kp => BuildOrderEntry(kp.Key, kp.Value, articleLookup, ordersLookup!, orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup))
                 .OrderBy(r => r.GetArticle().PartNumber.ToString());
         }
 
-        private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, List<PartListEntry> partListEntries)
+        private static Dictionary<Guid, Article?> GetArticleLookup(RecordManager recMan, Guid[] articleIds)
         {
             const string select = $"*, " +
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
-            var articleIds = partListEntries
-                .Select(ple => ple.ArticleId)
-                .Distinct()
-                .ToArray();
-
             return new ArticleRepository(recMan).FindMany(select, articleIds);
         }
 
-        private static OrderListEntry RecordFromGroup(
-            IGrouping<Guid, PartListEntry> group, 
+        private static OrderListEntry BuildOrderEntry(
+            Guid articleId, decimal demand,
             Dictionary<Guid, Article?> articleLookup,
             Dictionary<Guid, List<Order>> ordersLookup, 
             Dictionary<Guid, decimal> orderedAmountLookup, 
@@ -197,11 +206,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Dictionary<Guid, decimal> inventoryAmountLookup)
         {
 
-            var commons = group.First();
-            var articleId = commons.ArticleId;
             var article = articleLookup[articleId];
-            var demand = group.Sum(r => r.Amount);
-
             var orders = ordersLookup.TryGetValue(articleId, out var l) ? l : [];
             var orderedAmount = GetAmount(orderedAmountLookup, articleId);
             var receivedAmount = GetAmount(receivedAmountLookup, articleId);
@@ -228,6 +233,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory)
         {
+            if (Math.Max(ordered, received) + fromInventory > demand)
+                return OrderListEntryState.Abundance;
             if (demand <= received + fromInventory)
                 return OrderListEntryState.Complete;
             if (demand > ordered + fromInventory)

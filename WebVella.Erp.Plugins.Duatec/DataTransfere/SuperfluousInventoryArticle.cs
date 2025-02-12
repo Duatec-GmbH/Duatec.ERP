@@ -13,9 +13,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         public static class Fields
         {
             public const string ArticleId = "article_id";
+            public const string AvailableAmount = "available_amount";
+            public const string SelectedAmount = "selected_amount";
             public const string Demand = "demand";
-            public const string ReservedAmount = "reserved_amount";
-            public const string Amount = "amount";
         }
 
         public static class Relations
@@ -31,22 +31,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             set => Properties[Fields.ArticleId] = value;
         }
 
-        public decimal Amount
-        {
-            get => Get<decimal>(Fields.Amount);
-            set => Properties[Fields.Amount] = value;
-        }
-
-        public decimal ReservedAmount
-        {
-            get => Get<decimal>(Fields.ReservedAmount);
-            set => Properties[Fields.ReservedAmount] = value;
-        }
-
-        public decimal Demand
+        public decimal RelativeDemand
         {
             get => Get<decimal>(Fields.Demand);
             set => Properties[Fields.Demand] = value;
+        }
+
+        public decimal AvailableAmount
+        {
+            get => Get<decimal>(Fields.AvailableAmount);
+            set => Properties[Fields.AvailableAmount] = value;
+        }
+
+        public decimal SelectedAmount
+        {
+            get => Get<decimal>(Fields.SelectedAmount);
+            set => Properties[Fields.SelectedAmount] = value;
         }
 
         public Article GetArticle()

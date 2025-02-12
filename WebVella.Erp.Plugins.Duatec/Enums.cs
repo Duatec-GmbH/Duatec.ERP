@@ -10,6 +10,9 @@ namespace WebVella.Erp.Plugins.Duatec
         Complete = 1,
         [SelectOption(Label = "To order")]
         ToOrder = 2,
+        [SelectOption(Label = "Abundance")]
+        Abundance,
+
     }
 
     public enum OrderEntryState

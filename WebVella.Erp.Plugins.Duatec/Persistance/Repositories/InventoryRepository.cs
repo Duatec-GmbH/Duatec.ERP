@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -20,15 +19,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public bool ExistsByProject(Guid projectId)
             => ExistsBy(InventoryEntry.Fields.Project, projectId);
-
-        public bool ReservationsExistByProject(Guid projectId)
-        {
-            var list = FindReservationListByProject(projectId);
-            if (list == null)
-                return false;
-
-            return RepositoryHelper.Exists(RecordManager, InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list.Id);
-        }
 
         public override InventoryEntry? Insert(InventoryEntry record)
         {
@@ -162,109 +152,27 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(RecordManager, record.EntityName, record));
         }
 
-        public InventoryReservation? FindReservationListByProject(Guid projectId, string select = "*")
+        private List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
         {
-            var rec = RepositoryHelper.FindBy(RecordManager, InventoryReservation.Entity, InventoryReservation.Fields.Project, projectId, select);
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservation>(rec);
+            return RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ProjectId, projectId, select)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>).ToList();
         }
 
-        public List<InventoryReservationEntry> FindManyReservationEntriesByProject(Guid projectId, string select = "*")
+        public Dictionary<Guid, decimal> GetReservedArticleAmountLookup(Guid projectId)
         {
-            var list = FindReservationListByProject(projectId, "id")?.Id;
-            if (!list.HasValue || list == Guid.Empty)
-                return [];
+            var takenLookup = FindManyBookingsByProject(projectId)
+                .GroupBy(be => be.ArticleId)
+                .ToDictionary(g => g.Key, g => g.Sum(be => be.Amount));
 
-            return RepositoryHelper.FindManyBy(RecordManager, InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.InventoryReservationList, list, select)
-                .Select(TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>)
-                .ToList()!;
-        }
-
-        public InventoryReservationEntry? FindReservationEntryByProjectAndArticle(Guid projectId, Guid articleId)
-        {
-            var listId = FindReservationListByProject(projectId)?.Id;
-            if (!listId.HasValue)
-                return null;
-
-            var query = new QueryObject()
+            foreach(var ie in FindManyByProject(projectId))
             {
-                QueryType = QueryType.AND,
-                SubQueries =
-                [
-                    new(){
-                        QueryType = QueryType.EQ,
-                        FieldName = InventoryReservationEntry.Fields.Article,
-                        FieldValue = articleId,
-                    },
-                    new(){
-                        QueryType = QueryType.EQ,
-                        FieldName = InventoryReservationEntry.Fields.InventoryReservationList,
-                        FieldValue = listId.Value
-                    }
-                ]
-            };
-
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
-                RepositoryHelper.FindByQuery(RecordManager, InventoryReservationEntry.Entity, query));
-        }
-
-        public InventoryReservationEntry? Reserve(Guid articleId, Guid projectId, decimal amount)
-        {
-            var reservation = FindReservationEntryByProjectAndArticle(projectId, articleId);
-            if(reservation == null)
-            {
-                var list = FindReservationListByProject(projectId)
-                    ?? InsertReservationList(new InventoryReservation() { Id = Guid.NewGuid(), Project = projectId })
-                    ?? throw new DbException("Could not create reservation list");
-
-                reservation = new InventoryReservationEntry()
-                {
-                    Article = articleId,
-                    Amount = amount,
-                    InventoryReservationList = list.Id!.Value,
-                };
-                return InsertReservationEntry(reservation);
+                if (takenLookup.ContainsKey(ie.Article))
+                    takenLookup[ie.Article] += ie.Amount;
+                else
+                    takenLookup[ie.Article] = ie.Amount;
             }
-            else
-            {
-                reservation.Amount += amount;
-                return UpdateReservationEntry(reservation);
-            }
-        }
 
-        public InventoryReservationEntry? Unreserve(InventoryReservationEntry reservation, decimal amount)
-        {
-            if (reservation.Amount == amount)
-                return DeleteReservationEntry(reservation.Id!.Value);
-            if (reservation.Amount > amount)
-            {
-                reservation.Amount -= amount;
-                return UpdateReservationEntry(reservation);
-            }
-            throw new ArgumentException($"Amount is greater than reserved amount ({reservation.Amount})");
-        }
-
-        private InventoryReservation? InsertReservationList(InventoryReservation record)
-        {
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservation>(
-                RepositoryHelper.Insert(RecordManager, InventoryReservation.Entity, record));
-        }
-
-        private InventoryReservationEntry? UpdateReservationEntry(InventoryReservationEntry record)
-        {
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
-                RepositoryHelper.Update(RecordManager, InventoryReservationEntry.Entity, record));
-        }
-
-        private InventoryReservationEntry? InsertReservationEntry(InventoryReservationEntry record)
-        {
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
-                RepositoryHelper.Insert(RecordManager, InventoryReservationEntry.Entity, record));
-        }
-
-        private InventoryReservationEntry? DeleteReservationEntry(Guid inventoryReservationId)
-        {
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryReservationEntry>(
-                RepositoryHelper.Delete(RecordManager, InventoryReservationEntry.Entity, inventoryReservationId));
+            return takenLookup;
         }
 
         private static void RoundAmount(InventoryEntry record)

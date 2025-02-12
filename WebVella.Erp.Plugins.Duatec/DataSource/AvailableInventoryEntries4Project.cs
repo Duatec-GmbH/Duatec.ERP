@@ -64,20 +64,19 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(oe => oe.Article)
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var reservedLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
-                .GroupBy(re => re.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
+            var inventoryRepo = new InventoryRepository(recMan);
+            var reservedLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
             var result = new Dictionary<Guid, decimal>(demandLookup.Count);
 
-            foreach(var (key, val) in demandLookup)
+            foreach(var (articleId, demand) in demandLookup)
             {
-                var orderVal = orderedLookup.TryGetValue(key, out var d) ? d : 0m;
-                var fromInventory = reservedLookup.TryGetValue(key, out d) ? d : 0m;
+                var ordered = orderedLookup.TryGetValue(articleId, out var d) ? d : 0m;
+                var fromInventory = reservedLookup.TryGetValue(articleId, out d) ? d : 0m;
 
-                var demand = val - orderVal - fromInventory;
-                if (demand > 0)
-                    result.Add(key, demand);
+                var relativeDemand = demand - ordered - fromInventory;
+                if (relativeDemand > 0)
+                    result.Add(articleId, relativeDemand);
             }
 
             return result;

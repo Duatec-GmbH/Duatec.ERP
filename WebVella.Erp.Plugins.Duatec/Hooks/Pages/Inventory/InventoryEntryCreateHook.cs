@@ -28,24 +28,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 var repo = new InventoryRepository();
                 if (repo.Insert(record) == null)
                     throw new DbException("Could not create inventory entry record");
-
-                if (record.Project.HasValue && record.Project != Guid.Empty)
-                {
-                    if (repo.Reserve(record.Article, record.Project.Value, record.Amount) == null)
-                        throw new DbException("Could not reserve inventory");
-                }
-
-                var booking = new InventoryBooking()
-                {
-                    ArticleId = record.Article,
-                    Amount = record.Amount,
-                    UserId = userId,
-                    ProjectId = record.Project,
-                    Timestamp = DateTime.UtcNow,
-                };
-
-                if (repo.InsertBooking(booking) == null)
-                    throw new DbException("Could not create inventory booking");
             }
 
             if (!Transactional.TryExecute(TransactionalAction))

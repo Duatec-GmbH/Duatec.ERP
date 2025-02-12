@@ -47,6 +47,10 @@ namespace WebVella.Erp.Api
 			this.executeHooks = executeHooks;
 		}
 
+		public EntityManager EntityManager => entityManager;
+
+		public EntityRelationManager EntityRelationManager => entityRelationManager;
+
 		public QueryResponse CreateRelationManyToManyRecord(Guid relationId, Guid originValue, Guid targetValue)
 		{
 			QueryResponse response = new QueryResponse();

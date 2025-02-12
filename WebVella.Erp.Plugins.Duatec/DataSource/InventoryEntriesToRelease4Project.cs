@@ -38,14 +38,16 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         public static IEnumerable<SuperfluousInventoryArticle> Execute(Guid projectId)
         {
             var recMan = new RecordManager();
+            var inventoryRepository = new InventoryRepository(recMan);
 
-            var reservedLookup = new InventoryRepository(recMan).FindManyReservationEntriesByProject(projectId)
-                .ToDictionary(re => re.Article, re => re.Amount);
+            var inventoryLookup = inventoryRepository.FindManyByProject(projectId)
+                .GroupBy(ie => ie.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(ie => ie.Amount));
 
-            if (reservedLookup.Count == 0)
+            if (inventoryLookup.Count == 0)
                 yield break;
 
-            var articleIds = reservedLookup.Keys.ToArray();
+            var articleIds = inventoryLookup.Select(kp => kp.Key).ToArray();
             const string select = $"*, " +
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
@@ -55,17 +57,24 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .GroupBy(ple => ple.ArticleId)
                 .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 
-            foreach(var (articleId, reservedAmount) in reservedLookup)
+            var reservedAmountLookup = inventoryRepository.GetReservedArticleAmountLookup(projectId);
+
+            foreach(var (articleId, amount) in inventoryLookup)
             {
                 var demand = demandLookup.TryGetValue(articleId, out var d) ? d : 0m;
-                if(demand < reservedAmount)
+                var reserved = reservedAmountLookup.TryGetValue(articleId, out d) ? d : 0m;
+
+                if(demand < reserved)
                 {
+                    var available = amount;
+                    var relativeDemand = Math.Max(0m, available - (reserved - demand));
+
                     var result = new SuperfluousInventoryArticle()
                     {
                         ArticleId = articleId,
-                        Amount = demand,
-                        ReservedAmount = reservedAmount,
-                        Demand = demand,
+                        AvailableAmount = available,
+                        SelectedAmount = relativeDemand,
+                        RelativeDemand = relativeDemand
                     };
 
                     var article = articleLookup[articleId];

@@ -19,8 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
     using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
-    //[HookAttachment(key: HookKeys.GoodsReceiving.Store)]
-    [Obsolete]
+    [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
     {
         const string entryKey = $"${GoodsReceiving.Relations.Entries}";
@@ -92,18 +91,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     {
                         if (repo.Insert(entry) == null)
                             throw new DbException("Could not insert inventory entry record");
-
-                        var booking = new InventoryBooking()
-                        {
-                            Amount = entry.Amount,
-                            ArticleId = entry.Article,
-                            ProjectId = projectId,
-                            Timestamp = DateTime.UtcNow,
-                            UserId = userId,
-                        };
-
-                        if (repo.InsertBooking(booking) == null)
-                            throw new DbException("Could not insert booking");
                     }
                 }
             }
@@ -136,65 +123,65 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 .GroupBy(ple => ple.ArticleId)
                 .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 
-            var reservedAmounts = inventoryRepo.FindManyReservationEntriesByProject(projectId)
-                .GroupBy(re => re.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(re => re.Amount));
+            var reservedAmounts = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
-            var unstoredEntries = UnstoredGoodsReceivingEntries.Execute(record.Id!.Value)
-                .OrderBy(gre => gre.GetArticle().PartNumber);
+            yield break;
 
-            foreach (var entry in unstoredEntries)
-            {
-                var projectDemand = GetAmount(demands, entry.Article)
-                    - GetAmount(reservedAmounts, entry.Article);
+            //var unstoredEntries = UnstoredGoodsReceivingEntries.Execute(record.Id!.Value)
+            //    .OrderBy(gre => gre.GetArticle().PartNumber);
 
-                var inventoryEntry = new InventoryEntry()
-                {
-                    Id = Guid.NewGuid(),
-                    Amount = entry.Amount,
-                    Article = entry.Article,
-                    Project = projectId,
-                };
+            //foreach (var entry in unstoredEntries)
+            //{
+            //    var projectDemand = GetAmount(demands, entry.Article)
+            //        - GetAmount(reservedAmounts, entry.Article);
 
-                inventoryEntry.SetArticle(entry.GetArticle());
+            //    var inventoryEntry = new InventoryEntry()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Amount = entry.Amount,
+            //        Article = entry.Article,
+            //        Project = projectId,
+            //    };
 
-                if (projectDemand <= 0)
-                {
-                    inventoryEntry.WarehouseLocation 
-                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
-                    inventoryEntry.Project = null;
-                    yield return inventoryEntry;
-                }
-                else if (inventoryEntry.Amount <= projectDemand)
-                {
-                    inventoryEntry.WarehouseLocation
-                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
-                    yield return inventoryEntry;
-                }
-                else
-                {
-                    inventoryEntry.WarehouseLocation
-                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
-                    var goesToDefaultProject = new InventoryEntry()
-                    {
-                        Id = Guid.NewGuid(),
-                        Amount = inventoryEntry.Amount - projectDemand,
-                        Project = null,
-                        Article = entry.Article,
-                        WarehouseLocation = Guid.Empty,
-                    };
+            //    inventoryEntry.SetArticle(entry.GetArticle());
 
-                    goesToDefaultProject.WarehouseLocation
-                        = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
+            //    if (projectDemand <= 0)
+            //    {
+            //        inventoryEntry.WarehouseLocation 
+            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
+            //        inventoryEntry.Project = null;
+            //        yield return inventoryEntry;
+            //    }
+            //    else if (inventoryEntry.Amount <= projectDemand)
+            //    {
+            //        inventoryEntry.WarehouseLocation
+            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
+            //        yield return inventoryEntry;
+            //    }
+            //    else
+            //    {
+            //        inventoryEntry.WarehouseLocation
+            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
+            //        var goesToDefaultProject = new InventoryEntry()
+            //        {
+            //            Id = Guid.NewGuid(),
+            //            Amount = inventoryEntry.Amount - projectDemand,
+            //            Project = null,
+            //            Article = entry.Article,
+            //            WarehouseLocation = Guid.Empty,
+            //        };
 
-                    goesToDefaultProject.SetArticle(entry.GetArticle());
+            //        goesToDefaultProject.WarehouseLocation
+            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
 
-                    inventoryEntry.Amount = projectDemand;
+            //        goesToDefaultProject.SetArticle(entry.GetArticle());
 
-                    yield return inventoryEntry;
-                    yield return goesToDefaultProject;
-                }
-            }
+            //        inventoryEntry.Amount = projectDemand;
+
+            //        yield return inventoryEntry;
+            //        yield return goesToDefaultProject;
+            //    }
+            //}
         }
 
         private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Guid articleId, Guid? projectid)

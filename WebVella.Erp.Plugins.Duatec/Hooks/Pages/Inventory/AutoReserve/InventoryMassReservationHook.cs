@@ -58,16 +58,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             {
                 foreach (var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
                 {
+                    var availableInventoryEntries = availableInventoryEntryLookup[articleId];
                     var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr)
                         ? arr : [];
 
-                    var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out arr)
-                        ? arr : [];
-
                     MoveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries);
-
-                    if (inventoryRepo.Reserve(articleId, projectId, amount) == null)
-                        throw new DbException("Could not reserve inventory");
                 }
             }
 
@@ -83,10 +78,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
             var available = availableEntries.Aggregate(0m, (sum, entry) => sum + entry.Amount);
-
-            if (amount > available)
-                throw new DbException("Can not move more entries than available");
-
             if (amount == available)
             {
                 foreach (var entry in availableEntries)
@@ -100,40 +91,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = availableEntries.Where(
                     ae => !Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
-                var current = MoveInventory(recMan, projectId, amount, 0m, availableWithinLocation);
-                current = MoveInventory(recMan, projectId, amount, current, otherAvailables);
+                amount = MoveInventory(recMan, amount, projectId, availableWithinLocation);
+                amount = MoveInventory(recMan, amount, projectId, otherAvailables);
 
-                if (current != amount)
+                if (amount != 0)
                     throw new DbException("Could not reserve all entries");
             }
-        }
-
-        private static decimal MoveInventory(
-            RecordManager recMan, Guid projectId, decimal amount, decimal current,
-            IEnumerable<InventoryEntry> availableEntries)
-        {
-            if (current >= amount)
-                return current;
-
-            foreach (var entry in availableEntries)
-            {
-                var demand = amount - current;
-
-                if (entry.Amount <= demand)
-                {
-                    Move(recMan, projectId, entry);
-                    current += entry.Amount;
-
-                    if (current >= amount)
-                        return current;
-                }
-                else
-                {
-                    MovePartial(recMan, projectId, entry, demand);
-                    return demand;
-                }
-            }
-            return current;
         }
 
         private static void BuildErrorPage(Guid projectId, BaseErpPageModel pageModel,
@@ -187,7 +150,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
         {
             var field = $"amount[{index}]";
             var isInt = type?.IsInteger is true;
-            var errors = new NumberFormatValidator(InventoryReservationEntry.Entity, InventoryReservationEntry.Fields.Amount, isInt, true)
+            var errors = new NumberFormatValidator("inventory article", AvailableInventoryArticle.Fields.Amount, isInt, true)
                 .Validate(amount, field);
 
             foreach (var error in errors)
