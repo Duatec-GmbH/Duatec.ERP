@@ -115,8 +115,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 Demand = demand
             };
 
-            if (articleLookup[articleId] is Article article)
-                rec.SetArticle(article);
+            rec.SetArticle(articleLookup[articleId]);
 
             return rec;
         }

@@ -49,19 +49,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 record = repo.Insert(record)
                     ?? throw new DbException("Could not insert part list record");
 
-                foreach (var (articleId, amount, _) in formValues)
+                var entries = formValues.Select(fv => new PartListEntry()
                 {
-                    var entry = new PartListEntry()
-                    {
-                        Amount = amount,
-                        ArticleId = articleId,
-                        DeviceTag = string.Empty,
-                        PartListId = record.Id!.Value
-                    };
+                    Amount = fv.Amount,
+                    ArticleId = fv.ArticleId,
+                    DeviceTag = string.Empty,
+                    PartListId = record.Id!.Value
 
-                    if (repo.InsertEntry(entry) == null)
-                        throw new DbException("Could not insert part list entry record");
-                }
+                }).ToArray();
+
+                if (repo.InsertManyEntries(entries).Count != entries.Length)
+                    throw new DbException("Could not insert part list entry record");
             }
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))

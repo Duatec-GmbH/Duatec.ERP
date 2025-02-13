@@ -16,6 +16,13 @@ namespace WebVella.Erp.TypedRecords.Persistance
                 ? result.Object.Data.Single() : null;
         }
 
+        public static List<EntityRecord> InsertMany(RecordManager recMan, string entity, IEnumerable<EntityRecord> records)
+        {
+            var response = recMan.CreateRecords(entity, records);
+
+            return response.Object?.Data ?? [];
+        }
+
         public static EntityRecord? Delete(RecordManager recMan, string entity, Guid id)
         {
             var response = recMan.DeleteRecord(entity, id);

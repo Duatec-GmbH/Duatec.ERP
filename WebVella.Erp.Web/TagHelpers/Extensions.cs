@@ -42,10 +42,13 @@ namespace WebVella.Erp.Web.TagHelpers
 			}
 		}
 
+#nullable enable
+
 		public static void SetAttribute(this TagHelperOutput output, string key, string? value)
 		{
 			if (!string.IsNullOrEmpty(value))
 				output.Attributes.SetAttribute(key, value);
 		}
 	}
+#nullable restore
 }

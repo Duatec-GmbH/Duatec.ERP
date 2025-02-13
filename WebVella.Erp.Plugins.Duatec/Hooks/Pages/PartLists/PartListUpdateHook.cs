@@ -63,7 +63,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             var oldPartListEntries = repo.FindManyEntriesByPartList(record.Id!.Value);
 
             var toAdd = formValues
-                .Where(t => !oldPartListEntries.Exists(ple => ple.ArticleId == t.ArticleId));
+                .Where(t => !oldPartListEntries.Exists(ple => ple.ArticleId == t.ArticleId))
+                .ToArray();
 
             var toUpdate = oldPartListEntries
                 .Where(ple => Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId && fv.Amount != ple.Amount));
@@ -81,18 +82,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 if (toDelete.Length > 0 && repo.DeleteManyEntries(toDelete).Count == 0)
                     throw new DbException($"Could not delete part list entry records");
 
-                foreach (var (articleId, amount, _) in toAdd)
+                if(toAdd.Length > 0)
                 {
-                    var entry = new PartListEntry()
+                    var entries = toAdd.Select(fv => new PartListEntry()
                     {
-                        Amount = amount,
-                        ArticleId = articleId,
+                        Amount = fv.Amount,
+                        ArticleId = fv.ArticleId,
                         DeviceTag = string.Empty,
                         PartListId = record.Id.Value
-                    };
+                    });
 
-                    if (repo.InsertEntry(entry) == null)
-                        throw new DbException("Could not insert part list entry record");
+                    if (repo.InsertManyEntries(entries).Count != toAdd.Length)
+                        throw new DbException("Could not insert part list entries");
                 }
 
                 foreach(var entry in toUpdate)

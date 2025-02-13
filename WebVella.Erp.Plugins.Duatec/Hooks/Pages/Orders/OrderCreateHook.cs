@@ -50,11 +50,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             if (repository.Insert(record) == null)
                 throw new DbException("Could not create order record");
 
-            foreach (var entry in entries)
-            {
-                if (repository.InsertEntry(entry) == null)
-                    throw new DbException("Could not create order entry record");
-            }
+            if(repository.InsertManyEntries(entries).Count != entries.Count)
+                throw new DbException("Could not create order entry records");
         }
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)

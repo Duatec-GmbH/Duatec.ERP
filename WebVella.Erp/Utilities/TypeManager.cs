@@ -4,9 +4,10 @@ using System.Linq;
 
 namespace WebVella.Erp.Utilities
 {
+#nullable enable
 	public static class TypeManager
 	{
-		private static readonly Dictionary<string, Type> _types = new();
+		private static readonly Dictionary<string, Type?> _types = new(256);
 
 		public static Type? GetEnum(string name)
 		{
@@ -42,4 +43,5 @@ namespace WebVella.Erp.Utilities
 			return type;
 		}
 	}
+#nullable restore
 }

@@ -6,6 +6,8 @@ namespace WebVella.Erp.Hooks
 	[Hook("Provide hook for point in code before entity record create.")]
 	public interface IErpPreCreateRecordHook 
 	{
+		bool ExecuteOnPreCreateMany { get; }
+
 		void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors);
 	}
 }

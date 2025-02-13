@@ -39,6 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
             if (validationErrors.Count > 0)
             {
+                pageModel.Validation.Errors = validationErrors;
                 BuildErrorPage(projectId, pageModel, formData, availableArticleLookup);
                 return pageModel.Page();
             }

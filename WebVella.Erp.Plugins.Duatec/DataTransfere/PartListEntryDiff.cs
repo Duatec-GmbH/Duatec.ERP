@@ -47,7 +47,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         public Article GetArticle()
             => GetSingleByRelation<Article>(Relations.Article)!;
 
-        public void SetArticle(Article article)
+        public void SetArticle(Article? article)
             => SetRelationValue(Relations.Article, article);
     }
 }

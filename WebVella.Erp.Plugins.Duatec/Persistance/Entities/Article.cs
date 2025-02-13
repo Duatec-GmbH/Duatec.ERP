@@ -89,13 +89,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public ArticleType GetArticleType()
             => GetSingleByRelation<ArticleType>(Relations.Type)!;
 
-        public void SetArticleType(ArticleType type)
+        public void SetArticleType(ArticleType? type)
             => SetRelationValue(Relations.Type, type);
 
         public Company GetManufacturer()
             => GetSingleByRelation<Company>(Relations.Manufacturer)!;
 
-        public void SetManufacturer(Company manufacturer)
+        public void SetManufacturer(Company? manufacturer)
             => SetRelationValue(Relations.Manufacturer, manufacturer);
     }
 }

@@ -10,6 +10,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles
     {
         public string EntityName => Article.Entity;
 
+        public bool ExecuteOnPostDeleteMany => true;
+
         public void OnPostDeleteRecord(Article record)
             => Actions.DeleteAlternatives(record.Id!.Value);
     }

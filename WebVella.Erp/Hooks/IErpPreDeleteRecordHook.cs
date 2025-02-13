@@ -6,6 +6,8 @@ namespace WebVella.Erp.Hooks
 	[Hook("Provide hook for point in code before entity record delete.")]
 	public interface IErpPreDeleteRecordHook
 	{
+		bool ExecuteOnPreDeleteMany { get; }
+
 		void OnPreDeleteRecord(string entityName, EntityRecord record, List<ErrorModel> errors);
 	}
 }

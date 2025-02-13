@@ -225,7 +225,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 State = GetState(demand, orderedAmount, receivedAmount, inventoryAmount),
             };
 
-            rec.SetArticle(article!);
+            rec.SetArticle(article);
             rec.SetOrders(orders);
 
             return rec;

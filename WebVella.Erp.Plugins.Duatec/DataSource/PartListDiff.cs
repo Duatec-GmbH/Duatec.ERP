@@ -90,7 +90,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     Diff = Math.Abs(pl1Amount - pl2Amount),
                 };
 
-                if (articleLookup.TryGetValue(articleId, out var article) && article != null)
+                if (articleLookup.TryGetValue(articleId, out var article))
                     rec.SetArticle(article);
 
                 yield return rec;

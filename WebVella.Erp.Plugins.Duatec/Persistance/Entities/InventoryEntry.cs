@@ -49,7 +49,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Amount] = value;
         }
 
-        public void SetArticle(Article article)
+        public void SetArticle(Article? article)
             => SetRelationValue(Relations.Article, article);
 
         public Article GetArticle()

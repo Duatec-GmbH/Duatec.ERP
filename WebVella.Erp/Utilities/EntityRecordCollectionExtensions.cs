@@ -6,6 +6,8 @@ using WebVella.Erp.Api.Models;
 
 namespace WebVella.Erp.Utilities
 {
+#nullable enable
+
 	public static class EntityRecordCollectionExtensions
 	{
 		public static IEnumerable<T> Select<T>(this IEnumerable<T> records, string entityName, string relationName, RecordManager? recMan = null)
@@ -15,7 +17,7 @@ namespace WebVella.Erp.Utilities
 				return records;
 
 			recMan ??= new();
-			var relations = recMan.EntityRelationManager.Read().Object;
+			var relations = recMan.RelationManager.Read().Object;
 
 			IEnumerable<EntityRecord> currentRecords = records;
 
@@ -182,4 +184,5 @@ namespace WebVella.Erp.Utilities
 			return result;
 		}
 	}
+#nullable restore
 }

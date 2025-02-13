@@ -47,21 +47,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
             var entries = rows
                 .GroupBy(r => r.PartNumber)
-                .Select(g => ListEntryRecord(g, articleLookup!, listId));
+                .Select(g => ListEntryRecord(g, articleLookup!, listId))
+                .ToArray();
 
             var repo = new PartListRepository(recMan);
-
-            void TransactionalAction()
+            if(repo.InsertManyEntries(entries).Count != entries.Length)
             {
-                foreach (var rec in entries)
-                {
-                    if (repo.InsertEntry(rec) == null)
-                        throw new DbException($"Could not create part list entries");
-                }
-            }
-
-            if (!Transactional.TryExecute(pageModel, TransactionalAction))
+                pageModel.PutMessage(ScreenMessageType.Error, "Could not create part list entries");
                 return null;
+            }
 
             return pageModel.LocalRedirect(url);
         }

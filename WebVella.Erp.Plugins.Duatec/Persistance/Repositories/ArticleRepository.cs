@@ -49,8 +49,20 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         }
 
         public Article? Insert(DataPortalArticleDto article, Guid manufacturerId, Guid typeId)
+            => Insert(ArticleFromDataPortalArticle(article, manufacturerId, typeId));
+        
+
+        public List<Article> InsertMany(IEnumerable<(DataPortalArticleDto Article, Guid ManufacturerId, Guid TypeId)> articleInfo)
         {
-            var rec = new Article
+            var entries = articleInfo.Select(t => ArticleFromDataPortalArticle(t.Article, t.ManufacturerId, t.TypeId));
+            return RepositoryHelper.InsertMany(RecordManager, Entity, entries)
+                .Select(TypedEntityRecordWrapper.Wrap<Article>)
+                .ToList();
+        }
+
+        private static Article ArticleFromDataPortalArticle(DataPortalArticleDto article, Guid manufacturerId, Guid typeId)
+        {
+            return new Article
             {
                 PartNumber = article.PartNumber,
                 TypeNumber = article.TypeNumber,
@@ -61,8 +73,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 TypeId = typeId,
                 Image = article.PictureUrl,
             };
-            return Insert(rec);
         }
+
 
         public ArticleType? FindType(Guid typeId)
         {

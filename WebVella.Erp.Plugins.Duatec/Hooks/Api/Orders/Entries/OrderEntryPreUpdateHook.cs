@@ -11,6 +11,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Orders.Entries
     {
         public string EntityName => OrderEntry.Entity;
 
+        public bool ExecuteOnPreUpdateMany => true;
+
         public IEnumerable<ErrorModel> OnPreUpdateRecord(OrderEntry record)
         {
             var article = record.Article;

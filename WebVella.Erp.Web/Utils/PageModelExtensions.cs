@@ -5,6 +5,8 @@ namespace WebVella.Erp.Web.Utils
 {
 	public static class PageModelExtensions
 	{
+#nullable enable
+
 		public static string EntityListUrl(this BaseErpPageModel pageModel, string? pageName = null)
 			=> EntityPage(pageModel, 'l', pageName);
 
@@ -35,5 +37,6 @@ namespace WebVella.Erp.Web.Utils
 				result += '/' + pageName;
 			return result;
 		}
+#nullable restore
 	}
 }

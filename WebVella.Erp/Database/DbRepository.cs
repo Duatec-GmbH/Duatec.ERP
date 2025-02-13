@@ -1,8 +1,13 @@
-﻿using Npgsql;
+﻿using NetBox.Terminal.App;
+using Newtonsoft.Json.Linq;
+using Npgsql;
 using NpgsqlTypes;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Text;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database.Models;
 
@@ -482,9 +487,6 @@ namespace WebVella.Erp.Database
 				else
 					sql = sql + ";";
 
-
-
-
 				NpgsqlCommand command = connection.CreateCommand(sql);
 				command.ExecuteNonQuery();
 			}
@@ -503,7 +505,6 @@ namespace WebVella.Erp.Database
 			}
 		}
 
-
 		public static void DropIndex(string indexName)
 		{
 			using (var connection = DbContext.Current.CreateConnection())
@@ -516,74 +517,63 @@ namespace WebVella.Erp.Database
 
 		public static bool InsertRecord(string tableName, List<DbParameter> parameters)
 		{
-			using (var connection = DbContext.Current.CreateConnection())
-			{
-				NpgsqlCommand command = connection.CreateCommand("");
+			using var connection = DbContext.Current.CreateConnection();
+			
+			NpgsqlCommand command = connection.CreateCommand("");
 
-				string columns = "";
-				string values = "";
-				foreach (var param in parameters)
-				{
+			var columns = GetColumns(parameters);
+			var values = GetInsertValues(parameters);
+				
+			foreach (var param in parameters)
+				AppendParameter(command, param);
+				
+			command.CommandText = $"INSERT INTO \"{tableName}\" ({columns}) VALUES ({values})";
 
-					var parameter = command.CreateParameter() as NpgsqlParameter;
-					parameter.ParameterName = param.Name;
-					parameter.Value = param.Value ?? DBNull.Value;
-					parameter.NpgsqlDbType = param.Type;
-					command.Parameters.Add(parameter);
-
-					columns += $"\"{param.Name}\", ";
-					if (!string.IsNullOrWhiteSpace(param.ValueOverride))
-					{
-						values += param.ValueOverride + ", ";
-					}
-					else
-					{
-
-						values += $"@{param.Name}, ";
-					}
-				}
-
-				columns = columns.Remove(columns.Length - 2, 2);
-				values = values.Remove(values.Length - 2, 2);
-
-				command.CommandText = $"INSERT INTO \"{tableName}\" ({columns}) VALUES ({values})";
-
-				return command.ExecuteNonQuery() > 0;
-			}
+			return command.ExecuteNonQuery() > 0;
 		}
+
+
+		public static bool InsertRecords(string tableName, List<List<DbParameter>> parameterSets)
+		{
+			if (parameterSets.Count == 0)
+				return true;
+
+			var columns = GetColumns(parameterSets[0]);
+			if (parameterSets.Exists(p => p.Count != parameterSets[0].Count || GetColumns(p) != columns))
+				return false;
+
+			var i = 0;
+			var values = string.Join($", ", parameterSets.Select(p => $"({GetInsertValues(p, i++)})"));
+
+			using var connection = DbContext.Current.CreateConnection();
+
+			NpgsqlCommand command = connection.CreateCommand("");
+
+			i = 0;
+			foreach (var paramSet in parameterSets)
+			{
+				foreach (var param in paramSet)
+					AppendParameter(command, param, i);
+				i++;
+			}
+
+			command.CommandText = $"INSERT INTO \"{tableName}\" ({columns}) VALUES {values}";
+			return command.ExecuteNonQuery() == parameterSets.Count;
+		}
+
 
 		public static bool UpdateRecord(string tableName, List<DbParameter> parameters)
 		{
-			using (var connection = DbContext.Current.CreateConnection())
-			{
-				NpgsqlCommand command = connection.CreateCommand("");
+			using var connection = DbContext.Current.CreateConnection();
+			
+			NpgsqlCommand command = connection.CreateCommand("");
 
-				string values = "";
-				foreach (var param in parameters)
-				{
+			var values = GetUpdateValues(parameters);
+			foreach (var param in parameters)
+				AppendParameter(command, param);
 
-					var parameter = command.CreateParameter() as NpgsqlParameter;
-					parameter.ParameterName = param.Name;
-					parameter.Value = param.Value ?? DBNull.Value;
-					parameter.NpgsqlDbType = param.Type;
-					command.Parameters.Add(parameter);
-
-					if (!string.IsNullOrWhiteSpace(param.ValueOverride))
-					{
-						values += $"\"{param.Name}\"={param.ValueOverride}, ";
-					}
-					else
-					{
-						values += $"\"{param.Name}\"=@{param.Name}, ";
-					}
-				}
-
-				values = values.Remove(values.Length - 2, 2);
-
-				command.CommandText = $"UPDATE \"{tableName}\" SET {values} WHERE id=@id";
-
-				return command.ExecuteNonQuery() > 0;
-			}
+			command.CommandText = $"UPDATE \"{tableName}\" SET {values} WHERE id=@id";
+			return command.ExecuteNonQuery() > 0;
 		}
 
 		public static bool DeleteRecord(string tableName, Guid id)
@@ -603,6 +593,8 @@ namespace WebVella.Erp.Database
 				return command.ExecuteNonQuery() > 0;
 			}
 		}
+
+
 
 		public static bool DeleteRecords(string tableName, params Guid[] ids)
 		{
@@ -682,5 +674,40 @@ namespace WebVella.Erp.Database
 			}
 		}
 
+		private static void AppendParameter(NpgsqlCommand command, DbParameter param, int index = -1)
+		{
+			var parameter = command.CreateParameter();
+			var name = param.Name;
+			if (index >= 0)
+				name += $"_{index}";
+			parameter.ParameterName = name;
+			parameter.Value = param.Value ?? DBNull.Value;
+			parameter.NpgsqlDbType = param.Type;
+			command.Parameters.Add(parameter);
+		}
+
+		private static string GetColumns(List<DbParameter> parameters)
+			=> string.Join(", ", parameters.Select(p => p.Name));
+
+		private static string GetInsertValues(List<DbParameter> parameters, int index = -1)
+		{
+			return string.Join(", ", parameters.Select(
+				p => 
+				{
+					var val = !string.IsNullOrWhiteSpace(p.ValueOverride) ? p.ValueOverride : $"@{p.Name}";
+					if (index >= 0)
+						val += $"_{index}";
+					return val;
+				}
+			));
+		}
+
+		private static string GetUpdateValues(List<DbParameter> parameters)
+		{
+			return string.Join(", ", parameters.Select(
+				p => !string.IsNullOrWhiteSpace(p.ValueOverride)
+				? $"\"{p.Name}\"={p.ValueOverride}" : $"\"{p.Name}\"=@{p.Name}"
+			));
+		}
 	}
 }

@@ -94,10 +94,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             {
                 var article = orderEntry.GetArticle();
 
-                if (manufacturers.TryGetValue(article.ManufacturerId, out var manufacturer) && manufacturer != null)
+                if (manufacturers.TryGetValue(article.ManufacturerId, out var manufacturer))
                     article.SetManufacturer(manufacturer);
 
-                if (typeLookup.TryGetValue(article.TypeId, out var type) && type != null)
+                if (typeLookup.TryGetValue(article.TypeId, out var type))
                     article.SetArticleType(type);
 
                 var receivedAmount = 0m;

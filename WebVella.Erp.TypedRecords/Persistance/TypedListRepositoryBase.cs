@@ -37,6 +37,9 @@ namespace WebVella.Erp.TypedRecords.Persistance
         public virtual TEntry? InsertEntry(TEntry record)
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Insert(RecordManager, EntryEntity, record));
 
+        public virtual List<TEntry> InsertManyEntries(IEnumerable<TEntry> records)
+            => RepositoryHelper.InsertMany(RecordManager, EntryEntity, records).Select(TypedEntityRecordWrapper.Wrap<TEntry>).ToList();
+
         public TEntry? FindEntry(Guid id, string select = "*")
             => TypedEntityRecordWrapper.WrapElseDefault<TEntry>(RepositoryHelper.Find(RecordManager, EntryEntity, id, select));
 

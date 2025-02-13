@@ -6,6 +6,8 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Web.Services
 {
+#nullable enable
+
 	internal static class SnippetService
 	{
 		private static readonly Dictionary<string, ICodeVariable> _snippets = [];
@@ -17,13 +19,13 @@ namespace WebVella.Erp.Web.Services
 			lock (_snippets)
 			{
 				var types = AppDomain.CurrentDomain.GetAssemblies()
-					.Where(a => a.FullName.StartsWith("WebVella.Erp.Plugins"))
+					.Where(a => a.FullName!.StartsWith("WebVella.Erp.Plugins"))
 					.SelectMany(t => t.GetTypes().Where(t => t.GetCustomAttributes<SnippetAttribute>().Any()));
 
 				foreach (var type in types)
 				{
 					if (Activator.CreateInstance(type) is ICodeVariable instance)
-						_snippets.Add(type.FullName, instance);
+						_snippets.Add(type.FullName!, instance);
 				}
 			}
 		}
@@ -35,4 +37,5 @@ namespace WebVella.Erp.Web.Services
 			return variable;
 		}
 	}
+#nullable restore
 }

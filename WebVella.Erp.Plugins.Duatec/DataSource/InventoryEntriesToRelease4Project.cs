@@ -77,9 +77,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                         RelativeDemand = relativeDemand
                     };
 
-                    var article = articleLookup[articleId];
-                    if (article != null)
-                        result.SetArticle(article);
+                    result.SetArticle(articleLookup[articleId]);
 
                     yield return result;
                 }

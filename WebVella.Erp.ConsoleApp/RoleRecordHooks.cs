@@ -8,7 +8,19 @@ namespace WebVella.Erp.ConsoleApp
 	[HookAttachment("role")]
 	public class RoleRecordHooks : IErpPreCreateRecordHook, IErpPostCreateRecordHook, IErpPreUpdateRecordHook, IErpPostUpdateRecordHook, IErpPreDeleteRecordHook, IErpPostDeleteRecordHook
 	{
-		public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
+        public bool ExecuteOnPreCreateMany => true;
+
+        public bool ExecuteOnPostCreateMany => true;
+
+        public bool ExecuteOnPreDeleteMany => true;
+
+        public bool ExecuteOnPostDeleteMany => true;
+
+		public bool ExecuteOnPreUpdateMany => true;
+
+		public bool ExecuteOnPostUpdateMany => true;
+
+        public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
 		{
 			Console.WriteLine($"Pre create role: {record["name"]}");
 		}

@@ -65,11 +65,6 @@ namespace WebVella.Erp.Plugins.Project
 									currentPluginSettings.Version = patchVersion;
 									Patch20190203(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -86,11 +81,6 @@ namespace WebVella.Erp.Plugins.Project
 								{
 									currentPluginSettings.Version = patchVersion;
 									Patch20190205(entMan, relMan, recMan);
-								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
 								}
 								catch (Exception)
 								{
@@ -109,11 +99,6 @@ namespace WebVella.Erp.Plugins.Project
 									currentPluginSettings.Version = patchVersion;
 									Patch20190206(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -130,11 +115,6 @@ namespace WebVella.Erp.Plugins.Project
 								{
 									currentPluginSettings.Version = patchVersion;
 									Patch20190207(entMan, relMan, recMan);
-								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
 								}
 								catch (Exception)
 								{
@@ -153,11 +133,6 @@ namespace WebVella.Erp.Plugins.Project
 									currentPluginSettings.Version = patchVersion;
 									Patch20190208(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -175,11 +150,6 @@ namespace WebVella.Erp.Plugins.Project
 									currentPluginSettings.Version = patchVersion;
 									Patch20190222(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -195,11 +165,6 @@ namespace WebVella.Erp.Plugins.Project
 								{
 									currentPluginSettings.Version = patchVersion;
 									Patch20211012(entMan, relMan, recMan);
-								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
 								}
 								catch (Exception)
 								{
@@ -217,11 +182,6 @@ namespace WebVella.Erp.Plugins.Project
 									currentPluginSettings.Version = patchVersion;
 									Patch20211013(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -235,11 +195,6 @@ namespace WebVella.Erp.Plugins.Project
 
 						connection.CommitTransaction();
 						//connection.RollbackTransaction();
-					}
-					catch (ValidationException ex)
-					{
-						connection.RollbackTransaction();
-						throw ex;
 					}
 					catch (Exception)
 					{

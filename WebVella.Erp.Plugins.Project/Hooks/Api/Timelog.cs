@@ -13,8 +13,11 @@ namespace WebVella.Erp.Plugins.Project.Hooks.Api
 	[HookAttachment("timelog")]
 	public class Timelog : IErpPreCreateRecordHook, IErpPreDeleteRecordHook
 	{
+        public bool ExecuteOnPreCreateMany => true;
 
-		public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
+        public bool ExecuteOnPreDeleteMany => true;
+
+        public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
 		{
 			new TimeLogService().PreCreateApiHookLogic(entityName, record, errors);
 		}

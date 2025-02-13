@@ -23,6 +23,9 @@ namespace WebVella.Erp.TypedRecords.Persistance
         public virtual T? Insert(T record)
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Insert(RecordManager, Entity, record));
 
+        public virtual List<T> InsertMany(IEnumerable<T> records)
+            => RepositoryHelper.InsertMany(RecordManager, Entity, records).Select(TypedEntityRecordWrapper.Wrap<T>).ToList();
+
         public virtual T? Update(T record)
             => TypedEntityRecordWrapper.WrapElseDefault<T>(RepositoryHelper.Update(RecordManager, Entity, record));
 

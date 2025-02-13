@@ -14,7 +14,17 @@ namespace WebVella.Erp.Plugins.Mail.Hooks.Api
 	{
 		SmtpInternalService smtpIntService = new SmtpInternalService();
 
-		public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
+        public bool ExecuteOnPreCreateMany => true;
+
+        public bool ExecuteOnPostCreateMany => true;
+
+        public bool ExecuteOnPreDeleteMany => true;
+
+        public bool ExecuteOnPreUpdateMany => true;
+
+        public bool ExecuteOnPostUpdateMany => true;
+
+        public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
 		{
 			smtpIntService.ValidatePreCreateRecord(record, errors);
 			if (errors.Any())

@@ -74,15 +74,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 var companyRepo = new CompanyRepository(recMan);
                 var articleRepo = new ArticleRepository(recMan);
 
-                foreach (var article in articles)
+                var articleInfos = articles.Select(a =>
                 {
-                    var manufacturer = companyRepo.FindByShortName(article!.Manufacturer.ShortName)?.Id
-                        ?? companyRepo.Insert(article.Manufacturer)?.Id
-                        ?? throw new DbException($"Could not create manufacturer '{article.Manufacturer.Name}'."); ;
+                    var manufacturer = companyRepo.FindByShortName(a.Manufacturer.ShortName)?.Id
+                        ?? companyRepo.Insert(a.Manufacturer)?.Id
+                        ?? throw new DbException($"Could not create manufacturer '{a.Manufacturer.Name}'.");
 
-                    if (articleRepo.Insert(article, manufacturer, types[article.PartNumber]) == null)
-                        throw new DbException($"Could not create article '{article.PartNumber}'.");
-                }
+                    return (a, manufacturer, types[a.PartNumber]);
+                }).ToArray();
+
+                if(articleRepo.InsertMany(articleInfos).Count != articleInfos.Length)
+                    throw new DbException($"Could not create articles.");
             }
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))

@@ -61,7 +61,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 Id = Guid.NewGuid(),
                 Order = record.Id.Value,
                 TimeStamp = DateTime.Now,
-                DeliveryNote = deliveryNotePath,
+                DeliveryNote = deliveryNotePath!,
             };
 
             var entries = updateInfos
@@ -71,7 +71,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     Amount = t.Amount,
                     Article = t.ArticleId,
                     GoodsReceiving = goodsReceiving.Id.Value
-                });
+                })
+                .ToArray();
 
             void TransactionalAction()
             {
@@ -80,11 +81,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 if(repo.Insert(goodsReceiving) == null)
                     throw new DbException("Could not insert goods receiving record");
 
-                foreach(var entry in entries)
-                {
-                    if(repo.InsertEntry(entry) == null)
-                        throw new DbException("Could not insert goods receiving entry record");
-                }
+                if(repo.InsertManyEntries(entries).Count != entries.Length)
+                    throw new DbException("Could not insert goods receiving entry records");
             }
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))

@@ -14,6 +14,8 @@ namespace WebVella.Erp.Api.Models
 
 		public abstract object Execute(Dictionary<string, object> arguments);
 
+#nullable enable
+
 		protected static T? EnumValueFromParameter<T>(object o)
 		{
 			if (o is T state)
@@ -33,5 +35,6 @@ namespace WebVella.Erp.Api.Models
 			}
 			return default;
 		}
+#nullable restore
 	}
 }

@@ -59,11 +59,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 
         private static void AddEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<Guid> oldArticleIds)
         {
-            foreach (var entry in entries.Where(e => !oldArticleIds.Contains(e.Article)))
-            {
-                if (repository.InsertEntry(entry) == null)
-                    throw new DbException("Could not add entry");
-            }
+            var newEntries = entries.Where(e => !oldArticleIds.Contains(e.Article)).ToArray();
+
+            if(repository.InsertManyEntries(newEntries).Count != newEntries.Length)
+                throw new DbException("Could not add entries");
         }
 
         private static void UpdateEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<Guid> newArticleIds, List<OrderEntry> oldEntries)

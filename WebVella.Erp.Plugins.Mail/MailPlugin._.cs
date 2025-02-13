@@ -65,11 +65,6 @@ namespace WebVella.Erp.Plugins.Mail
 									currentPluginSettings.Version = patchVersion;
 									Patch20190215(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -86,11 +81,6 @@ namespace WebVella.Erp.Plugins.Mail
 								{
 									currentPluginSettings.Version = patchVersion;
 									Patch20190419(entMan, relMan, recMan);
-								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
 								}
 								catch (Exception)
 								{
@@ -109,11 +99,6 @@ namespace WebVella.Erp.Plugins.Mail
 									currentPluginSettings.Version = patchVersion;
 									Patch20190420(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -130,11 +115,6 @@ namespace WebVella.Erp.Plugins.Mail
 									currentPluginSettings.Version = patchVersion;
 									Patch20190422(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -150,11 +130,6 @@ namespace WebVella.Erp.Plugins.Mail
 								{
 									currentPluginSettings.Version = patchVersion;
 									Patch20190529(entMan, relMan, recMan);
-								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
 								}
 								catch (Exception)
 								{
@@ -173,11 +148,6 @@ namespace WebVella.Erp.Plugins.Mail
 									currentPluginSettings.Version = patchVersion;
 									Patch20200610(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -194,11 +164,6 @@ namespace WebVella.Erp.Plugins.Mail
 									currentPluginSettings.Version = patchVersion;
 									Patch20200611(entMan, relMan, recMan);
 								}
-								catch (ValidationException ex)
-								{
-									var exception = ex;
-									throw ex;
-								}
 								catch (Exception)
 								{
 									throw;
@@ -212,11 +177,6 @@ namespace WebVella.Erp.Plugins.Mail
 						SavePluginData(JsonConvert.SerializeObject(currentPluginSettings));
 
 						connection.CommitTransaction();
-					}
-					catch (ValidationException ex)
-					{
-						connection.RollbackTransaction();
-						throw ex;
 					}
 					catch (Exception)
 					{

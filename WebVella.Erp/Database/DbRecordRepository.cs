@@ -88,56 +88,90 @@ namespace WebVella.Erp.Database
 		{
 			Entity entity = entMan.ReadEntity(entityName).Object;
 
-			List<DbParameter> parameters = new List<DbParameter>();
-
-			foreach (var record in recordData)
+			var parameters = recordData.Select(record =>
 			{
-				Field field = entity.Fields.FirstOrDefault(f => f.Name.ToLowerInvariant() == record.Key.ToLowerInvariant());
+				var field = entity.Fields.First(f => f.Name.Equals(record.Key, StringComparison.OrdinalIgnoreCase));
+				return CreateInsertparameter(record, field);
 
-				DbParameter param = new DbParameter();
-				param.Name = field.Name;
-				param.Value = record.Value ?? DBNull.Value;
-				if (field.GetFieldType() == FieldType.GeographyField)
-				{
-					// this is set as text because later
-					// the generated SQL will be something like
-
-					// INSERT INTO places 
-					//  (id, 
-					//  border) 
-					// VALUES 
-					//  (@id, 
-					//  ST_Transform(ST_GeomFromGeoJSON(@border),4326)::geography)
-					// 
-					param.Type = NpgsqlDbType.Text;
-					GeographyField geo = (field as GeographyField);
-
-					if (param.Value == null || (string)param.Value == "")
-					{
-						if (geo.Format == GeographyFieldFormat.GeoJSON)
-						{
-							param.Value = "{\"type\":\"GeometryCollection\",\"geometries\":[]}";
-						}
-						else if (geo.Format == GeographyFieldFormat.Text)
-						{
-							param.Value = "GEOMETRYCOLLECTION EMPTY";
-						}
-
-					}
-
-					param.ValueOverride = $"ST_Transform(ST_GeomFrom{geo.Format.Value.ToString()}(@{param.Name}{(geo.Format.Value == GeographyFieldFormat.Text ? ", " + geo.SRID : "")}),{geo.SRID})::geography";
-
-				}
-				else
-				{
-					param.Type = DbTypeConverter.ConvertToDatabaseType(field.GetFieldType());
-				}
-				parameters.Add(param);
-			}
+			}).ToList();
 
 			string tableName = RECORD_COLLECTION_PREFIX + entityName;
 			DbRepository.InsertRecord(tableName, parameters);
 		}
+
+		public void CreateMany(string entityName, IEnumerable<IEnumerable<KeyValuePair<string, object>>> recordDataSets)
+		{
+			var entity = entMan.ReadEntity(entityName).Object;
+			var fieldLookup = new Dictionary<string, Field>(StringComparer.OrdinalIgnoreCase);
+
+			var parameterSets = recordDataSets.Select(recordData =>
+			
+				recordData.Select(property =>
+				{
+					if (!fieldLookup.TryGetValue(property.Key, out var field))
+					{
+						field = entity.Fields.First(f => f.Name.Equals(property.Key, StringComparison.OrdinalIgnoreCase));
+						fieldLookup.Add(property.Key, field);
+					}
+
+					var param = new KeyValuePair<string, object>($"{property.Key}", property.Value);
+
+					return CreateInsertparameter(property, field);
+
+				}).ToList()
+
+			).ToList();
+
+			string tableName = RECORD_COLLECTION_PREFIX + entityName;
+			DbRepository.InsertRecords(tableName, parameterSets);
+		}
+
+		private static DbParameter CreateInsertparameter(KeyValuePair<string, object> record, Field field)
+		{
+			DbParameter param = new DbParameter
+			{
+				Name = field.Name,
+				Value = record.Value ?? DBNull.Value
+			};
+
+			if (field.GetFieldType() == FieldType.GeographyField)
+			{
+				// this is set as text because later
+				// the generated SQL will be something like
+
+				// INSERT INTO places 
+				//  (id, 
+				//  border) 
+				// VALUES 
+				//  (@id, 
+				//  ST_Transform(ST_GeomFromGeoJSON(@border),4326)::geography)
+				// 
+				param.Type = NpgsqlDbType.Text;
+				GeographyField geo = (field as GeographyField);
+
+				if (param.Value == null || (string)param.Value == "")
+				{
+					if (geo.Format == GeographyFieldFormat.GeoJSON)
+					{
+						param.Value = "{\"type\":\"GeometryCollection\",\"geometries\":[]}";
+					}
+					else if (geo.Format == GeographyFieldFormat.Text)
+					{
+						param.Value = "GEOMETRYCOLLECTION EMPTY";
+					}
+
+				}
+
+				param.ValueOverride = $"ST_Transform(ST_GeomFrom{geo.Format.Value.ToString()}(@{param.Name}{(geo.Format.Value == GeographyFieldFormat.Text ? ", " + geo.SRID : "")}),{geo.SRID})::geography";
+
+			}
+			else
+			{
+				param.Type = DbTypeConverter.ConvertToDatabaseType(field.GetFieldType());
+			}
+			return param;
+		}
+
 		public void Update(string entityName, IEnumerable<KeyValuePair<string, object>> recordData)
 		{
 			Entity entity = entMan.ReadEntity(entityName).Object;

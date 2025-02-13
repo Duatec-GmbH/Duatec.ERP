@@ -48,9 +48,10 @@ namespace WebVella.Erp.TypedRecords
             return value;
         }
 
-        protected void SetRelationValue(string relationName, EntityRecord value)
+        protected void SetRelationValue(string relationName, EntityRecord? value)
         {
-            Properties[$"${relationName}"] = new List<EntityRecord>() { value };
+            var l = value == null ? [] : new List<EntityRecord>() { value };
+            Properties[$"${relationName}"] = l;
         }
 
         protected void SetRelationValues(string relationName, IEnumerable<EntityRecord> values)

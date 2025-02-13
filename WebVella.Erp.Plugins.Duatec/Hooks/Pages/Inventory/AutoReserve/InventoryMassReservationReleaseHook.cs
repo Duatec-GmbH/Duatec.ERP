@@ -43,6 +43,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
             if (validationErrors.Count > 0)
             {
+                pageModel.Validation.Errors = validationErrors;
                 BuildErrorPage(projectId, pageModel, formData, superfluousArticleLookup);
                 return pageModel.Page();
             }
@@ -71,7 +72,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                             var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
                                 ? arr : [];
 
-                            MoveInventory(recMan, amount, availableInventoryEntries, reseredInventoryEntries);
+                            MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries);
                         }
                     }
                 }
@@ -136,8 +137,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                     RelativeDemand = relativeDemand,
                 };
 
-                if (article != null)
-                    rec.SetArticle(article);
+                rec.SetArticle(article);
                 records.Add(rec);
             }
 

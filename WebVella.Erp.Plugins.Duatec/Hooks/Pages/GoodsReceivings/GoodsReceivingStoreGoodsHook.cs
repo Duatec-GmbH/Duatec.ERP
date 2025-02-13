@@ -87,11 +87,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     if (goodsReceivingRepo.UpdateEntry(receivingEntry) == null)
                         throw new DbException("Failed to update receiving entry record");
 
-                    foreach(var entry in g)
-                    {
-                        if (repo.Insert(entry) == null)
-                            throw new DbException("Could not insert inventory entry record");
-                    }
+                    var toAdd = g.ToArray();
+                    if(repo.InsertMany(toAdd).Count != toAdd.Length)
+                        throw new DbException("Could not insert inventory entries");
                 }
             }
 
@@ -281,8 +279,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             foreach(var entry in entries)
             {
-                if (bookedEntries.TryGetValue(entry.Article, out var gre) && gre[0].GetArticle() is Article article)
-                    entry.SetArticle(article);
+                if (bookedEntries.TryGetValue(entry.Article, out var gre))
+                    entry.SetArticle(gre[0].GetArticle());
             }
 
             record[entryKey] = entries

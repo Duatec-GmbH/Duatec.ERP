@@ -585,6 +585,14 @@ namespace WebVella.Erp.Web.Models
 			var currentPropertyNamePath = string.Empty;
 			string parentPropName = string.Empty;
 
+			if(completePropChain.Count == 2 && completePropChain[0] == "RequestQuery")
+			{
+				var rec = properties["RequestQuery"]?.Value as EntityRecord;
+				if (rec != null && rec.Properties.TryGetValue(completePropChain[1], out var val))
+					return val;
+				return null;
+			}
+
 			int idx = 0;
 			foreach (var ppName in completePropChain)
 			{

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Newtonsoft.Json.Linq;
+using Storage.Net;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -12,6 +14,8 @@ using WebVella.Erp.Utilities;
 
 namespace WebVella.Erp.Api
 {
+	using FileFieldInfo = (FileField Field, string Path);
+
 	public class RecordManager
 	{
 		private const char RELATION_SEPARATOR = '.';
@@ -49,7 +53,7 @@ namespace WebVella.Erp.Api
 
 		public EntityManager EntityManager => entityManager;
 
-		public EntityRelationManager EntityRelationManager => entityRelationManager;
+		public EntityRelationManager RelationManager => entityRelationManager;
 
 		public QueryResponse CreateRelationManyToManyRecord(Guid relationId, Guid originValue, Guid targetValue)
 		{
@@ -227,27 +231,6 @@ namespace WebVella.Erp.Api
 			return CreateRecord(entity, record);
 		}
 
-		public QueryResponse UpdateRecord(string entityName, EntityRecord record)
-		{
-			if (string.IsNullOrWhiteSpace(entityName))
-				return InvalidEntityName();
-
-			Entity entity = GetEntity(entityName);
-			if (entity == null)
-				return EntityNotFound();
-
-			return UpdateRecord(entity, record);
-		}
-
-		public QueryResponse UpdateRecord(Guid entityId, EntityRecord record)
-		{
-			Entity entity = GetEntity(entityId);
-			if (entity == null)
-				return EntityNotFound();
-
-			return UpdateRecord(entity, record);
-		}
-
 		public QueryResponse CreateRecord(Entity entity, EntityRecord record)
 		{
 
@@ -289,18 +272,19 @@ namespace WebVella.Erp.Api
 						}
 					}
 
-					bool hooksExists = RecordHookManager.ContainsAnyHooksForEntity(entity.Name);
+					var hooksExists = executeHooks 
+						&& RecordHookManager.HasRegisteredCreateHooks(entity.Name, false);
 
-					if (record.Properties.Any(p => p.Key.StartsWith("$")) || hooksExists)
+					if (hooksExists || record.Properties.Any(p => p.Key.StartsWith('$')))
 					{
 						connection.BeginTransaction();
 						isTransactionActive = true;
 					}
 
-					if (hooksExists && executeHooks)
+					if (hooksExists)
 					{
 						List<ErrorModel> errors = new List<ErrorModel>();
-						RecordHookManager.ExecutePreCreateRecordHooks(entity.Name, record, errors);
+						RecordHookManager.ExecutePreCreateRecordHooks(entity.Name, record, errors, false);
 						if (errors.Count > 0)
 						{
 							if (isTransactionActive)
@@ -863,8 +847,8 @@ namespace WebVella.Erp.Api
 					{
 						response.Message = "Record was created successfully";
 
-						if (hooksExists && executeHooks)
-							RecordHookManager.ExecutePostCreateRecordHooks(entity.Name, response.Object.Data[0]);
+						if (hooksExists)
+							RecordHookManager.ExecutePostCreateRecordHooks(entity.Name, response.Object.Data[0], true);
 					}
 
 					if (isTransactionActive)
@@ -895,6 +879,193 @@ namespace WebVella.Erp.Api
 
 					return response;
 				}
+			}
+		}
+
+		public QueryResponse UpdateRecord(string entityName, EntityRecord record)
+		{
+			if (string.IsNullOrWhiteSpace(entityName))
+				return InvalidEntityName();
+
+			Entity entity = GetEntity(entityName);
+			if (entity == null)
+				return EntityNotFound();
+
+			return UpdateRecord(entity, record);
+		}
+
+		public QueryResponse UpdateRecord(Guid entityId, EntityRecord record)
+		{
+			Entity entity = GetEntity(entityId);
+			if (entity == null)
+				return EntityNotFound();
+
+			return UpdateRecord(entity, record);
+		}
+
+		public QueryResponse CreateRecords(string entityName, IEnumerable<EntityRecord> records)
+		{
+			Entity entity = GetEntity(entityName);
+			if (entity == null)
+				return EntityNotFound();
+			return CreateRecords(entity, records);
+		}
+
+		public QueryResponse CreateRecords(Guid entityId, IEnumerable<EntityRecord> records)
+		{
+			Entity entity = GetEntity(entityId);
+			if (entity == null)
+				return EntityNotFound();
+			return CreateRecords(entity, records);
+		}
+
+		public QueryResponse CreateRecords(Entity entity, IEnumerable<EntityRecord> records)
+		{
+			// cast to array so it can't reevaluate
+			records = records.ToArray();
+			QueryResponse response = new QueryResponse
+			{
+				Object = null,
+				Success = true,
+				Timestamp = DateTime.UtcNow
+			};
+
+			if (!records.Any())
+			{
+				response.Object = new QueryResult() { Data = [] };
+				return response;
+			}
+
+			var recRepo = CurrentContext.RecordRepository;
+
+			using var connection = CurrentContext.CreateConnection();
+			
+			try
+			{
+				if (entity == null)
+					response.Errors.Add(new ErrorModel { Message = "Invalid entity name." });
+
+				if (records.Any(r => r == null))
+					response.Errors.Add(new ErrorModel { Message = "Invalid record. Cannot be null." });
+
+				if (records.SelectMany(r => r.Properties).Any(p => p.Key.StartsWith('$')))
+					response.Errors.Add(new ErrorModel { Message = "Invalid record. Inserting many with relations is not supported." });
+
+				if (response.Errors.Count > 0)
+				{
+					response.Object = null;
+					response.Success = false;
+					response.Timestamp = DateTime.UtcNow;
+					return response;
+				}
+
+				if (!ignoreSecurity)
+				{
+					bool hasPermisstion = SecurityContext.HasEntityPermission(EntityPermission.Create, entity);
+					if (!hasPermisstion)
+					{
+						response.StatusCode = HttpStatusCode.Forbidden;
+						response.Success = false;
+						response.Message = "Trying to create record in entity '" + entity.Name + "' with no create access.";
+						response.Errors.Add(new ErrorModel { Message = "Access denied." });
+						return response;
+					}
+				}
+
+				var hooksExist = executeHooks 
+					&& RecordHookManager.HasRegisteredCreateHooks(entity.Name, true);
+
+				connection.BeginTransaction();
+
+				if (hooksExist)
+				{
+					var errors = new List<ErrorModel>();
+					RecordHookManager.ExecutePreCreateManyRecordsHooks(entity.Name, records, errors);
+					foreach(var rec in records)
+						RecordHookManager.ExecutePreCreateRecordHooks(entity.Name, rec, errors, true);
+
+					if (errors.Count > 0)
+					{
+						connection.RollbackTransaction();
+
+						response.Success = false;
+						response.Object = null;
+						response.Errors = errors;
+						response.Timestamp = DateTime.UtcNow;
+						return response;
+					}
+				}
+				var keys = new HashSet<Guid>();
+
+				foreach (var record in records)
+				{
+					var id = GetRecordId(record);
+					if (!keys.Add(id))
+						throw new Exception("Duplicate keys in records");
+					record["id"] = id;
+				}
+
+				var fileFields = GetFileFields(entity, records);
+				var storageRecordData = GetStorageData(entity, records, fileFields);
+
+				recRepo.CreateMany(entity.Name, storageRecordData);
+
+				// when user create record, it is get returned ignoring create permissions
+				bool oldIgnoreSecurity = ignoreSecurity;
+				response = Find(entity.Name, "*", keys.ToArray());
+				ignoreSecurity = oldIgnoreSecurity;
+
+				//if not created exit immediately
+				if (!response.Success || response.Object?.Data == null || response.Object.Data.Count != keys.Count)
+				{
+					connection.RollbackTransaction();
+
+					response.Success = false;
+					response.Object = null;
+					response.Timestamp = DateTime.UtcNow;
+					response.Message = "The records were not created. An internal error occurred!";
+					return response;
+				}
+
+				if (hooksExist)
+				{
+					RecordHookManager.ExecutePostCreateManyRecordsHooks(entity.Name, response.Object.Data);
+					foreach (var rec in response.Object.Data)
+						RecordHookManager.ExecutePostCreateRecordHooks(entity.Name, rec, true);
+				}
+
+				//execute hooks after create related records
+				if (response.Object != null && response.Object.Data != null && response.Object.Data.Count > 0)
+				{
+					response.Message = "Records were created successfully";
+
+					if (hooksExist)
+						RecordHookManager.ExecutePostCreateRecordHooks(entity.Name, response.Object.Data[0], true);
+				}
+
+				connection.CommitTransaction();
+
+				return response;
+			}
+			catch (ValidationException)
+			{
+				connection.RollbackTransaction();
+				throw;
+			}
+			catch (Exception e)
+			{
+				connection.RollbackTransaction();
+
+				response.Success = false;
+				response.Object = null;
+				response.Timestamp = DateTime.UtcNow;
+
+				if (ErpSettings.DevelopmentMode)
+					response.Message = e.Message + e.StackTrace;
+				else
+					response.Message = "The entity record was not created. An internal error occurred!";
+
+				return response;
 			}
 		}
 
@@ -1550,12 +1721,14 @@ namespace WebVella.Erp.Api
 			if (entity == null)
 				return EntityNotFound();
 
-			var response = new QueryResponse();
-			response.Object = null;
-			response.Success = true;
-			response.Timestamp = DateTime.UtcNow;
+			var response = new QueryResponse
+			{
+				Object = null,
+				Success = true,
+				Timestamp = DateTime.UtcNow
+			};
 
-			if(ids.Length == 0)
+			if (ids.Length == 0)
 			{
 				response.Success = false;
 				response.Message = "Nothing to delete.";
@@ -1587,10 +1760,27 @@ namespace WebVella.Erp.Api
 				response = Find(entityQuery);
 				if (response.Object != null && response.Object.Data.Count >= 1)
 				{
-					var entityObj = entityManager.ReadEntities().Object.Single(x => x.Name == entity.Name);
-					var fileFields = entityObj.Fields.Where(x => x.GetFieldType() == FieldType.FileField).ToList();
+					var fileFields = entity.Fields.Where(x => x.GetFieldType() == FieldType.FileField).ToList();
 
-					var executeHooks = this.executeHooks && RecordHookManager.ContainsAnyHooksForEntity(entity.Name);
+					var executeHooks = this.executeHooks && RecordHookManager.HasRegisteredDeleteHooks(entity.Name, true);
+
+					if (executeHooks)
+					{
+						var errors = new List<ErrorModel>();
+						RecordHookManager.ExecutePreDeleteManyRecordsHooks(entity.Name, response.Object.Data, errors);
+						foreach(var rec in response.Object.Data)
+							RecordHookManager.ExecutePreDeleteRecordHooks(entity.Name, rec, errors, true);
+
+						if (errors.Count > 0)
+						{
+							response.Message = errors[0].Message;
+							response.Success = false;
+							response.Object = null;
+							response.Errors = errors;
+							response.Timestamp = DateTime.UtcNow;
+							return response;
+						}
+					}
 
 					var filesToDelete = new List<string>();
 					foreach(var rec in response.Object.Data)
@@ -1599,21 +1789,6 @@ namespace WebVella.Erp.Api
 						{
 							if (!string.IsNullOrWhiteSpace((string)rec[fileField.Name]))
 								filesToDelete.Add((string)rec[fileField.Name]);
-						}
-
-						if (executeHooks)
-						{
-							var errors = new List<ErrorModel>();
-							RecordHookManager.ExecutePreDeleteRecordHooks(entity.Name, rec, errors);
-							if (errors.Count > 0)
-							{
-								response.Message = errors[0].Message;
-								response.Success = false;
-								response.Object = null;
-								response.Errors = errors;
-								response.Timestamp = DateTime.UtcNow;
-								return response;
-							}
 						}
 					}
 
@@ -1628,8 +1803,9 @@ namespace WebVella.Erp.Api
 
 					if (executeHooks)
 					{
+						RecordHookManager.ExecutePostDeleteManyRecordsHooks(entity.Name, response.Object.Data);
 						foreach (var rec in response.Object.Data)
-							RecordHookManager.ExecutePostDeleteRecordHooks(entity.Name, rec);
+							RecordHookManager.ExecutePostDeleteRecordHooks(entity.Name, rec, true);
 					}	
 				}
 				else
@@ -1692,11 +1868,13 @@ namespace WebVella.Erp.Api
 				response = Find(entityQuery);
 				if (response.Object != null && response.Object.Data.Count == 1)
 				{
-					bool hooksExists = RecordHookManager.ContainsAnyHooksForEntity(entity.Name);
-					if (hooksExists && executeHooks)
+					var record = response.Object.Data[0];
+
+					bool hooksExists = executeHooks && RecordHookManager.HasRegisteredDeleteHooks(entity.Name, false);
+					if (hooksExists)
 					{
-						List<ErrorModel> errors = new List<ErrorModel>();
-						RecordHookManager.ExecutePreDeleteRecordHooks(entity.Name, response.Object.Data[0], errors);
+						var errors = new List<ErrorModel>();
+						RecordHookManager.ExecutePreDeleteRecordHooks(entity.Name, record, errors, false);
 						if (errors.Count > 0)
 						{
 							response.Message = errors[0].Message;
@@ -1712,7 +1890,6 @@ namespace WebVella.Erp.Api
 
 					var entityObj = entityManager.ReadEntities().Object.Single(x => x.Name == entity.Name);
 					var fileFields = entityObj.Fields.Where(x => x.GetFieldType() == FieldType.FileField).ToList();
-					var record = response.Object.Data[0];
 
 					var filesToDelete = new List<string>();
 					foreach (var fileField in fileFields)
@@ -1721,7 +1898,7 @@ namespace WebVella.Erp.Api
 							filesToDelete.Add((string)record[fileField.Name]);
 					}
 
-					if (filesToDelete.Any())
+					if (filesToDelete.Count > 0)
 					{
 						var dbFileRep = new DbFileRepository();
 						foreach (var filepath in filesToDelete)
@@ -1732,8 +1909,8 @@ namespace WebVella.Erp.Api
 
 					CurrentContext.RecordRepository.Delete(entity.Name, id);
 
-					if (hooksExists && executeHooks)
-						RecordHookManager.ExecutePostDeleteRecordHooks(entity.Name, response.Object.Data[0]);
+					if (hooksExists)
+						RecordHookManager.ExecutePostDeleteRecordHooks(entity.Name, record, false);
 				}
 				else
 				{
@@ -1812,6 +1989,47 @@ namespace WebVella.Erp.Api
 			}
 
 			return response;
+		}
+
+		public QueryResponse Find(string entityName, Guid id, string select = "*")
+		{
+			var query = EntityQuery.QueryEQ("id", id);
+			return Find(new EntityQuery(entityName, select, query));
+		}
+
+		public QueryResponse Find(string entityName, string select = "*", params Guid[] ids)
+		{
+			if(ids.Length == 0)
+			{
+				return new QueryResponse()
+				{
+					Errors = [],
+					Success = true,
+					AccessWarnings = [],
+					Object = new QueryResult()
+					{
+						Data = [],
+						FieldsMeta = []
+					},
+					Timestamp = DateTime.UtcNow,
+					Message = string.Empty,
+				};
+			}
+
+			var subQuery = ids.Select(id => new QueryObject()
+			{
+				QueryType = QueryType.EQ,
+				FieldName = "id",
+				FieldValue = id
+			}).ToList();
+
+			var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
+			{
+				QueryType = QueryType.OR,
+				SubQueries = subQuery
+			};
+
+			return Find(new EntityQuery(entityName, select, query));
 		}
 
 		public QueryCountResponse Count(EntityQuery query)
@@ -1893,6 +2111,122 @@ namespace WebVella.Erp.Api
 					recordData.Add(new KeyValuePair<string, object>(field.Name, defaultValue));
 				}
 			}
+		}
+
+		private static Guid GetRecordId(EntityRecord record)
+		{
+			Guid recordId;
+			if (!record.Properties.ContainsKey("id"))
+				recordId = Guid.NewGuid();
+			else
+			{
+				//fixes issue with ID coming from webapi request 
+				if (record["id"] is string s)
+					recordId = new Guid(s);
+				else if (record["id"] is Guid id)
+					recordId = id;
+				else
+					throw new Exception("Invalid record id");
+
+				if (recordId == Guid.Empty)
+					throw new Exception("Guid.Empty value cannot be used as valid value for record id.");
+			}
+			return recordId;
+		}
+
+		private static List<FileFieldInfo> GetFileFields(Entity entity, IEnumerable<EntityRecord> records)
+		{
+			var processedKeys = new HashSet<string>();
+			var result = new List<FileFieldInfo>();
+
+			foreach (var (key, value) in records.SelectMany(r => r.Properties).Where(kp => kp.Key != null && processedKeys.Add(kp.Key)))
+			{
+				var field = entity.Fields.SingleOrDefault(x => x.Name == key);
+				if (field is FileField ff)
+					result.Add((ff, value as string));
+			}
+			return result;
+		}
+
+		private static List<FileFieldInfo> GetFileFields(Entity entity, EntityRecord record)
+		{
+			var result = new List<FileFieldInfo>();
+
+			foreach (var (key, value) in record.Properties.Where(kp => kp.Key != null))
+			{
+				var field = entity.Fields.SingleOrDefault(x => x.Name == key);
+				if (field is FileField ff)
+					result.Add((ff, value as string));
+			}
+			return result;
+		}
+
+		private static List<List<KeyValuePair<string, object>>> GetStorageData(Entity entity, IEnumerable<EntityRecord> records, List<FileFieldInfo> fileFields)
+		{
+			return records.Select(r => GetStorageData(entity, r, fileFields)).ToList();
+		}
+
+		private static List<KeyValuePair<string, object>> GetStorageData(Entity entity, EntityRecord record, List<FileFieldInfo> fileFields)
+		{
+			var result = new List<KeyValuePair<string, object>>();
+			foreach (var kp in record.Properties.Where(kp => kp.Key != null))
+			{
+				var pair = GetStorageDataEntry(entity, kp);
+				if (pair.HasValue)
+					result.Add(pair.Value);
+			}
+
+
+			SetRecordRequiredFieldsDefaultData(entity, result);
+
+			foreach (var tuple in fileFields)
+			{
+				var (field, path) = tuple;
+				if (!string.IsNullOrWhiteSpace(path))
+				{
+					if (path.StartsWith("/fs/"))
+						path = path[3..];
+					else if (path.StartsWith("fs/"))
+						path = path[2..];
+				}
+
+				DbFileRepository fsRepository = new DbFileRepository();
+
+				if (field.Required && string.IsNullOrWhiteSpace(path))
+					result.Add(new KeyValuePair<string, object>(field.Name, field.GetFieldDefaultValue()));
+				else
+				{
+					if (!string.IsNullOrWhiteSpace(path) && path.StartsWith(DbFileRepository.FOLDER_SEPARATOR + DbFileRepository.TMP_FOLDER_NAME))
+					{
+						var fileName = path.Split('/').Last();
+						string source = path;
+						string target = $"/{field.EntityName}/{record["id"]}/{fileName}";
+						var movedFile = fsRepository.Move(source, target, false);
+
+						result.Add(new KeyValuePair<string, object>(field.Name, target));
+					}
+					else
+					{
+						result.Add(new KeyValuePair<string, object>(field.Name, path));
+					}
+				}
+			}
+			return result;
+		}
+
+
+		private static KeyValuePair<string, object>? GetStorageDataEntry(Entity entity, KeyValuePair<string, object> kp)
+		{
+			var field = entity.Fields.SingleOrDefault(x => x.Name == kp.Key)
+				?? throw new Exception("Error during processing value for field: '" + kp.Key + "'. Field not found.");
+
+			if (field is FileField or ImageField or AutoNumberField)
+				return null;
+
+			if (field.Required && kp.Value == null)
+				return new(field.Name, field.GetFieldDefaultValue());
+			else
+				return new(field.Name, ExtractFieldValue(kp, field, true));
 		}
 
 		private static object ExtractFieldValue(KeyValuePair<string, object>? fieldValue, Field field, bool encryptPasswordFields = false)
