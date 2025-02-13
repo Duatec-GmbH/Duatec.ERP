@@ -21,7 +21,7 @@
 
             using var stream = StreamFromString(text);
 
-            var result = Duatec.Services.EplanXml.GetArticles(stream);
+            var result = FileImports.EplanXml.GetArticles(stream);
 
             Assert.That(result, Has.Count.EqualTo(1));
             var article = result[0];

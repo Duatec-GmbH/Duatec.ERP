@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IO;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.FileImports;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
@@ -27,7 +28,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 
             var fsRepository = new DbFileRepository();
 
-            if (!filePath.EndsWith(".xml"))
+            if (!filePath.EndsWith(".xml") && !filePath.EndsWith(".csv"))
                 return Error(pageModel, "Only xml files are supported");
 
             var file = fsRepository.Find(filePath);
@@ -35,28 +36,55 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 return Error(pageModel, "File not found");
 
             using var stream = new MemoryStream(file.GetBytes());
-            var articles = EplanXml.GetArticles(stream);
+
+
+            var list = filePath.EndsWith(".xml")
+                ? GetRecordsFromXml(pageModel, stream)
+                : GetRecordsFromCsv(pageModel, stream)
 
             fsRepository.Delete(filePath);
 
-            if (articles.Count == 0)
+            if (list.Count == 0)
                 return Error(pageModel, "File does not contain any articles");
 
-            if (articles.DistinctBy(a => a.PartNumber).Count() != articles.Count)
+            if (list.DistinctBy(a => a[Article.Fields.PartNumber]).Count() != list.Count)
                 return pageModel.BadRequest();
 
             var record = new EntityRecord();
-            var list = new EntityRecordList { TotalCount = articles.Count };
-
             record["articles"] = list;
-
-            var importResult = ArticleImportResult.FromEplanArticles(articles);
-            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
-                list.Add(GetRecord(res));
 
             pageModel.DataModel.SetRecord(record);
 
             return null;
+        }
+
+        private static EntityRecordList GetRecordsFromXml(BaseErpPageModel pageModel, Stream stream)
+        {
+            var articles = EplanXml.GetArticles(stream);
+
+            var list = new EntityRecordList { TotalCount = articles.Count };
+            var importResult = ArticleImportResult.FromEplanArticles(articles);
+
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
+                list.Add(GetRecord(res));
+
+            return list;
+        }
+
+        private static EntityRecordList GetRecordsFromCsv(BaseErpPageModel pageModel, Stream stream)
+        {
+            var sr = new StreamReader(stream);
+
+            var header = sr.ReadLine();
+            
+            var hasPartNumber = 
+
+
+
+
+            var list = new EntityRecordList { TotalCount = Articles.Count };
+
+
         }
 
         private static IActionResult? Error(BaseErpPageModel pageModel, string message)

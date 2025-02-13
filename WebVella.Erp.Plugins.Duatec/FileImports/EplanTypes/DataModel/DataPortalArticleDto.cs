@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Nodes;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
+namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
 {
     public class DataPortalArticleDto
     {

@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel
+﻿namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
 {
     internal class EplanArticleDto
     {

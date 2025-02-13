@@ -1,7 +1,7 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 

@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
 {

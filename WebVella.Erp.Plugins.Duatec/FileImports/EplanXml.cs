@@ -1,7 +1,7 @@
 ﻿using System.Xml.Linq;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 
-namespace WebVella.Erp.Plugins.Duatec.Services
+namespace WebVella.Erp.Plugins.Duatec.FileImports
 {
     internal static class EplanXml
     {

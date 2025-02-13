@@ -1,9 +1,10 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.Erp.Plugins.Duatec.Services;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
+namespace WebVella.Erp.Plugins.Duatec.FileImports
 {
     internal class ArticleImportResult
     {

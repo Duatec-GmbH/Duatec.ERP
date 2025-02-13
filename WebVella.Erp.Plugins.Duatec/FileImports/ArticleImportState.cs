@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Plugins.Duatec.Util;
 
-namespace WebVella.Erp.Plugins.Duatec.Services.EplanTypes
+namespace WebVella.Erp.Plugins.Duatec.FileImports
 {
     internal enum ArticleImportState
     {

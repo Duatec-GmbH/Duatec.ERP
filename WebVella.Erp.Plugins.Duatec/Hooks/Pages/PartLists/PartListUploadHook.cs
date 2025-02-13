@@ -2,9 +2,8 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Plugins.Duatec.FileImports;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Services;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 

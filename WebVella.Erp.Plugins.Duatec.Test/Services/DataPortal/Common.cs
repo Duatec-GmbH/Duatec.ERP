@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using WebVella.Erp.Plugins.Duatec.Services.EplanTypes.DataModel;
+using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Test.Services.DataPortal
 {
