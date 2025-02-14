@@ -1,6 +1,4 @@
-﻿using System.IO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
@@ -37,10 +35,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 
             using var stream = new MemoryStream(file.GetBytes());
 
-
             var list = filePath.EndsWith(".xml")
-                ? GetRecordsFromXml(pageModel, stream)
-                : GetRecordsFromCsv(pageModel, stream)
+                ? GetRecordsFromXml(stream)
+                : GetRecordsFromCsv(stream);
 
             fsRepository.Delete(filePath);
 
@@ -58,7 +55,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             return null;
         }
 
-        private static EntityRecordList GetRecordsFromXml(BaseErpPageModel pageModel, Stream stream)
+        private static EntityRecordList GetRecordsFromXml(Stream stream)
         {
             var articles = EplanXml.GetArticles(stream);
 
@@ -71,20 +68,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             return list;
         }
 
-        private static EntityRecordList GetRecordsFromCsv(BaseErpPageModel pageModel, Stream stream)
+        private static EntityRecordList GetRecordsFromCsv(Stream stream)
         {
-            var sr = new StreamReader(stream);
+            var articles = Csv.GetArticles(stream);
 
-            var header = sr.ReadLine();
-            
-            var hasPartNumber = 
+            var list = new EntityRecordList { TotalCount = articles.Count };
+            var importResult = ArticleImportResult.FromCsvArticles(articles);
 
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
+                list.Add(GetRecord(res));
 
-
-
-            var list = new EntityRecordList { TotalCount = Articles.Count };
-
-
+            return list;
         }
 
         private static IActionResult? Error(BaseErpPageModel pageModel, string message)

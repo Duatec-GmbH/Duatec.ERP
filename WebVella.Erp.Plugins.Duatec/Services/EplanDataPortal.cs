@@ -9,7 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         private static DateTimeOffset _validUntil = DateTimeOffset.Now;
         private static readonly List<DataPortalManufacturerDto> _manufacturers = new(500);
 
-        private static string GetArticleByPartNumberUrl(string partNumber)
+        private static string GetArticleSearchUrl(string partNumber)
             => $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
 
         private static string GetArticleByIdUrl(long id)
@@ -56,19 +56,36 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static DataPortalArticleDto? GetArticleByPartNumber(string partNumber)
         {
-            var url = GetArticleByPartNumberUrl(partNumber);
+            var url = GetArticleSearchUrl(partNumber);
 
             var json = JsonFromUrl(url);
 
-            return DataPortalArticleDto.FromJson(json, partNumber);
+            return DataPortalArticleDto.FromJsonByPartNumber(json, partNumber);
+        }
+
+        public static DataPortalArticleDto? GetArticleByOrderNumber(string orderNumber)
+        {
+            var url = GetArticleSearchUrl(orderNumber);
+
+            var json = JsonFromUrl(url);
+
+            return DataPortalArticleDto.FromJsonByOrderNumber(json, orderNumber);
         }
 
         public static async Task<DataPortalArticleDto?> GetArticleByPartNumberAsync(string partNumber)
         {
-            var url = GetArticleByPartNumberUrl(partNumber);
+            var url = GetArticleSearchUrl(partNumber);
 
             return await JsonFromUrlAsync(url)
-                .ContinueWith(n => DataPortalArticleDto.FromJson(n.Result, partNumber));
+                .ContinueWith(n => DataPortalArticleDto.FromJsonByPartNumber(n.Result, partNumber));
+        }
+
+        public static async Task<DataPortalArticleDto?> GetArticleByOrderNumberAsync(string orderNumber)
+        {
+            var url = GetArticleSearchUrl(orderNumber);
+
+            return await JsonFromUrlAsync(url)
+                .ContinueWith(n => DataPortalArticleDto.FromJsonByOrderNumber(n.Result, orderNumber));
         }
 
         public static Dictionary<string, DataPortalArticleDto?> GetArticlesByPartNumber(params string[] partNumbers)
@@ -83,13 +100,25 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             return Task.WhenAll(tasks).Result.ToDictionary(t => t.PartNumber, t => t.Article);
         }
 
+        public static Dictionary<string, DataPortalArticleDto?> GetArticlesByOrderNumber(params string[] orderNumbers)
+        {
+            if (orderNumbers.Length == 0)
+                return [];
+
+            var tasks = orderNumbers
+                .Select(async on => new { OrderNumber = on, Article = await GetArticleByOrderNumberAsync(on) })
+                .ToArray();
+
+            return Task.WhenAll(tasks).Result.ToDictionary(t => t.OrderNumber, t => t.Article);
+        }
+
         public static DataPortalArticleDto? GetArticleById(long id)
         {
             var url = GetArticleByIdUrl(id);
 
             var json = JsonFromUrl(url);
 
-            return DataPortalArticleDto.FromJson(json, id);
+            return DataPortalArticleDto.FromJsonById(json, id);
         }
 
         private static JsonNode? JsonFromUrl(string url)

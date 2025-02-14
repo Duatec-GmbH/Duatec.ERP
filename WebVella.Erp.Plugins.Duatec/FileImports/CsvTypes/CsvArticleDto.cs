@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WebVella.Erp.Plugins.Duatec.FileImports.CsvTypes
+﻿namespace WebVella.Erp.Plugins.Duatec.FileImports.CsvTypes
 {
     internal class CsvArticleDto
     {
+        public CsvArticleDto(string partNumber, string orderNumber, string typeNumber, string manufacturerShortName, int amount)
+        {
+            PartNumber = partNumber;
+            OrderNumber = orderNumber;
+            TypeNumber = typeNumber;
+            ManufacturerShortName = manufacturerShortName;
+            Amount = amount;
+        }
+
         public string PartNumber { get; }
 
         public string OrderNumber { get; }
@@ -15,5 +18,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports.CsvTypes
         public string TypeNumber { get; }
 
         public string ManufacturerShortName { get; }
+
+        public int Amount { get; }
     }
 }

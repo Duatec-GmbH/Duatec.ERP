@@ -32,6 +32,37 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<string, Article?> FindMany(string select = "*", params string[] partNumbers)
             => FindManyByUniqueArgs(Article.Fields.PartNumber, select, partNumbers);
 
+        public Dictionary<string, List<Article>> FindManyByOrderNumbers(string select = "*", params string[] orderNumbers)
+        {
+            if (orderNumbers.Length == 0)
+                return [];
+
+            var subQueries = orderNumbers.Select(orderNumber => new QueryObject()
+            {
+                FieldName = Article.Fields.OrderNumber,
+                FieldValue = orderNumber,
+                QueryType = QueryType.EQ,
+            }).ToList();
+
+            var query = subQueries.Count == 1 ? subQueries[0] : new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = subQueries
+            };
+
+            var resultSet = FindManyByQuery(query, select)
+                .GroupBy(a => a.OrderNumber)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach(var orderNumber in orderNumbers)
+            {
+                if (!resultSet.ContainsKey(orderNumber))
+                    resultSet.Add(orderNumber, []);
+            }
+            return resultSet;
+        }
+
+
         public override Article? Delete(Guid id)
         {
             var alternatives = FindAlternativeIds(id);

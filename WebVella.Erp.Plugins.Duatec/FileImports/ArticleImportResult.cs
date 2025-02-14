@@ -1,4 +1,5 @@
 ﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.Plugins.Duatec.FileImports.CsvTypes;
 using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
@@ -44,15 +45,150 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
 
         public string[] AvailableActions { get; }
 
+
+        public static List<ArticleImportResult> FromCsvArticles(List<CsvArticleDto> csvArticles)
+        {
+            if (csvArticles.Count == 0)
+                return [];
+
+            var partNumbers = csvArticles
+                .Select(a => a.PartNumber)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToArray();
+
+            var orderNumbers = csvArticles
+                .Select(a => a.OrderNumber)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToArray();
+
+            var articleRepo = new ArticleRepository();
+
+            var articlesByPartNumber = partNumbers.Length > 0 
+                ? articleRepo.FindMany(partNumbers: partNumbers) : [];
+
+            var articlesByOrderNumber = orderNumbers.Length > 0
+                ? articleRepo.FindManyByOrderNumbers(orderNumbers: orderNumbers) : [];
+
+            var orderArticlesFlattened = articlesByOrderNumber
+                .Where(kp => kp.Value != null)
+                .SelectMany(kp => kp.Value);
+
+            foreach (var dbArticle in orderArticlesFlattened)
+            {
+                if (!articlesByPartNumber.TryGetValue(dbArticle.PartNumber, out var a) || a == null)
+                    articlesByPartNumber[dbArticle.PartNumber] = a; 
+            }
+
+            foreach(var dbArticle in articlesByPartNumber.Values.Where(a => a != null))
+            {
+                if(!articlesByOrderNumber.TryGetValue(dbArticle!.OrderNumber, out var l))
+                    articlesByOrderNumber.Add(dbArticle.OrderNumber, [ dbArticle ]);
+
+                else if(!l.Exists(dbA => dbA.PartNumber == dbArticle.PartNumber))
+                    l.Add(dbArticle);
+            }
+
+            partNumbers = articlesByPartNumber
+                .Where(kp => kp.Value == null)
+                .Select(kp => kp.Key)
+                .ToArray();
+
+            var edpArticlesByPartNumber = GetDataPortalArticlesByPartNumber(partNumbers);
+
+            orderNumbers = articlesByOrderNumber
+                .Where(kp => kp.Value == null || kp.Value.Count == 0)
+                .Select(kp => kp.Key)
+                .Intersect(articlesByPartNumber.Values.Where(a => a != null).Select(a => a!.OrderNumber))
+                .ToArray();
+
+            var edpArticlesByOrderNumber = GetDataPortalArticlesByOrderNumber(orderNumbers);
+
+            var result = new List<ArticleImportResult>(csvArticles.Count);
+            
+            foreach(var article in csvArticles)
+            {
+                var dbArticle = GetDbArticle(article, articlesByPartNumber, articlesByOrderNumber);
+                var edpArticle = GetDataPortalArticle(article, edpArticlesByPartNumber, edpArticlesByOrderNumber);
+
+                ArticleImportResult importResult;
+
+                //if(IsInvalid(article, articlesByPartNumber, edpArticlesByPartNumber, articlesByOrderNumber, edpArticlesByOrderNumber))
+                //{
+                //    importResult = new(
+                //        partNumber: !string.IsNullOrEmpty(article.PartNumber) ? article.PartNumber : "-",
+                //        typeNumber: article.TypeNumber,
+                //        orderNumber: !string.IsNullOrEmpty(article.OrderNumber) ? article.OrderNumber : "-",
+                //        designation: "-",
+                //        type: Article.DefaultType,
+                //        deviceTags: [],
+                //        amount: article.Amount,
+                //        importState: ArticleImportState.UnknownArticle,
+                //        action: ArticleImportAction.Default(ArticleImportState.UnknownArticle),
+                //        availableActions: ArticleImportAction.AvailableActions(ArticleImportState.UnknownArticle));
+                //}
+                //else
+                //{
+                //    var partNumber = !string.IsNullOrEmpty(article.PartNumber) ? article.PartNumber : "-"
+                //}
+
+                //result.Add(importResult);
+
+                // TODO
+            }
+
+            return result;
+
+        }
+
+        private static Article? GetDbArticle(CsvArticleDto article, Dictionary<string, Article?> partNumberLookup, Dictionary<string, List<Article>> orderNumberLookup)
+        {
+            if (string.IsNullOrWhiteSpace(article.PartNumber) && string.IsNullOrWhiteSpace(article.OrderNumber))
+                return null;
+
+            if (partNumberLookup.TryGetValue(article.PartNumber, out var a) && a != null)
+                return a;
+
+            if(orderNumberLookup.TryGetValue(article.OrderNumber, out var l) && l != null && l.Count == 1)
+                return l[0];
+
+            return null;
+        }
+
+        private static DataPortalArticleDto? GetDataPortalArticle(CsvArticleDto article,
+            Dictionary<string, DataPortalArticleDto?> partNumberLookup, 
+            Dictionary<string, DataPortalArticleDto?> orderNumberLookup)
+        {
+            if (string.IsNullOrWhiteSpace(article.PartNumber) && string.IsNullOrWhiteSpace(article.OrderNumber))
+                return null;
+
+            if (partNumberLookup.TryGetValue(article.PartNumber, out var a) && a != null)
+                return a;
+
+            if (orderNumberLookup.TryGetValue(article.OrderNumber, out a) && a != null)
+                return a;
+
+            return null;
+        }
+
+
         public static List<ArticleImportResult> FromEplanArticles(List<EplanArticleDto> eplanArticles)
         {
             if (eplanArticles.Count == 0)
                 return [];
 
+            var partNumbers = eplanArticles
+                .Select(a => a.PartNumber)
+                .Distinct()
+                .ToArray();
 
-            var partNumbers = GetPartNumbers(eplanArticles);
             var dbArticles = new ArticleRepository().FindMany(partNumbers: partNumbers);
-            var edpArticles = GetDataPortalArticles(partNumbers, dbArticles);
+            partNumbers = partNumbers
+                .Where(pn => !dbArticles.TryGetValue(pn, out var a) || a == null)
+                .ToArray();
+
+            var edpArticles = GetDataPortalArticlesByPartNumber(partNumbers);
 
             var result = new List<ArticleImportResult>(eplanArticles.Count);
 
@@ -84,44 +220,37 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
             return result;
         }
 
-        private static string[] GetPartNumbers(List<EplanArticleDto> eplanArticles)
-        {
-            var result = eplanArticles
-                .Select(a => a.PartNumber)
-                .Distinct()
-                .ToArray();
-
-            if (result.Length != eplanArticles.Count)
-                throw new ArgumentException($"argument '{nameof(eplanArticles)}' must not contain multiple articles with equal part numbers");
-
-            return result;
-        }
-
-        private static Dictionary<string, DataPortalArticleDto?> GetDataPortalArticles(string[] partNumbers, Dictionary<string, Article?> dbArticles)
+        private static Dictionary<string, DataPortalArticleDto?> GetDataPortalArticlesByPartNumber(string[] partNumbers)
         {
             var result = partNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticleDto?));
 
-            var edpPartNumbers = partNumbers
-                .Where(pn => dbArticles[pn] == null)
-                .ToArray();
-
-            if (edpPartNumbers.Length == 0)
+            if (partNumbers.Length == 0)
                 return result;
 
-            var edpArticles = EplanDataPortal.GetArticlesByPartNumber(edpPartNumbers);
-
-            foreach (var (key, val) in edpArticles)
-                result[key] = val;
-
-            return result;
+            return EplanDataPortal.GetArticlesByPartNumber(partNumbers);
         }
 
+        private static Dictionary<string, DataPortalArticleDto?> GetDataPortalArticlesByOrderNumber(string[] orderNumbers)
+        {
+            var result = orderNumbers.ToDictionary(pn => pn, _ => default(DataPortalArticleDto?));
+
+            if (orderNumbers.Length == 0)
+                return result;
+
+            return EplanDataPortal.GetArticlesByOrderNumber(orderNumbers);
+        }
+
+        //private static ArticleImportState GetArticleState(CsvArticleDto article, DataPortalArticleDto? edpArticle, Article dbArticle)
+        //{
+        //    // TODO
+        //}
+
         private static ArticleImportState GetArticleState(EplanArticleDto article,
-            DataPortalArticleDto? edpArticle, EntityRecord? dbRecord)
+            DataPortalArticleDto? edpArticle, Article? dbRecord)
         {
             if (IsValidDbArticle(article, dbRecord))
             {
-                return (bool)dbRecord![Article.Fields.IsBlocked]
+                return dbRecord!.IsBlocked
                     ? ArticleImportState.BlockedArticle
                     : ArticleImportState.DbArticle;
             }

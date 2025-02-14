@@ -32,12 +32,17 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
 
         public string PictureUrl { get; }
 
-        public static DataPortalArticleDto? FromJson(JsonNode? json, string partNumber)
+        public static DataPortalArticleDto? FromJsonByPartNumber(JsonNode? json, string partNumber)
         {
             return FromJson(json, partNumber, GetDataFromPartNumber);
         }
 
-        public static DataPortalArticleDto? FromJson(JsonNode? json, long id)
+        public static DataPortalArticleDto? FromJsonByOrderNumber(JsonNode? json, string orderNumber)
+        {
+            return FromJson(json, orderNumber, GetDataFromOrderNumber);
+        }
+
+        public static DataPortalArticleDto? FromJsonById(JsonNode? json, long id)
         {
             return FromJson(json, id, GetDataFromId);
         }
@@ -77,6 +82,12 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
             return GetData(json, partNumber, IdFromNode);
         }
 
+        private static JsonNode? GetDataFromOrderNumber(JsonNode? json, string orderNumber)
+        {
+            static string IdFromNode(JsonNode? n) => $"{n?["attributes"]?["order_number"]}";
+            return GetData(json, orderNumber, IdFromNode);
+        }
+
         private static JsonNode? GetDataFromId(JsonNode? json, long id)
         {
             static string IdFromNode(JsonNode? n) => $"{n?["id"]}";
@@ -88,7 +99,6 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
             var data = json?["data"];
             if (data is JsonArray jArr)
             {
-                var idString = id.ToString();
                 var arr = jArr
                     .Where(n => idFromNode(n) == id)
                     .ToArray();
