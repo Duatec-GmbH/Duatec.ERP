@@ -1,6 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
@@ -14,6 +16,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<Order> FindManyByProject(Guid projectId, string select = "*")
             => FindManyBy(Order.Fields.Project, projectId, select);
+
+        public override Order? Delete(Guid id)
+        {
+            DeleteConfirmations(id);
+            return base.Delete(id);
+        }
 
         public List<Order> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
         {
@@ -99,6 +107,37 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             };
 
             return FindManyEntriesByQuery(query, select);
+        }
+
+        public List<OrderConfirmation> InsertConfirmations(List<OrderConfirmation> confirmations)
+        {
+            var result = new List<OrderConfirmation>(confirmations.Count);
+            foreach(var confirmation in confirmations)
+            {
+                var rec = RepositoryHelper.Insert(RecordManager, OrderConfirmation.Entity, confirmation);
+                result.Add(TypedEntityRecordWrapper.Wrap<OrderConfirmation>(rec));
+            }
+            return result;
+        }
+
+        public void DeleteConfirmations(Guid orderId)
+        {
+            var files = FindConfirmations(orderId);
+            if (files.Count == 0)
+                return;
+
+            var ids = files.Select(f => f.Id!.Value)
+                .ToArray();
+
+            foreach (var id in ids)
+                RepositoryHelper.Delete(RecordManager, OrderConfirmation.Entity, id);
+        }
+
+        public List<OrderConfirmation> FindConfirmations(Guid orderId)
+        {
+            return RepositoryHelper.FindManyBy(RecordManager, OrderConfirmation.Entity, OrderConfirmation.Fields.OrderId, orderId)
+                .Select(TypedEntityRecordWrapper.Wrap<OrderConfirmation>)
+                .ToList();
         }
 
         private QueryObject? OrdersByProjectQuery(Guid projectId)

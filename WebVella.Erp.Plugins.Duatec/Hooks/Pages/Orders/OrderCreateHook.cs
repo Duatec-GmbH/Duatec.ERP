@@ -25,6 +25,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             foreach (var error in base.ValidateEntries(record, entries))
                 yield return error;
 
+            if (!record.GetProject().RequiresPartList)
+                yield break;
+
             var partListRepos = new PartListRepository();
 
             var demands = partListRepos.FindManyEntriesByProject(record.Project, true)
@@ -40,18 +43,32 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             }
         }
 
-        protected override void PersistanceAction(Order record, List<OrderEntry> entries)
+        protected override void PersistanceAction(RecordCreatePageModel pageModel, Order record, List<OrderEntry> entries)
         {
             foreach (var entry in entries)
                 entry.Order = record.Id!.Value;
 
             var repository = new OrderRepository();
 
-            if (repository.Insert(record) == null)
-                throw new DbException("Could not create order record");
+            record = repository.Insert(record)
+                ?? throw new DbException("Could not create order record");
 
-            if(repository.InsertManyEntries(entries).Count != entries.Count)
+            if (repository.InsertManyEntries(entries).Count != entries.Count)
                 throw new DbException("Could not create order entry records");
+
+            var files = pageModel.Request.Form["confirmations"].ToString();
+            if (!string.IsNullOrEmpty(files))
+            {
+                var confirmations = files.Split(',')
+                    .Select(path => new OrderConfirmation()
+                    {
+                        File = path,
+                        OrderId = record.Id!.Value,
+                    }).ToList();
+
+                if (repository.InsertConfirmations(confirmations).Count != confirmations.Count)
+                    throw new DbException("Could not insert confirmation files");
+            }
         }
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)

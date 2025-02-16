@@ -32,6 +32,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
+            if (pageSize <= 0)
+            {
+                pageSize = int.MaxValue;
+                page = 1;
+            }
             var shortName = (string?)arguments[Arguments.ShortName];
             var name = (string?)arguments[Arguments.Name];
 

@@ -9,6 +9,7 @@ using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Hooks;
+using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 {
@@ -20,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
         protected override List<ValidationError> ValidateRecord(Order record)
             => ValidationService.ValidateOnUpdate(record);
 
-        protected override void PersistanceAction(Order record, List<OrderEntry> entries)
+        protected override void PersistanceAction(RecordManagePageModel pageModel, Order record, List<OrderEntry> entries)
         {
             foreach (var entry in entries)
                 entry.Order = record.Id!.Value;
@@ -44,6 +45,54 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 .ToHashSet();
 
             AddEntries(repository, entries, oldArticleIds);
+
+            repository.DeleteConfirmations(record.Id!.Value);
+
+            var files = pageModel.Request.Form["confirmations"].ToString();
+            if (!string.IsNullOrEmpty(files))
+            {
+                var confirmations = files.Split(',')
+                    .Select(path => new OrderConfirmation()
+                    {
+                        File = path,
+                        OrderId = record.Id!.Value,
+                    }).ToList();
+
+                if (repository.InsertConfirmations(confirmations).Count != confirmations.Count)
+                    throw new DbException("Could not insert confirmation files");
+            }
+        }
+
+        protected override IEnumerable<ValidationError> ValidateEntries(Order record, List<OrderEntry> entries)
+        {
+            foreach (var error in base.ValidateEntries(record, entries))
+                yield return error;
+
+            if (!record.GetProject().RequiresPartList)
+                yield break;
+
+            var recMan = new RecordManager();
+            var orderRepo = new OrderRepository(recMan);
+            var partListRepo = new PartListRepository(recMan);
+
+            var oldEntries = orderRepo.FindManyEntriesByOrder(record.Id!.Value)
+                .Select(r => r.Article)
+                .Distinct()
+                .ToHashSet();
+
+            var demands = partListRepo.FindManyEntriesByProject(record.Project, true)
+                .Select(ple => ple.ArticleId)
+                .Distinct()
+                .ToHashSet();
+
+            var index = 0;
+            foreach(var articleId in entries.Select(e => e.Article))
+            {
+                // only check on new entries
+                if (articleId != Guid.Empty && !oldEntries.Contains(articleId) && !demands.Contains(articleId))
+                    yield return Error(OrderEntry.Fields.Article, index, "There is no demand on given article");
+                index++;
+            }
         }
 
         private static void DeleteEntries(OrderRepository repository, List<OrderEntry> oldEntries, HashSet<Guid> newArticleIds)

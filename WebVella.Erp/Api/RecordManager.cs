@@ -19,7 +19,6 @@ namespace WebVella.Erp.Api
 	public class RecordManager
 	{
 		private const char RELATION_SEPARATOR = '.';
-		private const char RELATION_NAME_RESULT_SEPARATOR = '$';
 
 		private readonly EntityManager entityManager;
 		private readonly EntityRelationManager entityRelationManager;

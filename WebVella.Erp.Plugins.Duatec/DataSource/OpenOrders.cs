@@ -35,6 +35,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
+            if (pageSize <= 0)
+            {
+                pageSize = int.MaxValue;
+                page = 1;
+            }
 
             var recMan = new RecordManager();
             var orderRepo = new OrderRepository(recMan);

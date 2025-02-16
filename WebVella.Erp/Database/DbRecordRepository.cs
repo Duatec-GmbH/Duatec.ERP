@@ -114,8 +114,6 @@ namespace WebVella.Erp.Database
 						fieldLookup.Add(property.Key, field);
 					}
 
-					var param = new KeyValuePair<string, object>($"{property.Key}", property.Value);
-
 					return CreateInsertparameter(property, field);
 
 				}).ToList()

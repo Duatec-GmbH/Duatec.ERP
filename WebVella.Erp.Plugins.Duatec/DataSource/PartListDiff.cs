@@ -47,6 +47,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var pl2Id = arguments[Arguments.PartList2] as Guid? ?? Guid.Empty;
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
+            if (pageSize <= 0)
+            {
+                pageSize = int.MaxValue;
+                page = 1;
+            }
 
             var entries = ApplyFilters(arguments, Execute(pl1Id, pl2Id)).ToArray();
             var result = new EntityRecordList { TotalCount = entries.Length };

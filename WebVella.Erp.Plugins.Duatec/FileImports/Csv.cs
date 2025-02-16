@@ -2,7 +2,7 @@
 
 namespace WebVella.Erp.Plugins.Duatec.FileImports
 {
-    internal class Csv
+    internal static class Csv
     {
         public static List<CsvArticleDto> GetArticles(Stream stream)
         {
@@ -18,8 +18,6 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
 
             var partNumberIndex = Array.IndexOf(headers, "part_number");
             var orderNumberIndex = Array.IndexOf(headers, "order_number");
-            var manufacturerIndex = Array.IndexOf(headers, "manufacturer");
-            var typeNumberIndex = Array.IndexOf(headers, "type_number");
             var amountIndex = Array.IndexOf(headers, "amount");
 
             var result = new List<CsvArticleDto>();
@@ -33,8 +31,6 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 var csvArticle = new CsvArticleDto(
                     partNumber: GetValue(cols, partNumberIndex),
                     orderNumber: GetValue(cols, orderNumberIndex),
-                    typeNumber: GetValue(cols, typeNumberIndex),
-                    manufacturerShortName: GetValue(cols, manufacturerIndex),
                     amount: GetAmount(cols, amountIndex));
 
                 result.Add(csvArticle);
@@ -43,7 +39,6 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
             }
             return result;
         }
-
 
         private static int GetAmount(string[] line, int index)
         {

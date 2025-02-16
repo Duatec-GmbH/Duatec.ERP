@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Api;
-using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Web.Hooks;
@@ -10,7 +8,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {
-    using Row = (string PartNumber, string DeviceTag, bool Import, decimal Amount);
+    using Row = (string PartNumber, bool Import, decimal Amount);
 
     [HookAttachment(key: HookKeys.PartList.Import)]
     internal class PartListImportHook : IPageHook
@@ -64,12 +62,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
         {
             var partNumbers = pageModel.GetFormValues(Article.Fields.PartNumber);
             var importValues = pageModel.GetFormValues("import");
-            var deviceTags = pageModel.GetFormValues(PartListEntry.Fields.DeviceTag);
             var amounts = pageModel.GetFormValues(PartListEntry.Fields.Amount);
 
             rows = new List<Row>(partNumbers.Length);
 
-            if (partNumbers.Length != importValues.Length || partNumbers.Length != deviceTags.Length || partNumbers.Length != amounts.Length)
+            if (partNumbers.Length != importValues.Length || partNumbers.Length != amounts.Length)
                 return false;
 
             for (var i = 0; i < partNumbers.Length; i++)
@@ -81,7 +78,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                     return false;
 
                 if (import && amount > 0)
-                    rows.Add(new(partNumbers[i], deviceTags[i], import, amount));
+                    rows.Add(new(partNumbers[i], import, amount));
             }
 
             return true;
@@ -118,21 +115,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 Id = Guid.NewGuid(),
                 PartListId = partListId,
                 ArticleId = articleLookup[g.Key].Id!.Value,
-                DeviceTag = AggregateDeviceTags(g),
+                DeviceTag = string.Empty,
                 Amount = g.Sum(r => r.Amount)
             };
-        }
-
-        private static string AggregateDeviceTags(IEnumerable<Row> group)
-        {
-            var entries = group
-                .SelectMany(r => r.DeviceTag.Split('\n')
-                    .Select(s => s.TrimEnd('\r').Trim())
-                    .Where(s => s != "-"))
-                .Where(t => !string.IsNullOrWhiteSpace(t))
-                .Order();
-
-            return string.Join(Environment.NewLine, entries);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             var articles = EplanXml.GetArticles(stream);
 
             var list = new EntityRecordList { TotalCount = articles.Count };
-            var importResult = ArticleImportResult.FromEplanArticles(articles);
+            var importResult = ArticleImportResultList.FromEplanArticles(articles);
 
             foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
                 list.Add(GetRecord(res));
@@ -73,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             var articles = Csv.GetArticles(stream);
 
             var list = new EntityRecordList { TotalCount = articles.Count };
-            var importResult = ArticleImportResult.FromCsvArticles(articles);
+            var importResult = ArticleImportResultList.FromCsvArticles(articles);
 
             foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
                 list.Add(GetRecord(res));

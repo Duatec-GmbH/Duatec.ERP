@@ -221,6 +221,9 @@ namespace WebVella.Erp.Eql
 										if (!Int32.TryParse((param.Value ?? string.Empty).ToString(), out number))
 											throw new EqlException($"PAGESIZE: Invalid parameter '{paramName}' value '{param.Value}'.");
 
+										if (number <= 0)
+											number = int.MaxValue;
+
 										selectNode.PageSize.Number = number;
 									}
 									break;

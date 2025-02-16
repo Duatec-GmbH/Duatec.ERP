@@ -473,7 +473,7 @@ namespace WebVella.Erp.Database
 				string sql = $"CREATE INDEX IF NOT EXISTS \"{indexName}\" ON \"{tableName}\" (\"{columnName}\"";
 				if (unique)
 					sql = $"CREATE UNIQUE INDEX IF NOT EXISTS \"{indexName}\" ON \"{tableName}\" (\"{columnName}\"";
-				if (field != null && field is GeographyField)
+				if (field is GeographyField)
 					sql = $"CREATE INDEX IF NOT EXISTS \"{indexName}\" ON \"{tableName}\" USING GIST(\"{columnName}\"";
 				if (!ascending)
 					sql = sql + " DESC";
@@ -582,7 +582,7 @@ namespace WebVella.Erp.Database
 			{
 				NpgsqlCommand command = connection.CreateCommand("");
 
-				var parameter = command.CreateParameter() as NpgsqlParameter;
+				var parameter = command.CreateParameter();
 				parameter.ParameterName = "id";
 				parameter.Value = id;
 				parameter.NpgsqlDbType = NpgsqlDbType.Uuid;
@@ -687,7 +687,7 @@ namespace WebVella.Erp.Database
 		}
 
 		private static string GetColumns(List<DbParameter> parameters)
-			=> string.Join(", ", parameters.Select(p => p.Name));
+			=> string.Join(", ", parameters.Select(p => $"\"{p.Name}\""));
 
 		private static string GetInsertValues(List<DbParameter> parameters, int index = -1)
 		{

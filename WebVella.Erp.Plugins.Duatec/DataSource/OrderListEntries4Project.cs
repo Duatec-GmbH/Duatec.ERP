@@ -83,7 +83,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var result = new EntityRecordList();
 
             if (pageSize <= 0)
+            {
                 pageSize = filtered.Count;
+                page = 1;
+            }
             result.AddRange(filtered.Skip((page - 1) * pageSize).Take(pageSize));
             result.TotalCount = filtered.Count;
 

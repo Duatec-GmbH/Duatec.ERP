@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
     {
         protected abstract string RelationName { get; }
 
-        protected abstract void PersistanceAction(TCollection record, List<TEntry> entries);
+        protected abstract void PersistanceAction(TModel pageModel, TCollection record, List<TEntry> entries);
 
         protected abstract List<ValidationError> ValidateRecord(TCollection record);
 
@@ -39,7 +39,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
             var entries = GetEntries(pageModel);
 
             void TransactionalAction()
-                => PersistanceAction(record, entries);
+                => PersistanceAction(pageModel, record, entries);
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
                 return FailureResult(record, pageModel, entries, []);

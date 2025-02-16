@@ -27,36 +27,48 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
             var fsRepository = new DbFileRepository();
 
-            if (!filePath.EndsWith(".xml"))
-                return Error(pageModel, "Only xml files are supported");
+            if (!filePath.EndsWith(".xml") && !filePath.EndsWith(".csv"))
+                return Error(pageModel, "Only xml and csv files are supported");
 
             var file = fsRepository.Find(filePath);
             if (file == null)
                 return Error(pageModel, "File not found");
 
             using var stream = new MemoryStream(file.GetBytes());
-            var articles = EplanXml.GetArticles(stream);
 
-            fsRepository.Delete(filePath);
+            var importResult = filePath.EndsWith(".xml")
+                ? FromXml(stream)
+                : FromCsv(stream);
 
-            if (articles.Count == 0)
+            if (importResult.Count == 0)
                 return Error(pageModel, "File does not contain any articles");
 
-            if (articles.DistinctBy(a => a.PartNumber).Count() != articles.Count)
-                return pageModel.BadRequest();
+            var list = new EntityRecordList { TotalCount = importResult.Count };
 
-            var record = new EntityRecord();
-            var list = new EntityRecordList { TotalCount = articles.Count };
-
-            record["articles"] = list;
-
-            var importResult = ArticleImportResult.FromEplanArticles(articles);
             foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
                 list.Add(GetRecord(res));
 
+            fsRepository.Delete(filePath);
+
+            var record = new EntityRecord();
+            record["articles"] = list;
             pageModel.DataModel.SetRecord(record);
 
             return null;
+        }
+
+        private static List<ArticleImportResult> FromXml(Stream stream)
+        {
+            var articles = EplanXml.GetArticles(stream);
+
+            return ArticleImportResultList.FromEplanArticles(articles);
+        }
+
+        private static List<ArticleImportResult> FromCsv(Stream stream)
+        {
+            var articles = Csv.GetArticles(stream);
+
+            return ArticleImportResultList.FromCsvArticles(articles);
         }
 
         private static IActionResult? Error(BaseErpPageModel pageModel, string message)
@@ -71,29 +83,25 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             var rec = new EntityRecord();
 
             var deviceTag = string.Join(Environment.NewLine, article.DeviceTags);
-            if (string.IsNullOrWhiteSpace(deviceTag))
-                deviceTag = "-";
+            var partNumber = string.IsNullOrWhiteSpace(article.PartNumber)
+                ? "-" : article.PartNumber;
 
-            rec[Article.Fields.PartNumber] = article.PartNumber;
+            rec[Article.Fields.PartNumber] = partNumber;
             rec[Article.Fields.OrderNumber] = article.OrderNumber;
             rec[Article.Fields.TypeNumber] = article.TypeNumber;
             rec[Article.Fields.Designation] = article.Designation;
             rec[PartListEntry.Fields.DeviceTag] = deviceTag;
             rec[PartListEntry.Fields.Amount] = article.Amount;
             rec["import_state"] = article.ImportState;
-            rec["import"] = GetDefaultImportValueFromState(article.ImportState);
+            rec["import"] = GetDefaultImportState(article.ImportState, article.Amount);
 
             return rec;
         }
 
-        private static bool GetDefaultImportValueFromState(ArticleImportState state)
+        private static bool GetDefaultImportState(ArticleImportState state, decimal amount)
         {
-            return state switch
-            {
-                ArticleImportState.DbArticle => true,
-                ArticleImportState.InvalidDbArticle => true,
-                _ => false
-            };
+            return amount > 0
+                && (state == ArticleImportState.DbArticle || state == ArticleImportState.InvalidDbArticle);
         }
     }
 }
