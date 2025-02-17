@@ -46,21 +46,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 
             AddEntries(repository, entries, oldArticleIds);
 
-            repository.DeleteConfirmations(record.Id!.Value);
-
-            var files = pageModel.Request.Form["confirmations"].ToString();
-            if (!string.IsNullOrEmpty(files))
-            {
-                var confirmations = files.Split(',')
-                    .Select(path => new OrderConfirmation()
-                    {
-                        File = path,
-                        OrderId = record.Id!.Value,
-                    }).ToList();
-
-                if (repository.InsertConfirmations(confirmations).Count != confirmations.Count)
-                    throw new DbException("Could not insert confirmation files");
-            }
+            var confirmations = GetConfirmations(record, pageModel);
+            if(repository.UpdateConfirmations(record.Id.Value, confirmations).Count != confirmations.Count)
+                throw new DbException("Could not insert confirmation files");
         }
 
         protected override IEnumerable<ValidationError> ValidateEntries(Order record, List<OrderEntry> entries)
@@ -68,7 +56,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             foreach (var error in base.ValidateEntries(record, entries))
                 yield return error;
 
-            if (!record.GetProject().RequiresPartList)
+            if (record.Project == null || record.Project == Guid.Empty || !record.GetProject()!.RequiresPartList)
                 yield break;
 
             var recMan = new RecordManager();
@@ -80,7 +68,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 .Distinct()
                 .ToHashSet();
 
-            var demands = partListRepo.FindManyEntriesByProject(record.Project, true)
+            var demands = partListRepo.FindManyEntriesByProject(record.Project.Value, true)
                 .Select(ple => ple.ArticleId)
                 .Distinct()
                 .ToHashSet();
@@ -118,7 +106,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
         {
             foreach (var entry in oldEntries.Where(oe => newArticleIds.Contains(oe.Article)))
             {
-                entry.Amount = entries.Single(e => e.Article == entry.Article).Amount;
+                var newEntry = entries.Single(e => e.Article == entry.Article);
+
+                entry.Amount = newEntry.Amount;
+                entry.ExpectedArrival = newEntry.ExpectedArrival;
+
                 if (repository.UpdateEntry(entry) == null)
                     throw new DbException("Could not update entry");
             }

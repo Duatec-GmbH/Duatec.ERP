@@ -19,6 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Article = Entities.Article.AsForeignKey;
             public const string Order = "order_id";
             public const string Amount = "amount";
+            public const string ExpectedArrival = "expected_arrival";
         }
 
         public override string EntityName => Entity;
@@ -39,6 +40,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get(Fields.Amount, decimal.MinValue);
             set => Properties[Fields.Amount] = value;
+        }
+
+        public DateTime? ExpectedArrival
+        {
+            get => Get<DateTime?>(Fields.ExpectedArrival);
+            set => Properties[Fields.ExpectedArrival] = value;
         }
 
         public Article GetArticle()

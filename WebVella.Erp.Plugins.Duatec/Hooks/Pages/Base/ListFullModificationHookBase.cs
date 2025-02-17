@@ -56,7 +56,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
             return FailureResult(record, pageModel, entries, validationErrors);
         }
 
-        protected IActionResult FailureResult(TCollection record, TModel pageModel, List<TEntry> entries, List<ValidationError> validationErrors)
+        protected virtual IActionResult FailureResult(TCollection record, TModel pageModel, List<TEntry> entries, List<ValidationError> validationErrors)
         {
             pageModel.Validation.Errors.AddRange(validationErrors);
 

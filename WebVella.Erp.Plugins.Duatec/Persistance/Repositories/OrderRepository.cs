@@ -120,7 +120,37 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return result;
         }
 
-        public void DeleteConfirmations(Guid orderId)
+        public List<OrderConfirmation> UpdateConfirmations(Guid orderId, List<OrderConfirmation> confirmations)
+        {
+            if (confirmations.Count > 0)
+            {
+                if (!confirmations.TrueForAll(c => c.OrderId == orderId))
+                    throw new DbException("confirmations must be from same order");
+            }
+
+            var oldConfirmations = FindConfirmations(orderId);
+
+            var newConfirmations = confirmations
+                .Where(c => !oldConfirmations.Exists(con => c.path == con.path))
+                .ToList();
+
+            var toDelete = oldConfirmations
+                .Where(c => !confirmations.Exists(con => c.path == con.path))
+                .ToList();
+
+            var result = oldConfirmations
+                .Where(c => confirmations.Exists(con => c.path == con.path))
+                .ToList();
+
+            foreach (var c in toDelete)
+                RepositoryHelper.Delete(RecordManager, OrderConfirmation.Entity, c.Id!.Value);
+
+            result.AddRange(InsertConfirmations(newConfirmations));
+
+            return result;
+        }
+
+        private void DeleteConfirmations(Guid orderId)
         {
             var files = FindConfirmations(orderId);
             if (files.Count == 0)
@@ -132,8 +162,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             foreach (var id in ids)
                 RepositoryHelper.Delete(RecordManager, OrderConfirmation.Entity, id);
         }
-
-        public List<OrderConfirmation> FindConfirmations(Guid orderId)
+        
+        private List<OrderConfirmation> FindConfirmations(Guid orderId)
         {
             return RepositoryHelper.FindManyBy(RecordManager, OrderConfirmation.Entity, OrderConfirmation.Fields.OrderId, orderId)
                 .Select(TypedEntityRecordWrapper.Wrap<OrderConfirmation>)

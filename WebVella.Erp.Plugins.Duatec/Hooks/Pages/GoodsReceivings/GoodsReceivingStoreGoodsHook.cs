@@ -19,7 +19,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
     using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
-    [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
+    // not used now -> but comming soon
+    [Obsolete]
+    //[HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
     {
         const string entryKey = $"${GoodsReceiving.Relations.Entries}";
@@ -110,18 +112,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
         private static IEnumerable<InventoryEntry> GetDefaultEntries(GoodsReceiving record, RecordManager? recMan = null)
         {
-            recMan ??= new RecordManager();
+            //recMan ??= new RecordManager();
             
-            var partListRepo = new PartListRepository(recMan);
-            var inventoryRepo = new InventoryRepository(recMan);
-            var receivingRepo = new GoodsReceivingRepository(recMan);
-            var projectId = record.GetOrder().Project;
+            //var partListRepo = new PartListRepository(recMan);
+            //var inventoryRepo = new InventoryRepository(recMan);
+            //var receivingRepo = new GoodsReceivingRepository(recMan);
+            //var projectId = record.GetOrder().Project;
 
-            var demands = partListRepo.FindManyEntriesByProject(projectId, true)
-                .GroupBy(ple => ple.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
+            //var demands = partListRepo.FindManyEntriesByProject(projectId, true)
+            //    .GroupBy(ple => ple.ArticleId)
+            //    .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 
-            var reservedAmounts = inventoryRepo.GetReservedArticleAmountLookup(projectId);
+            //var reservedAmounts = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
             yield break;
 

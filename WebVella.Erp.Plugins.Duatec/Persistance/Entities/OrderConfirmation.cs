@@ -25,7 +25,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.OrderId] = value;
         }
 
-        public string File
+
+#pragma warning disable IDE1006
+        // must be like this because component multi file
+        public string path
+#pragma warning restore IDE1006
         {
             get => Get(Fields.File, string.Empty);
             set => Properties[Fields.File] = value;

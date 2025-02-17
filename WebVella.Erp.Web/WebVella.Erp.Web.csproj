@@ -43,6 +43,7 @@
 		<None Remove="Components\PcFieldMultiFileUpload\service.js" />
 		<None Remove="Components\PcFieldDataCsv\service.js" />
 		<None Remove="TagHelpers\WvFieldDatasource\form.js" />
+		<None Remove="TagHelpers\WvFieldFileMultipleNoLimits\form.js" />
 		<None Remove="TagHelpers\WvFieldUserFileMultiple\form.js" />
 		<None Remove="TagHelpers\WvFieldUserFileMultiple\inline-edit.js" />
 		<None Remove="TagHelpers\WvPageHeader\script.js" />
@@ -102,6 +103,7 @@
 		<EmbeddedResource Include="Components\PcRow\service.js" />
 		<EmbeddedResource Include="TagHelpers\WvDrawer\drawer.js" />
 		<EmbeddedResource Include="TagHelpers\WvFieldDatasource\form.js" />
+		<EmbeddedResource Include="TagHelpers\WvFieldFileMultipleNoLimits\form.js" />
 		<EmbeddedResource Include="TagHelpers\WvFieldUserFileMultiple\form.js" />
 		<EmbeddedResource Include="TagHelpers\WvFieldUserFileMultiple\inline-edit.js" />
 		<EmbeddedResource Include="TagHelpers\WvFilterBase\base.js" />

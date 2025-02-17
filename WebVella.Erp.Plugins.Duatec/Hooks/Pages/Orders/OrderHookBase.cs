@@ -1,4 +1,6 @@
-﻿using WebVella.Erp.Api;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
@@ -21,18 +23,42 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             {
                 var articleFormId = $"{OrderEntry.Fields.Article}[{i}]";
                 var amountFormId = $"{OrderEntry.Fields.Amount}[{i}]";
+                var arrivalFormId = $"{OrderEntry.Fields.ExpectedArrival}[{i}]";
+
                 var form = pageModel.Request.Form;
 
-                if (!form.ContainsKey(articleFormId) && !form.ContainsKey(amountFormId))
+                if (!form.ContainsKey(articleFormId))
                     break;
 
                 var entry = new OrderEntry()
                 {
                     Amount = GetNumber(pageModel.GetFormValue(amountFormId)),
                     Article = GetId(pageModel.GetFormValue(articleFormId)),
+                    ExpectedArrival = GetDate(pageModel.GetFormValue(arrivalFormId)),
                 };
                 result.Add(entry);
             }
+            return result;
+        }
+
+        protected override List<ValidationError> Validate(Order record, Entity entity, TModel pageModel)
+        {
+            var result = base.Validate(record, entity, pageModel);
+
+            for(var i = 0; i < int.MaxValue; i++)
+            {
+                var articleFormId = $"{OrderEntry.Fields.Article}[{i}]";
+                var arrivalFormId = $"{OrderEntry.Fields.ExpectedArrival}[{i}]";
+
+                if (!pageModel.Request.Form.ContainsKey(articleFormId))
+                    break;
+
+                var arrivalValue = pageModel.GetFormValue(arrivalFormId);
+
+                if (!string.IsNullOrWhiteSpace(arrivalValue) && !SimpleDate.TryParse(arrivalValue, out _))
+                    result.Add(Error(OrderEntry.Fields.ExpectedArrival, i, "Invalid date format (expected: DD.MM.YYYY)"));
+            }
+
             return result;
         }
 
@@ -113,6 +139,50 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 return 0m;
 
             return decimal.TryParse(value, out var d) ? d : decimal.MinValue;
+        }
+
+        private static DateTime? GetDate(string value)
+        {
+            if (string.IsNullOrEmpty(value) || !SimpleDate.TryParse(value, out var result))
+                return null;
+            return result;
+        }
+
+        protected static List<OrderConfirmation> GetConfirmations(Order record, TModel pageModel)
+        {
+            var files = pageModel.Request.Form["confirmations"].ToString();
+            if (string.IsNullOrWhiteSpace(files))
+                return [];
+
+            return files.Split(',')
+                .Select(path => new OrderConfirmation()
+                {
+                    path = path,
+                    OrderId = record.Id!.Value,
+                }).ToList();
+        }
+
+        protected static List<dynamic> GetDynamicConfirmations(Order record, TModel pageModel)
+        {
+            var confirmations = GetConfirmations(record, pageModel);
+            var result = new List<dynamic>(confirmations.Count);
+            foreach (var conf in confirmations)
+                result.Add(conf);
+            return result;
+        }
+
+        protected override IActionResult FailureResult(Order record, TModel pageModel, List<OrderEntry> entries, List<ValidationError> validationErrors)
+        {
+            record["confirmations"] = GetDynamicConfirmations(record, pageModel);
+
+            for(var i = 0; i < entries.Count; i++)
+            {
+                var arrivalFormId = $"{OrderEntry.Fields.ExpectedArrival}[{i}]";
+                if (pageModel.Request.Form.TryGetValue(arrivalFormId, out var arrivalValue))
+                    entries[i][OrderEntry.Fields.ExpectedArrival] = arrivalValue.ToString();
+            }
+
+            return base.FailureResult(record, pageModel, entries, validationErrors);
         }
     }
 }

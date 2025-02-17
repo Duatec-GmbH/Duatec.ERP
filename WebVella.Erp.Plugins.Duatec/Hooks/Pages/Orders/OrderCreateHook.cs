@@ -25,12 +25,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             foreach (var error in base.ValidateEntries(record, entries))
                 yield return error;
 
-            if (!record.GetProject().RequiresPartList)
+            if (record.Project == null || record.Project == Guid.Empty || !record.GetProject()!.RequiresPartList)
                 yield break;
 
             var partListRepos = new PartListRepository();
 
-            var demands = partListRepos.FindManyEntriesByProject(record.Project, true)
+            var demands = partListRepos.FindManyEntriesByProject(record.Project.Value, true)
                 .Select(ple => ple.ArticleId)
                 .Distinct()
                 .ToHashSet();
@@ -56,19 +56,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             if (repository.InsertManyEntries(entries).Count != entries.Count)
                 throw new DbException("Could not create order entry records");
 
-            var files = pageModel.Request.Form["confirmations"].ToString();
-            if (!string.IsNullOrEmpty(files))
-            {
-                var confirmations = files.Split(',')
-                    .Select(path => new OrderConfirmation()
-                    {
-                        File = path,
-                        OrderId = record.Id!.Value,
-                    }).ToList();
-
-                if (repository.InsertConfirmations(confirmations).Count != confirmations.Count)
-                    throw new DbException("Could not insert confirmation files");
-            }
+            var confirmations = GetConfirmations(record, pageModel);
+            if(confirmations.Count > 0 && repository.InsertConfirmations(confirmations).Count != confirmations.Count)
+                throw new DbException("Could not insert confirmation files");
         }
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)

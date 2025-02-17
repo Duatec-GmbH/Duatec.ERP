@@ -185,7 +185,7 @@ namespace WebVella.Erp.Site
 			app
 			.UseErpPlugin<SdkPlugin>()
             .UseErpPlugin<MailPlugin>()
-//            .UseErpPlugin<DuatecPlugin>()
+            .UseErpPlugin<DuatecPlugin>()
             .UseErp()
             .UseErpMiddleware()
             .UseJwtMiddleware();

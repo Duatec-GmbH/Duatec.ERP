@@ -12,8 +12,13 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Orders
         protected override object? GetValue(BaseErpPageModel pageModel)
         {
             var rec = pageModel.TryGetDataSourceProperty<EntityRecord>("Record");
-            var order = TypedEntityRecordWrapper.WrapElseDefault<Order>(rec);
+            if (rec == null)
+                return new List<dynamic>();
 
+            if (rec.Properties.TryGetValue("confirmations", out var list))
+                return list;
+
+            var order = TypedEntityRecordWrapper.WrapElseDefault<Order>(rec);
             var result = new List<dynamic>();
             if (order == null)
                 return result;

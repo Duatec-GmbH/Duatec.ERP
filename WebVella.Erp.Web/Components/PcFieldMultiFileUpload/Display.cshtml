@@ -14,7 +14,7 @@
 	if(String.IsNullOrWhiteSpace(fieldModel.ApiUrl))
 		fieldModel.ApiUrl = $"/api/v3/en_US/record/{fieldModel.EntityName}/{fieldModel.RecordId}";
 }
-<wv-field-file-multiple label-mode="@labelMode" label-text="@options.LabelText" label-warning-text="@fieldModel.LabelWarningText"
+<wv-field-file-multiple-no-limits label-mode="@labelMode" label-text="@options.LabelText" label-warning-text="@fieldModel.LabelWarningText"
 				label-error-text="@fieldModel.LabelErrorText" label-help-text="@fieldModel.LabelHelpText" field-id="@fieldModel.FieldId"
 				name="@options.Name" class="@options.Class" value="@fieldModel.Value" mode="@mode" access="@fieldModel.Access"
 				init-errors="@fieldModel.InitErrors" validation-errors="@fieldModel.ValidationErrors.ToKeyValuePair()" 
@@ -24,4 +24,4 @@
 				get-handler-prefix="@options.GetHandlerPrefix" file-upload-api="@options.FileUploadApi"
 				path-prop-name="@options.PathPropName" size-prop-name="@options.SizePropName" 
 				name-prop-name="@options.NamePropName" icon-prop-name="@options.IconPropName"
-				timestamp-prop-name="@options.TimestampPropName" author-prop-name="@options.AuthorPropName"></wv-field-file-multiple>
+				timestamp-prop-name="@options.TimestampPropName" author-prop-name="@options.AuthorPropName"></wv-field-file-multiple-no-limits>
