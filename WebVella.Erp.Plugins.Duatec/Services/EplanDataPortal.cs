@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
+using NetBox.Extensions;
 using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
@@ -93,11 +94,31 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             if (partNumbers.Length == 0)
                 return [];
 
+            var result = new Dictionary<string, DataPortalArticleDto?>(partNumbers.Length);
+            for(var i = 0; i < partNumbers.Length; i += 10)
+            {
+                var pile = partNumbers.Skip(i).Take(10).ToArray();
+                var t = GetMax10ArticlesByPartNumber(pile);
+
+                t.Wait();
+                Thread.Sleep(10);
+
+                result.AddRange(t.Result);
+            }
+
+            return result;
+        }
+
+        private static Task<Dictionary<string, DataPortalArticleDto?>> GetMax10ArticlesByPartNumber(string[] partNumbers)
+        {
+            if (partNumbers.Length > 10)
+                throw new ArgumentException("Can not process more than 10 part numbers");
+
             var tasks = partNumbers
                 .Select(async pn => new { PartNumber = pn, Article = await GetArticleByPartNumberAsync(pn) })
                 .ToArray();
 
-            return Task.WhenAll(tasks).Result.ToDictionary(t => t.PartNumber, t => t.Article);
+            return Task.WhenAll(tasks).ContinueWith(r => r.Result.ToDictionary(t => t.PartNumber, t => t.Article));
         }
 
         public static Dictionary<string, DataPortalArticleDto?> GetArticlesByOrderNumber(params string[] orderNumbers)

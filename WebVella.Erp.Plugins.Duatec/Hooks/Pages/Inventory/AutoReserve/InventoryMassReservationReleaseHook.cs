@@ -89,8 +89,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             RecordManager recMan, decimal amount,
             InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
         {
-            var reserved = reservedEntries.Sum(rie => rie.Amount);
-            if (amount == reserved)
+            if (amount == 0)
             {
                 foreach (var entry in availableEntries)
                     Move(recMan, null, entry);
