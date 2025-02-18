@@ -221,3 +221,4 @@ _Pvt_Extensions
 **/Properties/launchSettings.json
 /.idea/.idea.WebVella.ERP3/.idea
 /WebVella.Erp.Site/Config.json
+/DbPatcher/Config.json
