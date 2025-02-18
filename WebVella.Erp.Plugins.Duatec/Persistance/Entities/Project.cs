@@ -13,6 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Number = "number";
             public const string Name = "name";
             public const string RequiresPartList = "requires_part_list";
+            public const string IsInventoryProject = "inventory_project";
         }
 
         public override string EntityName => Entity;
@@ -33,6 +34,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get(Fields.RequiresPartList, true);
             set => Properties[Fields.RequiresPartList] = value;
+        }
+
+        public bool IsInventoryProject
+        {
+            get => Get(Fields.IsInventoryProject, false);
+            set => Properties[Fields.IsInventoryProject] = value;
         }
     }
 }
