@@ -1312,7 +1312,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         datetimeField.Searchable = false;
                         datetimeField.Auditable = false;
                         datetimeField.System = false;
-                        try { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 22:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 22:00:00", new CultureInfo("en-US")); }
+                        try { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 00:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 00:00:00", new CultureInfo("de-DE")); }
                         datetimeField.Format = "yyyy-mm-dd HH:mm";
                         datetimeField.UseCurrentTimeAsDefaultValue = false;
                         datetimeField.EnableSecurity = false;
@@ -1765,7 +1765,7 @@ namespace WebVella.Erp.Plugins.Duatec
                         datetimeField.Searchable = true;
                         datetimeField.Auditable = false;
                         datetimeField.System = false;
-                        try { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 03:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 03:00:00", new CultureInfo("en-US")); }
+                        try { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 00:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("01.01.2025 00:00:00", new CultureInfo("de-DE")); }
                         datetimeField.Format = "yyyy-MMM-dd HH:mm";
                         datetimeField.UseCurrentTimeAsDefaultValue = false;
                         datetimeField.EnableSecurity = false;

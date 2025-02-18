@@ -3609,6 +3609,7 @@ using (SecurityContext.OpenSystemScope())
     #endregion
 
     #region manufacturers
+
     #region << ***Create record*** Id: 8a0a55d6-0522-4f2f-82c6-f1fd6b946856 (manufacturer) >>
 
     {
@@ -4171,24 +4172,6 @@ using (SecurityContext.OpenSystemScope())
     }
     #endregion
 
-
-    #endregion
-
-    #region article types
-    #region << ***Create record*** Id: 14a2d274-c18e-46f8-a920-2814ea5faa2d (article_type) >>
-    {
-        var json = @"{
-  ""$type"": ""WebVella.Erp.Api.Models.EntityRecord, WebVella.Erp"",
-  ""id"": ""14a2d274-c18e-46f8-a920-2814ea5faa2d"",
-  ""unit"": ""pc."",
-  ""label"": ""Component"",
-  ""is_integer"": true
-}";
-        EntityRecord rec = JsonConvert.DeserializeObject<EntityRecord>(json);
-        recMan.CreateRecord("article_type", rec);
-        
-    }
-    #endregion
 
     #endregion
 
