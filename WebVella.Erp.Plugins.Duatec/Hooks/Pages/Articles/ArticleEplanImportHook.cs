@@ -25,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             var id = pageModel.GetFormValue("eplan_identifier");
             var type = pageModel.GetFormValue("article_type");
             Import(pageModel, id, type);
-            return pageModel.RedirectToPage();
+            return null;
         }
 
         private static void Import(BaseErpPageModel pageModel, string partNumber, string type)

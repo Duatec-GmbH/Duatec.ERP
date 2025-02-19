@@ -113,6 +113,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
 
         protected static LocalRedirectResult ReturnToProject(BaseErpPageModel pageModel)
         {
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+
             var id = pageModel.RecordId;
             var appName = pageModel.ErpRequestContext.App.Name;
             var area = pageModel.ErpRequestContext?.SitemapArea?.Name;

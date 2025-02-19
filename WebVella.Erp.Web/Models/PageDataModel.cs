@@ -624,7 +624,7 @@ namespace WebVella.Erp.Web.Models
 									result = l[0];
 
 								if (result is not EntityRecord rec)
-									throw new PropertyDoesNotExistException($"Property not found");
+									return null;
 
 								var path = completePropChain[1..(i + 1)]
 									.Select(p => p.Replace(" ", string.Empty).Trim())
@@ -645,12 +645,14 @@ namespace WebVella.Erp.Web.Models
 								{
 									if (i == completePropChain.Count - 1 && rec.Properties.TryGetValue(accessor, out var value))
 										return value;
-									throw new PropertyDoesNotExistException($"Relation '{relName}' not found");
+									return null;
 								}
 
 								var (entityId, nextIdName, sourceIdName) = OtherSideOfRelation(relResponse.Object, entity);
-								var resultEntity = entMan.ReadEntity(entityId)?.Object
-									?? throw new PropertyDoesNotExistException($"Invalid relation '{relName}'");
+								var resultEntity = entMan.ReadEntity(entityId)?.Object;
+
+								if (resultEntity == null)
+									return null;
 
 								List<EntityRecord> resultList;
 								if (rec.Properties.TryGetValue(accessor, out var obj) && obj is List<EntityRecord> recList)
@@ -670,7 +672,7 @@ namespace WebVella.Erp.Web.Models
 										.Find(new EntityQuery(resultEntity.Name, "*", queryObject));
 
 									if (!response.Success || response.Object.Data == null)
-										throw new PropertyDoesNotExistException(response.Message);
+										return null;
 
 									resultList = response.Object.Data;
 								}
@@ -682,24 +684,24 @@ namespace WebVella.Erp.Web.Models
 							else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
 							{
 								if (result is not List<EntityRecord> records)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
 								var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
 								if (index >= records.Count)
 									return null;
 								result = records[index];
 							}
-							else if(result is EntityRecord rec)
+							else if (result is EntityRecord rec)
 							{
 								if (i < completePropChain.Count - 1)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
-								result = rec[accessor];										
+								result = rec[accessor];
 							}
-							else if(result is List<EntityRecord> recList)
+							else if (result is List<EntityRecord> recList)
 							{
 								if (i < completePropChain.Count - 1)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
 								if (recList.Count == 0)
 									return null;
@@ -711,7 +713,7 @@ namespace WebVella.Erp.Web.Models
 								return recList.Select(r => r?[accessor])
 									.ToList();
 							}
-							else throw new PropertyDoesNotExistException($"Property not found");
+							else return null;
 						}
 						return result;
 					}
@@ -734,14 +736,14 @@ namespace WebVella.Erp.Web.Models
 									result = l[0];
 
 								if (result is not EntityRecord rec || !rec.Properties.TryGetValue(accessor, out var obj))
-									throw new PropertyDoesNotExistException($"Property not found");
+									return null;
 
 								result = obj;
 							}
 							else if (accessor.StartsWith('[') && accessor.EndsWith(']'))
 							{
 								if (result is not List<EntityRecord> records)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
 								var index = int.Parse(accessor[1..(accessor.Length - 1)].Trim());
 								if (index >= records.Count)
@@ -751,14 +753,14 @@ namespace WebVella.Erp.Web.Models
 							else if (result is EntityRecord rec)
 							{
 								if (i < completePropChain.Count - 1)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
 								result = rec[accessor];
 							}
 							else if (result is List<EntityRecord> recList)
 							{
 								if(i < completePropChain.Count - 1)
-									throw new PropertyDoesNotExistException("Property not found");
+									return null;
 
 								if (recList.Count == 0)
 									return null;
@@ -770,7 +772,7 @@ namespace WebVella.Erp.Web.Models
 								return recList.Select(r => r?[accessor])
 									.ToList();
 							}
-							else throw new PropertyDoesNotExistException($"Property not found");
+							else return null;
 						}
 						return result;
 					}
@@ -786,10 +788,7 @@ namespace WebVella.Erp.Web.Models
 
 				if (!currentPropDict.ContainsKey(pName))
 				{
-					if (!currentPropertyNamePath.EndsWith(']'))
-						throw new PropertyDoesNotExistException($"Property name '{currentPropertyNamePath}' not found.");
-					else
-						throw new PropertyDoesNotExistException($"Property name is found, but list index is out of bounds.");
+					return null;
 				}
 
 				mpw = currentPropDict[pName];

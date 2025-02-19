@@ -93,6 +93,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully booked goods");
 
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+
             var context = pageModel.ErpRequestContext;
             return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/" +
                 $"{context.SitemapNode?.Name}/r/{record.Id}/detail");

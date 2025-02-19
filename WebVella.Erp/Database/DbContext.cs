@@ -62,9 +62,9 @@ namespace WebVella.Erp.Database
 			connectionStack.Push(con);
 
 			Debug.WriteLine($"ERP CreateConnection: {currentDbContextId.Value} | Stack count: {connectionStack.Count} | Hash: {con.GetHashCode()}");
-			StackTrace t = new StackTrace();
-			Debug.WriteLine($"========== ERP CreateConnection Stack =====");
-			Debug.WriteLine($"{t.ToString()}");
+			//StackTrace t = new StackTrace();
+			//Debug.WriteLine($"========== ERP CreateConnection Stack =====");
+			//Debug.WriteLine($"{t.ToString()}");
 			return con;
 		}
 

@@ -44,11 +44,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             if (list.Count == 0)
                 return Error(pageModel, "File does not contain any articles");
 
-            if (list.DistinctBy(a => a[Article.Fields.PartNumber]).Count() != list.Count)
-                return pageModel.BadRequest();
-
             var record = new EntityRecord();
             record["articles"] = list;
+            record["count"] = list.Count;
 
             pageModel.DataModel.SetRecord(record);
 
@@ -75,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             var list = new EntityRecordList { TotalCount = articles.Count };
             var importResult = ArticleImportResultList.FromCsvArticles(articles);
 
-            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber).ThenBy(r => r.OrderNumber))
                 list.Add(GetRecord(res));
 
             return list;

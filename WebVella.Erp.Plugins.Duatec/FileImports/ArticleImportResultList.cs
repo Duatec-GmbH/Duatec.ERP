@@ -79,7 +79,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 result.Add(importResult);
             }
 
-            return result.GroupBy(a => a.PartNumber).Select(FromGroup).ToList();
+            return result.GroupBy(a => (a.PartNumber, a.OrderNumber)).Select(FromGroup).ToList();
         }
 
         public static List<ArticleImportResult> FromEplanArticles(List<EplanArticleDto> eplanArticles)
@@ -127,13 +127,13 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
             return result;
         }
 
-        private static ArticleImportResult FromGroup(IGrouping<string, ArticleImportResult> group)
+        private static ArticleImportResult FromGroup(IGrouping<(string PartNumber, string OrderNumber), ArticleImportResult> group)
         {
             var first = group.First();
 
             return new(
-                partNumber: group.Key,
-                orderNumber: first.OrderNumber,
+                partNumber: group.Key.PartNumber,
+                orderNumber: group.Key.OrderNumber,
                 typeNumber: first.TypeNumber,
                 designation: first.Designation,
                 deviceTags: first.DeviceTags,

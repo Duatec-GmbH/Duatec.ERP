@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using CSScripting;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -216,10 +219,86 @@ namespace WebVella.Erp.Web.Models
 
 			if (PageContext.HttpContext.Request.Query.ContainsKey("returnUrl"))
 			{
-				ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
+				var queryString = PageContext.HttpContext.Request.QueryString.ToString();
+				var returnUrlIndex = queryString.IndexOf("returnUrl");
+				var returnUrlQueryIndex = queryString.IndexOf('?', returnUrlIndex);
+
+				if(returnUrlQueryIndex < 0)
+					ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
+				else
+				{
+					var i = returnUrlQueryIndex + 1;
+					var pairs = new List<KeyValuePair<string, StringValues>>();
+
+					while(i >= 0 && i < queryString.Length)
+					{
+						var end = queryString.IndexOf('&', i);
+						if (end < 0)
+							end = queryString.Length;
+
+						var argWithValue = queryString[i..end];
+						var assignIndex = argWithValue.IndexOf('=');
+
+						var key = argWithValue[0..assignIndex];
+						string value;
+
+						if(key != "returnUrl")
+						{
+							value = argWithValue[(assignIndex + 1)..];
+							i = end + 1;
+						}
+						else
+						{
+							i = queryString.IndexOf('=', i);
+							value = queryString[(i + 1)..];
+							i = queryString.Length;
+						}
+
+						pairs.Add(new(key, value));
+					}
+
+					var start = queryString.IndexOf('=', returnUrlIndex) + 1;
+					var returnUrl = queryString[start..(returnUrlQueryIndex + 1)];
+					returnUrl += $"{pairs[0].Key}={pairs[0].Value}";
+
+					foreach (var (key, value) in pairs.Skip(1))
+						returnUrl += $"&{key}={value}";
+
+					ReturnUrl = returnUrl;
+					CurrentUrl = $"{PageContext.HttpContext.Request.Path}{queryString}";
+
+					var dict = new Dictionary<string, StringValues>
+					{
+						{ "returnUrl", returnUrl }
+					};
+
+					returnUrlIndex--;
+					i = 1;
+
+					while(i >= 0 && i < returnUrlIndex)
+					{
+						var end = queryString.IndexOf('&', i);
+						if (end < 0 || end > returnUrlIndex)
+							end = returnUrlIndex;
+
+						var argWithValue = queryString[i..end];
+						var assignIndex = argWithValue.IndexOf('=');
+
+						var key = argWithValue[0..assignIndex];
+						var value = argWithValue[(assignIndex + 1)..];
+						i = end + 1;
+
+						dict.Add(key, value);
+					}
+
+					var queryCollection = new QueryCollection(dict);
+					PageContext.HttpContext.Request.Query = queryCollection;
+				}
 			}
+
 			ErpAppContext = ErpAppContext.Current;
-			CurrentUrl = PageUtils.GetCurrentUrl(PageContext.HttpContext);
+			if(string.IsNullOrWhiteSpace(CurrentUrl))
+				CurrentUrl = PageUtils.GetCurrentUrl(PageContext.HttpContext);
 
 			#region << Init Navigation >>
 			//Application navigation

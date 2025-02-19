@@ -183,8 +183,14 @@
 	}
 
 	function getNumber(numberField) {
+
 		let input = numberField.getElementsByTagName('input')[0];
-		return input.value;
+		if(input)
+			return input.value;
+		let div = numberField.getElementsByClassName('form-control-plaintext')[0];
+		if (div)
+			return parseFloat(div.innerText).toString() ?? null;
+		return null;
 	}
 
 	function getSelectId(selectField) {

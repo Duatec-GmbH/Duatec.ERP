@@ -68,6 +68,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 return pageModel.Page();
             }
 
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
     }

@@ -63,6 +63,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles");
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
             return pageModel.LocalRedirect(pageModel.EntityListUrl());
         }
     }

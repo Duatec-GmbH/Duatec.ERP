@@ -62,6 +62,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
 

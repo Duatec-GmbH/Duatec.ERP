@@ -16,6 +16,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Entries
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
 
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(GetReturnUrl(pageModel));
+
             var url = $"/{context.App?.Name}/{context.SitemapArea?.Name}/part-lists/r/{record.PartListId}/detail";
             return pageModel.LocalRedirect(url);
         }

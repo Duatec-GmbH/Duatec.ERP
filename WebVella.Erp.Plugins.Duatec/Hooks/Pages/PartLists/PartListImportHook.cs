@@ -26,11 +26,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             if (!TryGetRows(pageModel, out var rows))
                 return pageModel.BadRequest();
 
-            var context = pageModel.ErpRequestContext;
-            var url = $"/{context.App?.Name}/part-lists/part-lists/r/{listId}";
-
             if (rows.Count == 0)
-                return pageModel.LocalRedirect(url);
+                return PartListDetail(pageModel, listId);
 
             var partNumbers = rows
                 .Select(r => r.PartNumber)
@@ -39,9 +36,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
             var recMan = new RecordManager();
             var articleLookup = new ArticleRepository(recMan).FindMany(partNumbers: partNumbers!);
+            var oldEntries = new PartListRepository(recMan).FindManyEntriesByPartList(listId);
 
             if (articleLookup.Any(kp => kp.Value == null))
-                return Error(pageModel, articleLookup);
+                return Error(pageModel, "Some articles are not present anymore in database please try again");
+
+            if (oldEntries.Any(ple => articleLookup.Values.Any(a => a!.Id == ple.ArticleId)))
+                return Error(pageModel, "Some articles have been inserted meanwhile you tried to import please try again");
 
             var entries = rows
                 .GroupBy(r => r.PartNumber)
@@ -55,7 +56,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 return null;
             }
 
-            return pageModel.LocalRedirect(url);
+            return PartListDetail(pageModel, listId);
         }
 
         private static bool TryGetRows(BaseErpPageModel pageModel, out List<Row> rows)
@@ -84,28 +85,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             return true;
         }
 
+        private static LocalRedirectResult PartListDetail(BaseErpPageModel pageModel, Guid listId)
+        {
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+
+            var context = pageModel.ErpRequestContext;
+            var url = $"/{context.App?.Name}/part-lists/part-lists/r/{listId}";
+
+            return pageModel.LocalRedirect(url);
+        }
+
         private static IActionResult? Error(BaseErpPageModel pageModel, string message)
         {
             pageModel.PutMessage(ScreenMessageType.Error, message);
             return null;
-        }
-
-        private static IActionResult? Error(BaseErpPageModel pageModel, Dictionary<string, Article?> articleLookup)
-        {
-            var partNumbers = articleLookup
-                .Where(kp => kp.Value == null)
-                .Select(kp => $"'{kp.Key}'")
-                .ToArray();
-
-            var message = "Error during import:" + Environment.NewLine
-                + "Could not find article";
-
-            if (partNumbers.Length == 1)
-                message += $" with part number {partNumbers[0]}";
-            else
-                message += $"s with part numbers {{ {string.Join(", ", partNumbers)} }}";
-
-            return Error(pageModel, message);
         }
 
         private static PartListEntry ListEntryRecord(IGrouping<string, Row> g, Dictionary<string, Article> articleLookup, Guid partListId)

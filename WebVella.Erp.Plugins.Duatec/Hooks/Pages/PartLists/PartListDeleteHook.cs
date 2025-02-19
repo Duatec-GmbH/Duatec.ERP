@@ -17,10 +17,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             if (new PartListRepository().Delete(record.Id!.Value) is not PartList deleted)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not delete part list");
-                return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
+                return pageModel.LocalRedirect(Url.RemoveParameter(pageModel.CurrentUrl, "hookKey"));
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+
             var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{deleted.Project}";
             return pageModel.LocalRedirect(returnUrl);
         }

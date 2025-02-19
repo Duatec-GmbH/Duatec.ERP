@@ -4,6 +4,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.FileImports;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
@@ -45,13 +46,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
             var list = new EntityRecordList { TotalCount = importResult.Count };
 
-            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber))
-                list.Add(GetRecord(res));
+            var articlesWithinPartList = new PartListRepository().FindManyEntriesByPartList(listId)
+                .Select(ple => ple.GetArticle().PartNumber)
+                .ToHashSet();
+
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber).ThenBy(r => r.OrderNumber))
+                list.Add(GetRecord(res, articlesWithinPartList));
 
             fsRepository.Delete(filePath);
 
             var record = new EntityRecord();
             record["articles"] = list;
+            record["count"] = list.Count;
             pageModel.DataModel.SetRecord(record);
 
             return null;
@@ -78,22 +84,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             return null;
         }
 
-        private static EntityRecord GetRecord(ArticleImportResult article)
+        private static EntityRecord GetRecord(ArticleImportResult article, HashSet<string> articlesWithinPartList)
         {
             var rec = new EntityRecord();
 
             var deviceTag = string.Join(Environment.NewLine, article.DeviceTags);
             var partNumber = string.IsNullOrWhiteSpace(article.PartNumber)
                 ? "-" : article.PartNumber;
-
+            var state = articlesWithinPartList.Contains(partNumber) 
+                ? ArticleImportState.DuplicateArticle : article.ImportState;
+            
             rec[Article.Fields.PartNumber] = partNumber;
             rec[Article.Fields.OrderNumber] = article.OrderNumber;
             rec[Article.Fields.TypeNumber] = article.TypeNumber;
             rec[Article.Fields.Designation] = article.Designation;
             rec[PartListEntry.Fields.DeviceTag] = deviceTag;
             rec[PartListEntry.Fields.Amount] = article.Amount;
-            rec["import_state"] = article.ImportState;
-            rec["import"] = GetDefaultImportState(article.ImportState, article.Amount);
+            rec["import_state"] = state;
+            rec["import"] = GetDefaultImportState(state, article.Amount);
 
             return rec;
         }

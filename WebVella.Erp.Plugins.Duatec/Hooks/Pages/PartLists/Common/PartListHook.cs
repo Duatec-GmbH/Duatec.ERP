@@ -11,7 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
     {
         public static IEnumerable<ValidationError> ValidateEntries(BaseErpPageModel pageModel)
         {
-            var formValues = GetEntryFormValues(pageModel).ToArray();
+            var formValues = GetEntryFormValues(pageModel);
             var articleLookup = GetArticleLookup(formValues);
 
             foreach (var (articleId, amount, idx) in formValues)
@@ -47,7 +47,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 
         public static void SetUpErrorPage(BaseErpPageModel pageModel, PartList record)
         {
-            var formValues = GetEntryFormValues(pageModel).ToArray();
+            var formValues = GetEntryFormValues(pageModel);
 
             record.SetEntries(formValues.Select(fv => new PartListEntry()
             {
@@ -58,7 +58,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             pageModel.BeforeRender();
         }
 
-        private static Dictionary<Guid, Article?> GetArticleLookup(Row[] rows)
+        private static Dictionary<Guid, Article?> GetArticleLookup(List<Row> rows)
         {
             var articleIds = rows.Select(r => r.ArticleId)
                 .Distinct()
@@ -68,20 +68,22 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
                 .FindMany($"*, ${Article.Relations.Type}.*", articleIds);
         }
 
-        public static IEnumerable<Row> GetEntryFormValues(BaseErpPageModel pageModel)
+        public static List<Row> GetEntryFormValues(BaseErpPageModel pageModel)
         {
             var idx = 0;
             var form = pageModel.Request.Form;
+            var result = new List<Row>(64);
 
             while (form.TryGetValue($"article_id[{idx}]", out var articleVal))
             {
                 var articleId = Guid.TryParse(articleVal, out var id) ? id : Guid.Empty;
                 var amount = decimal.TryParse(form[$"amount[{idx}]"], out var d) ? d : 0m;
 
-                yield return (articleId, amount, idx);
+                result.Add((articleId, amount, idx));
 
                 idx++;
             }
+            return result;
         }
 
         private static ValidationError ArticleError(int index, string message)

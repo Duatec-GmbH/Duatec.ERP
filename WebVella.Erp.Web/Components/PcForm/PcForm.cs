@@ -144,15 +144,19 @@ namespace WebVella.Erp.Web.Components
                     ViewBag.Action = "";
                     if (!String.IsNullOrWhiteSpace(instanceOptions.HookKey))
                     {
-                        var queryList = new List<SelectOption>();
+						var queryList = new List<SelectOption>()
+						{
+							new ("hookKey", instanceOptions.HookKey)
+						};
                         foreach (var key in HttpContext.Request.Query.Keys)
                         {
-                            if (key != "hookKey")
+                            if (key != "hookKey" && key != "returnUrl")
                             {
                                 queryList.Add(new SelectOption(key, HttpContext.Request.Query[key].ToString()));
                             }
                         }
-                        queryList.Add(new SelectOption("hookKey", instanceOptions.HookKey)); //override even if already present
+						if (HttpContext.Request.Query.TryGetValue("returnUrl", out var returnUrl))
+							queryList.Add(new SelectOption("returnUrl", returnUrl));
 
                         ViewBag.Action = string.Format(HttpContext.Request.Path + "?{0}", string.Join("&", queryList.Select(kvp => string.Format("{0}={1}", kvp.Value, kvp.Label))));
                     }

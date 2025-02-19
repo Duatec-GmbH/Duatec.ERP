@@ -91,7 +91,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 return null;
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully imported articles");
-            return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
+            return pageModel.LocalRedirect(Url.RemoveParameter(pageModel.CurrentUrl, "hookKey"));
         }
     }
 }

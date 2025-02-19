@@ -67,7 +67,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var recMan = new RecordManager();
 
             var articleIds = entries.Select(e => e.Article)
-                .Where(g => g != Guid.Empty)
                 .Distinct()
                 .ToArray();
 
@@ -101,7 +100,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 var idxInfo = entries.Select(e => new { Index = idx++, e.Article })
                     .ToArray();
 
-                foreach (var id in articleIds)
+                foreach (var id in articleIds.Where(aId => aId != Guid.Empty))
                 {
                     var occurances = idxInfo.Where(t => t.Article == id)
                         .ToArray();

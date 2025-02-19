@@ -44,13 +44,12 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
                 if (result != null)
                     return result;
 
-                url = pageModel.EntityListUrl();
-                return pageModel.LocalRedirect(url);
+                return pageModel.LocalRedirect(GetReturnUrl(pageModel));
             }
 
             pageModel.PutMessage(ScreenMessageType.Error, string.Join(Environment.NewLine, errors.Select(e => e.Message)));
 
-            url = Url.RemoveParameters(pageModel.CurrentUrl);
+            url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
             return pageModel.LocalRedirect(url);
         }
 
@@ -76,8 +75,21 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
             var msg = $"Failed to delete '{entity.FancyName()}'";
             pageModel.PutMessage(ScreenMessageType.Error, msg);
 
-            var url = Url.RemoveParameters(pageModel.CurrentUrl);
+            var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
             return pageModel.LocalRedirect(url);
+        }
+
+        protected static string GetReturnUrl(TModel pageModel)
+        {
+            if (string.IsNullOrWhiteSpace(pageModel.ReturnUrl))
+                pageModel.EntityListUrl();
+
+            var idx = pageModel.ReturnUrl.IndexOf("returnUrl");
+            if (idx < 0)
+                return pageModel.ReturnUrl;
+
+            idx = pageModel.ReturnUrl.IndexOf('=', idx) + 1;
+            return pageModel.ReturnUrl[idx..];
         }
     }
 }

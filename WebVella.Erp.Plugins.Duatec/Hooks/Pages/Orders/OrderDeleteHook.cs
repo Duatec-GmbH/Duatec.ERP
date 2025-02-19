@@ -32,7 +32,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
-            return pageModel.LocalRedirect(pageModel.EntityListUrl());
+            return pageModel.LocalRedirect(GetReturnUrl(pageModel));
         }
     }
 }

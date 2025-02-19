@@ -5,6 +5,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
     internal enum ArticleImportState
     {
         UnknownArticle,
+        DuplicateArticle,
         InvalidDbArticle,
         BlockedArticle,
         InvalidEplanArticle,

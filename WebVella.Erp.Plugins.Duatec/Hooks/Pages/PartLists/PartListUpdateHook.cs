@@ -58,7 +58,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
         protected override IActionResult? OnValidationSuccess(PartList record, PartList unmodified, RecordManagePageModel pageModel)
         {
-            var formValues = PartListHook.GetEntryFormValues(pageModel).ToArray();
+            var formValues = PartListHook.GetEntryFormValues(pageModel);
             var repo = new PartListRepository();
             var oldPartListEntries = repo.FindManyEntriesByPartList(record.Id!.Value);
 
@@ -67,10 +67,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 .ToArray();
 
             var toUpdate = oldPartListEntries
-                .Where(ple => Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId && fv.Amount != ple.Amount));
+                .Where(ple => formValues.Exists(fv => fv.ArticleId == ple.ArticleId && fv.Amount != ple.Amount));
 
             var toDelete = oldPartListEntries
-                .Where(ple => !Array.Exists(formValues, fv => fv.ArticleId == ple.ArticleId))
+                .Where(ple => !formValues.Exists(fv => fv.ArticleId == ple.ArticleId))
                 .Select(ple => ple.Id!.Value)
                 .ToArray();
             
@@ -98,7 +98,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
                 foreach(var entry in toUpdate)
                 {
-                    var amount = Array.Find(formValues, t => t.ArticleId == entry.ArticleId).Amount;
+                    var amount = formValues.Find(t => t.ArticleId == entry.ArticleId).Amount;
                     if(entry.Amount != amount)
                     {
                         entry.Amount = amount;
@@ -113,6 +113,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 PartListHook.SetUpErrorPage(pageModel, record);
                 return pageModel.Page();
             }
+
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
 
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }

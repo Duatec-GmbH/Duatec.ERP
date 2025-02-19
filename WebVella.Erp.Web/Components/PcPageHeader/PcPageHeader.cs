@@ -128,7 +128,7 @@ namespace WebVella.Erp.Web.Components
                     ViewBag.ProccessedIconColor = context.DataModel.GetPropertyValueByDataSource(instanceOptions.IconColor);
                     ViewBag.ProccessedIconClass = context.DataModel.GetPropertyValueByDataSource(instanceOptions.IconClass);
 
-                    if (ErpRequestContext != null && ErpRequestContext.PageContext != null && ErpRequestContext.PageContext.HttpContext.Request.Query.ContainsKey("returnUrl")
+					if (ErpRequestContext != null && ErpRequestContext.PageContext != null && ErpRequestContext.PageContext.HttpContext.Request.Query.ContainsKey("returnUrl")
                         && !String.IsNullOrWhiteSpace(ErpRequestContext.PageContext.HttpContext.Request.Query["returnUrl"]))
                     {
                         ViewBag.ProccessedReturnUrl = ErpRequestContext.PageContext.HttpContext.Request.Query["returnUrl"].ToString();
