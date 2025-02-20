@@ -894,7 +894,8 @@ namespace WebVella.Erp.Web.Services
 		public List<PageDataSource> GetPageDataSources(Guid pageId, NpgsqlTransaction transaction = null)
 		{
 			var pageDataSourceRep = new PageDataSourceRepository(connectionString);
-			return pageDataSourceRep.GetByPageId(pageId, transaction).Rows.MapTo<PageDataSource>();
+			var dataRowCollection = pageDataSourceRep.GetByPageId(pageId, transaction);
+			return dataRowCollection.Rows.MapTo<PageDataSource>();
 		}
 
 		/// <summary>

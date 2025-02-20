@@ -47,13 +47,17 @@ namespace WebVella.Erp.Web
 			Current = new ErpAppContext(serviceProvider);
 		}
 
-		private ErpAppContext(IServiceProvider serviceProvider)
+		public static void Init()
+		{
+			Current = new ErpAppContext();
+		}
+
+		private ErpAppContext(IServiceProvider? serviceProvider = null)
 		{
 			ServiceProvider = serviceProvider;
 			InitCoreSettings();
 			InitTheme();
 		}
-
 
 
 		//methods Init

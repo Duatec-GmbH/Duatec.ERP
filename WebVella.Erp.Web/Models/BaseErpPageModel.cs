@@ -220,6 +220,7 @@ namespace WebVella.Erp.Web.Models
 			if (PageContext.HttpContext.Request.Query.ContainsKey("returnUrl"))
 			{
 				var queryString = PageContext.HttpContext.Request.QueryString.ToString();
+				CurrentUrl = $"{PageContext.HttpContext.Request.Path}{queryString}";
 				var returnUrlIndex = queryString.IndexOf("returnUrl");
 
 				if(returnUrlIndex >= 0)
@@ -268,7 +269,6 @@ namespace WebVella.Erp.Web.Models
 							returnUrl += $"&{key}={value}";
 
 						ReturnUrl = returnUrl;
-						CurrentUrl = $"{PageContext.HttpContext.Request.Path}{queryString}";
 
 						var dict = new Dictionary<string, StringValues>
 						{
