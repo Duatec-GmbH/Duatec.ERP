@@ -21,8 +21,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
+
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+                return pageModel.LocalRedirect(GetReturnUrl(pageModel));
 
             var returnUrl = $"/{pageModel.ErpRequestContext.App?.Name}/projects/projects/r/{deleted.Project}";
             return pageModel.LocalRedirect(returnUrl);
