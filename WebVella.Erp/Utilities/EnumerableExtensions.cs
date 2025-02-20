@@ -5,10 +5,10 @@ namespace WebVella.Erp.Utilities
 {
     public static class EnumerableExtensions
     {
-		public static bool Any(this IEnumerable en, Func<object, bool> fun)
+		public static bool Any(this IEnumerable en, Predicate<object> pred)
 		{
 			foreach (var obj in en)
-				if (fun(obj))
+				if (pred(obj))
 					return true;
 			return false;
 		}
@@ -18,6 +18,23 @@ namespace WebVella.Erp.Utilities
 			foreach (var _ in en)
 				return true;
 			return false;
+		}
+
+		public static int Count(this IEnumerable en, Predicate<object> pred)
+		{
+			var i = 0;
+			foreach (var obj in en)
+				if(pred(obj)) i++;
+
+			return i;
+		}
+
+		public static int Count(this IEnumerable en)
+		{
+			var i = 0;
+			foreach (var _ in en)
+				i++;
+			return i;
 		}
 
 		public static bool SequenceEquals(this IEnumerable col, IEnumerable other)

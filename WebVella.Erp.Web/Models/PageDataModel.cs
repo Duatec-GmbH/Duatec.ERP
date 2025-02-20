@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Wangkanai.Extensions;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
@@ -44,15 +45,20 @@ namespace WebVella.Erp.Web.Models
 
 				properties.Add("$exists", new MPW(MPT.Function, new ExistsFunction(this)));
 				properties.Add("$not", new MPW(MPT.Function, new NotFunction(this)));
-				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
-				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
+				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
+				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));
+				properties.Add("$concat", new MPW(MPT.Function, new ConcatFunction(this)));
 				properties.Add("$coalesce", new MPW(MPT.Function, new CoalesceFunction(this)));
 				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
 				properties.Add("$hasRole", new MPW(MPT.Function, new HasRoleFunction(this)));
 				properties.Add("$areEqual", new MPW(MPT.Function, new AreEqualFunction(this)));
-				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
-				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));
-				properties.Add("$concat", new MPW(MPT.Function, new ConcatFunction(this)));
+
+				properties.Add("$where", new MPW(MPT.Function, new WhereFunction(this)));
+				properties.Add("$count", new MPW(MPT.Function, new CountFunction(this)));
+
+
+				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
+				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -556,13 +562,20 @@ namespace WebVella.Erp.Web.Models
 
 			if (propName.StartsWith('$'))
 			{
-				if (properties.TryGetValue(propName, out var mpv) && mpv.Value is QueryFunction fun)
+				if (properties.TryGetValue(propName, out var mpv) && mpv.Value is Function fun)
 					return fun;
 
 				if (propName.EndsWith(')'))
 					return ExecFunction(propName);
 			}
 
+			if (propName.Contains("=>"))
+			{
+				var arrowIdx = propName.IndexOf("=>");
+				var ident = propName[..arrowIdx].TrimEnd();
+				var body = propName[(arrowIdx + 2)..].TrimStart();
+				return new Lambda(this, ident, body);
+			}
 
 			var tmpPropChain = name.Split(".", StringSplitOptions.RemoveEmptyEntries);
 			var completePropChain = new List<string>();
@@ -835,7 +848,7 @@ namespace WebVella.Erp.Web.Models
 			var openParIdx = propName.IndexOf('(');
 			var funName = propName[..openParIdx].Trim();
 
-			if (!properties.TryGetValue(funName, out var mpv) || mpv.Value is not QueryFunction fun)
+			if (!properties.TryGetValue(funName, out var mpv) || mpv.Value is not Function fun)
 				throw new PropertyDoesNotExistException($"function '{funName}' does not exist in given context");
 
 			var closeParIdx = propName.LastIndexOf(')');
@@ -1026,6 +1039,7 @@ namespace WebVella.Erp.Web.Models
 			EntityRecord,
 			ListEntityRecords,
 			Function,
+			Lambda
 		}
 
 		//DataSourceWrapper
@@ -1123,12 +1137,34 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		private class Lambda(PageDataModel dataModel, string ident, string body)
+		{
+			public object Execute(object instanceObject)
+			{
+				var old = dataModel.properties.TryGetValueSafe(ident, out var mpv) ? mpv : null;
+				dataModel.properties.Remove(ident);
+
+				if (instanceObject is EntityRecord)
+					dataModel.properties.Add(ident, new MPW(MPT.EntityRecord, instanceObject));
+				else
+					dataModel.properties.Add(ident, new MPW(MPT.Object, instanceObject));
+				var result = dataModel.ResolveProperty(body);
+
+				dataModel.properties.Remove(ident);
+
+				if (old != null)
+					dataModel.properties.Add(ident, old);
+
+				return result;
+			}
+		}
+
 
 		//Function classes
-		private abstract class QueryFunction
+		private abstract class Function
 		{
 
-			protected QueryFunction(PageDataModel dataModel)
+			protected Function(PageDataModel dataModel)
 			{
 				DataModel = dataModel;
 			}
@@ -1194,7 +1230,7 @@ namespace WebVella.Erp.Web.Models
 			public abstract object Execute(LazyObject[] parameters);
 		}
 
-		private sealed class ExistsFunction : QueryFunction
+		private sealed class ExistsFunction : Function
 		{
 			public ExistsFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1220,7 +1256,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class NotFunction : QueryFunction
+		private sealed class NotFunction : Function
 		{
 			public NotFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1239,7 +1275,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class OrderByFunction : QueryFunction
+		private sealed class OrderByFunction : Function
 		{
 			public OrderByFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1353,7 +1389,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class CoalesceFunction : QueryFunction
+		private sealed class CoalesceFunction : Function
 		{
 			public CoalesceFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1376,7 +1412,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class IncludeFunction : QueryFunction
+		private sealed class IncludeFunction : Function
 		{
 			public IncludeFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1445,7 +1481,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class WhenFunction : QueryFunction
+		private sealed class WhenFunction : Function
 		{
 			public WhenFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1466,7 +1502,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class HasRoleFunction : QueryFunction
+		private sealed class HasRoleFunction : Function
 		{
 			public HasRoleFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1490,7 +1526,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class AreEqualFunction : QueryFunction
+		private sealed class AreEqualFunction : Function
 		{
 			public AreEqualFunction(PageDataModel dataModel)
 				: base(dataModel) 
@@ -1518,7 +1554,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class AndFunction : QueryFunction
+		private sealed class AndFunction : Function
 		{
 			public AndFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1534,7 +1570,7 @@ namespace WebVella.Erp.Web.Models
 				=> Array.TrueForAll(parameters, param => param.Value is bool b && b);
 		}
 
-		private sealed class ConcatFunction : QueryFunction
+		private sealed class ConcatFunction : Function
 		{
 			public ConcatFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1562,7 +1598,7 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class OrFunction : QueryFunction
+		private sealed class OrFunction : Function
 		{
 			public OrFunction(PageDataModel dataModel)
 				: base(dataModel)
@@ -1576,6 +1612,83 @@ namespace WebVella.Erp.Web.Models
 
 			public override object Execute(LazyObject[] parameters)
 				=> Array.Exists(parameters, param => param.Value is bool b && b);
+		}
+
+
+		private sealed class CountFunction: Function
+		{
+			public CountFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 1;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "count";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value == null)
+					return null;
+
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
+
+				if (parameters.Length == 1)
+				{
+					if (en is IList l)
+						return l.Count;
+
+					return en.Count();
+				}
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
+
+				return en.Count(obj =>
+				{
+					var result = lambda.Execute(obj);
+					if (result == null) return false;
+					if (result is not bool b)
+						throw new PropertyDoesNotExistException($"boolean result expected within lambda expression at function '{Name}'");
+					return b;
+				});
+			}
+		}
+
+		private sealed class WhereFunction : Function
+		{
+			public WhereFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "where";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value == null)
+					return null;
+
+				if (parameters[0].Value is not List<EntityRecord> en)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
+
+				return en.Where(rec =>
+				{
+					var result = lambda.Execute(rec);
+					if (result == null) return false;
+					if (result is not bool b)
+						throw new PropertyDoesNotExistException($"boolean result expected within lambda expression at function '{Name}'");
+					return b;
+				}).ToList();
+			}
 		}
 
 		#endregion

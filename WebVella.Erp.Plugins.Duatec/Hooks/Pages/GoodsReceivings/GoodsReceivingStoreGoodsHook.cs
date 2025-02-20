@@ -5,7 +5,6 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
@@ -19,9 +18,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
     using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
 
-    // not used now -> but comming soon
-    [Obsolete]
-    //[HookAttachment(key: HookKeys.GoodsReceiving.Store)]
+    [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
     {
         const string entryKey = $"${GoodsReceiving.Relations.Entries}";
