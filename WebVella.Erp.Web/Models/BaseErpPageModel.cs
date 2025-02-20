@@ -221,78 +221,82 @@ namespace WebVella.Erp.Web.Models
 			{
 				var queryString = PageContext.HttpContext.Request.QueryString.ToString();
 				var returnUrlIndex = queryString.IndexOf("returnUrl");
-				var returnUrlQueryIndex = queryString.IndexOf('?', returnUrlIndex);
 
-				if(returnUrlQueryIndex < 0)
-					ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
-				else
+				if(returnUrlIndex >= 0)
 				{
-					var i = returnUrlQueryIndex + 1;
-					var pairs = new List<KeyValuePair<string, StringValues>>();
+					var returnUrlQueryIndex = queryString.IndexOf('?', returnUrlIndex);
 
-					while(i >= 0 && i < queryString.Length)
+					if(returnUrlQueryIndex < 0)
+						ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
+					else
 					{
-						var end = queryString.IndexOf('&', i);
-						if (end < 0)
-							end = queryString.Length;
+						var i = returnUrlQueryIndex + 1;
+						var pairs = new List<KeyValuePair<string, StringValues>>();
 
-						var argWithValue = queryString[i..end];
-						var assignIndex = argWithValue.IndexOf('=');
-
-						var key = argWithValue[0..assignIndex];
-						string value;
-
-						if(key != "returnUrl")
+						while(i >= 0 && i < queryString.Length)
 						{
-							value = argWithValue[(assignIndex + 1)..];
+							var end = queryString.IndexOf('&', i);
+							if (end < 0)
+								end = queryString.Length;
+
+							var argWithValue = queryString[i..end];
+							var assignIndex = argWithValue.IndexOf('=');
+
+							var key = argWithValue[0..assignIndex];
+							string value;
+
+							if(key != "returnUrl")
+							{
+								value = argWithValue[(assignIndex + 1)..];
+								i = end + 1;
+							}
+							else
+							{
+								i = queryString.IndexOf('=', i);
+								value = queryString[(i + 1)..];
+								i = queryString.Length;
+							}
+
+							pairs.Add(new(key, value));
+						}
+
+						var start = queryString.IndexOf('=', returnUrlIndex) + 1;
+						var returnUrl = queryString[start..(returnUrlQueryIndex + 1)];
+						returnUrl += $"{pairs[0].Key}={pairs[0].Value}";
+
+						foreach (var (key, value) in pairs.Skip(1))
+							returnUrl += $"&{key}={value}";
+
+						ReturnUrl = returnUrl;
+						CurrentUrl = $"{PageContext.HttpContext.Request.Path}{queryString}";
+
+						var dict = new Dictionary<string, StringValues>
+						{
+							{ "returnUrl", returnUrl }
+						};
+
+						returnUrlIndex--;
+						i = 1;
+
+						while(i >= 0 && i < returnUrlIndex)
+						{
+							var end = queryString.IndexOf('&', i);
+							if (end < 0 || end > returnUrlIndex)
+								end = returnUrlIndex;
+
+							var argWithValue = queryString[i..end];
+							var assignIndex = argWithValue.IndexOf('=');
+
+							var key = argWithValue[0..assignIndex];
+							var value = argWithValue[(assignIndex + 1)..];
 							i = end + 1;
-						}
-						else
-						{
-							i = queryString.IndexOf('=', i);
-							value = queryString[(i + 1)..];
-							i = queryString.Length;
+
+							dict.Add(key, value);
 						}
 
-						pairs.Add(new(key, value));
+						var queryCollection = new QueryCollection(dict);
+						PageContext.HttpContext.Request.Query = queryCollection;
 					}
-
-					var start = queryString.IndexOf('=', returnUrlIndex) + 1;
-					var returnUrl = queryString[start..(returnUrlQueryIndex + 1)];
-					returnUrl += $"{pairs[0].Key}={pairs[0].Value}";
-
-					foreach (var (key, value) in pairs.Skip(1))
-						returnUrl += $"&{key}={value}";
-
-					ReturnUrl = returnUrl;
-					CurrentUrl = $"{PageContext.HttpContext.Request.Path}{queryString}";
-
-					var dict = new Dictionary<string, StringValues>
-					{
-						{ "returnUrl", returnUrl }
-					};
-
-					returnUrlIndex--;
-					i = 1;
-
-					while(i >= 0 && i < returnUrlIndex)
-					{
-						var end = queryString.IndexOf('&', i);
-						if (end < 0 || end > returnUrlIndex)
-							end = returnUrlIndex;
-
-						var argWithValue = queryString[i..end];
-						var assignIndex = argWithValue.IndexOf('=');
-
-						var key = argWithValue[0..assignIndex];
-						var value = argWithValue[(assignIndex + 1)..];
-						i = end + 1;
-
-						dict.Add(key, value);
-					}
-
-					var queryCollection = new QueryCollection(dict);
-					PageContext.HttpContext.Request.Query = queryCollection;
 				}
 			}
 

@@ -46,10 +46,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(entity));
 
-            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+            return pageModel.LocalRedirect(GetRedirectUrl(pageModel, record.Id!.Value));
+        }
 
-            return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
+        protected static string GetRedirectUrl(TModel pageModel, Guid recordId)
+        {
+            var url = pageModel.EntityDetailUrl(recordId);
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                url += $"?returnUrl={pageModel.ReturnUrl}";
+            return url;
         }
 
         protected override IActionResult? OnValidationFailure(TCollection record, Entity entity, TModel pageModel, List<ValidationError> validationErrors)

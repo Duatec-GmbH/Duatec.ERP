@@ -82,7 +82,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
         protected static string GetReturnUrl(TModel pageModel)
         {
             if (string.IsNullOrWhiteSpace(pageModel.ReturnUrl))
-                pageModel.EntityListUrl();
+                return pageModel.EntityListUrl();
 
             var idx = pageModel.ReturnUrl.IndexOf("returnUrl");
             if (idx < 0)

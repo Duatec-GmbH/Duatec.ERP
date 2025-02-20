@@ -6,6 +6,7 @@ using WebVella.Erp.TypedRecords.Validation;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
@@ -13,6 +14,8 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page
         where T : TypedEntityRecordWrapper, new()
     {
         protected virtual string ActionNameInPastTense => "created";
+
+        protected virtual string DetailPageName => "detail";
 
         IActionResult? IRecordCreatePageHook.OnPostCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel)
             => OnPostCreate(TypedEntityRecordWrapper.Wrap<T>(record), pageModel);
@@ -51,13 +54,23 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page
         {
             var msg = SuccessMessage(record.EntityName);
             pageModel.PutMessage(ScreenMessageType.Success, msg);
-            return null;
+            return pageModel.LocalRedirect(GetReturnUrl(pageModel, record.Id!.Value));
         }
 
         protected string SuccessMessage(string entity)
         {
             entity = EntityExtensions.FancyfySnakeCase(entity);
             return $"Successfully {ActionNameInPastTense} {entity}";
+        }
+
+        protected string GetReturnUrl(RecordCreatePageModel pageModel, Guid recordId)
+        {
+            var url = pageModel.EntityDetailUrl(recordId, DetailPageName);
+
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                url += $"?returnUrl={pageModel.ReturnUrl}";
+
+            return url;
         }
     }
 }

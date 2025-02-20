@@ -33,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (!Transactional.TryExecute(TransactionalAction))
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not create inventory entry");
-                return pageModel.LocalRedirect(Url.RemoveParameters(pageModel.CurrentUrl));
+                return pageModel.LocalRedirect(Url.RemoveParameter(pageModel.CurrentUrl, "hookKey"));
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));

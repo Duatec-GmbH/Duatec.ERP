@@ -52,6 +52,7 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$areEqual", new MPW(MPT.Function, new AreEqualFunction(this)));
 				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
 				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));
+				properties.Add("$concat", new MPW(MPT.Function, new ConcatFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
 				properties.Add("CurrentUser", currentUserMPW);
@@ -541,7 +542,7 @@ namespace WebVella.Erp.Web.Models
 			propName = propName.Trim();
 			var name = propName.Replace("$index", "0");
 
-			if(propName.StartsWith('"') && propName.EndsWith('"'))
+			if(propName.StartsWith('"') && propName.EndsWith('"') || propName.StartsWith('\'') && propName.EndsWith('\''))
 				return propName[1..(propName.Length - 1)];
 
 			if (decimal.TryParse(propName, out var dec))
@@ -845,6 +846,9 @@ namespace WebVella.Erp.Web.Models
 
 		private object ExecDataSource(DSW dsWrapper)
 		{
+			if (dsWrapper.Result != null)
+				return dsWrapper.Result;
+
 			if (dsWrapper.DataSource.Type == DataSourceType.CODE)
 			{
 				var arguments = new Dictionary<string, object>();
@@ -892,9 +896,11 @@ namespace WebVella.Erp.Web.Models
 				var codeDS = (CodeDataSource)dsWrapper.DataSource;
 
 				if (SafeCodeDataVariable)
-					try { return codeDS.Execute(arguments); } catch { return null; }
+					try { dsWrapper.Result = codeDS.Execute(arguments); } catch { return null; }
 				else
-					return codeDS.Execute(arguments);
+					dsWrapper.Result = codeDS.Execute(arguments);
+
+				return dsWrapper.Result;
 			}
 			else if (dsWrapper.DataSource.Type == DataSourceType.DATABASE)
 			{
@@ -941,7 +947,8 @@ namespace WebVella.Erp.Web.Models
 				}
 
 				DatabaseDataSource dbDs = (DatabaseDataSource)dsWrapper.DataSource;
-				return dsMan.Execute(dbDs.Id, eqlParameters);
+				dsWrapper.Result = dsMan.Execute(dbDs.Id, eqlParameters);
+				return dsWrapper.Result;
 			}
 			else
 				throw new Exception("Not supported data source type.");
@@ -1027,6 +1034,8 @@ namespace WebVella.Erp.Web.Models
 			public DataSourceBase DataSource { get; set; }
 
 			public PageDataSource PageDataSource { get; set; }
+
+			public object Result { get; set; }
 		}
 
 		//ModelPropertyWrapper
@@ -1523,6 +1532,34 @@ namespace WebVella.Erp.Web.Models
 
 			public override object Execute(LazyObject[] parameters)
 				=> Array.TrueForAll(parameters, param => param.Value is bool b && b);
+		}
+
+		private sealed class ConcatFunction : QueryFunction
+		{
+			public ConcatFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => -1;
+
+			public override string Name => "concat";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				var param = parameters.FirstOrDefault(p => p.Value != null);
+
+				if(param is List<EntityRecord>)
+				{
+					IEnumerable<EntityRecord> result = [];
+					foreach (var l in parameters.Select(p => p.Value as List<EntityRecord>).Where(v => v != null))
+						result = result.Concat(l);
+					return result.ToList();
+				}
+
+				return string.Concat(parameters.Select(p => p.Value?.ToString() ?? string.Empty));
+			}
 		}
 
 		private sealed class OrFunction : QueryFunction
