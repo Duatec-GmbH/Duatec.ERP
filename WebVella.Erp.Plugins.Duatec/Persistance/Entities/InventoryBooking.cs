@@ -12,6 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string ProjectId = "project_id";
             public const string ArticleId = "article_id";
+            public const string WarehouseLocationId = "warehouse_location_id";
             public const string Timestamp = "timestamp";
             public const string UserId = "user_id";
             public const string Amount = "amount";
@@ -28,6 +29,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<Guid?>(Fields.ProjectId);
             set => Properties[Fields.ProjectId] = value;
+        }
+
+        public Guid? WarehouseLocationId
+        {
+            get => Get<Guid?>(Fields.WarehouseLocationId);
+            set => Properties[Fields.WarehouseLocationId] = value;
         }
 
         public Guid ArticleId
