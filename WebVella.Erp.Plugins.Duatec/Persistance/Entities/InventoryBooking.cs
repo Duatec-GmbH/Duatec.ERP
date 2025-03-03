@@ -2,6 +2,13 @@
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
+    public enum InventoryBookingKind
+    {
+        Undefined = 0,
+        Take = 1,
+        Store = 2,
+    }
+
     internal class InventoryBooking : TypedEntityRecordWrapper
     {
         public const string Entity = "inventory_booking";
@@ -16,6 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Timestamp = "timestamp";
             public const string UserId = "user_id";
             public const string Amount = "amount";
+            public const string Kind = "kind";
         }
 
         public static class Relations
@@ -59,6 +67,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<DateTime>(Fields.Timestamp);
             set => Properties[Fields.Timestamp] = value;
+        }
+
+        public InventoryBookingKind Kind
+        {
+            get => GetEnumValueFromString(Fields.Kind, InventoryBookingKind.Undefined, true);
+            set => Properties[Fields.Kind] = value.ToString();
         }
     }
 }

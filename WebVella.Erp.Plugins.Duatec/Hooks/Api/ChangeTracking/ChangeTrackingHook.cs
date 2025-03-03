@@ -62,7 +62,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.ChangeTracking
 
         private void TrackMany(IEnumerable<EntityRecord> records, string entityName, ChangeTrackingAction action)
         {
-            var timeStamp = DateTime.UtcNow;
+            var timeStamp = DateTime.Now;
             var entries = records
                 .Select(r => CreateEntry(r, entityName, action, timeStamp))
                 .ToList();
@@ -74,7 +74,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.ChangeTracking
 
         private ChangeTrackingEntry CreateEntry(EntityRecord record, string entityName, ChangeTrackingAction action, DateTime? timestamp = null)
         {
-            var ts = timestamp ?? DateTime.UtcNow;
+            var ts = timestamp ?? DateTime.Now;
 
             return new ChangeTrackingEntry()
             {

@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
-using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -152,11 +151,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             record.Amount = Math.Round(record.Amount, 2);
             return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(RecordManager, record.EntityName, record));
         }
-
-        public InventoryBooking? FindBooking(Guid id, string select = "*")
-            => TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Find(RecordManager, InventoryBooking.Entity, id, select));
         
-
         public InventoryBooking? ReverseBooking(Guid id)
         {
             var booking = FindBooking(id);
@@ -169,19 +164,45 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             if (location == null)
                 return null;
 
-            var entry = new InventoryEntry()
+            if (booking.Kind == InventoryBookingKind.Take)
             {
-                Id = Guid.NewGuid(),
-                Amount = booking.Amount,
-                Article = booking.ArticleId,
-                Project = booking.ProjectId,
-                WarehouseLocation = booking.WarehouseLocationId!.Value,
-            };
-            if (Insert(entry) == null)
-                return null;
+                var entry = new InventoryEntry()
+                {
+                    Id = Guid.NewGuid(),
+                    Amount = booking.Amount,
+                    Article = booking.ArticleId,
+                    Project = booking.ProjectId,
+                    WarehouseLocation = booking.WarehouseLocationId!.Value,
+                };
+                if (Insert(entry) == null)
+                    return null;
+            }
+            else if (booking.Kind == InventoryBookingKind.Store)
+            {
+                var entry = Find(booking.ArticleId, booking.WarehouseLocationId!.Value, booking.ProjectId);
+
+                if (entry == null || entry.Amount < booking.Amount)
+                    return null;
+
+                if(entry.Amount == booking.Amount)
+                {
+                    if (Delete(entry.Id!.Value) == null)
+                        return null;
+                }
+                else
+                {
+                    entry.Amount -= booking.Amount;
+                    if (Update(entry) == null)
+                        return null;
+                }
+            }
+            else return null;
 
             return TypedEntityRecordWrapper.WrapElseDefault<InventoryBooking>(RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
         }
+
+        private InventoryBooking? FindBooking(Guid id, string select = "*")
+            => TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Find(RecordManager, InventoryBooking.Entity, id, select));
 
         private List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
         {
@@ -193,7 +214,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         {
             var takenLookup = FindManyBookingsByProject(projectId)
                 .GroupBy(be => be.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(be => be.Amount));
+                .ToDictionary(g => g.Key, g => g
+                    .Where(be => be.Kind == InventoryBookingKind.Take)
+                    .Aggregate(0m, (sum, be) => sum + be.Amount));
 
             foreach(var ie in FindManyByProject(projectId))
             {

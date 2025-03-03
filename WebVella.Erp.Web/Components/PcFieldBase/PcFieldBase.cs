@@ -147,9 +147,9 @@ namespace WebVella.Erp.Web.Components
 			public string Description { get; set; } = "";
 
 			[JsonProperty(PropertyName = "locale")]
-			public string Locale { get; set; } = "";
+			public string Locale { get; set; } = ErpSettings.Locale;
 
-			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");
+			public CultureInfo Culture { get; set; } = new CultureInfo(ErpSettings.Locale);
 
 			public List<WvSelectOption> LabelRenderModeOptions { get; set; } = new List<WvSelectOption>();
 

@@ -36,8 +36,11 @@
 
             s = s.TrimStart();
             var yearString = Extract(ref s, char.IsAsciiDigit);
-            if (yearString.Length < 4 || !int.TryParse(yearString, out var year))
+            if (yearString.Length < 1 || !int.TryParse(yearString, out var year))
                 return false;
+
+            if (yearString.Length < 4)
+                year += 2000;
 
             result = new DateTime(year, month, day);
             return true;

@@ -16,8 +16,8 @@ namespace WebVella.Erp.Web.Services
 {
 	public class AuthService
 	{
-		private const double JWT_TOKEN_EXPIRY_DURATION_MINUTES = 1440;
-		private const double JWT_TOKEN_FORCE_REFRESH_MINUTES = 120;
+		private const double JWT_TOKEN_EXPIRY_DURATION_MINUTES = 1200;
+		private const double JWT_TOKEN_FORCE_REFRESH_MINUTES = 960;
 
 		private IServiceProvider serviceProvider;
 

@@ -12,11 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         public static class Arguments
         {
             public const string Order = "order";
-            public const string PartNumber = "partNumber";
-            public const string TypeNumber = "typeNumber";
-            public const string OrderNumber = "orderNumber";
+            public const string Article = "article";
             public const string Manufacturer = "manufacturer";
-            public const string Designation = "designation";
             public const string State = "state";
             public const string Page = "page";
             public const string PageSize = "pageSize";
@@ -30,11 +27,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             ResultModel = nameof(EntityRecordList);
 
             Parameters.Add(new() { Name = Arguments.Order, Type = "Guid", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.PartNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.TypeNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Article, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.State, Type = typeof(OrderEntryState).FullName, Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
@@ -120,27 +114,26 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static IEnumerable<ExtendedOrderEntry> ApplyFilters(Dictionary<string, object> arguments, IEnumerable<ExtendedOrderEntry> orderEntries)
         {
-            var partNumber = arguments[Arguments.PartNumber] as string;
-            var typeNumber = arguments[Arguments.TypeNumber] as string;
-            var orderNumber = arguments[Arguments.OrderNumber] as string;
+            var articleFilter = arguments[Arguments.Article] as string;
             var manufacturer = arguments[Arguments.Manufacturer] as string;
-            var designation = arguments[Arguments.Designation] as string;
             var state = EnumValueFromParameter<OrderEntryState?>(arguments[Arguments.State]);
 
-            if (!string.IsNullOrEmpty(partNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle().PartNumber.Contains(partNumber, StringComparison.OrdinalIgnoreCase));
+            var comp = StringComparison.OrdinalIgnoreCase;
 
-            if (!string.IsNullOrEmpty(typeNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle().TypeNumber.Contains(typeNumber, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(orderNumber))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle().OrderNumber.Contains(orderNumber, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(articleFilter))
+            {
+                orderEntries = orderEntries.Where(oe =>
+                {
+                    var article = oe.GetArticle();
+                    return article.PartNumber.Contains(articleFilter, comp)
+                        || article.OrderNumber.Contains(articleFilter, comp)
+                        || article.TypeNumber.Contains(articleFilter, comp)
+                        || article.Designation.Contains(articleFilter, comp);
+                });
+            }
 
             if (!string.IsNullOrEmpty(manufacturer))
                 orderEntries = orderEntries.Where(oe => oe.GetArticle().GetManufacturer().Name.Contains(manufacturer, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(designation))
-                orderEntries = orderEntries.Where(oe => oe.GetArticle().Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
 
             if (state.HasValue)
                 orderEntries = orderEntries.Where(oe => oe.State == state.Value);

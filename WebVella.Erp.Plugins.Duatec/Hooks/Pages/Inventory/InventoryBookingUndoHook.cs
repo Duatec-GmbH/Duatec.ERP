@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;

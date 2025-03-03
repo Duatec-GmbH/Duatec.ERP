@@ -79,7 +79,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' does not exist.");
 
             else if (articleRepository.Exists(article.PartNumber))
-                pageModel.PutMessage(ScreenMessageType.Error, $"Article '{partNumber}' already exists in the data base.");
+                pageModel.PutMessage(ScreenMessageType.Info, $"Article '{partNumber}' already exists in the data base.");
 
             else if (articleRepository.Exists(article.EplanId))
                 pageModel.PutMessage(ScreenMessageType.Error, $"An article with the same EPLAN ID already exists.");

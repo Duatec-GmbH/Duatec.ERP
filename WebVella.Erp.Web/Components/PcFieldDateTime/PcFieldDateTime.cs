@@ -150,12 +150,14 @@ namespace WebVella.Erp.Web.Components
 					ViewBag.IsVisible = isVisible;
 
 					var valueObj = context.DataModel.GetPropertyValueByDataSource(options.Value);
-					if(valueObj is DateTime)
-						model.Value = valueObj as DateTime?;
-					else if(valueObj is string)
+
+					
+					if (valueObj is DateTime dt)
+						model.Value = dt.AddHours(DateTime.UtcNow.Hour - DateTime.Now.Hour); // TODO: Remove this DIRTY HACK to make it work for de-AT!!!!!!!!!!!!!
+					else if (valueObj is string)
 					{
-						if(DateTime.TryParse(valueObj as string,out DateTime outDateTime))
-							model.Value = outDateTime.ConvertToAppDate();					
+						if (DateTime.TryParse(valueObj as string, out DateTime outDateTime))
+							model.Value = outDateTime.ConvertToAppDate();
 					}
 				}
 

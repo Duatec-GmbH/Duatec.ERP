@@ -68,7 +68,7 @@ namespace WebVella.Erp.Web.Components
 			public string Name { get; set; } = "";// can be inherited
 
 			[JsonProperty(PropertyName = "culture")]
-			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");// can be inherited
+			public CultureInfo Culture { get; set; } = new CultureInfo(ErpSettings.Locale);// can be inherited
 
 			[JsonProperty(PropertyName = "class")]
 			public string Class { get; set; } = "";

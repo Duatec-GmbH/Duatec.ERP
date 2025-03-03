@@ -12,11 +12,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         {
             public const string PartList1 = "partList1";
             public const string PartList2 = "partList2";
-            public const string PartNumber = "partNumber";
-            public const string TypeNumber = "typeNumber";
-            public const string OrderNumber = "orderNumber";
+            public const string Article = "article";
             public const string Manufacturer = "manufacturer";
-            public const string Designation = "designation";
             public const string IsEqual = "isEqual";
             public const string Page = "page";
             public const string PageSize = "pageSize";
@@ -31,11 +28,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             Parameters.Add(new() { Name = Arguments.PartList1, Type = "guid", Value = "null" });
             Parameters.Add(new() { Name = Arguments.PartList2, Type = "guid", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.PartNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.TypeNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Article, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.IsEqual, Type = "bool", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
@@ -104,23 +98,24 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static IEnumerable<PartListEntryDiff> ApplyFilters(Dictionary<string, object> arguments, IEnumerable<PartListEntryDiff> entries)
         {
-            var partNumber = arguments[Arguments.PartNumber] as string;
-            var typeNumber = arguments[Arguments.TypeNumber] as string;
-            var orderNumber = arguments[Arguments.OrderNumber] as string;
+            var articleFilter = arguments[Arguments.Article] as string;
             var manufacturer = arguments[Arguments.Manufacturer] as string;
-            var designation = arguments[Arguments.Designation] as string;
             var isEqual = arguments[Arguments.IsEqual] as bool?;
+            var comp = StringComparison.OrdinalIgnoreCase;
 
-            if (!string.IsNullOrWhiteSpace(partNumber))
-                entries = entries.Where(e => e.GetArticle().PartNumber.Contains(partNumber, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(typeNumber))
-                entries = entries.Where(e => e.GetArticle().TypeNumber.Contains(typeNumber, StringComparison.OrdinalIgnoreCase));
-            if(!string.IsNullOrWhiteSpace(orderNumber))
-                entries = entries.Where(e => e.GetArticle().OrderNumber.Contains(orderNumber, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(articleFilter))
+            {
+                entries = entries.Where(e =>
+                {
+                    var article = e.GetArticle();
+                    return article.PartNumber.Contains(articleFilter, comp)
+                        || article.TypeNumber.Contains(articleFilter, comp)
+                        || article.OrderNumber.Contains(articleFilter, comp)
+                        || article.Designation.Contains(articleFilter, comp);
+                });
+            }
             if (!string.IsNullOrWhiteSpace(manufacturer))
                 entries = entries.Where(e => e.GetArticle().GetManufacturer().Name.Contains(manufacturer, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(designation))
-                entries = entries.Where(e => e.GetArticle().Designation.Contains(designation, StringComparison.OrdinalIgnoreCase));
 
             if (isEqual.HasValue)
                 entries = entries.Where(e => isEqual.Value == (e.Amount1 == e.Amount2));

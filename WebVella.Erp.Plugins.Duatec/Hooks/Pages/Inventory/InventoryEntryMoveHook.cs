@@ -44,6 +44,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
+            var id = record.Id!.Value;
             void TransactionalAction()
             {
                 var repo = new InventoryRepository();
@@ -63,7 +64,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             pageModel.PutMessage(ScreenMessageType.Success, SuccessMessage(record.EntityName));
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+            {
+                if (pageModel.ReturnUrl.Contains($"{id}"))
+                    pageModel.ReturnUrl = pageModel.ReturnUrl.Replace($"{id}", $"{record.Id!.Value}");
                 return pageModel.LocalRedirect(pageModel.ReturnUrl);
+            }
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
 

@@ -58,7 +58,7 @@ namespace WebVella.Erp.Web.Components
 			public bool HasThead { get; set; } = true;
 
 			[JsonProperty(PropertyName = "culture")]
-			public CultureInfo Culture { get; set; } = new CultureInfo("en-US");// can be inherited
+			public CultureInfo Culture { get; set; } = new CultureInfo(ErpSettings.Locale);// can be inherited
 
 			[JsonProperty(PropertyName = "has-add-button")]
 			public bool HasAddButton { get; set; } = true;

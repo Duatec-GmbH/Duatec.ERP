@@ -25,9 +25,25 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             void TransactionalAction()
             {
+                var amount = record.Amount;
+
                 var repo = new InventoryRepository();
                 if (repo.Insert(record) == null)
                     throw new DbException("Could not create inventory entry record");
+
+                var booking = new InventoryBooking()
+                {
+                    Amount = amount,
+                    ArticleId = record.Article,
+                    Kind = InventoryBookingKind.Store,
+                    Timestamp = DateTime.Now,
+                    ProjectId = record.Project,
+                    WarehouseLocationId = record.WarehouseLocation,
+                    UserId = userId,
+                };
+
+                if (repo.InsertBooking(booking) == null)
+                    throw new DbException("Could not create booking entry");
             }
 
             if (!Transactional.TryExecute(TransactionalAction))

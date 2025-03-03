@@ -52,6 +52,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     WarehouseLocationId = unmodified.WarehouseLocation,
                     UserId = pageModel.CurrentUser.Id,
                     Timestamp = DateTime.Now,
+                    Kind = InventoryBookingKind.Take,
                 };
                 if (repo.InsertBooking(booking) == null)
                     throw new DbException("Could not insert booking");

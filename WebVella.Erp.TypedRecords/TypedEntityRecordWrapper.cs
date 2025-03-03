@@ -48,6 +48,23 @@ namespace WebVella.Erp.TypedRecords
             return value;
         }
 
+        protected T GetEnumValueFromString<T>(string property, T defaultValue = default!, bool ignoreCase = false) where T : unmanaged
+        {
+            if (!Properties.TryGetValue(property, out var v) || v is not string text)
+                return defaultValue;
+
+            var comp = ignoreCase 
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+
+            foreach(var val in Enum.GetValues(typeof(T)))
+            {
+                if (text.Equals($"{val}", comp))
+                    return (T)val;
+            }
+            return defaultValue;
+        }
+
         protected void SetRelationValue(string relationName, EntityRecord? value)
         {
             var l = value == null ? [] : new List<EntityRecord>() { value };

@@ -12,10 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         public static class Arguments
         {
             public const string Project = "project";
-            public const string PartNumber = "partNumber";
-            public const string TypeNumber = "typeNumber";
-            public const string OrderNumber = "orderNumber";
-            public const string Designation = "designation";
+            public const string Article = "article";
             public const string Manufacturer = "manufacturer";
             public const string Order = "order";
             public const string State = "state";
@@ -38,10 +35,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             ResultModel = nameof(EntityRecordList);
 
             Parameters.Add(new() { Name = Arguments.Project, Type = "guid", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.PartNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.TypeNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
-            Parameters.Add(new() { Name = Arguments.Designation, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Article, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Manufacturer, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Order, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.State, Type = typeof(OrderListEntryState).FullName, Value = "null" });
@@ -60,10 +54,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var records = GetRecords(projectId.Value);
 
-            var partNumber = arguments[Arguments.PartNumber]?.ToString();
-            var typeNumber = arguments[Arguments.TypeNumber]?.ToString();
-            var orderNumber = arguments[Arguments.OrderNumber]?.ToString();
-            var designation = arguments[Arguments.Designation]?.ToString();
+            var article = arguments[Arguments.Article]?.ToString();
             var manufacturer = arguments[Arguments.Manufacturer]?.ToString();
             var order = arguments[Arguments.Order]?.ToString();
             var state = EnumValueFromParameter<OrderListEntryState?>(arguments[Arguments.State]);
@@ -71,10 +62,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
 
-            records = ApplyArticleFilter(partNumber, Article.Fields.PartNumber, records);
-            records = ApplyArticleFilter(typeNumber, Article.Fields.TypeNumber, records);
-            records = ApplyArticleFilter(orderNumber, Article.Fields.OrderNumber, records);
-            records = ApplyArticleFilter(designation, Article.Fields.Designation, records);
+            records = ApplyArticleFilter(article, records);
             records = ApplyManufacturerFilter(manufacturer, records);
             records = ApplyOrderFilter(order, records);
             records = ApplyStateFilter(state, stateFilterType, records);
@@ -93,13 +81,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static IEnumerable<OrderListEntry> ApplyArticleFilter(string? filterValue, string property, IEnumerable<OrderListEntry> records)
+        private static IEnumerable<OrderListEntry> ApplyArticleFilter(string? filterValue, IEnumerable<OrderListEntry> records)
         {
             if (string.IsNullOrEmpty(filterValue))
                 return records;
 
+            var comp = StringComparison.OrdinalIgnoreCase;
+
             return records
-                .Where(r => r.GetArticle()[property].ToString()!.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                .Where(r =>
+                {
+                    var article = r.GetArticle();
+                    return article.PartNumber.Contains(filterValue, comp)
+                        || article.OrderNumber.Contains(filterValue, comp)
+                        || article.TypeNumber.Contains(filterValue, comp)
+                        || article.Designation.Contains(filterValue, comp);
+                });
         }
 
         private static IEnumerable<OrderListEntry> ApplyOrderFilter(string? filterValue, IEnumerable<OrderListEntry> records)
