@@ -1,6 +1,6 @@
 ﻿using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
-using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Attributes;
 using WebVella.Erp.TypedRecords.Validation;
 
@@ -12,16 +12,33 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     internal class OrderValidator : IRecordValidator<Order>
     {
         const string Entity = Order.Entity;
-        private static readonly NameUniqueValidator _orderNumberValidator = new(Entity, Fields.Number);
 
         public List<ValidationError> ValidateOnCreate(Order record)
         {
-            return _orderNumberValidator.ValidateOnCreate(record.Number, Fields.Number);
+            return Validate(record);
         }
 
         public List<ValidationError> ValidateOnUpdate(Order record)
         {
-            return _orderNumberValidator.ValidateOnUpdate(record.Number, Fields.Number, record.Id!.Value);
+            return Validate(record);
+        }
+
+        private static List<ValidationError> Validate(Order record)
+        {
+            var result = new List<ValidationError>();
+
+            if (!record.Project.HasValue || record.Project == Guid.Empty)
+                result.Add(new ValidationError(Fields.Project, "Project is required"));
+            else
+            {
+                var orders = new OrderRepository().FindManyByProject(record.Project.Value);
+
+                if (orders.Any(o => o.Id != record.Id && o.Number == record.Number))
+                    result.Add(new ValidationError(Fields.Number, "Order number must be unique within project"));
+
+            }
+
+            return result;
         }
 
         public List<ValidationError> ValidateOnDelete(Order record)
