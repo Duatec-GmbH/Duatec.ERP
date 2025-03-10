@@ -38,7 +38,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Kind = InventoryBookingKind.Store,
                     Timestamp = DateTime.Now,
                     ProjectId = record.Project,
+                    ProjectSourceId = record.Project,
                     WarehouseLocationId = record.WarehouseLocation,
+                    WarehouseLocationSourceId = record.WarehouseLocation,
                     UserId = userId,
                 };
 

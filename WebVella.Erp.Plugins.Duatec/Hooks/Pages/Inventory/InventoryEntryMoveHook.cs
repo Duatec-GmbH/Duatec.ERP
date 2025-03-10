@@ -47,6 +47,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var id = record.Id!.Value;
             void TransactionalAction()
             {
+                var booking = new InventoryBooking()
+                {
+                    Amount = record.Amount,
+                    ArticleId = record.Article,
+                    ProjectId = record.Project,
+                    ProjectSourceId = unmodified.Project,
+                    WarehouseLocationId = record.WarehouseLocation,
+                    WarehouseLocationSourceId = unmodified.WarehouseLocation,
+                    UserId = pageModel.CurrentUser.Id,
+                    Kind = InventoryBookingKind.Move,
+                    Timestamp = DateTime.Now
+                };
+
                 var repo = new InventoryRepository();
                 record = (record.Amount >= unmodified.Amount - eps
                     ? repo.Update(record)
@@ -54,6 +67,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 if (record == null)
                     throw new DbException("Could not move inventory entry");
+
+                if (repo.InsertBooking(booking) == null)
+                    throw new DbException("Could not insert booking");
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))

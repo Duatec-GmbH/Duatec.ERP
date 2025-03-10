@@ -72,7 +72,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                             var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
                                 ? arr : [];
 
-                            MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries);
+                            MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries, pageModel.CurrentUser.Id);
                         }
                     }
                 }
@@ -87,12 +87,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
         private static void MoveInventory(
             RecordManager recMan, decimal amount,
-            InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
+            InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries,
+            Guid userId)
         {
             if (amount == 0)
             {
                 foreach (var entry in availableEntries)
-                    Move(recMan, null, entry);
+                    Move(recMan, null, entry, userId);
             }
             else
             {
@@ -102,8 +103,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = reservedEntries.Where(
                     rie => !Array.Exists(availableEntries, aie => aie.WarehouseLocation == rie.WarehouseLocation));
 
-                amount = MoveInventory(recMan, amount, null, availableWithinLocation);
-                amount = MoveInventory(recMan, amount, null, otherAvailables);
+                amount = MoveInventory(recMan, amount, null, availableWithinLocation, userId);
+                amount = MoveInventory(recMan, amount, null, otherAvailables, userId);
 
                 if (amount != 0)
                     throw new DbException($"Could not unreserve all entries");

@@ -63,7 +63,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                     var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr)
                         ? arr : [];
 
-                    MoveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries);
+                    MoveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries, pageModel.CurrentUser.Id);
                 }
             }
 
@@ -76,13 +76,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 
         private static void MoveInventory(
             RecordManager recMan, Guid projectId, decimal amount,
-            InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries)
+            InventoryEntry[] availableEntries, InventoryEntry[] reservedEntries,
+            Guid userId)
         {
             var available = availableEntries.Aggregate(0m, (sum, entry) => sum + entry.Amount);
             if (amount == available)
             {
                 foreach (var entry in availableEntries)
-                    Move(recMan, projectId, entry);
+                    Move(recMan, projectId, entry, userId);
             }
             else
             {
@@ -92,8 +93,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 var otherAvailables = availableEntries.Where(
                     ae => !Array.Exists(reservedEntries, re => re.WarehouseLocation == ae.WarehouseLocation));
 
-                amount = MoveInventory(recMan, amount, projectId, availableWithinLocation);
-                amount = MoveInventory(recMan, amount, projectId, otherAvailables);
+                amount = MoveInventory(recMan, amount, projectId, availableWithinLocation, userId);
+                amount = MoveInventory(recMan, amount, projectId, otherAvailables, userId);
 
                 if (amount != 0)
                     throw new DbException("Could not reserve all entries");

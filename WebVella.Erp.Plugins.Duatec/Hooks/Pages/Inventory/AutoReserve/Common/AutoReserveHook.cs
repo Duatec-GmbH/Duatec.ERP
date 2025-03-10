@@ -59,7 +59,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
 
         protected static decimal MoveInventory(
             RecordManager recMan, decimal amount, Guid? projectId,
-            IEnumerable<InventoryEntry> availableInventoryEntries)
+            IEnumerable<InventoryEntry> availableInventoryEntries, Guid userId)
         {
             if (amount <= 0)
                 return amount;
@@ -69,14 +69,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 if (entry.Amount <= amount)
                 {
                     amount -= entry.Amount;
-                    Move(recMan, projectId, entry);
+                    Move(recMan, projectId, entry, userId);
 
                     if (amount <= 0)
                         return amount;
                 }
                 else
                 {
-                    MovePartial(recMan, projectId, entry, amount);
+                    MovePartial(recMan, projectId, entry, amount, userId);
                     return 0;
                 }
             }
@@ -84,19 +84,51 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
         }
 
 
-        protected static void Move(RecordManager recMan, Guid? projectId, InventoryEntry entry)
+        protected static void Move(RecordManager recMan, Guid? projectId, InventoryEntry entry, Guid userId)
         {
+            var repo = new InventoryRepository(recMan);
+            var booking = new InventoryBooking()
+            {
+                Amount = entry.Amount,
+                Timestamp = DateTime.Now,
+                ArticleId = entry.Article,
+                Kind = InventoryBookingKind.Move,
+                WarehouseLocationId = entry.WarehouseLocation,
+                WarehouseLocationSourceId = entry.WarehouseLocation,
+                ProjectSourceId = entry.Project,
+                ProjectId = projectId,
+                UserId = userId
+            };
+
             entry.Project = projectId;
-            if (new InventoryRepository(recMan).Update(entry) == null)
+            if (repo.Update(entry) == null)
                 throw new DbException("Could not move inventory entry");
+            if (repo.InsertBooking(booking) == null)
+                throw new DbException("Could not insert booking");
         }
 
-        private static void MovePartial(RecordManager recMan, Guid? projectId, InventoryEntry entry, decimal amount)
+        private static void MovePartial(RecordManager recMan, Guid? projectId, InventoryEntry entry, decimal amount, Guid userId)
         {
+            var repo = new InventoryRepository(recMan);
+            var booking = new InventoryBooking()
+            {
+                Amount = amount,
+                Timestamp = DateTime.Now,
+                ArticleId = entry.Article,
+                Kind = InventoryBookingKind.Move,
+                WarehouseLocationId = entry.WarehouseLocation,
+                WarehouseLocationSourceId = entry.WarehouseLocation,
+                ProjectSourceId = entry.Project,
+                ProjectId = projectId,
+                UserId = userId
+            };
+
             entry.Project = projectId;
             entry.Amount = amount;
-            if (new InventoryRepository(recMan).MovePartial(entry) == null)
+            if (repo.MovePartial(entry) == null)
                 throw new DbException("Could not partially move inventory entry");
+            if (repo.InsertBooking(booking) == null)
+                throw new DbException("Could not insert booking");
         }
 
         protected static LocalRedirectResult Info(BaseErpPageModel pageModel, string message)

@@ -23,7 +23,7 @@ namespace WebVella.Erp.Plugins.SDK.Services
         private string OldDbConnectionString;
         private string defaultCulture = "en-US";
 
-        public CodeGenService() : this("en-US")
+        public CodeGenService() : this(ErpSettings.Locale)
         {
         }
 
@@ -116,7 +116,8 @@ namespace WebVella.Erp.Plugins.SDK.Services
                 #region << Process entity >>
 
                 #region << Logic >>
-                foreach (var entity in oldEntityList)
+                // TODO: Dirty Hack (entities always get deleted, this is not valid)
+                foreach (var entity in oldEntityList.Where(e => e.Name != "role" && e.Name != "user" && e.Name != "user_file" && e.Name != "smtp_service" && e.Name != "email"))
                 {
                     if (!oldEntityProcessedDictionary.ContainsKey(entity.Id))
                     {

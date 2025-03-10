@@ -48,8 +48,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 {
                     Amount = amount,
                     ArticleId = unmodified.Article,
-                    ProjectId = unmodified.Project,
-                    WarehouseLocationId = unmodified.WarehouseLocation,
+                    ProjectId = record.Project,
+                    ProjectSourceId = unmodified.Project,
+                    WarehouseLocationId = record.WarehouseLocation,
+                    WarehouseLocationSourceId = unmodified.WarehouseLocation,
                     UserId = pageModel.CurrentUser.Id,
                     Timestamp = DateTime.Now,
                     Kind = InventoryBookingKind.Take,

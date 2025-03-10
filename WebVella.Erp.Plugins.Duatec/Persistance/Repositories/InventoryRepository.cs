@@ -171,7 +171,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     Id = Guid.NewGuid(),
                     Amount = booking.Amount,
                     Article = booking.ArticleId,
-                    Project = booking.ProjectId,
+                    Project = booking.ProjectSourceId,
                     WarehouseLocation = booking.WarehouseLocationId!.Value,
                 };
                 if (Insert(entry) == null)
@@ -196,9 +196,43 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         return null;
                 }
             }
+            else if(booking.Kind == InventoryBookingKind.Move)
+            {
+                if (!booking.WarehouseLocationSourceId.HasValue)
+                    return null;
+
+                var entry = Find(booking.ArticleId, booking.WarehouseLocationId!.Value, booking.ProjectId);
+
+                if (entry == null || entry.Amount < booking.Amount)
+                    return null;
+
+                if (entry.Amount == booking.Amount)
+                {
+                    if (Delete(entry.Id!.Value) == null)
+                        return null;
+                }
+                else
+                {
+                    entry.Amount -= booking.Amount;
+                    if (Update(entry) == null)
+                        return null;
+                }
+
+                var rec = new InventoryEntry()
+                {
+                    Article = booking.ArticleId,
+                    Amount = booking.Amount,
+                    Project = booking.ProjectSourceId,
+                    WarehouseLocation = booking.WarehouseLocationSourceId.Value,
+                };
+
+                if (Insert(rec) == null)
+                    return null;
+            }
             else return null;
 
-            return TypedEntityRecordWrapper.WrapElseDefault<InventoryBooking>(RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
+            return TypedEntityRecordWrapper.WrapElseDefault<InventoryBooking>(
+                RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
         }
 
         private InventoryBooking? FindBooking(Guid id, string select = "*")

@@ -511,7 +511,7 @@ namespace WebVella.Erp.Web.Models
 			if (string.IsNullOrWhiteSpace(propName))
 				throw new ArgumentException($"Argument '{nameof(propName)}' must not be null or whitespace");
 
-			if (!propName.Contains("{{"))
+			if (!propName.Contains("{{") || propName.StartsWith('"') || propName.StartsWith('$'))
 				return ResolveProperty(propName);
 
 			var sb = new StringBuilder();
@@ -529,8 +529,21 @@ namespace WebVella.Erp.Web.Models
 				else
 				{
 					idx += 2;
-					var end = propName.IndexOf("}}", idx);
-					if (end <= idx)
+					var depth = 0;
+					var end = idx;
+					while(end < propName.Length - 1 && !(propName[end] == '}' && propName[end + 1] == '}' && depth <= 0) )
+					{
+						if(end < propName.Length - 1)
+						{
+							if (propName[end] == '{' && propName[end + 1] == '{')
+								depth++;
+							else if (propName[end] == '}' && propName[end + 1] == '}')
+								depth--;
+						}
+						end++;
+					}
+
+					if (end <= idx || end >= propName.Length - 1 || propName[end] != '}' || propName[end + 1] != '}' )
 						throw new PropertyDoesNotExistException("Could not interpret property value");
 
 					var prop = propName[idx..end];
@@ -549,7 +562,12 @@ namespace WebVella.Erp.Web.Models
 			var name = propName.Replace("$index", "0");
 
 			if(propName.StartsWith('"') && propName.EndsWith('"') || propName.StartsWith('\'') && propName.EndsWith('\''))
-				return propName[1..(propName.Length - 1)];
+			{
+				var stringVal = propName[1..(propName.Length - 1)];
+				if (!stringVal.Contains("{{"))
+					return stringVal;
+				return GetProperty(stringVal);
+			}
 
 			if (decimal.TryParse(propName, out var dec))
 				return dec;
