@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
@@ -92,13 +93,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully booked goods");
+            var url = GetSuccessUrl(pageModel, record);
 
+            if(record.GetProject()?.IsInventoryProject is true)
+            {
+                var context = pageModel.ErpRequestContext;
+                url = $"/{context.App.Name}/history/goods-receiving/r/{goodsReceiving.Id}/store-goods?hookKey={HookKeys.GoodsReceiving.Store}&returnUrl={url}";
+            }
+
+            return pageModel.LocalRedirect(url);
+        }
+
+        private static string GetSuccessUrl(BaseErpPageModel pageModel, Order record)
+        {
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+                return pageModel.ReturnUrl;
 
             var context = pageModel.ErpRequestContext;
-            return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/" +
-                $"{context.SitemapNode?.Name}/r/{record.Id}/detail");
+            return $"/{context.App?.Name}/{context.SitemapArea?.Name}/{context.SitemapNode?.Name}/r/{record.Id}/detail";
         }
 
         private static void SetUpErrorPage(Order record, BaseErpPageModel pageModel, IEnumerable<OrderEntry> demandedEntries, UpdateInfo[] updateInfos)

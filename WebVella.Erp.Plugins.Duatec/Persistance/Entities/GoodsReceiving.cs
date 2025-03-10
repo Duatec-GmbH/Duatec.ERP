@@ -19,6 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Order = "order_id";
             public const string TimeStamp = "time_stamp";
             public const string DeliveryNote = "delivery_note";
+            public const string HasBeenStored = "has_been_stored";
         }
 
         public override string EntityName => Entity;
@@ -39,6 +40,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get(Fields.DeliveryNote, string.Empty);
             set => Properties[Fields.DeliveryNote] = value;
+        }
+
+        public bool HasBeenStored
+        {
+            get => Get(Fields.HasBeenStored, false);
+            set => Properties[Fields.HasBeenStored] = value;
         }
 
         public IEnumerable<GoodsReceivingEntry> GetEntries()

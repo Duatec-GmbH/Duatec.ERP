@@ -43,6 +43,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return result;
         }
 
+        public override List<InventoryEntry> InsertMany(IEnumerable<InventoryEntry> records)
+            => records.Select(Insert).Where(ie => ie != null).ToList()!;
+
         public InventoryEntry? MovePartial(InventoryEntry record)
         {
             RoundAmount(record);
@@ -150,6 +153,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         {
             record.Amount = Math.Round(record.Amount, 2);
             return TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Insert(RecordManager, record.EntityName, record));
+        }
+
+        public List<InventoryBooking> InsertManyBookings(IEnumerable<InventoryBooking> bookings)
+        {
+            return RepositoryHelper.InsertMany(RecordManager, InventoryBooking.Entity, bookings)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)
+                .ToList();
         }
         
         public InventoryBooking? ReverseBooking(Guid id)

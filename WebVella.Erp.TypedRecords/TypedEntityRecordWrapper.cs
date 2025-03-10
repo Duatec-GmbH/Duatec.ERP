@@ -7,6 +7,7 @@ namespace WebVella.Erp.TypedRecords
     public abstract class TypedEntityRecordWrapper : EntityRecord
     {
         private Dictionary<string, EntityRelation>? _queriedRelations = null;
+        private Dictionary<string, object>? _unmodifiedFields = null;
 
         public abstract string EntityName { get; }
 
@@ -140,6 +141,18 @@ namespace WebVella.Erp.TypedRecords
             return relation;
         }
 
+        private Dictionary<string, object>? GetUnmodifiedFields()
+        {
+            if (!Id.HasValue || Id.Value == Guid.Empty)
+                return null;
+
+            var unmodified = new RecordManager().Find(EntityName, Id.Value)?.Object?.Data.SingleOrDefault();
+            if (unmodified == null)
+                return null;
+
+            return unmodified.Properties;
+        }
+
         private List<EntityRecord> FindRelatedRecords(EntityRelation relation)
         {
             var isOrigin = relation.OriginEntityName == EntityName;
@@ -161,11 +174,20 @@ namespace WebVella.Erp.TypedRecords
                 otherEntityName = relation.OriginEntityName;
             }
 
+            if (!Properties.TryGetValue(thisFieldName, out var value))
+            {
+                _unmodifiedFields ??= GetUnmodifiedFields();
+                if (_unmodifiedFields == null)
+                    throw new DbException($"Entity '{EntityName}' does not have a field with name '{thisFieldName}'");
+
+                value = _unmodifiedFields[thisFieldName];
+            }
+
             var expr = new QueryObject()
             {
                 QueryType = QueryType.EQ,
                 FieldName = otherFieldName,
-                FieldValue = Properties[thisFieldName]
+                FieldValue = value
             };
 
             var result = new RecordManager()

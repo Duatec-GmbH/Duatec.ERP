@@ -49,14 +49,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         protected override IActionResult? OnPreUpdate(GoodsReceiving record, RecordManagePageModel pageModel, List<ValidationError> validationErrors)
         {
             var recMan = new RecordManager();
-
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
+
             record = goodsReceivingRepo.Find(pageModel.RecordId!.Value, $"*, ${GoodsReceiving.Relations.Order}.*")!;
+
             var projectId = record.GetOrder().Project;
-
-            var userId = pageModel.TryGetDataSourceProperty<ErpUser>("CurrentUser")!.Id;
-
-            record = goodsReceivingRepo.Find(record.Id!.Value)!;
+            var userId = pageModel.CurrentUser.Id;
 
             var defaultEntries = GetDefaultEntries(record, recMan)
                 .GroupBy(ie => ie.Article)
@@ -64,6 +62,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             var updateInfos = GetUpdateInfo(pageModel)
                 .ToArray();
+
+            if (defaultEntries.Keys.Except(updateInfos.Select(ui => ui.ArticleId).Distinct()).Any())
+                return pageModel.BadRequest();
 
             validationErrors.AddRange(Validate(updateInfos, defaultEntries));
 
@@ -75,21 +76,33 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             void TransactionalAction()
             {
-                var repo = new InventoryRepository(recMan);
-                var entries = goodsReceivingRepo.FindManyEntriesByGoodsReceiving(record.Id!.Value)
-                    .ToDictionary(gre => gre.Article, gre => gre);
+                var inventoryRepo = new InventoryRepository(recMan);
+                var entries = BuildInventoryEntries(updateInfos)
+                    .ToArray();
 
-                foreach(var g in BuildInventoryEntries(updateInfos).GroupBy(ie => ie.Article).ToArray())
+                var timestamp = DateTime.Now;
+                var bookings = entries.Select(e => new InventoryBooking()
                 {
-                    var receivingEntry = entries[g.Key];
+                    Amount = e.Amount,
+                    ArticleId = e.Article,
+                    Kind = InventoryBookingKind.Store,
+                    ProjectId = projectId,
+                    ProjectSourceId = projectId,
+                    WarehouseLocationId = e.WarehouseLocation,
+                    WarehouseLocationSourceId = e.WarehouseLocation,
+                    Timestamp = timestamp,
+                    UserId = userId,
+                });
 
-                    if (goodsReceivingRepo.UpdateEntry(receivingEntry) == null)
-                        throw new DbException("Failed to update receiving entry record");
+                record.HasBeenStored = true;
+                if (goodsReceivingRepo.Update(record) == null)
+                    throw new DbException("Could not update record");
 
-                    var toAdd = g.ToArray();
-                    if(repo.InsertMany(toAdd).Count != toAdd.Length)
-                        throw new DbException("Could not insert inventory entries");
-                }
+                if (inventoryRepo.InsertMany(entries).Count != entries.Length)
+                    throw new DbException("Could not create inventory entries");
+
+                if (inventoryRepo.InsertManyBookings(bookings).Count != entries.Length)
+                    throw new DbException("Could not insert bookings");
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))
@@ -104,81 +117,50 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/open-orders/r/{record.Order}/detail");
         }
 
-        private static decimal GetAmount<T>(Dictionary<T, decimal> dict, T key) where T : notnull
-            => dict.TryGetValue(key, out var amount) ? amount : 0m;
 
         private static IEnumerable<InventoryEntry> GetDefaultEntries(GoodsReceiving record, RecordManager? recMan = null)
         {
-            //recMan ??= new RecordManager();
-            
-            //var partListRepo = new PartListRepository(recMan);
-            //var inventoryRepo = new InventoryRepository(recMan);
-            //var receivingRepo = new GoodsReceivingRepository(recMan);
-            //var projectId = record.GetOrder().Project;
+            if (record.HasBeenStored)
+                yield break;
 
-            //var demands = partListRepo.FindManyEntriesByProject(projectId, true)
-            //    .GroupBy(ple => ple.ArticleId)
-            //    .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
+            recMan ??= new RecordManager();
+            var inventoryRepo = new InventoryRepository(recMan);
+            var receivingRepo = new GoodsReceivingRepository(recMan);
+            var articleRepo = new ArticleRepository(recMan);
 
-            //var reservedAmounts = inventoryRepo.GetReservedArticleAmountLookup(projectId);
+            const string entrySelect = "*, " +
+                $"${GoodsReceivingEntry.Relations.Article}.*";
 
-            yield break;
+            var unstoredEntries = receivingRepo.FindManyEntriesByGoodsReceiving(record.Id!.Value, entrySelect);
 
-            //var unstoredEntries = UnstoredGoodsReceivingEntries.Execute(record.Id!.Value)
-            //    .OrderBy(gre => gre.GetArticle().PartNumber);
+            var articleIds = unstoredEntries
+                .Select(e => e.Article)
+                .Distinct()
+                .ToArray();
 
-            //foreach (var entry in unstoredEntries)
-            //{
-            //    var projectDemand = GetAmount(demands, entry.Article)
-            //        - GetAmount(reservedAmounts, entry.Article);
+            const string articleSelect = "*, " +
+                $"${Article.Relations.Type}.*, " +
+                $"${Article.Relations.Manufacturer}.name";
 
-            //    var inventoryEntry = new InventoryEntry()
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        Amount = entry.Amount,
-            //        Article = entry.Article,
-            //        Project = projectId,
-            //    };
+            var articleLookup = articleRepo.FindMany(articleSelect, articleIds);
+            var projectId = record.GetOrder().Project;
 
-            //    inventoryEntry.SetArticle(entry.GetArticle());
+            foreach (var entry in unstoredEntries)
+            {
+                var inventoryEntry = new InventoryEntry()
+                {
+                    Id = Guid.NewGuid(),
+                    Amount = entry.Amount,
+                    Article = entry.Article,
+                    Project = projectId,
+                };
 
-            //    if (projectDemand <= 0)
-            //    {
-            //        inventoryEntry.WarehouseLocation 
-            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
-            //        inventoryEntry.Project = null;
-            //        yield return inventoryEntry;
-            //    }
-            //    else if (inventoryEntry.Amount <= projectDemand)
-            //    {
-            //        inventoryEntry.WarehouseLocation
-            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
-            //        yield return inventoryEntry;
-            //    }
-            //    else
-            //    {
-            //        inventoryEntry.WarehouseLocation
-            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
-            //        var goesToDefaultProject = new InventoryEntry()
-            //        {
-            //            Id = Guid.NewGuid(),
-            //            Amount = inventoryEntry.Amount - projectDemand,
-            //            Project = null,
-            //            Article = entry.Article,
-            //            WarehouseLocation = Guid.Empty,
-            //        };
+                inventoryEntry.SetArticle(articleLookup[entry.Article]);
+                inventoryEntry.WarehouseLocation
+                    = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
 
-            //        goesToDefaultProject.WarehouseLocation
-            //            = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, null);
-
-            //        goesToDefaultProject.SetArticle(entry.GetArticle());
-
-            //        inventoryEntry.Amount = projectDemand;
-
-            //        yield return inventoryEntry;
-            //        yield return goesToDefaultProject;
-            //    }
-            //}
+                yield return inventoryEntry;
+            }
         }
 
         private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Guid articleId, Guid? projectid)
@@ -204,7 +186,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             var projectSetPoint = defaultLookup
                 .First().Value[0].Project;
 
-            foreach (var (projectId, articleId, warehouseLocationId, amount, index) in updateInfos.Where(t => t.Amount > 0))
+            foreach (var (projectId, articleId, warehouseLocationId, amount, index) in updateInfos)
             {
                 if (warehouseLocationId == Guid.Empty)
                     yield return WarehouseLocationError(index, "Warehouse location is required");
@@ -212,40 +194,34 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 if (projectId != Guid.Empty && projectId != null && projectId != projectSetPoint)
                     yield return ProjectError(index, "Fatal error project id missmatch");
 
+                if (amount <= 0)
+                    yield return AmountError(index, "Positive value expected");
+
                 if (articleId == Guid.Empty)
                     yield return ArticleError(index, "Article is required");
 
                 else if (!defaultLookup.TryGetValue(articleId, out var entries) || entries.Length == 0)
-                    yield return ArticleError(index, "There is no booking for this article");
+                    yield return ArticleError(index, "Article is not defined in goodsreceiving");
 
                 else
                 {
-                    var equivalentArticles = updateInfos
-                        .Where(t => t.Amount > 0 && t.ArticleId == articleId)
-                        .ToArray();
-
-                    var totalAmount = equivalentArticles
-                        .Aggregate(0m, (sum, current) => sum + current.Amount);
-
-                    var max = entries.Sum(t => t.Amount);
-
-                    if (totalAmount != max)
-                        yield return AmountError(index, $"Sum of amounts for given article must be equal to booked amount ({max})");
-
-                    var totalProject = equivalentArticles
-                        .Where(ie => ie.ProjectId == projectId)
-                        .Aggregate(0m, (sum, current) => sum + current.Amount);
-
-                    var maxProject = entries
-                        .Where(ie => ie.Project == projectId)
-                        .Aggregate(0m, (sum, current) => sum + current.Amount);
-
-                    if (totalProject != maxProject)
-                        yield return AmountError(index, $"Sum of amounts for given article for given project must be equal to project demand ({maxProject})");
-
                     var isInt = entries[0].GetArticle().GetArticleType().IsInteger;
                     if (isInt && amount % 1 != 0)
                         yield return AmountError(index, "Amount is expected to be an integer value");
+                    else
+                    {
+                        var equivalentArticles = updateInfos
+                            .Where(t => t.ArticleId == articleId)
+                            .ToArray();
+
+                        var totalAmount = equivalentArticles
+                            .Aggregate(0m, (sum, current) => sum + current.Amount);
+
+                        var max = entries.Sum(t => t.Amount);
+
+                        if (totalAmount != max)
+                            yield return AmountError(index, $"Sum of amounts for given article must be equal to booked amount ({max})");
+                    }
                 }
             }
         }
