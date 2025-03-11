@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CSScripting;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -43,21 +44,28 @@ namespace WebVella.Erp.Web.Models
 				//if page request context is set, it is used, otherwise, the requestContext is used
 				ErpRequestContext reqCtx = erpPageModel.ErpRequestContext;
 
-				properties.Add("$exists", new MPW(MPT.Function, new ExistsFunction(this)));
 				properties.Add("$not", new MPW(MPT.Function, new NotFunction(this)));
 				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
 				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));
+				properties.Add("$gt", new MPW(MPT.Function, new GreaterThanFunction(this)));
+				properties.Add("$ge", new MPW(MPT.Function, new GreaterThanOrEqualFunction(this)));
+				properties.Add("$lt", new MPW(MPT.Function, new LessThanFunction(this)));
+				properties.Add("$le", new MPW(MPT.Function, new LessThanOrEqualFunction(this)));
+
+				properties.Add("$exists", new MPW(MPT.Function, new ExistsFunction(this)));
 				properties.Add("$concat", new MPW(MPT.Function, new ConcatFunction(this)));
 				properties.Add("$coalesce", new MPW(MPT.Function, new CoalesceFunction(this)));
 				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
 				properties.Add("$hasRole", new MPW(MPT.Function, new HasRoleFunction(this)));
 				properties.Add("$areEqual", new MPW(MPT.Function, new AreEqualFunction(this)));
 
-				properties.Add("$where", new MPW(MPT.Function, new WhereFunction(this)));
+				properties.Add("$filter", new MPW(MPT.Function, new FilterFunction(this)));
 				properties.Add("$count", new MPW(MPT.Function, new CountFunction(this)));
-
-
+				properties.Add("$any", new MPW(MPT.Function, new AnyFunction(this)));
 				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
+				properties.Add("$thenOrderBy", new MPW(MPT.Function, new ThenOrderByFunction(this)));
+				properties.Add("$orderByDescending", new MPW(MPT.Function, new OrderByDescendingFunction(this)));
+				properties.Add("$thenOrderByDescending", new MPW(MPT.Function, new ThenOrderByDescendingFunction(this)));
 				properties.Add("$include", new MPW(MPT.Function, new IncludeFunction(this)));
 
 				var currentUserMPW = new MPW(MPT.Object, erpPageModel.CurrentUser);
@@ -506,12 +514,61 @@ namespace WebVella.Erp.Web.Models
 			throw new PropertyDoesNotExistException($"Relation '{rel.Name}' does not touch entity '{entity.Name}'");
 		}
 
+
+		private static bool HasTopLevelInterpolation(string propName)
+		{
+			var isWithinString = false;
+			var index = 0;
+
+			while(index < propName.Length)
+			{
+				if (propName[index] == '{' && index + 1 < propName.Length && propName[index + 1] == '{')
+				{
+					if (!isWithinString)
+						return true;
+					index = IndexOfNextCloseDoubleCurley(propName, index + 2);
+					if (index < 0)
+						return false;
+					index += 2;
+				}
+				else if (propName[index] == '"')
+				{
+					isWithinString = !isWithinString;
+					index++;
+				}
+				else index++;
+			}
+			return false;
+		}
+
+		private static int IndexOfNextCloseDoubleCurley(string propName, int index)
+		{
+			var depth = 0;
+			while(index < propName.Length)
+			{
+				if (propName[index] == '}' && index + 1 < propName.Length && propName[index + 1] == '}')
+				{
+					if (depth == 0)
+						return index;
+					depth--;
+					index += 2;
+				}
+				else if (propName[index] == '{' && index + 1 < propName.Length && propName[index + 1] == '{')
+				{
+					depth++;
+					index += 2;
+				}
+				else index++;
+			}
+			return -1;
+		}
+
 		public object GetProperty(string propName)
 		{
 			if (string.IsNullOrWhiteSpace(propName))
 				throw new ArgumentException($"Argument '{nameof(propName)}' must not be null or whitespace");
 
-			if (!propName.Contains("{{") || propName.StartsWith('"') || propName.StartsWith('$'))
+			if (!HasTopLevelInterpolation(propName))
 				return ResolveProperty(propName);
 
 			var sb = new StringBuilder();
@@ -1303,53 +1360,67 @@ namespace WebVella.Erp.Web.Models
 
 			public override int MinParameters => 2;
 
-			public override int MaxParameters => -1;
+			public override int MaxParameters => 2;
 
 			public override object Execute(LazyObject[] parameters)
 			{
-				if (parameters[0].Value is not List<EntityRecord> l)
-					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> at first argument");
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function {Name} requires any collection as first argument");
 
-				if (l.Count == 0)
-					return l;
-
-				IOrderedEnumerable<EntityRecord> query = null;
-
-				var idx = 1;
-				while(idx < parameters.Length)
+				if (parameters[1].Value is string orderString)
 				{
-					if (parameters[idx].Value is not string propName)
-						throw new PropertyDoesNotExistException($"function {Name} requires string at argument '{idx}'");
+					if (en is not List<EntityRecord> l)
+						throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> as first argument when second argument is string");
 
-					var isDesc = IsDesc(propName);
-					propName = RemoveDirection(propName);
+					if (string.IsNullOrWhiteSpace(orderString))
+						throw new PropertyDoesNotExistException($"function {Name} second argument (string) must not be empty");
+					
+					if (l.Count == 0)
+						return l;
 
-					if (idx == 1)
+					IOrderedEnumerable<EntityRecord> query = null;
+					var orderArgs = orderString.Split(',', StringSplitOptions.TrimEntries);
+
+					for(var i = 0; i < orderArgs.Length; i++)
 					{
-						if (isDesc)
-							query = l.OrderByDescending(QueryPath(propName));
+						var propName = orderArgs[i];
+
+						var isDesc = IsDesc(propName);
+						propName = RemoveDirection(propName);
+
+						if (i == 0)
+						{
+							if (isDesc)
+								query = l.OrderByDescending(QueryPath(propName));
+							else
+								query = l.OrderBy(QueryPath(propName));
+						}
 						else
-							query = l.OrderBy(QueryPath(propName));
-					}
-					else
-					{
-						if (isDesc)
-							query = query.ThenByDescending(QueryPath(propName));
-						else
-							query = query.ThenBy(QueryPath(propName));
+						{
+							if (isDesc)
+								query = query.ThenByDescending(QueryPath(propName));
+							else
+								query = query.ThenBy(QueryPath(propName));
+						}
 					}
 
-					idx++;
+					return query.ToList();
 				}
 
-				return query.ToList();
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function {Name} second argument requires lambda or string");
+
+				if (en is List<EntityRecord> lR)
+					return Enumerable.OrderBy(lR, lambda.Execute);
+
+				if (en is IEnumerable<EntityRecord> enR)
+					return Enumerable.OrderBy(enR, lambda.Execute);
+
+				return en.OrderBy(lambda.Execute);
 			}
 
-			private static bool IsDesc(object o)
-			{
-				return o is string s
-					&& s.ToUpper().EndsWith(" DESC");
-			}
+			private static bool IsDesc(string s)
+				=> s.EndsWith(" DESC", StringComparison.OrdinalIgnoreCase);
 
 			private static string RemoveDirection(string s)
 			{
@@ -1404,6 +1475,90 @@ namespace WebVella.Erp.Web.Models
 				}
 
 				return GetProperty;
+			}
+		}
+
+		private sealed class OrderByDescendingFunction : Function
+		{ 
+			public OrderByDescendingFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "orderByDescending";
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function {Name} requires any collection as first argument");
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function {Name} second argument requires lambda");
+
+				if (en is List<EntityRecord> l)
+					return Enumerable.OrderByDescending(l, lambda.Execute);
+
+				if (en is IEnumerable<EntityRecord> enR)
+					return Enumerable.OrderByDescending(enR, lambda.Execute);
+
+				return en.OrderByDescending(lambda.Execute);
+			}
+		}
+
+		private sealed class ThenOrderByDescendingFunction : Function
+		{
+			public ThenOrderByDescendingFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "thenOrderByDescending";
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value is not IOrderedEnumerable<object> en)
+					throw new PropertyDoesNotExistException($"function {Name} requires any ordered collection as first argument");
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function {Name} second argument requires lambda");
+
+				if (en is IOrderedEnumerable<EntityRecord> enR)
+					return Enumerable.ThenByDescending(enR, lambda.Execute);
+
+				return en.ThenByDescending(lambda.Execute);
+			}
+		}
+
+		private sealed class ThenOrderByFunction : Function
+		{
+			public ThenOrderByFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "thenOrderBy";
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value is not IOrderedEnumerable<object> en)
+					throw new PropertyDoesNotExistException($"function {Name} requires any ordered collection as first argument");
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function {Name} second argument requires lambda");
+
+				if (en is IOrderedEnumerable<EntityRecord> enR)
+					return Enumerable.ThenBy(enR, lambda.Execute);
+
+				return en.ThenBy(lambda.Execute);
 			}
 		}
 
@@ -1491,7 +1646,6 @@ namespace WebVella.Erp.Web.Models
 						var id = (Guid)r[relation.TargetFieldName];
 						if (lookup.TryGetValue(id, out var relatedRec))
 							r[$"${relationName}"] = relatedRec;
-
 					}
 				}
 
@@ -1572,6 +1726,87 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
+		private abstract class CompareFunction : Function
+		{
+			protected CompareFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			protected abstract bool InterpretResult(int compareResult);
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value != null && parameters[0].Value is not IComparable)
+					throw new PropertyDoesNotExistException($"function {Name} argument 1 requires comparable type");
+
+				if (parameters[1].Value != null && parameters[1].Value is not IComparable)
+					throw new PropertyDoesNotExistException($"function {Name} argument 2 requires comparable type");
+
+				var a = parameters[0].Value as IComparable;
+				var b = parameters[1].Value as IComparable;
+
+				if (a == null && b == null)
+					return InterpretResult(0);
+
+				if(a == null)
+					return InterpretResult(-b.CompareTo(a));
+
+				return InterpretResult(a.CompareTo(b));
+			}
+		}
+
+		private sealed class GreaterThanFunction : CompareFunction
+		{
+			public GreaterThanFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "gt";
+
+			protected override bool InterpretResult(int compareResult) 
+				=> compareResult > 0;
+		}
+
+		private sealed class LessThanFunction : CompareFunction
+		{
+			public LessThanFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "lt";
+
+			protected override bool InterpretResult(int compareResult)
+				=> compareResult < 0;
+		}
+
+		private sealed class GreaterThanOrEqualFunction : CompareFunction
+		{
+			public GreaterThanOrEqualFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "ge";
+
+			protected override bool InterpretResult(int compareResult)
+				=> compareResult >= 0;
+		}
+
+		private sealed class LessThanOrEqualFunction : CompareFunction
+		{
+			public LessThanOrEqualFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override string Name => "le";
+
+			protected override bool InterpretResult(int compareResult)
+				=> compareResult <= 0;
+		}
+
 		private sealed class AndFunction : Function
 		{
 			public AndFunction(PageDataModel dataModel)
@@ -1604,7 +1839,7 @@ namespace WebVella.Erp.Web.Models
 			{
 				var param = parameters.FirstOrDefault(p => p.Value != null);
 
-				if(param is List<EntityRecord>)
+				if(param.Value is List<EntityRecord>)
 				{
 					IEnumerable<EntityRecord> result = [];
 					foreach (var l in parameters.Select(p => p.Value as List<EntityRecord>).Where(v => v != null))
@@ -1675,9 +1910,9 @@ namespace WebVella.Erp.Web.Models
 			}
 		}
 
-		private sealed class WhereFunction : Function
+		private sealed class FilterFunction : Function
 		{
-			public WhereFunction(PageDataModel dataModel)
+			public FilterFunction(PageDataModel dataModel)
 				: base(dataModel)
 			{ }
 
@@ -1685,27 +1920,70 @@ namespace WebVella.Erp.Web.Models
 
 			public override int MaxParameters => 2;
 
-			public override string Name => "where";
+			public override string Name => "filter";
 
 			public override object Execute(LazyObject[] parameters)
 			{
 				if (parameters[0].Value == null)
 					return null;
 
-				if (parameters[0].Value is not List<EntityRecord> en)
+				if (parameters[0].Value is not IEnumerable en)
 					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
 
 				if (parameters[1].Value is not Lambda lambda)
 					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
 
-				return en.Where(rec =>
+				var result = en.Where(rec =>
 				{
 					var result = lambda.Execute(rec);
 					if (result == null) return false;
 					if (result is not bool b)
 						throw new PropertyDoesNotExistException($"boolean result expected within lambda expression at function '{Name}'");
 					return b;
-				}).ToList();
+				});
+
+				if (en is not List<EntityRecord>)
+					return result;
+
+				return result.Select(o => o as EntityRecord).ToList();
+			}
+		}
+
+		private sealed class AnyFunction : Function
+		{
+			public AnyFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 1;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "any";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value == null)
+					return null;
+
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
+
+				if (parameters.Length == 1)
+					return en.Any();
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
+
+				return en.Any(rec =>
+				{
+					var result = lambda.Execute(rec);
+					if (result == null) return false;
+					if (result is not bool b)
+						throw new PropertyDoesNotExistException($"boolean result expected within lambda expression at function '{Name}'");
+					return b;
+
+				});
 			}
 		}
 

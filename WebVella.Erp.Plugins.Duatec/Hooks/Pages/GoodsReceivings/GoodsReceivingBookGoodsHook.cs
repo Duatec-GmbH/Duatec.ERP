@@ -75,6 +75,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 })
                 .ToArray();
 
+            var project = record.GetProject();
+
             void TransactionalAction()
             {
                 var repo = new GoodsReceivingRepository();
@@ -95,10 +97,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully booked goods");
             var url = GetSuccessUrl(pageModel, record);
 
-            if(record.GetProject()?.IsInventoryProject is true)
+            if(project?.IsInventoryProject is true)
             {
                 var context = pageModel.ErpRequestContext;
-                url = $"/{context.App.Name}/history/goods-receiving/r/{goodsReceiving.Id}/store-goods?hookKey={HookKeys.GoodsReceiving.Store}&returnUrl={url}";
+                url = $"/{context.App.Name}/goods-receiving/goods-receiving/m/{goodsReceiving.Id}/store-goods?hookKey={HookKeys.GoodsReceiving.Store}&returnUrl={url}";
             }
 
             return pageModel.LocalRedirect(url);

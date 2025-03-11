@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebVella.Erp.Utilities
 {
@@ -35,6 +37,38 @@ namespace WebVella.Erp.Utilities
 			foreach (var _ in en)
 				i++;
 			return i;
+		}
+
+		public static IEnumerable Where(this IEnumerable en, Predicate<object> pred)
+		{
+			foreach (var obj in en)
+				if (pred(obj)) yield return obj;
+		}
+
+		public static IEnumerable<T> Select<T>(this IEnumerable en, Func<object, T> selector)
+		{
+			foreach(var obj in en)
+				yield return selector(obj);
+		}
+
+		public static IOrderedEnumerable<object> OrderBy(this IEnumerable en, Func<object, object> selector)
+		{
+			return Enumerable.OrderBy(en.Select(o => o), selector);
+		}
+
+		public static IOrderedEnumerable<object> OrderByDescending(this IEnumerable en, Func<object, object> selector)
+		{
+			return Enumerable.OrderByDescending(en.Select(o => o), selector);
+		}
+
+		public static IOrderedEnumerable<object> ThenBy(this IOrderedEnumerable<object> en, Func<object, object> selector)
+		{
+			return Enumerable.ThenBy(en, selector);
+		}
+
+		public static IOrderedEnumerable<object> ThenByDescending(this IOrderedEnumerable<object> en, Func<object, object> selector)
+		{
+			return Enumerable.ThenByDescending(en, selector);
 		}
 
 		public static bool SequenceEquals(this IEnumerable col, IEnumerable other)

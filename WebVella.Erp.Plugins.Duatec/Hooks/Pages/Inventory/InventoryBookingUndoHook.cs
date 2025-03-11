@@ -3,6 +3,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
 
@@ -26,7 +27,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             if (Transactional.TryExecute(pageModel, TransactionalAction))
-                pageModel.PutMessage(ScreenMessageType.Success, "Successfully restored inventory entry");
+            {
+                pageModel.PutMessage(ScreenMessageType.Success, "Successfully undid inventory action");
+                var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
+                return pageModel.LocalRedirect(url);
+            }
 
             return null;
         }

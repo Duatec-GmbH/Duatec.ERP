@@ -92,7 +92,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     WarehouseLocationSourceId = e.WarehouseLocation,
                     Timestamp = timestamp,
                     UserId = userId,
-                });
+
+                }).ToArray(); // must be collected, otherwhise amounts will be updated
 
                 record.HasBeenStored = true;
                 if (goodsReceivingRepo.Update(record) == null)
@@ -112,8 +113,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully stored goods");
-
             var context = pageModel.ErpRequestContext;
+
+            if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
+                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+
             return pageModel.LocalRedirect($"/{context.App?.Name}/{context.SitemapArea?.Name}/open-orders/r/{record.Order}/detail");
         }
 

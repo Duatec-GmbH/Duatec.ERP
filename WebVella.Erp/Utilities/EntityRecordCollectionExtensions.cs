@@ -13,7 +13,7 @@ namespace WebVella.Erp.Utilities
 		public static IEnumerable<T> Select<T>(this IEnumerable<T> records, string entityName, string relationName, RecordManager? recMan = null)
 			where T : EntityRecord
 		{
-			if (!records.Any())
+			if (!Enumerable.Any(records))
 				return records;
 
 			recMan ??= new();
@@ -74,7 +74,7 @@ namespace WebVella.Erp.Utilities
 			}
 
 			entityName = nextEntityName;
-			return currentRecords.Where(v => v != null)!.ToArray();
+			return Enumerable.Where(currentRecords, v => v != null)!.ToArray();
 		}
 
 
@@ -82,8 +82,8 @@ namespace WebVella.Erp.Utilities
 		{
 			var (recordProperty, nextIdProperty, nextEntityName) = GetJoinInfo(relation, entityName);
 
-			var subQueries = GetIds(currentRecords, recordProperty)
-				.Select(id => new QueryObject()
+			var subQueries = Enumerable.Select(GetIds(currentRecords, recordProperty),
+				id => new QueryObject()
 				{
 					FieldName = nextIdProperty,
 					FieldValue = id,
@@ -159,8 +159,8 @@ namespace WebVella.Erp.Utilities
 			if (args.Length == 0)
 				return [];
 
-			var subQuery = args
-				.Select(id => new QueryObject() { QueryType = QueryType.EQ, FieldName = fieldName, FieldValue = id })
+
+			var subQuery = Enumerable.Select(args, id => new QueryObject() { QueryType = QueryType.EQ, FieldName = fieldName, FieldValue = id })
 				.ToList();
 
 			var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
