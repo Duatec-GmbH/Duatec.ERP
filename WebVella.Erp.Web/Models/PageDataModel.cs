@@ -1575,14 +1575,7 @@ namespace WebVella.Erp.Web.Models
 			public override int MaxParameters => -1;
 
 			public override object Execute(LazyObject[] parameters)
-			{
-				foreach(var val in parameters.Select(p => p.Value))
-				{
-					if (val != null && (val is not IEnumerable en || !en.Any()))
-						return val;
-				}
-				return null;
-			}
+				=> parameters.Select(p => p.Value).FirstOrDefault(v => v != null);
 		}
 
 		private sealed class IncludeFunction : Function

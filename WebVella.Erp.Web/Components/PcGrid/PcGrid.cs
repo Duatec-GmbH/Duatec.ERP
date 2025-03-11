@@ -29,7 +29,7 @@ namespace WebVella.Erp.Web.Components
 			public string IsVisible { get; set; } = "";
 
 			[JsonProperty(PropertyName = "page_size")]
-			public int? PageSize { get; set; } = 10;
+			public string PageSize { get; set; } = "10";
 
 			[JsonProperty(PropertyName = "records")]
 			public string Records { get; set; } = "";
@@ -542,15 +542,17 @@ namespace WebVella.Erp.Web.Components
 				ViewBag.Page = 1;
 				ViewBag.TotalCount = 0;
 
+				int pageSize = 0;
 				if(options.PageSize != null)
 				{
-					ViewBag.PageSize = options.PageSize;
+					var pageSizeVal = context.DataModel.GetPropertyValueByDataSource(options.PageSize);
+					if (pageSizeVal != null && decimal.TryParse(pageSizeVal.ToString(), out var d))
+						pageSize = Math.Max(0, (int)d);
+					else
+						pageSize = 0;
 				}
-				else
-				{
-					ViewBag.PageSize = 0;
-				}
-				
+
+				ViewBag.PageSize = pageSize;
 
 				if (context.Mode != ComponentMode.Options && context.Mode != ComponentMode.Help)
 				{
@@ -573,7 +575,11 @@ namespace WebVella.Erp.Web.Components
 
 					if (ViewBag.Records.Count > 0)
 					{
-						ViewBag.TotalCount = ((EntityRecordList)ViewBag.Records).TotalCount;
+						var total = ((EntityRecordList)ViewBag.Records).TotalCount;
+						ViewBag.TotalCount = total;
+						if (pageSize <= 0)
+							ViewBag.PageSize = total;
+
 					}
 					//Could be a simple List<EntityRecord> (if from relation)
 					if(ViewBag.Records.Count == 0){

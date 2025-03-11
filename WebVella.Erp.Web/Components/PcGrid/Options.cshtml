@@ -33,7 +33,7 @@
 		<wv-field-datasource name="records" value="@options.Records" label-text="Records" page-id="erpRequest.Page.Id"></wv-field-datasource>
 	</wv-column>
 	<wv-column span="4">
-		<wv-field-number name="page_size" value="@options.PageSize" label-text="Page size" placeholder="empty or 0 for unlimited"></wv-field-number>
+        <wv-field-datasource name="page_size" value="@options.PageSize" label-text="Page size" page-id="erpRequest.Page.Id" placeholder="empty or 0 for unlimited"></wv-field-datasource>
 	</wv-column>
 </wv-row>
 <wv-row>
