@@ -500,6 +500,8 @@ namespace WebVella.Erp.Web.Controllers
 		{
 			try
 			{
+				throw new NotSupportedException("Code compilation is not supported anymore!");
+
 				CodeEvalService.Compile(model.CsCode);
 			}
 			catch (Exception ex)
