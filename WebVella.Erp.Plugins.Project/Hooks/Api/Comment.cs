@@ -8,8 +8,11 @@ namespace WebVella.Erp.Plugins.Project.Hooks.Api
 	[HookAttachment("comment")]
 	public class Comment : IErpPreCreateRecordHook, IErpPostCreateRecordHook
 	{
+		public bool ExecuteOnPreCreateMany => true;
 
-		public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
+		public bool ExecuteOnPostCreateMany => true;
+
+        public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
 		{
 			new CommentService().PreCreateApiHookLogic(entityName, record, errors);
 		}

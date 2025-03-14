@@ -2,6 +2,41 @@
 var ApiBaseUrl = "/api/v3/en_US";
 
 /*******************************************************************************
+ STICKY ERP LIST
+ ******************************************************************************/
+
+document.addEventListener("DOMContentLoaded", () => {
+	let pageHeads = document.getElementsByClassName("pc-page-header");
+	let erpLists = document.getElementsByClassName("erp-list");
+	let toolBars = document.getElementsByClassName("page-header-toolbar");
+
+	if (toolBars.length === 0 && pageHeads.length >= 1 && erpLists.length === 1) {
+
+		let erpList = erpLists[0];
+		let pageHead = pageHeads[0];
+
+		erpList.addEventListener("resize", () => {
+			stickyErpList(pageHead, erpList);
+		});
+
+		document.addEventListener("scroll", () => {
+			stickyErpList(pageHead, erpList);
+		});
+
+		stickyErpList(pageHead, erpList);
+	}
+});
+
+function stickyErpList(pageHead, erpList) {
+
+	let listHead = erpList.getElementsByTagName('THEAD')[0];
+	let stickyPos = pageHead.getBoundingClientRect().bottom;
+
+	listHead.style.top = `${stickyPos}px`;
+	listHead.style.position = "sticky";
+}
+
+/*******************************************************************************
 FIELDS GENERAL METHODS
 *******************************************************************************/
 

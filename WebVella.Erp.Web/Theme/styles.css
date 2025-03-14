@@ -2743,7 +2743,7 @@ body.sidebar-lg #sidebar .nav-item .dropdown-item {
 	line-height: 40px;
 	position: sticky;
 	top: 0;
-	z-index: 10;
+	z-index: 11;
 	margin-top: -2px;
 	background-color: white;
 	border-bottom: 1px solid --gray_border_color;
@@ -3811,6 +3811,8 @@ border-bottom-style:dashed;
 	position: sticky;
 	top: 40px;
 	z-index: 10;
+	overflow: hidden;
+	padding-left: 15px;
 }
 
 	.pc-page-header.fixed {
@@ -4009,6 +4011,10 @@ border-bottom-style:dashed;
 
 .pc-page-header .actions .btn + .btn {
 	margin-left: 5px;
+}
+
+.page-header-toolbar{
+	z-index: 11;
 }
 
 .pc-page-header .page-header-toolbar {
@@ -5142,10 +5148,10 @@ input{
 	text-overflow: ellipsis;
 }
 
-
-
-
-
+.erp-list > table > thead {
+	background-color: white;
+	box-shadow: inset 0px -2px #ccc;
+}
 
 /*#endregion*/
 

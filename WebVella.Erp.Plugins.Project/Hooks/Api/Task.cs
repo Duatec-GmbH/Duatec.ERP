@@ -8,7 +8,16 @@ namespace WebVella.Erp.Plugins.Project.Hooks.Api
 	[HookAttachment("task")]
 	public class Task : IErpPostCreateRecordHook, IErpPostUpdateRecordHook, IErpPreCreateRecordHook, IErpPreUpdateRecordHook
 	{
-		public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
+        public bool ExecuteOnPreCreateMany => true;
+
+        public bool ExecuteOnPostCreateMany => true;
+
+        public bool ExecuteOnPreUpdateMany => true;
+
+        public bool ExecuteOnPostUpdateMany => true;
+
+
+        public void OnPreCreateRecord(string entityName, EntityRecord record, List<ErrorModel> errors)
 		{
 			new TaskService().PreCreateRecordPageHookLogic(entityName, record, errors);
 		}
