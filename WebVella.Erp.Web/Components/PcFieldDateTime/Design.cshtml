@@ -21,7 +21,7 @@
 					   init-errors="@fieldModel.InitErrors" validation-errors="@fieldModel.ValidationErrors.ToKeyValuePair()" 
 					   api-url="@fieldModel.ApiUrl" access-denied-message="@fieldModel.AccessDeniedMessage"
 					   empty-value-message="@fieldModel.EmptyValueMessage" required="@fieldModel.Required" placeholder="@fieldModel.Placeholder"
-					   description="@options.Description" locale="@fieldModel.Locale">
+					   description="@options.Description" locale="@fieldModel.Locale" timezone-name="@options.TimeZoneName">
 	@if (options.ShowIcon)
 	{
 		<wv-field-prepend><span class='input-group-text'><i class='fa fa-fw fa-calendar-alt'></i></span></wv-field-prepend>

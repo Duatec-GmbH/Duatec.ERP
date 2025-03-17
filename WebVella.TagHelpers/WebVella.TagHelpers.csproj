@@ -1,0 +1,107 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="TagHelpers\js-test\script.js" />
+    <None Remove="TagHelpers\WvFieldCheckboxGrid\form.js" />
+    <None Remove="TagHelpers\WvFieldCheckboxList\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldCheckbox\form.js" />
+    <None Remove="TagHelpers\WvFieldCheckbox\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldCode\form.js" />
+    <None Remove="TagHelpers\WvFieldColor\form.js" />
+    <None Remove="TagHelpers\WvFieldColor\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldCurrency\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldDataCsv\display.js" />
+    <None Remove="TagHelpers\WvFieldDataCsv\form.js" />
+    <None Remove="TagHelpers\WvFieldDataCsv\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldDateTime\form.js" />
+    <None Remove="TagHelpers\WvFieldDateTime\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldDate\form.js" />
+    <None Remove="TagHelpers\WvFieldDate\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldEmail\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldFileMultiple\form.js" />
+    <None Remove="TagHelpers\WvFieldFile\form.js" />
+    <None Remove="TagHelpers\WvFieldFile\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldGuid\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldHtml\form.js" />
+    <None Remove="TagHelpers\WvFieldHtml\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldIcon\form.js" />
+    <None Remove="TagHelpers\WvFieldIcon\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldImage\form.js" />
+    <None Remove="TagHelpers\WvFieldImage\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldMultiSelect\form.js" />
+    <None Remove="TagHelpers\WvFieldMultiSelect\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldNumber\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldPassword\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldPercent\form.js" />
+    <None Remove="TagHelpers\WvFieldPercent\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldPhone\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldRadioList\form.js" />
+    <None Remove="TagHelpers\WvFieldRadioList\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldSelect\form.js" />
+    <None Remove="TagHelpers\WvFieldSelect\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldTextarea\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldText\inline-edit.js" />
+    <None Remove="TagHelpers\WvFieldTime\inline-edit.js" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="TagHelpers\js-test\script.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCheckboxGrid\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCheckboxList\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCheckbox\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCheckbox\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCode\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldColor\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldColor\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldCurrency\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDataCsv\display.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDataCsv\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDataCsv\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDateTime\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDateTime\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDate\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldDate\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldEmail\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldFileMultiple\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldFile\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldFile\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldGuid\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldHtml\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldHtml\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldIcon\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldIcon\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldImage\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldImage\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldMultiSelect\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldMultiSelect\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldNumber\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldPassword\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldPercent\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldPercent\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldPhone\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldRadioList\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldRadioList\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldSelect\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldSelect\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldTextarea\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldText\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldTime\form.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldTime\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvFieldUrl\inline-edit.js" />
+    <EmbeddedResource Include="TagHelpers\WvGrid\sort-and-page.js" />
+    <EmbeddedResource Include="TagHelpers\WvSection\service.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
+  </ItemGroup>
+
+</Project>

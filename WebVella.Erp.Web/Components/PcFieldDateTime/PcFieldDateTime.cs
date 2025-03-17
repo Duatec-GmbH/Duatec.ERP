@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using WebVella.Erp.Api.Models;
@@ -27,6 +28,9 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "show_icon")]
 			public bool ShowIcon { get; set; } = false;
+
+			[JsonProperty(PropertyName = "time_zone_name")]
+			public string TimeZoneName { get; set; }
 
 			public static PcFieldDateTimeOptions CopyFromBaseOptions(PcFieldBaseOptions input)
 			{
@@ -70,6 +74,10 @@ namespace WebVella.Erp.Web.Components
 
 				var baseOptions = InitPcFieldBaseOptions(context);
 				var options = PcFieldDateTimeOptions.CopyFromBaseOptions(baseOptions);
+
+				if (string.IsNullOrEmpty(options.TimeZoneName))
+					options.TimeZoneName = ErpSettings.TimeZoneName;
+
 				if (context.Options != null)
 				{
 					options = JsonConvert.DeserializeObject<PcFieldDateTimeOptions>(context.Options.ToString());
@@ -153,7 +161,9 @@ namespace WebVella.Erp.Web.Components
 
 					
 					if (valueObj is DateTime dt)
-						model.Value = dt.AddHours(DateTime.UtcNow.Hour - DateTime.Now.Hour); // TODO: Remove this DIRTY HACK to make it work for de-AT!!!!!!!!!!!!!
+					{
+						model.Value = TimeZoneInfo.ConvertTime(dt, TimeZoneInfo.FindSystemTimeZoneById(ErpSettings.TimeZoneName));
+					}
 					else if (valueObj is string)
 					{
 						if (DateTime.TryParse(valueObj as string, out DateTime outDateTime))
