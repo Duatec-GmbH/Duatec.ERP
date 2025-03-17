@@ -18,6 +18,22 @@ namespace WebVella.TagHelpers.TagHelpers
 		[HtmlAttributeName("timezone-name")]
 		public string TimezoneName { get; set; } = "FLE Standard Time";
 
+		private string GetDisplayValue()
+		{
+			// old
+			// var dt = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind();
+			var dt = Value as DateTime? ?? DateTime.Now;
+			return dt.ToString("dd MMM yyyy HH:mm", Culture);
+        }
+
+		private string GetEditValue()
+		{
+            // old
+            // var dt = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind();
+            var dt = Value as DateTime? ?? DateTime.Now;
+            return dt.ToString("dd MMM yyyy HH:mm:ss", Culture);
+        }
+
 		public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
 		{
 			output.TagMode = TagMode.StartTagAndEndTag;
@@ -60,8 +76,8 @@ namespace WebVella.TagHelpers.TagHelpers
 				var inputEditValue = "";
 				if (Value != null)
 				{
-					inputReadOnlyValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("dd MMM yyyy HH:mm", Culture);
-					inputEditValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("yyyy-MM-ddTHH:mm:ss");//.ToString("yyyy-MM-ddTHH:mm:ssZ");
+					inputReadOnlyValue = GetDisplayValue();
+					inputEditValue = GetEditValue();
 				}
 
 
@@ -215,7 +231,7 @@ namespace WebVella.TagHelpers.TagHelpers
 			{
 				if (Value != null)
 				{
-					var inputReadOnlyValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("dd MMM yyyy HH:mm", Culture);
+					var inputReadOnlyValue = GetDisplayValue();
 
 					var divEl = new TagBuilder("div");
 					divEl.Attributes.Add("id", $"input-{FieldId}");
@@ -238,7 +254,7 @@ namespace WebVella.TagHelpers.TagHelpers
 				if (Value != null)
 				{
 					output.SuppressOutput();
-					var inputReadOnlyValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("dd MMM yyyy HH:mm", Culture);
+					var inputReadOnlyValue = GetDisplayValue();
 					output.Content.AppendHtml(inputReadOnlyValue);
 				}
 				else
@@ -257,8 +273,8 @@ namespace WebVella.TagHelpers.TagHelpers
 					var readOnlyInputValue = "";
 					if (Value != null)
 					{
-						readOnlyInputValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("dd MMM yyyy HH:mm", Culture);
-						editInpuValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("yyyy-MM-ddTHH:mm:ss"); //.ToString("yyyy-MM-ddTHH:mm:ssZ"); 
+						readOnlyInputValue = GetDisplayValue();
+						editInpuValue = GetEditValue();
 					}
 
 					#region << View Wrapper >>
@@ -445,7 +461,7 @@ namespace WebVella.TagHelpers.TagHelpers
 					var readOnlyInputValue = "";
 					if (Value != null)
 					{
-						readOnlyInputValue = (Value as DateTime? ?? DateTime.Now).WvConvertToTZDate(TimezoneName).WvClearKind().ToString("dd MMM yyyy HH:mm", Culture);
+						readOnlyInputValue = GetDisplayValue();
 					}
 
 					var divEl = new TagBuilder("div");
