@@ -32,18 +32,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             void TransactionalAction()
             {
-                if (amount >= unmodified.Amount)
-                {
-                    if (repo.Delete(record.Id!.Value) == null)
-                        throw new DbException("Could not delete inventory entry");
-                }
-                else
-                {
-                    record.Amount = unmodified.Amount - amount;
-                    if (repo.Update(record) == null)
-                        throw new DbException("Could not update inventory entry");
-                }
-
                 var booking = new InventoryBooking()
                 {
                     Amount = amount,
@@ -56,6 +44,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Timestamp = DateTime.Now,
                     Kind = InventoryBookingKind.Take,
                 };
+
+                if (amount >= unmodified.Amount)
+                {
+                    if (repo.Delete(record.Id!.Value) == null)
+                        throw new DbException("Could not delete inventory entry");
+                }
+                else
+                {
+                    record.Amount = unmodified.Amount - amount;
+                    record.Project = unmodified.Project;
+                    if (repo.Update(record) == null)
+                        throw new DbException("Could not update inventory entry");
+                }
+
                 if (repo.InsertBooking(booking) == null)
                     throw new DbException("Could not insert booking");
             }
