@@ -7,7 +7,6 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Models;
-using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {

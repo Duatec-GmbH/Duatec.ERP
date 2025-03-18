@@ -1,5 +1,4 @@
 ﻿using System.Xml.Linq;
-using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes;
 
 namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
 {

@@ -1,6 +1,4 @@
-﻿using WebVella.Erp.Api;
-using WebVella.Erp.Plugins.Duatec.DataSource;
-using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+﻿using WebVella.Erp.Plugins.Duatec.DataSource;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
 using WebVella.Erp.Web.Models;
 

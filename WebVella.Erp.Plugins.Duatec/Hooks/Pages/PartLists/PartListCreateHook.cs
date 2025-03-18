@@ -8,7 +8,6 @@ using WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance;
-using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {

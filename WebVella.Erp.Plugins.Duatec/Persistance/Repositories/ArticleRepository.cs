@@ -1,6 +1,8 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
+using WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -211,6 +213,23 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 ]
             };
             return RepositoryHelper.FindByQuery(RecordManager, Alternatives.Entity, query);
+        }
+
+        public void DeletePreviewIfUnused(string? imagePath, Guid? excludedArticleId = null)
+        {
+            if (!string.IsNullOrEmpty(imagePath) && imagePath.StartsWith(Images.FilePath))
+            {
+                var fsPath = imagePath["/fs".Length..];
+                var fileRepo = new DbFileRepository();
+
+                if (fileRepo.Find(fsPath) != null)
+                {
+                    var records = FindManyBy(Article.Fields.Image, imagePath, "id");
+
+                    if (records.Count == 0 || records.Count == 1 && excludedArticleId.HasValue && excludedArticleId.Equals(records[0]["id"]))
+                        fileRepo.Delete(fsPath);
+                }
+            }
         }
     }
 }

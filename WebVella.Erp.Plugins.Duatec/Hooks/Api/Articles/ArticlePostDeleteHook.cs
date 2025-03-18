@@ -1,6 +1,7 @@
 ﻿using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles.Common;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles
@@ -13,6 +14,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles
         public bool ExecuteOnPostDeleteMany => true;
 
         public void OnPostDeleteRecord(Article record)
-            => Actions.DeleteAlternatives(record.Id!.Value);
+        {
+            Actions.DeleteAlternatives(record.Id!.Value);
+
+            new ArticleRepository().DeletePreviewIfUnused(record.Image, record.Id);
+        }
     }
 }
