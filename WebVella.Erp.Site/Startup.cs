@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using WebVella.Erp.Plugins.Mail;
 using WebVella.Erp.Plugins.Next;
 using WebVella.Erp.Plugins.Duatec;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebVella.Erp.Site
 {
@@ -66,6 +67,14 @@ namespace WebVella.Erp.Site
                         .AllowAnyHeader());
             });
             services.AddDetection();
+            services.AddAntiforgery(options =>
+            {
+                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                options.Cookie.Name = "erp_antiforgery";
+                options.Cookie.Expiration = new TimeSpan(14, 0, 0);
+                options.Cookie.MaxAge = new TimeSpan(14, 0, 0);
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
 
             services.AddMvc()
 
@@ -97,10 +106,14 @@ namespace WebVella.Erp.Site
             {
                 options.Cookie.HttpOnly = true;
                 options.Cookie.Name = "erp_auth_base";
+                options.Cookie.MaxAge = new TimeSpan(14, 0, 0);
+                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
                 options.LoginPath = new PathString("/login");
                 options.LogoutPath = new PathString("/logout");
                 options.AccessDeniedPath = new PathString("/error?access_denied");
                 options.ReturnUrlParameter = "returnUrl";
+                options.ExpireTimeSpan = new TimeSpan(14, 0, 0);
+                options.SlidingExpiration = true;
             })
              .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
              {
@@ -125,7 +138,8 @@ namespace WebVella.Erp.Site
 
                       return CookieAuthenticationDefaults.AuthenticationScheme;
                   };
-              });
+              })
+              .AddIdentityCookies();
 
 
             services.AddErp();
@@ -178,17 +192,20 @@ namespace WebVella.Erp.Site
             });
             app.UseStaticFiles(); //Workaround for blazor to work - https://github.com/dotnet/aspnetcore/issues/9588
             app.UseRouting();
-
+            app.UseHttpsRedirection();
+            app.UseCookiePolicy(new CookiePolicyOptions()
+            {
+                Secure = CookieSecurePolicy.Always
+            });
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			app
-			.UseErpPlugin<SdkPlugin>()
-            .UseErpPlugin<MailPlugin>()
-            .UseErpPlugin<DuatecPlugin>()
-            .UseErp()
-            .UseErpMiddleware()
-            .UseJwtMiddleware();
+			app.UseErpPlugin<SdkPlugin>()
+               .UseErpPlugin<MailPlugin>()
+               .UseErpPlugin<DuatecPlugin>()
+               .UseErp()
+               .UseErpMiddleware()
+               .UseJwtMiddleware();
 
 			
 			app.UseEndpoints(endpoints =>

@@ -30,7 +30,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             var key = $"${Order.Relations.Entries}";
             if (!record.Properties.TryGetValue(key, out var l) || l == null)
-                record[key] = OpenOrderEntries4Booking.Execute((Guid)record["id"]).Select(gre => (EntityRecord)gre).ToList();
+            {
+                var entries = OpenOrderEntries4Booking.Execute((Guid)record["id"]).ToList();
+                foreach (var entry in entries)
+                    entry["initial"] = 0m;
+                record[key] = entries.Select(gre => (EntityRecord)gre).ToList();
+            }
 
             return null;
         }

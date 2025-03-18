@@ -12,7 +12,7 @@
 		{
 		<div class="alert alert-danger">@Model.Error</div>
 		}
-		<form method="post" name="form">
+		<form method="post" name="form" autocomplete="on">
 			@Html.AntiForgeryToken()
 			<div class="form-group">
 				<label for="loginEmail">Email</label>
