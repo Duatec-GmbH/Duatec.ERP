@@ -5,7 +5,7 @@ namespace WebVella.Erp.TypedRecords.Persistance
 {
     public abstract class TypedRepositoryBase<T> where T : TypedEntityRecordWrapper, new()
     {
-        protected TypedRepositoryBase(RecordManager? record = null)
+        protected TypedRepositoryBase(RecordManager? record)
         {
             RecordManager = record ?? new RecordManager();
         }

@@ -33,6 +33,7 @@ using WebVella.Erp.Web.Service;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
 using Wangkanai.Detection.Services;
+using System.Net.Mime;
 
 namespace WebVella.Erp.Web.Controllers
 {
@@ -3388,7 +3389,17 @@ namespace WebVella.Erp.Web.Controllers
 				}
 			}
 
-			return File(file.GetBytes(), mimeType);
+			if(mimeType != null)
+				return File(file.GetBytes(), mimeType);
+
+			var cd = new ContentDisposition
+			{
+				FileName = file.FilePath,
+				Inline = false,
+			};
+
+			HttpContext.Response.Headers.TryAdd("Content-Disposition", cd.ToString());
+			return File(file.GetBytes(), MediaTypeNames.Application.Octet);
 		}
 
 		/// <summary>

@@ -50,7 +50,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Companies
             void TransactionalAction()
             {
                 if (repo.Insert(manufacturer) == null)
-                    throw new DbException($"Failed to import manufacturer '{manufacturer.Name}'");
+                    throw new DbException($"Could not import manufacturer '{manufacturer.Name}'");
             }
 
             if (Transactional.TryExecute(pageModel, TransactionalAction))
@@ -59,7 +59,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Companies
 
         private static void PutInvalidArg(BaseErpPageModel pageModel)
         {
-            pageModel.PutMessage(ScreenMessageType.Error, $"invalid argument '{EplanIdArg}'");
+            pageModel.PutMessage(ScreenMessageType.Error, $"Invalid argument '{EplanIdArg}'");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -61,6 +62,28 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             var recMan = new RecordManager();
             var response = recMan.Count(new EntityQuery(Entity, "*", query));
             return response.Success && response.Object == 0;
+        }
+
+        public List<Company> FindManyByLogo(string logoUrl, string select = "*")
+            => FindManyBy(Company.Fields.LogoUrl, logoUrl, select);
+
+        public void DeleteLogoIfUnused(string? imagePath, Guid? excludedArticleId = null)
+        {
+            if (!string.IsNullOrEmpty(imagePath) && imagePath.StartsWith(Images.FilePath))
+            {
+                var fsPath = imagePath["/fs".Length..];
+                var fileRepo = new DbFileRepository();
+                var file = fileRepo.Find(fsPath);
+
+                if (file != null && new ImageRepository(RecordManager).FindManyByPath(file.FilePath).Count == 0)
+                {
+                    var companyRecords = FindManyByLogo(imagePath, "id");
+                    var articleRecords = new ArticleRepository(RecordManager).FindManyByPreview(imagePath);
+
+                    if (articleRecords.Count == 0 && (companyRecords.Count == 0 || companyRecords.Count == 1 && excludedArticleId.HasValue && excludedArticleId.Equals(companyRecords[0]["id"])))
+                        fileRepo.Delete(fsPath);
+                }
+            }
         }
     }
 }

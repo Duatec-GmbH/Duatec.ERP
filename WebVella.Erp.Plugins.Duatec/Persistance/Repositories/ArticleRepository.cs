@@ -2,7 +2,6 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel;
-using WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
@@ -215,18 +214,23 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return RepositoryHelper.FindByQuery(RecordManager, Alternatives.Entity, query);
         }
 
+        public List<Article> FindManyByPreview(string preview, string select = "*")
+            => FindManyBy(Article.Fields.Image, preview, select);
+
         public void DeletePreviewIfUnused(string? imagePath, Guid? excludedArticleId = null)
         {
             if (!string.IsNullOrEmpty(imagePath) && imagePath.StartsWith(Images.FilePath))
             {
                 var fsPath = imagePath["/fs".Length..];
                 var fileRepo = new DbFileRepository();
+                var file = fileRepo.Find(fsPath);
 
-                if (fileRepo.Find(fsPath) != null)
+                if (file != null && new ImageRepository(RecordManager).FindManyByPath(file.FilePath).Count == 0)
                 {
-                    var records = FindManyBy(Article.Fields.Image, imagePath, "id");
+                    var articleRecords = FindManyByPreview(imagePath, "id");
+                    var manufacturerRecords = new CompanyRepository(RecordManager).FindManyByLogo(imagePath);
 
-                    if (records.Count == 0 || records.Count == 1 && excludedArticleId.HasValue && excludedArticleId.Equals(records[0]["id"]))
+                    if (manufacturerRecords.Count == 0 && (articleRecords.Count == 0 || articleRecords.Count == 1 && excludedArticleId.HasValue && excludedArticleId.Equals(articleRecords[0]["id"])))
                         fileRepo.Delete(fsPath);
                 }
             }

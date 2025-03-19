@@ -3,40 +3,41 @@ using WebVella.Erp.Database;
 
 namespace WebVella.Erp.Plugins.Duatec
 {
-    internal static partial class Images
+    public static partial class Images
     {
-        public static string FilePath = "/fs/images/";
+        public static string FilePath = "/fs/image/";
 
-        public static string? GetOrDownload(string filePathOrUrl, Guid? userId, DbContext? dbContext = null)
+        public static string? GetOrDownload(string url, Guid? userId, DbContext? dbContext = null)
         {
-            if (string.IsNullOrEmpty(filePathOrUrl))
+            if (string.IsNullOrEmpty(url))
                 return null;
 
             var fileRepo = new DbFileRepository(dbContext);
             DbFile dbFile;
 
-            if (filePathOrUrl.StartsWith(FilePath))
+            if (LooksLikeSystemImage(url))
             {
-                dbFile = fileRepo.Find(filePathOrUrl["/fs".Length..]);
+                var filePath = SystemFilePath(url);
+                dbFile = fileRepo.Find(filePath);
                 if (dbFile != null)
-                    return filePathOrUrl;
+                    return "/fs" + filePath;
             }
 
-            var name = filePathOrUrl;
-
-            if (name.StartsWith("https://"))
-                name = name["https://".Length..];
-
-            if (name.StartsWith("http://"))
-                name = name["http://".Length..];
-
-            if (name.StartsWith("www."))
-                name = name["www.".Length..];
+            var name = TrimFront(url);
+            while (name.StartsWith('/'))
+                name = name[1..];
 
             name = FileRegex().Replace(name, "_");
-            name = $"/images/{name}".ToLowerInvariant();
 
+            if (string.IsNullOrEmpty(url))
+                return null;
+
+            if (!char.IsLetter(name[0]))
+                name = 'i' + name;
+
+            name = $"/image/{name}".ToLowerInvariant();
             dbFile = fileRepo.Find(name);
+
             if (dbFile == null)
             {
                 using var client = new HttpClient()
@@ -47,7 +48,7 @@ namespace WebVella.Erp.Plugins.Duatec
 
                 try
                 {
-                    var t = client.GetStreamAsync(filePathOrUrl);
+                    var t = client.GetStreamAsync(url);
                     t.Wait();
 
                     using var stream = t.Result;
@@ -69,5 +70,43 @@ namespace WebVella.Erp.Plugins.Duatec
 
         [GeneratedRegex("[^\\w\\d._+ -]+")]
         private static partial Regex FileRegex();
+
+        private static bool LooksLikeSystemImage(string url)
+        {
+            if (url.StartsWith(FilePath))
+                return true;
+            else if (url.Contains(FilePath))
+            {
+                url = TrimFront(url);
+                url = url[url.IndexOf('/')..];
+                return url.StartsWith(FilePath);
+            }
+            return false;
+        }
+
+        private static string SystemFilePath(string url)
+        {
+            url = TrimFront(url);
+            url = url[url.IndexOf('/')..];
+            url = url["/fs".Length..];
+            url = TrimEnd(url);
+            return url;
+        }
+
+        private static string TrimFront(string url)
+        {
+            if (url.StartsWith("https://"))
+                return url["https://".Length..];
+            else if (url.StartsWith("http://"))
+                return url["http://".Length..];
+            return url;
+        }
+
+        private static string TrimEnd(string url)
+        {
+            if (url.Contains('?'))
+                return url[..url.IndexOf('?')];
+            return url;
+        }
     }
 }

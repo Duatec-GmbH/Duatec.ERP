@@ -4,10 +4,11 @@ using WebVella.Erp.Database;
 using Newtonsoft.Json.Linq;
 using WebVella.Erp.Api.Models.AutoMapper;
 using WebVella.Erp;
-using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web;
 using WebVella.Erp.Web.Models.AutoMapper;
 using Microsoft.Extensions.Configuration;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
+using WebVella.Erp.Plugins.Duatec;
 
 
 var location = System.Reflection.Assembly.GetEntryAssembly()!.Location;
@@ -44,5 +45,6 @@ using (SecurityContext.OpenSystemScope())
         throw;
     }
 
+    Console.WriteLine("Successfully patched db");
     connection.CommitTransaction();
 }

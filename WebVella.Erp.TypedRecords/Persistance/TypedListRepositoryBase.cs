@@ -7,7 +7,7 @@ namespace WebVella.Erp.TypedRecords.Persistance
         where TList : TypedEntityRecordWrapper, new()
         where TEntry : TypedEntityRecordWrapper, new()
     {
-        protected TypedListRepositoryBase(RecordManager? recordManager = null)
+        protected TypedListRepositoryBase(RecordManager? recordManager)
             : base(recordManager) { }
 
         protected string EntryEntity { get; } = new TEntry().EntityName;

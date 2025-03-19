@@ -31,13 +31,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public static class GoodsReceiving
         {
-            public static class Entry
-            {
-                public const string Create = "goods_receiving_entry_create";
-                public const string Delete = "goods_receiving_entry_delete";
-                public const string Update = "goods_receiving_entry_update";
-            }
-
             public const string Delete = "goods_receiving_delete";
             public const string Book = "goods_receiving_book";
             public const string Store = "goods_receiving_store";
@@ -46,6 +39,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
         public static class Company
         {
             public const string EplanImport = "manufacturer_eplan_import";
+            public const string Create = "manufacturer_create";
+            public const string Update = "manufacturer_update";
         }
 
         public static class Warehouse
@@ -66,13 +61,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
 
         public static class PartList
         {
-            public static class Entry
-            {
-                public const string Create = "part_list_entry_create";
-                public const string Delete = "part_list_entry_delete";
-                public const string Update = "part_list_entry_update";
-            }
-
             public const string Update = "part_list_update";
             public const string Create = "part_list_create";
             public const string Delete = "part_list_delete";
@@ -86,6 +74,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Create = "order_create";
             public const string Update = "order_update";
             public const string Delete = "order_delete";
+        }
+
+        public static class Image
+        {
+            public const string Delete = "image_delete";
+            public const string Create = "image_create";
         }
     }
 }

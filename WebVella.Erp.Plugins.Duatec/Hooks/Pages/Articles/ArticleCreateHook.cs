@@ -8,6 +8,8 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 {
+    using Images = Duatec.Images;
+
     [HookAttachment(key: HookKeys.Article.Create)]
     public class ArticleCreateHook : TypedValidatedCreateHook<Article>
     {

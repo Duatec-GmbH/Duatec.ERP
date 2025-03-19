@@ -72,7 +72,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
 
         protected virtual IActionResult? OnError(TModel pageModel, Entity entity, QueryResponse response)
         {
-            var msg = $"Failed to delete '{entity.FancyName()}'";
+            var msg = $"Could not delete '{entity.FancyName()}'";
             pageModel.PutMessage(ScreenMessageType.Error, msg);
 
             var url = Url.RemoveParameter(pageModel.CurrentUrl, "hookKey");
