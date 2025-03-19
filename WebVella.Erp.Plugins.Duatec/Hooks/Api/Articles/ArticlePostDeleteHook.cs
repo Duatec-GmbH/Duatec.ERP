@@ -17,7 +17,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles
         {
             Actions.DeleteAlternatives(record.Id!.Value);
 
-            new ArticleRepository().DeletePreviewIfUnused(record.Image, record.Id);
+            var repo = new ArticleRepository();
+            repo.DeletePreviewIfUnused(record.Image, record.Id);
         }
     }
 }

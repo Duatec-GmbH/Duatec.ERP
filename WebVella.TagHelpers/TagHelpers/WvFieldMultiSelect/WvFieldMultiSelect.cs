@@ -181,15 +181,10 @@ namespace WebVella.TagHelpers.TagHelpers
 					{
 						var optionEl = new TagBuilder("option");
 						optionEl.Attributes.Add("value", option.Value);
-						Debug.WriteLine("============================");
-						string valueJson = JsonSerializer.Serialize(Value);
 						string optionValueJson = JsonSerializer.Serialize(option.Value);
-						Debug.WriteLine("value: " + valueJson);
 						if (Value != null && ((List<string>)Value).Any(x => x == option.Value))
-						{
 							optionEl.Attributes.Add("selected", null);
-							Debug.WriteLine("selected: " + optionValueJson);
-						}
+
 						optionEl.Attributes.Add("data-icon", option.IconClass);
 						optionEl.Attributes.Add("data-color", option.Color);
 						optionEl.Attributes.Add("data-value", JsonSerializer.Serialize(Value));

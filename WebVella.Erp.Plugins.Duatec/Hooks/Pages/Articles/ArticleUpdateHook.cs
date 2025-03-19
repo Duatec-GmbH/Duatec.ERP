@@ -16,20 +16,27 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
         {
             if(record.Image != unmodified.Image)
             {
+                var hasChanged = true;
+
                 if (!string.IsNullOrWhiteSpace(record.Image))
                 {
                     var file = Images.GetOrDownload(record.Image, pageModel.CurrentUser.Id);
-                    if (file == null)
+                    if (string.IsNullOrEmpty(file))
                     {
                         pageModel.PutMessage(ScreenMessageType.Error, "Could not download image");
                         pageModel.DataModel.SetRecord(record);
                         pageModel.BeforeRender();
                         return pageModel.Page();
                     }
-                    record.Image = file.FilePath;
+                    hasChanged = unmodified.Image != file;
+                    record.Image = file;
                 }
 
-                new ArticleRepository().DeletePreviewIfUnused(unmodified.Image, unmodified.Id);
+                if (hasChanged)
+                {
+                    var repo = new ArticleRepository();
+                    repo.DeletePreviewIfUnused(unmodified.Image, unmodified.Id);
+                }
             }
 
             return base.OnValidationSuccess(record, unmodified, pageModel);

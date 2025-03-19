@@ -88,7 +88,6 @@ PAGESIZE @pagesize";
 				Stopwatch sw = new Stopwatch();
 				sw.Start();
 				var dsResult = dataSourceManager.Execute(ds.Id, parameters);
-				Debug.WriteLine($"Elapsed:{sw.ElapsedMilliseconds}");
 
 				if (ds != null)
 					dataSourceManager.Delete(ds.Id);

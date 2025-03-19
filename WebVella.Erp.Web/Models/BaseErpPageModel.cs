@@ -406,7 +406,6 @@ namespace WebVella.Erp.Web.Models
 
 					if (ErpRequestContext.SitemapArea == null && ErpRequestContext.Page != null && ErpRequestContext.Page.Type != PageType.Application)
 					{
-						Debug.WriteLine("<><><><> ERP results in page not found");
 						return new NotFoundResult();
 					}
 
@@ -453,7 +452,6 @@ namespace WebVella.Erp.Web.Models
 
 			DataModel = new PageDataModel(this);
 
-			//Debug.WriteLine(">>>>>>>>>>>>>>>>>>>>>>>>>> Base page init: " + sw.ElapsedMilliseconds);
 			return null;
 		}
 

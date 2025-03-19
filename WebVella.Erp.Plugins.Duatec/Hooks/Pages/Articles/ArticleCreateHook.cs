@@ -20,14 +20,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             if (!string.IsNullOrWhiteSpace(record.Image))
             {
                 var file = Images.GetOrDownload(record.Image, pageModel.CurrentUser.Id);
-                if(file == null)
+                if(string.IsNullOrEmpty(file))
                 {
                     pageModel.PutMessage(ScreenMessageType.Error, "Could not download image");
                     pageModel.DataModel.SetRecord(record);
                     pageModel.BeforeRender();
                     return pageModel.Page();
                 }
-                record.Image = file.FilePath;
+                record.Image = file;
             }
 
             return base.OnValidationSuccess(record, pageModel);

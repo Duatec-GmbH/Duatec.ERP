@@ -1,13 +1,13 @@
 ﻿using System.Text.RegularExpressions;
 using WebVella.Erp.Database;
 
-namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
+namespace WebVella.Erp.Plugins.Duatec
 {
     internal static partial class Images
     {
         public static string FilePath = "/fs/images/";
 
-        public static DbFile? GetOrDownload(string filePathOrUrl, Guid? userId, DbContext? dbContext = null)
+        public static string? GetOrDownload(string filePathOrUrl, Guid? userId, DbContext? dbContext = null)
         {
             if (string.IsNullOrEmpty(filePathOrUrl))
                 return null;
@@ -19,13 +19,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             {
                 dbFile = fileRepo.Find(filePathOrUrl["/fs".Length..]);
                 if (dbFile != null)
-                    return dbFile;
+                    return filePathOrUrl;
             }
 
             var name = filePathOrUrl;
 
             if (name.StartsWith("https://"))
                 name = name["https://".Length..];
+
+            if (name.StartsWith("http://"))
+                name = name["http://".Length..];
 
             if (name.StartsWith("www."))
                 name = name["www.".Length..];
@@ -39,7 +42,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 using var client = new HttpClient()
                 {
                     Timeout = new TimeSpan(0, 0, 10),
-                    MaxResponseContentBufferSize = 51200,
+                    MaxResponseContentBufferSize = 52428800,
                 };
 
                 try
@@ -61,11 +64,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                 }
             }
 
-            dbFile.FilePath = "/fs" + dbFile.FilePath;
-            return dbFile;
+            return "/fs" + dbFile.FilePath;
         }
 
-        [GeneratedRegex("[^\\w\\d.+ -]+")]
+        [GeneratedRegex("[^\\w\\d._+ -]+")]
         private static partial Regex FileRegex();
     }
 }

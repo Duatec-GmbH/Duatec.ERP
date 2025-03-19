@@ -17,12 +17,9 @@ namespace WebVella.Erp.Web.Pages
 		{
 			try
 			{
-				Debug.WriteLine("<><><><> ERP Index Start");
 				var initResult = Init();
-				Debug.WriteLine("<><><><> ERP Index Inited");
 				if (initResult != null)
 				{
-					Debug.WriteLine("<><><><> ERP Index Inited With Result NULL - NOT FOUND");
 					return initResult;
 				}
 

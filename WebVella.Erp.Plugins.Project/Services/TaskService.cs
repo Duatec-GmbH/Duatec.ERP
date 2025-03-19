@@ -591,51 +591,6 @@ namespace WebVella.Erp.Plugins.Project.Services
 
 			valEx.CheckAndThrow();
 
-			//EntityRecord taskRecord = (EntityRecord)pageModel.DataModel.GetProperty("Record");
-			//if (taskRecord["recurrence_id"] == null)
-			//{
-			//	Guid recurrenceId = Guid.NewGuid();
-
-			//	RecurrenceTemplate recurrenceData = JsonConvert.DeserializeObject<RecurrenceTemplate>(pageModel.HttpContext.Request.Form["recurrence_template"]);
-			//	var occurrences = recurrenceData.CalculateOccurrences(startTime, endTime, startTime, startTime.AddYears(5) );
-			//	foreach (var o in occurrences)
-			//	{
-			//		var ocStartTime = o.Period.StartTime.AsDateTimeOffset.DateTime;
-			//		var ocEndTime = o.Period.EndTime.AsDateTimeOffset.DateTime;
-
-			//		EntityRecord newTask = new EntityRecord();
-			//		newTask["id"] = Guid.NewGuid();
-			//		newTask["start_time"] = ocStartTime;
-			//		newTask["end_time"] = ocEndTime;
-			//		newTask["l_scope"] = taskRecord["l_scope"];
-			//		newTask["subject"] = taskRecord["subject"];
-			//		newTask["body"] = taskRecord["body"];
-			//		newTask["owner_id"] = taskRecord["owner_id"];
-			//		newTask["created_on"] = taskRecord["created_on"];
-			//		newTask["created_by"] = taskRecord["created_by"];
-			//		newTask["completed_on"] = null;
-			//		newTask["parent_id"] = taskRecord["parent_id"];
-			//		newTask["status_id"] = taskRecord["status_id"]; // ??set always as pending
-			//		newTask["priority"] = taskRecord["priority"];
-			//		newTask["type_id"] = taskRecord["type_id"];
-			//		newTask["key"] = Guid.NewGuid().ToString(); //set as unique guid text, post create hook will update it
-			//		newTask["x_billable_minutes"] = 0;
-			//		newTask["x_nonbillable_minutes"] = 0;
-			//		newTask["estimated_minutes"] = taskRecord["estimated_minutes"];
-			//		newTask["timelog_started_on"] = null;
-			//		newTask["recurrence_id"] = recurrenceId;
-			//		newTask["reserve_time"] = taskRecord["reserve_time"];
-			//		newTask["recurrence_template"] = JsonConvert.SerializeObject(recurrenceData);
-
-			//		//Debug.WriteLine($"{o.Period.StartTime}-{o.Period.EndTime}");
-			//	}
-
-			//}
-			//else
-			//{
-			//	//UPDATE RECURRENCE CHAIN
-			//}
-
 
 			return null;
 		}
