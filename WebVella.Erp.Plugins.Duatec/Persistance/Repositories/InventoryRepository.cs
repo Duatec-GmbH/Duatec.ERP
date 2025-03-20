@@ -257,9 +257,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<Guid, decimal> GetReservedArticleAmountLookup(Guid projectId)
         {
             var takenLookup = FindManyBookingsByProject(projectId)
+                .Where(be => be.Kind == InventoryBookingKind.Take && be.Amount != 0m)
                 .GroupBy(be => be.ArticleId)
                 .ToDictionary(g => g.Key, g => g
-                    .Where(be => be.Kind == InventoryBookingKind.Take)
                     .Aggregate(0m, (sum, be) => sum + be.Amount));
 
             foreach(var ie in FindManyByProject(projectId))
