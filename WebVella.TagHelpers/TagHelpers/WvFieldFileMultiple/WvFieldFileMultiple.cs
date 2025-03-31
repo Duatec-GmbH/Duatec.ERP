@@ -202,7 +202,7 @@ namespace WebVella.TagHelpers.TagHelpers
 					fakeInputEl.Attributes.Add("id", $"fake-{FieldId}");
 					fakeInputEl.Attributes.Add("style", "cursor:pointer");
 					inputElCssClassList.Add("go-gray");
-					fakeInputEl.InnerHtml.AppendHtml("Activate 'Paste Image' from clipboard");
+					//fakeInputEl.InnerHtml.AppendHtml("Activate 'Paste Image' from clipboard");
 
 
 					if (ValidationErrors.Count > 0)

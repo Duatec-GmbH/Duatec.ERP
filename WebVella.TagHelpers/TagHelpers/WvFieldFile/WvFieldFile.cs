@@ -27,7 +27,7 @@ namespace WebVella.TagHelpers.TagHelpers
 		public string SrcPrefix { get; set; } = "/fs";
 
 		[HtmlAttributeName("clipboard-support")]
-		public bool ClipboardSupport { get; set; } = true;
+		public bool ClipboardSupport { get; set; } = false;
 
 		public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
 		{

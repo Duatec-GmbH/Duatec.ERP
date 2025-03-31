@@ -5153,6 +5153,17 @@ input{
 	box-shadow: inset 0px -2px #ccc;
 }
 
+/* ########### field file modified ################# */
+
+.wv-field-file .erp-file {
+	margin-right: 1px;
+}
+
+.erp-file > .remove {
+	margin-left: -1px;
+}
+
+
 /*#endregion*/
 
 /*#endregion*/

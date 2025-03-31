@@ -271,19 +271,19 @@ function FieldMultiFileFormInit(fieldId, config) {
 		FieldMultiFileFormSubmit(fieldId,files);
 	});
 
-	$(selectors.fakeInputEl).click(function (event) {
-		if (FieldMultiFileFormGlobalPasteActiveFieldId === fieldId) {
-			$(selectors.fakeInputEl).text("Activate 'Paste Image' from clipboard");
-			$(selectors.fakeInputEl).removeClass("go-teal go-bkg-teal-light").addClass("go-gray");
-			FieldMultiFileFormGlobalPasteActiveFieldId = null;
-			document.removeEventListener("paste",FieldMultiFileFormAttachEventListener);
-		}
-		else {
-			$(selectors.fakeInputEl).text("listening for image paste...");
-			$(selectors.fakeInputEl).addClass("go-teal go-bkg-teal-light").removeClass("go-gray");
-			FieldMultiFileFormGlobalPasteActiveFieldId = fieldId;
-			document.addEventListener("paste",FieldMultiFileFormAttachEventListener);
-		}
-	});
+	//$(selectors.fakeInputEl).click(function (event) {
+	//	if (FieldMultiFileFormGlobalPasteActiveFieldId === fieldId) {
+	//		$(selectors.fakeInputEl).text("Activate 'Paste Image' from clipboard");
+	//		$(selectors.fakeInputEl).removeClass("go-teal go-bkg-teal-light").addClass("go-gray");
+	//		FieldMultiFileFormGlobalPasteActiveFieldId = null;
+	//		document.removeEventListener("paste",FieldMultiFileFormAttachEventListener);
+	//	}
+	//	else {
+	//		$(selectors.fakeInputEl).text("listening for image paste...");
+	//		$(selectors.fakeInputEl).addClass("go-teal go-bkg-teal-light").removeClass("go-gray");
+	//		FieldMultiFileFormGlobalPasteActiveFieldId = fieldId;
+	//		document.addEventListener("paste",FieldMultiFileFormAttachEventListener);
+	//	}
+	//});
 
 }
