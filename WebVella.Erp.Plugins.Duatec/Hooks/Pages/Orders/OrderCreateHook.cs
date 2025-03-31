@@ -59,6 +59,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var confirmations = GetConfirmations(record, pageModel);
             if(confirmations.Count > 0 && repository.InsertConfirmations(confirmations).Count != confirmations.Count)
                 throw new DbException("Could not insert confirmation files");
+
+            var bills = GetBills(record, pageModel);
+            if (bills.Count > 0 && repository.InsertBills(bills).Count != bills.Count)
+                throw new DbException("Could not insert bill files");
         }
 
         public IActionResult? OnPreCreateRecord(EntityRecord record, Entity entity, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)

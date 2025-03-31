@@ -1529,334 +1529,6 @@ namespace WebVella.Erp.Plugins.Duatec
                         }
                         #endregion
 
-                        #region << ***Create entity*** Entity name: inventory_booking >>
-                        {
-                            #region << entity >>
-                            {
-                                var entity = new InputEntity();
-                                var systemFieldIdDictionary = new Dictionary<string, Guid>();
-                                systemFieldIdDictionary["id"] = new Guid("a71653b5-cd75-40d1-a997-24b993efc616");
-                                entity.Id = new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b");
-                                entity.Name = "inventory_booking";
-                                entity.Label = "Inventory Booking";
-                                entity.LabelPlural = "Inventory Bookings";
-                                entity.System = false;
-                                entity.IconName = "fa fa-database";
-                                entity.Color = "";
-                                entity.RecordScreenIdField = null;
-                                entity.RecordPermissions = new RecordPermissions();
-                                entity.RecordPermissions.CanCreate = new List<Guid>();
-                                entity.RecordPermissions.CanRead = new List<Guid>();
-                                entity.RecordPermissions.CanUpdate = new List<Guid>();
-                                entity.RecordPermissions.CanDelete = new List<Guid>();
-                                //Create
-                                entity.RecordPermissions.CanCreate.Add(new Guid("987148b1-afa8-4b33-8616-55861e5fd065"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
-                                entity.RecordPermissions.CanCreate.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
-                                //READ
-                                entity.RecordPermissions.CanRead.Add(new Guid("987148b1-afa8-4b33-8616-55861e5fd065"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
-                                entity.RecordPermissions.CanRead.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
-                                //UPDATE
-                                entity.RecordPermissions.CanUpdate.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
-                                //DELETE
-                                entity.RecordPermissions.CanDelete.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
-                                entity.RecordPermissions.CanDelete.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
-                                {
-                                    var response = entMan.CreateEntity(entity, systemFieldIdDictionary);
-                                    if (!response.Success)
-                                        throw new Exception("System error 10050. Entity: inventory_booking creation Message: " + response.Message);
-                                }
-                            }
-                            #endregion
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: article_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("8c794634-580b-4194-8f08-9bb610cbbae9");
-                            guidField.Name = "article_id";
-                            guidField.Label = "Article";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = true;
-                            guidField.Unique = false;
-                            guidField.Searchable = false;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = Guid.Parse("00000000-0000-0000-0000-000000000000");
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: article_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: user_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("f2c44b90-14dd-4a9e-9a96-93ff44c0f727");
-                            guidField.Name = "user_id";
-                            guidField.Label = "User";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = true;
-                            guidField.Unique = false;
-                            guidField.Searchable = false;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = Guid.Parse("00000000-0000-0000-0000-000000000000");
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: user_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: timestamp >>
-                        {
-                            InputDateTimeField datetimeField = new InputDateTimeField();
-                            datetimeField.Id = new Guid("878beffe-e7e4-470d-92fa-b6dc3403805b");
-                            datetimeField.Name = "timestamp";
-                            datetimeField.Label = "Timestamp";
-                            datetimeField.PlaceholderText = null;
-                            datetimeField.Description = null;
-                            datetimeField.HelpText = null;
-                            datetimeField.Required = true;
-                            datetimeField.Unique = false;
-                            datetimeField.Searchable = false;
-                            datetimeField.Auditable = false;
-                            datetimeField.System = false;
-                            try { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 23:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 23:00:00", new CultureInfo("de-AT")); }
-                            datetimeField.Format = "yyyy-mm-dd HH:mm";
-                            datetimeField.UseCurrentTimeAsDefaultValue = false;
-                            datetimeField.EnableSecurity = false;
-                            datetimeField.Permissions = new FieldPermissions();
-                            datetimeField.Permissions.CanRead = new List<Guid>();
-                            datetimeField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), datetimeField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: timestamp Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: amount >>
-                        {
-                            InputNumberField numberField = new InputNumberField();
-                            numberField.Id = new Guid("9c806f5a-00bf-4e89-a67b-4d6f98dce7aa");
-                            numberField.Name = "amount";
-                            numberField.Label = "Amount";
-                            numberField.PlaceholderText = null;
-                            numberField.Description = null;
-                            numberField.HelpText = null;
-                            numberField.Required = true;
-                            numberField.Unique = false;
-                            numberField.Searchable = false;
-                            numberField.Auditable = false;
-                            numberField.System = false;
-                            numberField.DefaultValue = Decimal.Parse("0,0");
-                            numberField.MinValue = Decimal.Parse("2147483648000,0");
-                            numberField.MaxValue = Decimal.Parse("2147483647000,0");
-                            numberField.DecimalPlaces = byte.Parse("2");
-                            numberField.EnableSecurity = false;
-                            numberField.Permissions = new FieldPermissions();
-                            numberField.Permissions.CanRead = new List<Guid>();
-                            numberField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), numberField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: amount Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: project_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("d347ec63-d5f8-49b6-a453-d6e249ede127");
-                            guidField.Name = "project_id";
-                            guidField.Label = "Project";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = false;
-                            guidField.Unique = false;
-                            guidField.Searchable = false;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = null;
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: project_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: warehouse_location_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("a0e8ac5b-fdc3-4fd2-81ff-e2b5e9ed4581");
-                            guidField.Name = "warehouse_location_id";
-                            guidField.Label = "Warehouse Location";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = false;
-                            guidField.Unique = false;
-                            guidField.Searchable = true;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = null;
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: warehouse_location_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: kind >>
-                        {
-                            InputTextField textboxField = new InputTextField();
-                            textboxField.Id = new Guid("92794b54-cbc9-414b-82be-75513341c0de");
-                            textboxField.Name = "kind";
-                            textboxField.Label = "Kind";
-                            textboxField.PlaceholderText = null;
-                            textboxField.Description = null;
-                            textboxField.HelpText = null;
-                            textboxField.Required = true;
-                            textboxField.Unique = false;
-                            textboxField.Searchable = true;
-                            textboxField.Auditable = false;
-                            textboxField.System = false;
-                            textboxField.DefaultValue = "Undefined";
-                            textboxField.MaxLength = Int32.Parse("32");
-                            textboxField.EnableSecurity = false;
-                            textboxField.Permissions = new FieldPermissions();
-                            textboxField.Permissions.CanRead = new List<Guid>();
-                            textboxField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), textboxField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: kind Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: project_source_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("f20b9e5f-1658-4b2c-845a-1b5aaa16c884");
-                            guidField.Name = "project_source_id";
-                            guidField.Label = "Project Source Id";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = false;
-                            guidField.Unique = false;
-                            guidField.Searchable = true;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = null;
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: project_source_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
-                        #region << ***Create field***  Entity: inventory_booking Field Name: warehouse_location_source_id >>
-                        {
-                            InputGuidField guidField = new InputGuidField();
-                            guidField.Id = new Guid("fd62ab21-4129-4d21-bff2-6acfdbe28b67");
-                            guidField.Name = "warehouse_location_source_id";
-                            guidField.Label = "Source Warehouse Location";
-                            guidField.PlaceholderText = null;
-                            guidField.Description = null;
-                            guidField.HelpText = null;
-                            guidField.Required = false;
-                            guidField.Unique = false;
-                            guidField.Searchable = true;
-                            guidField.Auditable = false;
-                            guidField.System = false;
-                            guidField.DefaultValue = null;
-                            guidField.GenerateNewId = false;
-                            guidField.EnableSecurity = false;
-                            guidField.Permissions = new FieldPermissions();
-                            guidField.Permissions.CanRead = new List<Guid>();
-                            guidField.Permissions.CanUpdate = new List<Guid>();
-                            //READ
-                            //UPDATE
-                            {
-                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
-                                if (!response.Success)
-                                    throw new Exception("System error 10060. Entity: inventory_booking Field: warehouse_location_source_id Message:" + response.Message);
-                            }
-                        }
-                        #endregion
-
                         #region << ***Create entity*** Entity name: warehouse >>
                         {
                             #region << entity >>
@@ -3107,6 +2779,346 @@ namespace WebVella.Erp.Plugins.Duatec
                         }
                         #endregion
 
+                        #region << ***Create entity*** Entity name: inventory_booking >>
+                        {
+                            #region << entity >>
+                            {
+                                var entity = new InputEntity();
+                                var systemFieldIdDictionary = new Dictionary<string, Guid>();
+                                systemFieldIdDictionary["id"] = new Guid("a71653b5-cd75-40d1-a997-24b993efc616");
+                                entity.Id = new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b");
+                                entity.Name = "inventory_booking";
+                                entity.Label = "Inventory Booking";
+                                entity.LabelPlural = "Inventory Bookings";
+                                entity.System = false;
+                                entity.IconName = "fa fa-database";
+                                entity.Color = "";
+                                entity.RecordScreenIdField = null;
+                                entity.RecordPermissions = new RecordPermissions();
+                                entity.RecordPermissions.CanCreate = new List<Guid>();
+                                entity.RecordPermissions.CanRead = new List<Guid>();
+                                entity.RecordPermissions.CanUpdate = new List<Guid>();
+                                entity.RecordPermissions.CanDelete = new List<Guid>();
+                                //Create
+                                entity.RecordPermissions.CanCreate.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
+                                entity.RecordPermissions.CanCreate.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
+                                //READ
+                                entity.RecordPermissions.CanRead.Add(new Guid("987148b1-afa8-4b33-8616-55861e5fd065"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
+                                entity.RecordPermissions.CanRead.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
+                                //UPDATE
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
+                                entity.RecordPermissions.CanUpdate.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
+                                //DELETE
+                                entity.RecordPermissions.CanDelete.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("1c609c71-d73f-431b-97e8-1a4576f7e831"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("df38b4cc-42cb-4c4d-b1ab-31e426d48177"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("15b5964b-b4c9-4857-b454-c9d4662ee7cd"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("21e35fcd-d1f6-4a94-9863-f1f61c159960"));
+                                entity.RecordPermissions.CanDelete.Add(new Guid("6cd475d2-0ac3-4ef1-bb69-3d6db5175b9a"));
+                                {
+                                    var response = entMan.CreateEntity(entity, systemFieldIdDictionary);
+                                    if (!response.Success)
+                                        throw new Exception("System error 10050. Entity: inventory_booking creation Message: " + response.Message);
+                                }
+                            }
+                            #endregion
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: article_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("8c794634-580b-4194-8f08-9bb610cbbae9");
+                            guidField.Name = "article_id";
+                            guidField.Label = "Article";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = true;
+                            guidField.Unique = false;
+                            guidField.Searchable = false;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = Guid.Parse("00000000-0000-0000-0000-000000000000");
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: article_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: user_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("f2c44b90-14dd-4a9e-9a96-93ff44c0f727");
+                            guidField.Name = "user_id";
+                            guidField.Label = "User";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = true;
+                            guidField.Unique = false;
+                            guidField.Searchable = false;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = Guid.Parse("00000000-0000-0000-0000-000000000000");
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: user_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: timestamp >>
+                        {
+                            InputDateTimeField datetimeField = new InputDateTimeField();
+                            datetimeField.Id = new Guid("878beffe-e7e4-470d-92fa-b6dc3403805b");
+                            datetimeField.Name = "timestamp";
+                            datetimeField.Label = "Timestamp";
+                            datetimeField.PlaceholderText = null;
+                            datetimeField.Description = null;
+                            datetimeField.HelpText = null;
+                            datetimeField.Required = true;
+                            datetimeField.Unique = false;
+                            datetimeField.Searchable = false;
+                            datetimeField.Auditable = false;
+                            datetimeField.System = false;
+                            try { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 23:00:00"); } catch { datetimeField.DefaultValue = DateTime.Parse("31.12.2024 23:00:00", new CultureInfo("de-AT")); }
+                            datetimeField.Format = "yyyy-mm-dd HH:mm";
+                            datetimeField.UseCurrentTimeAsDefaultValue = false;
+                            datetimeField.EnableSecurity = false;
+                            datetimeField.Permissions = new FieldPermissions();
+                            datetimeField.Permissions.CanRead = new List<Guid>();
+                            datetimeField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), datetimeField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: timestamp Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: amount >>
+                        {
+                            InputNumberField numberField = new InputNumberField();
+                            numberField.Id = new Guid("9c806f5a-00bf-4e89-a67b-4d6f98dce7aa");
+                            numberField.Name = "amount";
+                            numberField.Label = "Amount";
+                            numberField.PlaceholderText = null;
+                            numberField.Description = null;
+                            numberField.HelpText = null;
+                            numberField.Required = true;
+                            numberField.Unique = false;
+                            numberField.Searchable = false;
+                            numberField.Auditable = false;
+                            numberField.System = false;
+                            numberField.DefaultValue = Decimal.Parse("0,0");
+                            numberField.MinValue = Decimal.Parse("2147483648000,0");
+                            numberField.MaxValue = Decimal.Parse("2147483647000,0");
+                            numberField.DecimalPlaces = byte.Parse("2");
+                            numberField.EnableSecurity = false;
+                            numberField.Permissions = new FieldPermissions();
+                            numberField.Permissions.CanRead = new List<Guid>();
+                            numberField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), numberField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: amount Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: project_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("d347ec63-d5f8-49b6-a453-d6e249ede127");
+                            guidField.Name = "project_id";
+                            guidField.Label = "Project";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = false;
+                            guidField.Unique = false;
+                            guidField.Searchable = false;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = null;
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: project_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: warehouse_location_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("a0e8ac5b-fdc3-4fd2-81ff-e2b5e9ed4581");
+                            guidField.Name = "warehouse_location_id";
+                            guidField.Label = "Warehouse Location";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = false;
+                            guidField.Unique = false;
+                            guidField.Searchable = true;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = null;
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: warehouse_location_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: kind >>
+                        {
+                            InputTextField textboxField = new InputTextField();
+                            textboxField.Id = new Guid("92794b54-cbc9-414b-82be-75513341c0de");
+                            textboxField.Name = "kind";
+                            textboxField.Label = "Kind";
+                            textboxField.PlaceholderText = null;
+                            textboxField.Description = null;
+                            textboxField.HelpText = null;
+                            textboxField.Required = true;
+                            textboxField.Unique = false;
+                            textboxField.Searchable = true;
+                            textboxField.Auditable = false;
+                            textboxField.System = false;
+                            textboxField.DefaultValue = "Undefined";
+                            textboxField.MaxLength = Int32.Parse("32");
+                            textboxField.EnableSecurity = false;
+                            textboxField.Permissions = new FieldPermissions();
+                            textboxField.Permissions.CanRead = new List<Guid>();
+                            textboxField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), textboxField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: kind Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: project_source_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("f20b9e5f-1658-4b2c-845a-1b5aaa16c884");
+                            guidField.Name = "project_source_id";
+                            guidField.Label = "Project Source Id";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = false;
+                            guidField.Unique = false;
+                            guidField.Searchable = true;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = null;
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: project_source_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
+                        #region << ***Create field***  Entity: inventory_booking Field Name: warehouse_location_source_id >>
+                        {
+                            InputGuidField guidField = new InputGuidField();
+                            guidField.Id = new Guid("fd62ab21-4129-4d21-bff2-6acfdbe28b67");
+                            guidField.Name = "warehouse_location_source_id";
+                            guidField.Label = "Source Warehouse Location";
+                            guidField.PlaceholderText = null;
+                            guidField.Description = null;
+                            guidField.HelpText = null;
+                            guidField.Required = false;
+                            guidField.Unique = false;
+                            guidField.Searchable = true;
+                            guidField.Auditable = false;
+                            guidField.System = false;
+                            guidField.DefaultValue = null;
+                            guidField.GenerateNewId = false;
+                            guidField.EnableSecurity = false;
+                            guidField.Permissions = new FieldPermissions();
+                            guidField.Permissions.CanRead = new List<Guid>();
+                            guidField.Permissions.CanUpdate = new List<Guid>();
+                            //READ
+                            //UPDATE
+                            {
+                                var response = entMan.CreateField(new Guid("0e10f5d0-8573-426a-b11e-eab1523dd34b"), guidField, false);
+                                if (!response.Success)
+                                    throw new Exception("System error 10060. Entity: inventory_booking Field: warehouse_location_source_id Message:" + response.Message);
+                            }
+                        }
+                        #endregion
+
                         #region << ***Create relation*** Relation name: article_manufacturer >>
                         {
                             var relation = new EntityRelation();
@@ -3978,7 +3990,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var weight = 99;
                             var access = new List<Guid>();
                             access.Add(new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda"));
-                            access.Add(new Guid("f16ec6db-626d-4c27-8de0-3e7ce542c55f"));
+                            access.Add(new Guid("f71835a8-8a30-42e5-9742-d3c12972f731"));
 
                             new WebVella.Erp.Web.Services.AppService().CreateApplication(id, name, label, description, iconClass, author, color, weight, access, WebVella.Erp.Database.DbContext.Current.Transaction);
                         }
@@ -36026,7 +36038,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var options = @"{
   ""is_visible"": """",
   ""label_mode"": ""0"",
-  ""label_text"": ""Requires Part List"",
+  ""label_text"": ""Requires Part List (order entries are checked if given article is defined in a active part list)"",
   ""mode"": ""0"",
   ""value"": ""{\""type\"":\""0\"",\""string\"":\""Record.requires_part_list\"",\""default\"":\""true\""}"",
   ""name"": ""requires_part_list"",
@@ -36685,7 +36697,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var options = @"{
   ""is_visible"": """",
   ""label_mode"": ""0"",
-  ""label_text"": ""Is Inventory Project"",
+  ""label_text"": ""Is Inventory Project (store dialog is shown after booking goods receivings)"",
   ""mode"": ""0"",
   ""value"": ""{\""type\"":\""0\"",\""string\"":\""Record.inventory_project\"",\""default\"":\""\""}"",
   ""name"": ""inventory_project"",
@@ -43623,7 +43635,7 @@ namespace WebVella.Erp.Plugins.Duatec
                             var componentName = "WebVella.Erp.Web.Components.PcForm";
                             var containerId = "column12";
                             var options = @"{
-  ""is_visible"": ""{\""type\"":\""0\"",\""string\"":\""$and($or($areEqual(RowRecord.kind, \\\""Store\\\"")), $areEqual(RowRecord.kind, \\\""Take\\\""))$or($hasRole('inventory-admin'), $areEqual(CurrentUser.id, RowRecord.user_id)), $exists(RowRecord.$inventory_booking_warehouse_location.designation))\"",\""default\"":\""\""}"",
+  ""is_visible"": ""{\""type\"":\""0\"",\""string\"":\""$or($hasRole('inventory-admin'), $areEqual(CurrentUser.Id, RowRecord.user_id))\"",\""default\"":\""\""}"",
   ""id"": ""wv-68456a6f-e46a-471b-a0b3-1dd4f722ad32"",
   ""name"": ""form"",
   ""hook_key"": ""inventory_booking_undo"",

@@ -24,8 +24,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
             {
-                pageModel.PutMessage(ScreenMessageType.Error, "Could not delete order");
-
                 var url = Url.RemoveParameters(pageModel.CurrentUrl);
                 return pageModel.LocalRedirect(url);
             }

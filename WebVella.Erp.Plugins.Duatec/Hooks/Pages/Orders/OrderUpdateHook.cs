@@ -49,6 +49,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var confirmations = GetConfirmations(record, pageModel);
             if(repository.UpdateConfirmations(record.Id.Value, confirmations).Count != confirmations.Count)
                 throw new DbException("Could not insert confirmation files");
+
+            var bills = GetBills(record, pageModel);
+            if (repository.UpdateBills(record.Id.Value, bills).Count != bills.Count)
+                throw new DbException("Could not insert bill files");
         }
 
         protected override IEnumerable<ValidationError> ValidateEntries(Order record, List<OrderEntry> entries)

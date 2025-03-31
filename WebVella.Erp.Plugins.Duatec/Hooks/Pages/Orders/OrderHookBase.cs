@@ -161,6 +161,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 }).ToList();
         }
 
+        protected static List<OrderBill> GetBills(Order record, TModel pageModel)
+        {
+            var files = pageModel.Request.Form["bills"].ToString();
+            if (string.IsNullOrWhiteSpace(files))
+                return [];
+
+            return files.Split(',')
+                .Select(path => new OrderBill()
+                {
+                    path = path,
+                    OrderId = record.Id!.Value
+                }).ToList();
+        }
+
         protected static List<dynamic> GetDynamicConfirmations(Order record, TModel pageModel)
         {
             var confirmations = GetConfirmations(record, pageModel);
@@ -170,9 +184,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             return result;
         }
 
+        protected static List<dynamic> GetDynamicBills(Order record, TModel pageModel)
+        {
+            var bills = GetBills(record, pageModel);
+            var result = new List<dynamic>(bills.Count);
+            foreach (var bill in bills)
+                result.Add(bill);
+            return result;
+        }
+
         protected override IActionResult FailureResult(Order record, TModel pageModel, List<OrderEntry> entries, List<ValidationError> validationErrors)
         {
             record["confirmations"] = GetDynamicConfirmations(record, pageModel);
+            record["bills"] = GetDynamicBills(record, pageModel);
 
             for(var i = 0; i < entries.Count; i++)
             {

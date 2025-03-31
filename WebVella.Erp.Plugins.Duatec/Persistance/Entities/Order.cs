@@ -13,6 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Project = "order_project";
             public const string Entries = OrderEntry.Relations.Order;
             public const string Confirmations = "order_confirmation_order";
+            public const string Bills = "order_bill_order";
             public const string GoodsReceivings = GoodsReceiving.Relations.Order;
         }
 
@@ -45,12 +46,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Order] = value;
         }
 
-        public string BillFile
-        {
-            get => Get(Fields.Bill, string.Empty);
-            set => Properties[Fields.Bill] = value;
-        }
-
         public Guid? Project
         {
             get => Get<Guid?>(Fields.Project);
@@ -63,13 +58,16 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public IEnumerable<OrderEntry> GetEntries()
             => GetManyByRelation<OrderEntry>(Relations.Entries);
 
+        public void SetEntries(IEnumerable<OrderEntry> entries)
+            => SetRelationValues(Relations.Entries, entries);
+
         public IEnumerable<OrderConfirmation> GetConfirmations()
             => GetManyByRelation<OrderConfirmation>(Relations.Confirmations);
 
+        public IEnumerable<OrderBill> GetBills()
+            => GetManyByRelation<OrderBill>(Relations.Bills);
+
         public IEnumerable<GoodsReceiving> GetGoodsReceivings()
             => GetManyByRelation<GoodsReceiving>(Relations.GoodsReceivings);
-
-        public void SetEntries(IEnumerable<OrderEntry> entries)
-            => SetRelationValues(Relations.Entries, entries);
     }
 }

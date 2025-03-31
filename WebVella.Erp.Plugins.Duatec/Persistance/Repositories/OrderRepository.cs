@@ -20,6 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public override Order? Delete(Guid id)
         {
             DeleteConfirmations(id);
+            DeleteBills(id);
             return base.Delete(id);
         }
 
@@ -167,6 +168,67 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         {
             return RepositoryHelper.FindManyBy(RecordManager, OrderConfirmation.Entity, OrderConfirmation.Fields.OrderId, orderId)
                 .Select(TypedEntityRecordWrapper.Wrap<OrderConfirmation>)
+                .ToList();
+        }
+
+        public List<OrderBill> InsertBills(List<OrderBill> bills)
+        {
+            var result = new List<OrderBill>(bills.Count);
+            foreach (var bill in bills)
+            {
+                var rec = RepositoryHelper.Insert(RecordManager, OrderBill.Entity, bill);
+                result.Add(TypedEntityRecordWrapper.Wrap<OrderBill>(rec));
+            }
+            return result;
+        }
+
+        public List<OrderBill> UpdateBills(Guid orderId, List<OrderBill> bills)
+        {
+            if (bills.Count > 0)
+            {
+                if (!bills.TrueForAll(c => c.OrderId == orderId))
+                    throw new DbException("bills must be from same order");
+            }
+
+            var oldBills = FindBills(orderId);
+
+            var newBills = bills
+                .Where(bill => !oldBills.Exists(b => bill.path == b.path))
+                .ToList();
+
+            var toDelete = oldBills
+                .Where(bill => !bills.Exists(b => bill.path == b.path))
+                .ToList();
+
+            var result = oldBills
+                .Where(bill => bills.Exists(b => bill.path == b.path))
+                .ToList();
+
+            foreach (var bill in toDelete)
+                RepositoryHelper.Delete(RecordManager, OrderBill.Entity, bill.Id!.Value);
+
+            result.AddRange(InsertBills(newBills));
+
+            return result;
+        }
+
+        private void DeleteBills(Guid orderId)
+        {
+            var files = FindBills(orderId);
+            if (files.Count == 0)
+                return;
+
+            var ids = files.Select(f => f.Id!.Value)
+                .ToArray();
+
+            foreach (var id in ids)
+                RepositoryHelper.Delete(RecordManager, OrderBill.Entity, id);
+        }
+
+        private List<OrderBill> FindBills(Guid orderId)
+        {
+            return RepositoryHelper.FindManyBy(RecordManager, OrderBill.Entity, OrderBill.Fields.OrderId, orderId)
+                .Select(TypedEntityRecordWrapper.Wrap<OrderBill>)
                 .ToList();
         }
 
