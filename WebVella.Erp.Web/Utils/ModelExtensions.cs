@@ -58,6 +58,9 @@ namespace WebVella.Erp.Web.Utils
 				var label = "";
 				var iconClass = "";
 				var color = "";
+				var isVisible = true;
+				var value = ((int)val).ToString();
+
 				if (enumAuxAttributes.Length > 0)
 				{
 					// we're only getting the first description we find
@@ -66,9 +69,13 @@ namespace WebVella.Erp.Web.Utils
 					label = enumAux.Label;
 					iconClass = enumAux.IconClass;
 					color = enumAux.Color;
+					isVisible = enumAux.IsVisible;
+					if (enumAux.SelectOptionType == SelectOptionType.String)
+						value = val.ToString();
 				}
 
-				selectOptions.Add(new SelectOption() { Value = ((int)val).ToString(), Label = label, Color = color, IconClass = iconClass });
+				if(isVisible)
+					selectOptions.Add(new SelectOption() { Value = value, Label = label, Color = color, IconClass = iconClass });
 			}
 			return selectOptions;
 		}

@@ -1,12 +1,17 @@
-﻿using WebVella.Erp.TypedRecords;
+﻿using WebVella.Erp.Api.Models;
+using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     public enum InventoryBookingKind
     {
+        [SelectOption(IsVisible = false)]
         Undefined = 0,
+        [SelectOption(Label = "Take", SelectOptionType = SelectOptionType.String)]
         Take = 1,
+        [SelectOption(Label = "Store", SelectOptionType = SelectOptionType.String)]
         Store = 2,
+        [SelectOption(Label = "Move", SelectOptionType = SelectOptionType.String)]
         Move = 3,
     }
 
