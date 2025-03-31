@@ -47,7 +47,7 @@
 {
     <div class="@divClass" id="table-@(tableId)">
 
-        @if (options.HasAddButton)
+        @if (options.HasAddButton && (!options.HasThead || !options.HasDeleteButtons))
         {
             var style = $"width:{actionButtonWidth};";
 
@@ -72,7 +72,18 @@
                     }
                     @if (options.HasDeleteButtons)
                     {
-                        <th></th>
+                        <th>
+                            @if (options.HasAddButton) 
+                            {
+                                var style = $"width:{actionButtonWidth};";
+
+                                <wv-button icon-class="fa fa-plus go-green"
+                                           text="Add"
+                                           class="float-right btn-sm mb-2 editable-grid-add-entry-button"
+                                           style=@style>
+                                </wv-button>
+                            }
+                        </th>
                     }
                 </thead>
             }

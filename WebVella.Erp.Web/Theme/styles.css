@@ -5151,6 +5151,7 @@ input{
 .erp-list > table > thead {
 	background-color: white;
 	box-shadow: inset 0px -2px #ccc;
+	z-index: 10;
 }
 
 /* ########### field file modified ################# */

@@ -581,7 +581,10 @@
 		function addAddCallback(btn) {
 
 			btn.addEventListener('click', () => {
-				let body = btn.parentElement.getElementsByTagName('TBODY')[0];
+				let body;
+				if (btn.parentElement.tagName === 'TH')
+					body = btn.parentElement.parentElement.parentElement.parentElement.getElementsByTagName('TBODY')[0];
+				else body = btn.parentElement.getElementsByTagName('TBODY')[0];
 				if (body)
 					addNew(body);
 			});
