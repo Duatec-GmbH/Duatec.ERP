@@ -80,11 +80,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var manufacturers = manufacturerRepo.FindMany($"id, {Company.Fields.Name}", manufacturerIds);
 
-            const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
-
-            var recievedAmountsLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
+            const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.*";
+            var goodsReceivingEntryLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
                 .GroupBy(e => e.Article)
-                .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
+                .ToDictionary(g => g.Key, g => g.ToArray());
 
 
             var typeLookup = articleRepo.FindManyTypesById(typeIds);
@@ -100,9 +99,19 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     article.SetArticleType(type);
 
                 var receivedAmount = 0m;
-                if (recievedAmountsLookup.TryGetValue(orderEntry.Article, out var amount))
-                    receivedAmount = amount;
                 
+                if (!goodsReceivingEntryLookup.TryGetValue(orderEntry.Article, out var receivingEntries))
+                    orderEntry.SetGoodsReceivings([]);
+                else
+                {
+                    var receivings = receivingEntries
+                        .Select(gre => gre.GetGoodsReceiving())
+                        .DistinctBy(gr => gr.Id)
+                        .ToList();
+
+                    orderEntry.SetGoodsReceivings(receivings);
+                    receivedAmount = receivingEntries.Sum(gre => gre.Amount);
+                }                
 
                 orderEntry.ReceivedAmount = receivedAmount;
                 orderEntry.State = orderEntry.Amount <= receivedAmount

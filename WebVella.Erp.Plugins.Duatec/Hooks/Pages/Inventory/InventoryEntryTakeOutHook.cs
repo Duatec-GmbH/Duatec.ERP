@@ -29,6 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         {
             var repo = new InventoryRepository();
             var amount = record.Amount = Math.Max(0m, Math.Round(record.Amount, 2));
+            var comment = pageModel.GetFormValue("comment");
 
             void TransactionalAction()
             {
@@ -43,6 +44,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     UserId = pageModel.CurrentUser.Id,
                     Timestamp = DateTime.Now,
                     Kind = InventoryBookingKind.Take,
+                    Comment = comment,
                 };
 
                 if (amount >= unmodified.Amount)

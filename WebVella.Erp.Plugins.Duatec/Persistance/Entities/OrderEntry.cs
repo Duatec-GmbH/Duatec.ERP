@@ -53,5 +53,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public Order GetOrder()
             => GetSingleByRelation<Order>(Relations.Order)!;
+
+        public virtual IEnumerable<GoodsReceiving> GetGoodsReceivings()
+            => GetOrder().GetGoodsReceivings().Where(gr => gr.GetEntries().Any(gre => gre.Article == Article));
     }
 }

@@ -22,6 +22,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             var id = Guid.NewGuid();
             record.Id = id;
+            var comment = pageModel.GetFormValue("comment");
 
             void TransactionalAction()
             {
@@ -42,6 +43,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     WarehouseLocationId = record.WarehouseLocation,
                     WarehouseLocationSourceId = record.WarehouseLocation,
                     UserId = userId,
+                    Comment = comment,
                 };
 
                 if (repo.InsertBooking(booking) == null)

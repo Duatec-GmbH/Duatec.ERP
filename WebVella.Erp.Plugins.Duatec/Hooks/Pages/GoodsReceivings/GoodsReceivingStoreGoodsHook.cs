@@ -92,6 +92,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     WarehouseLocationSourceId = e.WarehouseLocation,
                     Timestamp = timestamp,
                     UserId = userId,
+                    Comment = "Goods Receiving Store"
 
                 }).ToArray(); // must be collected, otherwhise amounts will be updated
 

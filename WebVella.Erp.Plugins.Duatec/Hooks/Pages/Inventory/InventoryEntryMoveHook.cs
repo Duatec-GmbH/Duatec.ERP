@@ -45,6 +45,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
             var id = record.Id!.Value;
+            var comment = pageModel.GetFormValue("comment");
+
             void TransactionalAction()
             {
                 var booking = new InventoryBooking()
@@ -57,7 +59,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     WarehouseLocationSourceId = unmodified.WarehouseLocation,
                     UserId = pageModel.CurrentUser.Id,
                     Kind = InventoryBookingKind.Move,
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTime.Now,
+                    Comment = comment,
                 };
 
                 var repo = new InventoryRepository();

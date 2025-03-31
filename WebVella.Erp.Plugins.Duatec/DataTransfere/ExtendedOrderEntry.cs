@@ -10,6 +10,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             public const string ReceivedAmount = "received_amount";
         }
 
+        public static class ExtendedRelations
+        {
+            public const string GoodsReceivings = "goods_receivings";
+        }
+
         public OrderEntryState State
         {
             get => Get<OrderEntryState>(ExtendedFields.State);
@@ -21,5 +26,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             get => Get<decimal>(ExtendedFields.ReceivedAmount);
             set => Properties[ExtendedFields.ReceivedAmount] = value;
         }
+
+        public override IEnumerable<GoodsReceiving> GetGoodsReceivings()
+            => GetManyByRelation<GoodsReceiving>(ExtendedRelations.GoodsReceivings);
+
+        public void SetGoodsReceivings(IEnumerable<GoodsReceiving> goodsReceivings)
+            => SetRelationValues(ExtendedRelations.GoodsReceivings, goodsReceivings);
     }
 }

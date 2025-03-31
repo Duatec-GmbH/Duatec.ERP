@@ -27,6 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string UserId = "user_id";
             public const string Amount = "amount";
             public const string Kind = "kind";
+            public const string Comment = "comment";
         }
 
         public static class Relations
@@ -89,6 +90,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => GetEnumValueFromString(Fields.Kind, InventoryBookingKind.Undefined, true);
             set => Properties[Fields.Kind] = value.ToString();
+        }
+
+        public string Comment
+        {
+            get => Get(Fields.Comment, string.Empty);
+            set => Properties[Fields.Comment] = value;
         }
     }
 }

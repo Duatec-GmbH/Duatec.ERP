@@ -97,6 +97,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 ProjectSourceId = entry.Project,
                 ProjectId = projectId,
+                Comment = "Auto reserve",
                 UserId = userId
             };
 
@@ -120,7 +121,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 ProjectSourceId = entry.Project,
                 ProjectId = projectId,
-                UserId = userId
+                UserId = userId,
+                Comment = "Auto reserve",
             };
 
             entry.Project = projectId;

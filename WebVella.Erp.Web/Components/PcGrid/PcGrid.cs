@@ -491,6 +491,38 @@ namespace WebVella.Erp.Web.Components
 			public WvHorizontalAlignmentType Container12HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
 			#endregion
 
+			#region << container13 >>
+			[JsonProperty(PropertyName = "container13_id")]
+			public string Container13Id { get; set; } = "column13";
+
+			[JsonProperty(PropertyName = "container13_name")]
+			public string Container13Name { get; set; } = ""; //For URL purposes
+
+			[JsonProperty(PropertyName = "container13_label")]
+			public string Container13Label { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container13_width")]
+			public string Container13Width { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container13_sortable")]
+			public bool Container13Sortable { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container13_searchable")]
+			public bool Container13Searchable { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container13_nowrap")]
+			public bool Container13NoWrap { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container13_class")]
+			public string Container13Class { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container13_vertical_align")]
+			public WvVerticalAlignmentType Container13VerticalAlign { get; set; } = WvVerticalAlignmentType.None;
+
+			[JsonProperty(PropertyName = "container13_horizontal_align")]
+			public WvHorizontalAlignmentType Container13HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
+			#endregion
+
 		}
 
 
@@ -755,6 +787,18 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container12Searchable,
 						Sortable = options.Container12Sortable,
 						Width = options.Container12Width
+					});
+				}
+				if (options.VisibleColumns > 12)
+				{
+					columns.Add(new WvGridColumnMeta()
+					{
+						ContainerId = options.Container13Id,
+						Name = options.Container13Name,
+						Label = options.Container13Label,
+						Searchable = options.Container13Searchable,
+						Sortable = options.Container13Sortable,
+						Width = options.Container13Width
 					});
 				}
 				#endregion
