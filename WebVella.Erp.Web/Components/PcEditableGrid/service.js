@@ -782,7 +782,7 @@
 
 			if (!match) {
 				do {
-					id = id.generateUUID();
+					id = generateUUID();
 				} while (usedIds.has(id));
 
 				return id;
