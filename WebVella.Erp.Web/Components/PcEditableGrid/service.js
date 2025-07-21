@@ -11,6 +11,7 @@
 	let cDown = false;
 	let vDown = false;
 	let xDown = false;
+	let aDown = false;
 	let ctrlDown = false;
 
 	// !!!!!!!! must be VAR otherwhise gets initialized for every editable grid
@@ -32,17 +33,11 @@
 			for (let table of document.getElementsByClassName('editable-grid')) {
 
 				let body = table.getElementsByTagName('TBODY')[0];
-				let length = body.children.length - 1;
 
-				for (let i = 0; i < length; i++) {
-					let tr = body.children[1]; // first is dummy -> skip
-					let row = performClone(tr);
-
-					body.removeChild(tr);
-					body.appendChild(row);
+				for (let i = 1; i < body.children.length; i++) { // first is dummy to perform copy -> skip
+					initRowElements(body.children[i]);
 				}
 
-				updateFieldNames(body);
 				updateNoRecordsMessage(body);
 			}
 
@@ -65,7 +60,6 @@
 					clearAllSelections();
 				}
 				else if (e.key == 'Insert' || e.key == '+') {
-					clearAllSelections();
 					let body = getTargetBody();
 					if (body && body.getAttribute('add') === 'true')
 						addNew(body);
@@ -85,16 +79,26 @@
 						updateNoRecordsMessage(body);
 					}
 				}
-				else if (e.key == 'c') {
-					if (e.ctrlKey && !cDown && !hasSomethingSelected()) {
+				else if (e.key == 'c' || e.key == 'C') {
+					if (e.ctrlKey && !cDown && !hasSomethingElseSelected()) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('copy') === 'true')
 							putDataToClipboard(body);
 					}
 					cDown = true;
 				}
-				else if (e.key == 'x') {
-					if (e.ctrlKey && !xDown && !hasSomethingSelected()) {
+				else if (e.key == 'a' || e.key == 'A') {
+					if (e.ctrlKey && !aDown && !hasSomethingElseSelected()) {
+						let body = getTargetBody();
+						if (body) {
+							selectAll(body);
+							e.preventDefault();
+						}
+					}
+					aDown = true;
+				}
+				else if (e.key == 'x' || e.key == 'X') {
+					if (e.ctrlKey && !xDown && !hasSomethingElseSelected()) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('delete') === 'true') {
 
@@ -113,7 +117,7 @@
 						}
 					}
 				}
-				else if (e.key == 'v') {
+				else if (e.key == 'v' || e.key == 'V') {
 					if (e.ctrlKey && !vDown) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('paste') === 'true') {
@@ -147,8 +151,8 @@
 
 												e = row;
 												for (let node of newNodes) {
-													handleSelect2Elements(node);
 													e.after(node);
+													handleSelect2Elements(node);
 													e = node;
 												}
 												updateFieldNames(body);
@@ -170,9 +174,10 @@
 
 			document.addEventListener('keyup', e => {
 
-				if (e.key == 'c') cDown = false;
-				if (e.key == 'v') vDown = false;
-				if (e.key == 'x') xDown = false;
+				if (e.key == 'c' || e.key == 'C') cDown = false;
+				if (e.key == 'v' || e.key == 'V') vDown = false;
+				if (e.key == 'x' || e.key == 'X') xDown = false;
+				if (e.key == 'a' || e.key == 'A') aDown = false;
 				if (e.key == 'Control') ctrlDown = false;
 
 				if (e.key == 'Shift') {
@@ -237,7 +242,8 @@
 			}, true);
 		});
 
-		function hasSomethingSelected() {
+
+		function hasSomethingElseSelected() {
 			return document.getSelection().toString().trim().length > 0;
 		}
 
@@ -264,15 +270,26 @@
 			for (let elem of body.children) {
 				if (!elem.classList.contains('d-none') && !elem.getElementsByClassName('alert-info')[0]) {
 
-					for (let select of elem.getElementsByTagName('select')) {
-						updateFieldName(select, idx);
-					}
-
-					for (let input of elem.getElementsByTagName('input')) {
-						updateFieldName(input, idx);
-					}
+					updateRowFieldNames(elem, idx);
 					idx++;
 				}
+			}
+		}
+
+		function updateRowFieldNames(row, idx) {
+
+			if (!row) return;
+
+			if (!row.classList.contains('d-none') && !row.getElementsByClassName('alert-info')[0]) {
+
+				for (let select of row.getElementsByTagName('select')) {
+					updateFieldName(select, idx);
+				}
+
+				for (let input of row.getElementsByTagName('input')) {
+					updateFieldName(input, idx);
+				}
+				idx++;
 			}
 		}
 
@@ -545,6 +562,12 @@
 				row.classList.remove('row-selected');
 		}
 
+		function selectAll(tbody) {
+
+			for (let i = 1; i < tbody.children.length; i++) // element 0 is dummy!!!
+				mayAddClass(tbody.children[i], 'row-selected');
+		}
+
 		function clearAllSelections() {
 			let bodies = document.getElementsByTagName('TBODY');
 
@@ -592,11 +615,23 @@
 
 		function addNew(body) {
 
-			clearAllSelections();
 			let node = performClone(body.children[0]);
 
 			if (node) {
-				body.appendChild(node);
+
+				const selectedRows = body.getElementsByClassName('row-selected');
+				const row = selectedRows && selectedRows.length > 0 ? selectedRows[selectedRows.length - 1] : null;
+
+				clearAllSelections();
+
+				if (!row)
+					body.appendChild(node);
+				else
+					row.after(node);
+
+				node.classList.add('row-selected');
+
+				handleSelect2Elements(node);
 				updateFieldNames(body);
 				updateNoRecordsMessage(body);
 			}
@@ -605,6 +640,7 @@
 		function performClone(row) {
 
 			let node = row.cloneNode(true);
+
 			node.classList.remove("d-none");
 			resetDisabled(node);
 
@@ -613,14 +649,58 @@
 
 			addDeleteButtonEvents(node);
 			addCheckBoxEvents(node);
-			handleSelect2Elements(node);
 
 			return node;
 		}
 
+		function initRowElements(row) {
+			row.classList.remove("d-none");
+			resetDisabled(row);
+
+			addRowEvents(row);
+			replaceIds(row);
+
+			addDeleteButtonEvents(row);
+			addCheckBoxEvents(row);
+			handleSelect2Elements(row);
+		}
+
 		function handleSelect2Elements(node) {
+
+			let i = 0;
+
 			for (let n of node.getElementsByTagName('select')) {
-				$(n).select2();
+
+				const srcSelect = getParentTableBody(node).children[0].getElementsByTagName('select')[i];
+
+				$(n).select2({
+					ajax: {
+						transport: function (params, onSuccessHandler) {
+							const options = srcSelect.getElementsByTagName('option');
+							const resultSet = [];
+
+							if (params.data?.term) {
+								const searchText = params.data.term.toUpperCase();
+
+
+								for (const option of options) {
+
+									if (option.text?.toUpperCase()?.includes(searchText))
+										resultSet[resultSet.length] = { id: option.value, text: option.text };
+								}
+
+								onSuccessHandler({ results: resultSet });
+							}
+							else {
+								for (const option of options)
+									resultSet[resultSet.length] = { id: option.value, text: option.text };
+
+								onSuccessHandler({ results: resultSet });
+							}
+						},
+					}
+				});
+				i++;
 			}
 
 			let select2Containers = node.getElementsByClassName('select2');
@@ -720,6 +800,14 @@
 
 			let it = elem;
 			while (it && it.tagName !== 'TR') {
+				it = it.parentElement;
+			}
+			return it;
+		}
+
+		function getParentTableBody(elem) {
+			let it = elem;
+			while (it && it.tagName !== 'TBODY') {
 				it = it.parentElement;
 			}
 			return it;

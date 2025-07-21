@@ -8,6 +8,7 @@
 	let shiftAnchor = null;
 	let cDown = false;
 	let ctrlDown = false;
+	let aDown = false;
 
 	let grids = getGrids();
 
@@ -41,7 +42,8 @@
 
 			document.addEventListener('keyup', e => {
 
-				if (e.key == 'c') cDown = false;
+				if (e.key == 'c' || e.key == 'C') cDown = false;
+				if (e.key == 'a' || e.key == 'A') aDown = false;
 				if (e.key == 'Control') ctrlDown = false;
 
 				if (e.key == 'Shift') {
@@ -70,14 +72,27 @@
 				if (e.key == 'Escape') {
 					clearAllSelections();
 				}
-				else if (e.key == 'c') {
+				else if (e.key == 'c' || e.key == 'C') {
 					if (e.ctrlKey && !cDown && !hasSomethingSelected()) {
 						let body = getTargetBody();
 
-						if(body)
+						if (body)
 							putDataToClipboard(body);
 					}
 					cDown = true;
+				}
+				else if (e.key == 'a' || e.key == 'A') {
+					if (e.ctrlKey && !aDown && !hasSomethingSelected()) {
+						let body = getTargetBody();
+
+						if (body) {
+							for (let row of body.children) {
+								if (!row.classList.contains('row-selected'))
+									row.classList.add('row-selected');
+							}
+							e.preventDefault();
+						}
+					}
 				}
 			});
 

@@ -1,6 +1,8 @@
 ﻿@addTagHelper *, WebVella.Erp.Plugins.Core
 @addTagHelper *, WebVella.Erp.Web
 @addTagHelper *, WebVella.TagHelpers
+@using Newtonsoft.Json.Linq
+@using System.Text.Json
 @using WebVella.Erp.Web.TagHelpers
 @using WebVella.Erp.Web.Utils;
 @using WebVella.Erp.Web.Components;
@@ -52,9 +54,9 @@
             var style = $"width:{actionButtonWidth};";
 
             <wv-button icon-class="fa fa-plus go-green"
-                       text="Add"
-                       class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
-                       style=@style>
+            text="Add"
+            class="float-right btn-sm mb-2 mr-2 editable-grid-add-entry-button"
+            style=@style>
             </wv-button>            
         }
         <table class="@tableClass" id="@tableId">
@@ -78,9 +80,9 @@
                                 var style = $"width:{actionButtonWidth};";
 
                                 <wv-button icon-class="fa fa-plus go-green"
-                                           text="Add"
-                                           class="float-right btn-sm mb-2 editable-grid-add-entry-button"
-                                           style=@style>
+                                text="Add"
+                                class="float-right btn-sm mb-2 editable-grid-add-entry-button"
+                                style=@style>
                                 </wv-button>
                             }
                         </th>
@@ -88,36 +90,38 @@
                 </thead>
             }
             <tbody
-                compatibility="@options.Compatibility" 
-                copy="@options.AllowCopy.ToString().ToLower()" 
-                paste="@options.AllowPaste.ToString().ToLower()" 
-                delete="@options.AllowDelete.ToString().ToLower()" 
-                add="@options.AllowAdd.ToString().ToLower()">
+            compatibility="@options.Compatibility" 
+            copy="@options.AllowCopy.ToString().ToLower()" 
+            paste="@options.AllowPaste.ToString().ToLower()" 
+            delete="@options.AllowDelete.ToString().ToLower()" 
+            add="@options.AllowAdd.ToString().ToLower()">
                 @{
+
+                    var cachedSelectOptions = new Dictionary<string, Dictionary<string, SelectOption>>();
 
                     await CreateRow(new EntityRecord());
 
                     for(var i = 0; i < records.Count; i++)
                         await CreateRow(records[i], i);
-                    
 
-                async Task CreateRow(EntityRecord record, int idx = -1)
-                {
-                    var rowClass = idx < 0 ? "d-none" : string.Empty;
-                    
-                    <tr class="@rowClass">
-                        @for (var i = 1; i <= options.VisibleColumns; i++)
-                        {
-                            var optType = options.GetType();
-                            var containerId = optType.GetProperty($"Container{i}Id").GetValue(options, null)?.ToString() ?? string.Empty;
-                            var columnNoWrap = (bool)(optType.GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
-                            var columnClass = optType.GetProperty($"Container{i}Class").GetValue(options, null)?.ToString() ?? string.Empty;
-                            var verticalAlign = (WvVerticalAlignmentType)(optType.GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
-                            var horizontalAlign = (WvHorizontalAlignmentType)(optType.GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
-                            var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
-                            var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
 
-                            <wv-td width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" width="@columnWidth" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
+                    async Task CreateRow(EntityRecord record, int idx = -1)
+                    {
+                        var rowClass = idx < 0 ? "d-none" : string.Empty;
+
+                        <tr class="@rowClass">
+                            @for (var i = 1; i <= options.VisibleColumns; i++)
+                            {
+                                var optType = options.GetType();
+                                var containerId = optType.GetProperty($"Container{i}Id").GetValue(options, null)?.ToString() ?? string.Empty;
+                                var columnNoWrap = (bool)(optType.GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
+                                var columnClass = optType.GetProperty($"Container{i}Class").GetValue(options, null)?.ToString() ?? string.Empty;
+                                var verticalAlign = (WvVerticalAlignmentType)(optType.GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
+                                var horizontalAlign = (WvHorizontalAlignmentType)(optType.GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
+                                var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
+                                var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
+
+                                <wv-td width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" width="@columnWidth" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
                                     @{
                                         foreach (var childNode in columnChildNodes)
                                         {
@@ -131,12 +135,61 @@
                                             {
                                                 var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
 
-                                                if (idx >= 0)
-                                                    childOptions["name"] = $"{childOptions["name"]}[{idx}]";
-
                                                 var pcContext = new PageComponentContext(childNode, componentContext.DataModel, ComponentMode.Display, childOptions, componentContext.Items);
                                                 pcContext.DataModel.SetRowRecord(record);
 
+                                                if (idx >= 0)
+                                                {
+                                                    childOptions["name"] = $"{childOptions["name"]}[{idx}]";
+
+                                                    #region Performance increase by caching datasources of select options and reduce to selected element
+                                                    if(nodeComponentName == "PcFieldSelect")
+                                                    {
+                                                        var selectOptions = PageUtils.ConvertStringToJObject(childOptions["options"]?.ToString());
+
+                                                        if (selectOptions["type"]?.ToString() == "0")
+                                                        {
+                                                            var dataSourceName = $"{selectOptions["string"]}";
+
+                                                            if (!string.IsNullOrEmpty(dataSourceName))
+                                                            {
+                                                                if(!dataSourceName.Contains("RowRecord"))
+                                                                {
+                                                                    var valueOptions = PageUtils.ConvertStringToJObject(childOptions["value"]?.ToString());
+
+                                                                    if (valueOptions["type"]?.ToString() == "0")
+                                                                    {
+                                                                        var value = componentContext.DataModel.GetProperty($"{valueOptions["string"]}");
+
+                                                                        if (value == null)
+                                                                        {
+                                                                            selectOptions["string"] = string.Empty;
+                                                                            childOptions["options"] = selectOptions;
+                                                                        }
+
+                                                                        else
+                                                                        {
+                                                                            Dictionary<string, SelectOption> lookup = null;
+
+                                                                            if (!cachedSelectOptions.TryGetValue(dataSourceName, out lookup))
+                                                                            {
+                                                                                if (componentContext.DataModel.GetProperty(dataSourceName) is List<SelectOption> options)
+                                                                                {
+                                                                                    lookup = options.ToDictionary(o => o.Value, o => o);
+                                                                                    cachedSelectOptions.Add(dataSourceName, lookup);
+                                                                                }
+                                                                            }
+
+                                                                            if (lookup != null && lookup.TryGetValue($"{value}", out var selectedOption))
+                                                                                childOptions["options"] = JsonSerializer.Serialize<SelectOption[]>(new SelectOption[] { selectedOption });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    #endregion
+                                                }
 
                                                 @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
                                             }
