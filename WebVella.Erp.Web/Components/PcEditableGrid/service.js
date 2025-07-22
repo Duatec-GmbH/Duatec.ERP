@@ -52,6 +52,7 @@ let usedIds = new Set();
 				const selectOptionSet = [];
 				let i = 0;
 				for (let select of body.children[0].getElementsByTagName('select')) {
+
 					selectOptionSet[i] = { textLookup: new Map(), data: [] };
 
 					for (let option of select.getElementsByTagName('option')) {
@@ -60,6 +61,15 @@ let usedIds = new Set();
 						selectOptionSet[i].textLookup.set(option.value, option.text);
 					}
 					select.innerHTML = '';
+
+					let container = select.parentElement.parentElement;
+
+					// delete scripts to reduce node sice
+					for (let j = container.children.length - 1; j >= 0; j--) {
+						if (container.children[j].tagName === 'SCRIPT')
+							container.removeChild(container.children[j]);
+					}
+
 					i++;
 				}
 
@@ -77,7 +87,7 @@ let usedIds = new Set();
 				addAddCallback(addBtn);
 			}
 
-			document.addEventListener('keydown', e => {
+			document.addEventListener('keydown', async e => {
 
 				if (e.key == 'Control') ctrlDown = true;
 
@@ -114,7 +124,7 @@ let usedIds = new Set();
 					if (e.ctrlKey && !cDown && !hasSomethingElseSelected()) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('copy') === 'true')
-							putDataToClipboard(body);
+							await putDataToClipboard(body);
 					}
 					cDown = true;
 				}
@@ -133,18 +143,17 @@ let usedIds = new Set();
 						let body = getTargetBody();
 						if (body && body.getAttribute('delete') === 'true') {
 
-							putDataToClipboard(body)?.then(() => {
+							await putDataToClipboard(body);
 
-								for (let i = body.children.length - 1; i > 0; i--) {
+							for (let i = body.children.length - 1; i > 0; i--) {
 
-									let row = body.children[i];
-									if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
-										body.removeChild(row);
-								}
+								let row = body.children[i];
+								if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+									body.removeChild(row);
+							}
 
-								updateFieldNames(body);
-								updateNoRecordsMessage(body);
-							});
+							updateFieldNames(body);
+							updateNoRecordsMessage(body);
 						}
 					}
 				}
@@ -160,77 +169,78 @@ let usedIds = new Set();
 								let tableId = getParentTable(body).id;
 								let selectOptionSet = editableGridSelectSources.get(tableId);
 
-								navigator.clipboard.readText()
-									.then(text => {
-										try {
-											let obj = JSON.parse(text);
+								const text = await navigator.clipboard.readText();
+								try {
+									let obj = JSON.parse(text);
 
-											if (isCompatible(body, obj.compatibility)) {
+									if (isCompatible(body, obj.compatibility)) {
 
-												let newNodes = obj.data[0][1].map(_ => performClone(body.children[0]));
+										let newNodes = obj.data[0][1].map(_ => performClone(body.children[0]));
 
-												let selectCellOffsets = [];
-												let cnt = 0;
+										let n = row;
+										for (let node of newNodes) {
+											n.after(node);
+											n = node;
+										}
 
-												for (let i = 0; i < body.children[0].children.length; i++) {
+										let selectCellOffsets = [];
+										let cnt = 0;
 
-													selectCellOffsets[i] = cnt;
-													cnt += body.children[0].children[i].getElementsByTagName('select').length;
-												}
+										for (let i = 0; i < body.children[0].children.length; i++) {
 
-												for (let kp of obj.data) {
+											selectCellOffsets[i] = cnt;
+											cnt += body.children[0].children[i].getElementsByTagName('select').length;
+										}
 
-													let header = kp[0];
-													let data = kp[1];
-													let childIdx = headers.indexOf(header);
+										for (let kp of obj.data) {
 
-													if (childIdx >= 0) {
-														for (let i = 0; i < newNodes.length; i++) {
+											let header = kp[0];
+											let data = kp[1];
+											let childIdx = headers.indexOf(header);
 
-															let value = data[i];
-															let cell = newNodes[i].children[childIdx];
+											if (childIdx >= 0) {
+												for (let i = 0; i < newNodes.length; i++) {
 
-															let selects = cell.getElementsByTagName('select');
+													let value = data[i];
+													let cell = newNodes[i].children[childIdx];
 
-															for (let j = 0; j < selects.length; j++) {
+													let selects = cell.getElementsByTagName('select');
 
-																let select = selects[j];
-																let emptyOption = document.createElement('option');
-																select.appendChild(emptyOption);
+													for (let j = 0; j < selects.length; j++) {
 
-																let textLookup = selectOptionSet[selectCellOffsets[childIdx] + j].textLookup;
-																let text = textLookup.get(value);
+														let select = selects[j];
+														let emptyOption = document.createElement('option');
+														select.appendChild(emptyOption);
 
-																if (text) {
-																	let selectedOption = document.createElement('option');
-																	selectedOption.value = value;
-																	selectedOption.text = text;
-																	select.appendChild(selectedOption);
-																}
-															}
+														let textLookup = selectOptionSet[selectCellOffsets[childIdx] + j].textLookup;
+														let text = textLookup.get(value);
 
-															setValue(cell, value);
+														if (text) {
+															let selectedOption = document.createElement('option');
+															selectedOption.value = value;
+															selectedOption.text = text;
+															select.appendChild(selectedOption);
 														}
 													}
-												}
 
-												e = row;
-												for (let node of newNodes) {
-													e.after(node);
-													handleSelect2Elements(node);
-													e = node;
+													setValue(cell, value);
 												}
-												updateFieldNames(body);
-												updateNoRecordsMessage(body);
 											}
-											loader.classList.add('d-none');
 										}
-										catch (e) {
-											updateFieldNames(body);
-											updateNoRecordsMessage(body);
-											loader.classList.add('d-none');
+
+										for (let node of newNodes) {
+											handleSelect2Elements(node);
 										}
-									});
+
+										updateFieldNames(body);
+										updateNoRecordsMessage(body);
+									}
+								}
+								catch (e) {
+									updateFieldNames(body);
+									updateNoRecordsMessage(body);
+								}
+								loader.classList.add('d-none');
 							}
 						}
 					}
@@ -528,7 +538,7 @@ let usedIds = new Set();
 			selectField.getElementsByTagName('select')[0].value = value;
 		}
 
-		function putDataToClipboard(body) {
+		async function putDataToClipboard(body) {
 			let rows = body.getElementsByClassName('row-selected');
 			if (rows.length > 0) {
 				let headers = getHeaders(body);
@@ -563,10 +573,9 @@ let usedIds = new Set();
 						data: Array.from(map.entries().filter(kp => kp[1].some(v => v != null && v != undefined)))
 					};
 
-					return navigator.clipboard.writeText(JSON.stringify(obj));
+					await navigator.clipboard.writeText(JSON.stringify(obj));
 				}
 			}
-			return null;
 		}
 
 		function getHeaders(body) {
@@ -740,6 +749,19 @@ let usedIds = new Set();
 			const selectOptionSet = editableGridSelectSources.get(tableId);
 
 			for (let n of node.getElementsByTagName('select')) {
+
+				n.removeAttribute('data-select2-id');
+
+				if (n.parentElement) {
+
+					for (let j = n.parentElement.children.length - 1; j >= 0; j--) {
+
+						let elem = n.parentElement.children[0];
+						if (elem.classList.contains('select2'))
+							elem.parentElement.removeChild(elem);
+
+					}						
+				}
 
 				const data = selectOptionSet[i].data;
 

@@ -142,7 +142,8 @@
                                                 {
                                                     childOptions["name"] = $"{childOptions["name"]}[{idx}]";
 
-                                                    #region Performance increase by caching datasources of select options and reduce to selected element
+#region Performance increase by caching datasources of select options and reduce to selected element
+
                                                     if(nodeComponentName == "PcFieldSelect")
                                                     {
                                                         var selectOptions = PageUtils.ConvertStringToJObject(childOptions["options"]?.ToString());
@@ -188,7 +189,7 @@
                                                             }
                                                         }
                                                     }
-                                                    #endregion
+#endregion
                                                 }
 
                                                 @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
