@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 {
-	let usedIds = new Set();
+let usedIds = new Set();
 
 	let mouseOverRow = null;
 	let shiftAnchor = null;
@@ -19,6 +19,19 @@
 	var editableGridSelectSources;
 
 	if (editableGridsInitialized !== true) {
+
+		let loader = document.body.getElementsByClassName('loader')[0];
+		if (!loader) {
+			loader = document.createElement('div');
+			loader.classList.add('loader');
+
+			if (document.body.children.length === 0)
+				document.body.appendChild(loader);
+			else
+				document.body.children[0].prepend(loader);
+		}
+
+
 		editableGridsInitialized = true;
 		editableGridSelectSources = new Map();
 
@@ -139,15 +152,16 @@
 					if (e.ctrlKey && !vDown) {
 						let body = getTargetBody();
 						if (body && body.getAttribute('paste') === 'true') {
+
 							let row = getTargetRow(body);
 							if (row) {
+								loader.classList.remove('d-none');
 								let headers = getHeaders(body);
 								let tableId = getParentTable(body).id;
 								let selectOptionSet = editableGridSelectSources.get(tableId);
 
 								navigator.clipboard.readText()
 									.then(text => {
-
 										try {
 											let obj = JSON.parse(text);
 
@@ -209,11 +223,12 @@
 												updateFieldNames(body);
 												updateNoRecordsMessage(body);
 											}
-
+											loader.classList.add('d-none');
 										}
 										catch (e) {
 											updateFieldNames(body);
 											updateNoRecordsMessage(body);
+											loader.classList.add('d-none');
 										}
 									});
 							}
@@ -291,6 +306,8 @@
 					}
 				}
 			}, true);
+
+			loader.classList.add('d-none');
 		});
 
 
