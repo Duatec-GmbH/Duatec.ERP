@@ -16,9 +16,11 @@
 
 	// !!!!!!!! must be VAR otherwhise gets initialized for every editable grid
 	var editableGridsInitialized;
+	var editableGridSelectSources;
 
 	if (editableGridsInitialized !== true) {
 		editableGridsInitialized = true;
+		editableGridSelectSources = new Map();
 
 		document.addEventListener("DOMContentLoaded", () => {
 
@@ -34,7 +36,23 @@
 
 				let body = table.getElementsByTagName('TBODY')[0];
 
-				for (let i = 1; i < body.children.length; i++) { // first is dummy to perform copy -> skip
+				const selectOptionSet = [];
+				let i = 0;
+				for (let select of body.children[0].getElementsByTagName('select')) {
+					selectOptionSet[i] = { textLookup: new Map(), data: [] };
+
+					for (let option of select.getElementsByTagName('option')) {
+
+						selectOptionSet[i].data[selectOptionSet[i].data.length] = { id: option.value, text: option.text };
+						selectOptionSet[i].textLookup.set(option.value, option.text);
+					}
+					select.innerHTML = '';
+					i++;
+				}
+
+				editableGridSelectSources.set(table.id, selectOptionSet);
+
+				for (let i = 1; i < body.children.length; i++) { // first is dummy -> skip
 					initRowElements(body.children[i]);
 				}
 
@@ -124,6 +142,8 @@
 							let row = getTargetRow(body);
 							if (row) {
 								let headers = getHeaders(body);
+								let tableId = getParentTable(body).id;
+								let selectOptionSet = editableGridSelectSources.get(tableId);
 
 								navigator.clipboard.readText()
 									.then(text => {
@@ -135,6 +155,15 @@
 
 												let newNodes = obj.data[0][1].map(_ => performClone(body.children[0]));
 
+												let selectCellOffsets = [];
+												let cnt = 0;
+
+												for (let i = 0; i < body.children[0].children.length; i++) {
+
+													selectCellOffsets[i] = cnt;
+													cnt += body.children[0].children[i].getElementsByTagName('select').length;
+												}
+
 												for (let kp of obj.data) {
 
 													let header = kp[0];
@@ -143,8 +172,30 @@
 
 													if (childIdx >= 0) {
 														for (let i = 0; i < newNodes.length; i++) {
+
 															let value = data[i];
-															setValue(newNodes[i].children[childIdx], value);
+															let cell = newNodes[i].children[childIdx];
+
+															let selects = cell.getElementsByTagName('select');
+
+															for (let j = 0; j < selects.length; j++) {
+
+																let select = selects[j];
+																let emptyOption = document.createElement('option');
+																select.appendChild(emptyOption);
+
+																let textLookup = selectOptionSet[selectCellOffsets[childIdx] + j].textLookup;
+																let text = textLookup.get(value);
+
+																if (text) {
+																	let selectedOption = document.createElement('option');
+																	selectedOption.value = value;
+																	selectedOption.text = text;
+																	select.appendChild(selectedOption);
+																}
+															}
+
+															setValue(cell, value);
 														}
 													}
 												}
@@ -668,34 +719,32 @@
 		function handleSelect2Elements(node) {
 
 			let i = 0;
+			const tableId = getParentTable(node).id;
+			const selectOptionSet = editableGridSelectSources.get(tableId);
 
 			for (let n of node.getElementsByTagName('select')) {
 
-				const srcSelect = getParentTableBody(node).children[0].getElementsByTagName('select')[i];
+				const data = selectOptionSet[i].data;
 
 				$(n).select2({
 					ajax: {
 						transport: function (params, onSuccessHandler) {
-							const options = srcSelect.getElementsByTagName('option');
-							const resultSet = [];
 
 							if (params.data?.term) {
+
+								const filteredData = [];
 								const searchText = params.data.term.toUpperCase();
 
+								for (const elem of data) {
 
-								for (const option of options) {
-
-									if (option.text?.toUpperCase()?.includes(searchText))
-										resultSet[resultSet.length] = { id: option.value, text: option.text };
+									if (!elem.text || elem.text.toUpperCase().includes(searchText))
+										filteredData[filteredData.length] = elem;
 								}
 
-								onSuccessHandler({ results: resultSet });
+								onSuccessHandler({ results: filteredData });
 							}
 							else {
-								for (const option of options)
-									resultSet[resultSet.length] = { id: option.value, text: option.text };
-
-								onSuccessHandler({ results: resultSet });
+								onSuccessHandler({ results: data });
 							}
 						},
 					}
@@ -797,17 +846,16 @@
 		}
 
 		function getParentTableRow(elem) {
-
-			let it = elem;
-			while (it && it.tagName !== 'TR') {
-				it = it.parentElement;
-			}
-			return it;
+			return getParentByTagName(elem, 'TR');
 		}
 
-		function getParentTableBody(elem) {
+		function getParentTable(elem) {
+			return getParentByTagName(elem, 'TABLE');
+		}
+
+		function getParentByTagName(elem, tagName) {
 			let it = elem;
-			while (it && it.tagName !== 'TBODY') {
+			while (it && it.tagName !== tagName) {
 				it = it.parentElement;
 			}
 			return it;
