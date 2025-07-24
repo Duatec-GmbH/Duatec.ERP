@@ -13,6 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             public const string Manufacturer = "article_manufacturer";
             public const string Type = "article_article_type";
+            public const string PreferedWarehouseLocation = "article_prefered_warehouse_location";
         }
 
         public static class Fields
@@ -26,6 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Manufacturer = "manufacturer_id";
             public const string Image = "preview";
             public const string IsBlocked = "is_blocked";
+            public const string PreferedWarehouseLocation = "prefered_warehouse_location_id";
         }
 
         public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
@@ -86,6 +88,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.IsBlocked] = value;
         }
 
+        public Guid? PreferedWarehouseLocation
+        {
+            get => Get<Guid?>(Fields.PreferedWarehouseLocation);
+            set => Properties[Fields.PreferedWarehouseLocation] = value;
+        }
+
         public ArticleType GetArticleType()
             => GetSingleByRelation<ArticleType>(Relations.Type)!;
 
@@ -97,5 +105,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public void SetManufacturer(Company? manufacturer)
             => SetRelationValue(Relations.Manufacturer, manufacturer);
+
+        public WarehouseLocation? GetPreferedWarehouseLocation()
+            => GetSingleByRelation<WarehouseLocation>(Relations.PreferedWarehouseLocation);
+
+        public void SetPreferedWarehouseLocation(WarehouseLocation? location)
+            => SetRelationValue(Relations.PreferedWarehouseLocation, location);
     }
 }

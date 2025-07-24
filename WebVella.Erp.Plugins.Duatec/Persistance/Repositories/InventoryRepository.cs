@@ -245,12 +245,20 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
         }
 
+
+
         private InventoryBooking? FindBooking(Guid id, string select = "*")
             => TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Find(RecordManager, InventoryBooking.Entity, id, select));
 
-        private List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
+        public List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
         {
             return RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ProjectId, projectId, select)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>).ToList();
+        }
+
+        public List<InventoryBooking> FindManyBookingsByArticle(Guid articleId, string select = "*")
+        {
+            return RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ArticleId, articleId, select)
                 .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>).ToList();
         }
 

@@ -142,7 +142,7 @@
                                                 {
                                                     childOptions["name"] = $"{childOptions["name"]}[{idx}]";
 
-#region Performance increase by caching datasources of select options and reduce to selected element
+                                                    #region Performance increase by caching datasources of select options and reduce to selected element
 
                                                     if(nodeComponentName == "PcFieldSelect")
                                                     {
@@ -162,27 +162,26 @@
                                                                     {
                                                                         var value = componentContext.DataModel.GetProperty($"{valueOptions["string"]}");
 
-                                                                        if (value == null)
+                                                                        Dictionary<string, SelectOption> lookup = null;
+
+                                                                        if (!cachedSelectOptions.TryGetValue(dataSourceName, out lookup))
                                                                         {
-                                                                            selectOptions["string"] = string.Empty;
-                                                                            childOptions["options"] = selectOptions;
+                                                                            if (componentContext.DataModel.GetProperty(dataSourceName) is List<SelectOption> options)
+                                                                            {
+                                                                                lookup = options.ToDictionary(o => o.Value, o => o);
+                                                                                cachedSelectOptions.Add(dataSourceName, lookup);
+                                                                            }
                                                                         }
 
-                                                                        else
+                                                                        if (lookup != null)
                                                                         {
-                                                                            Dictionary<string, SelectOption> lookup = null;
-
-                                                                            if (!cachedSelectOptions.TryGetValue(dataSourceName, out lookup))
-                                                                            {
-                                                                                if (componentContext.DataModel.GetProperty(dataSourceName) is List<SelectOption> options)
-                                                                                {
-                                                                                    lookup = options.ToDictionary(o => o.Value, o => o);
-                                                                                    cachedSelectOptions.Add(dataSourceName, lookup);
-                                                                                }
-                                                                            }
-
-                                                                            if (lookup != null && lookup.TryGetValue($"{value}", out var selectedOption))
+                                                                            if (lookup.TryGetValue($"{value}", out var selectedOption))
                                                                                 childOptions["options"] = JsonSerializer.Serialize<SelectOption[]>(new SelectOption[] { selectedOption });
+                                                                            else
+                                                                            {
+                                                                                selectOptions["string"] = string.Empty;
+                                                                                childOptions["options"] = selectOptions;
+                                                                            }
                                                                         }
                                                                     }
                                                                 }

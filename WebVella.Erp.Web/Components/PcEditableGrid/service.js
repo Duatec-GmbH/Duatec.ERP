@@ -20,6 +20,12 @@ let usedIds = new Set();
 
 	if (editableGridsInitialized !== true) {
 
+		var EditableGrid = {
+			updateFieldNames: function (body) { updateFieldNames(body) },
+			handleSelect2Elements: function (node) { handleSelect2Elements(node) },
+			performClone: function (row) { return performClone(row); },
+		};
+
 		let loader = document.body.getElementsByClassName('loader')[0];
 		if (!loader) {
 			loader = document.createElement('div');
@@ -76,6 +82,17 @@ let usedIds = new Set();
 				editableGridSelectSources.set(table.id, selectOptionSet);
 
 				for (let i = 1; i < body.children.length; i++) { // first is dummy -> skip
+
+					for (let select of body.children[i].getElementsByTagName('select')) {
+						let container = select.parentElement.parentElement;
+
+						// delete scripts to reduce node sice
+						for (let j = container.children.length - 1; j >= 0; j--) {
+							if (container.children[j].tagName === 'SCRIPT')
+								container.removeChild(container.children[j]);
+						}
+					}
+
 					initRowElements(body.children[i]);
 				}
 
@@ -990,8 +1007,6 @@ let usedIds = new Set();
 			});
 		}
 	}
-
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -12,6 +12,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string OrderNumber = "orderNumber";
             public const string ProjectNumber = "projectNumber";
             public const string ProjectName = "projectName";
+            public const string Project = "project";
             public const string Page = "page";
             public const string PageSize = "pageSize";
         }
@@ -26,6 +27,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.OrderNumber, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.ProjectNumber, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.ProjectName, Type = "text", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.Project, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });            
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
             
@@ -104,15 +106,32 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orderNumber = arguments[Arguments.OrderNumber] as string;
             var projectNumber = arguments[Arguments.ProjectNumber] as string;
             var projectName = arguments[Arguments.ProjectName] as string;
+            var project = arguments[Arguments.Project] as string;
+
+            const StringComparison comparison = StringComparison.OrdinalIgnoreCase;
 
             if (!string.IsNullOrWhiteSpace(orderNumber))
-                orders = orders.Where(o => o.Number.Contains(orderNumber, StringComparison.OrdinalIgnoreCase));
+                orders = orders.Where(o => o.Number.Contains(orderNumber, comparison));
 
             if (!string.IsNullOrWhiteSpace(projectNumber))
-                orders = orders.Where(o => o.GetProject()?.Number.Contains(projectNumber, StringComparison.OrdinalIgnoreCase) is true);
+                orders = orders.Where(o => o.GetProject()?.Number.Contains(projectNumber, comparison) is true);
 
             if (!string.IsNullOrWhiteSpace(projectName))
-                orders = orders.Where(o => o.GetProject()?.Name.Contains(projectName, StringComparison.OrdinalIgnoreCase) is true);
+                orders = orders.Where(o => o.GetProject()?.Name.Contains(projectName, comparison) is true);
+
+            if(!string.IsNullOrWhiteSpace(project))
+            {
+                orders = orders.Where(o =>
+                {
+                    var p = o.GetProject();
+                    if (p != null)
+                    {
+                        return p.Name.Contains(project, comparison)
+                            || p.Number.Contains(project, comparison);
+                    }
+                    return false;
+                });
+            }
 
             return orders.OrderByDescending(o => o.GetProject()?.Number)
                 .ThenBy(o => o.Number);

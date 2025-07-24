@@ -162,16 +162,35 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
                 inventoryEntry.SetArticle(articleLookup[entry.Article]);
                 inventoryEntry.WarehouseLocation
-                    = SmartWarehouseLocationSelection(inventoryRepo, entry.Article, projectId);
+                    = SmartWarehouseLocationSelection(inventoryRepo, entry.GetArticle(), projectId);
 
                 yield return inventoryEntry;
             }
         }
 
-        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Guid articleId, Guid? projectid)
+        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Article article, Guid? projectid)
         {
-            return repo.FindManyByArticleAndProject(articleId, projectid)
-                .FirstOrDefault()?.WarehouseLocation ?? Guid.Empty;
+            if (article.PreferedWarehouseLocation.HasValue)
+                return article.PreferedWarehouseLocation.Value;
+
+            var location = repo.FindManyByArticleAndProject(article.Id!.Value, projectid)
+                .FirstOrDefault()?.WarehouseLocation;
+
+            if (!location.HasValue)
+            {
+                location = repo.FindManyByArticle(article.Id!.Value)
+                    .FirstOrDefault()?.WarehouseLocation;
+
+                if (!location.HasValue)
+                {
+                    location = repo.FindManyBookingsByArticle(article.Id!.Value)
+                        .Where(b => b.Kind == InventoryBookingKind.Take)
+                        .OrderByDescending(b => b.Timestamp)
+                        .FirstOrDefault()?.WarehouseLocationSourceId;
+                }
+            }
+
+            return location ?? Guid.Empty;
         }
 
         private static IEnumerable<InventoryEntry> BuildInventoryEntries(UpdateInfo[] updateInfos)
