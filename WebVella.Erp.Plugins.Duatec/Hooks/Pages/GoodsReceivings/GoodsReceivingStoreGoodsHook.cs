@@ -53,7 +53,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
             record = goodsReceivingRepo.Find(pageModel.RecordId!.Value, $"*, ${GoodsReceiving.Relations.Order}.*")!;
 
-            var projectId = record.GetOrder().Project;
+            var order = record.GetOrder();
+            var projectId = order.Project;
+            if (order.GetProject()?.ReserveStoredArticles is false)
+                projectId = null;
+
             var userId = pageModel.CurrentUser.Id;
 
             var defaultEntries = GetDefaultEntries(record, recMan)
@@ -148,7 +152,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 $"${Article.Relations.Manufacturer}.name";
 
             var articleLookup = articleRepo.FindMany(articleSelect, articleIds);
-            var projectId = record.GetOrder().Project;
+
+            var order = record.GetOrder();
+            var projectId = order.Project;
+            if (order.GetProject()?.ReserveStoredArticles is false)
+                projectId = null;
 
             foreach (var entry in unstoredEntries)
             {

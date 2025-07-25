@@ -49,10 +49,22 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Amount] = value;
         }
 
+        public Article GetArticle()
+            => GetSingleByRelation<Article>(Relations.Article)!;
+
         public void SetArticle(Article? article)
             => SetRelationValue(Relations.Article, article);
 
-        public Article GetArticle()
-            => GetSingleByRelation<Article>(Relations.Article)!;
+        public WarehouseLocation GetWarehouseLocation()
+            => GetSingleByRelation<WarehouseLocation>(Relations.Location)!;
+
+        public void SetWarehouseLocation(WarehouseLocation location)
+            => SetRelationValue(Relations.Location, location);
+
+        public Project? GetProject()
+            => GetSingleByRelation<Project>(Relations.Project);
+
+        public void SetProject(Project project)
+            => SetRelationValue(Relations.Project, project);
     }
 }

@@ -104,6 +104,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 ManufacturerId = manufacturerId,
                 TypeId = typeId,
                 Image = article.PictureUrl,
+                PreferedWarehouseLocation = null,
             };
         }
 

@@ -14,6 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Name = "name";
             public const string RequiresPartList = "requires_part_list";
             public const string IsInventoryProject = "inventory_project";
+            public const string ReserveStoredArticles = "reserve_stored_articles";
         }
 
         public override string EntityName => Entity;
@@ -40,6 +41,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get(Fields.IsInventoryProject, false);
             set => Properties[Fields.IsInventoryProject] = value;
+        }
+
+        public bool ReserveStoredArticles
+        {
+            get => Get<bool>(Fields.ReserveStoredArticles);
+            set => Properties[Fields.ReserveStoredArticles] = value;
+
         }
     }
 }

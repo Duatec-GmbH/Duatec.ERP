@@ -14,6 +14,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Designation = "designation";
         }
 
+        public static class Relations
+        {
+            public const string Warehouse = "warehouse";
+        }
+
         public override string EntityName => Entity;
 
         public Guid Warehouse
@@ -27,5 +32,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             get => Get(Fields.Designation, string.Empty);
             set => Properties[Fields.Designation] = value;
         }
+
+        public Warehouse GetWarehouse()
+            => GetSingleByRelation<Warehouse>(Relations.Warehouse)!;
+
+        public void SetWarehouse(Warehouse warehouse)
+            => SetRelationValue(Relations.Warehouse, warehouse);
     }
 }
