@@ -122,7 +122,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         private static void SetUpErrorPage(Order record, BaseErpPageModel pageModel, IEnumerable<OrderEntry> demandedEntries, UpdateInfo[] updateInfos)
         {
             foreach (var entry in demandedEntries.Where(e => Array.Exists(updateInfos, t => t.ArticleId == e.Article)))
-                entry.Amount = Array.Find(updateInfos, t => t.ArticleId == entry.Article).Amount;
+                entry["initial"] = Array.Find(updateInfos, t => t.ArticleId == entry.Article).Amount;
 
             record.SetEntries(demandedEntries.OrderBy(e => e.GetArticle().PartNumber));
             pageModel.DataModel.SetRecord(record);

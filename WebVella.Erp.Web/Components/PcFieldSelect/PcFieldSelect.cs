@@ -103,7 +103,8 @@ namespace WebVella.Erp.Web.Components
 				var options = PcFieldSelectOptions.CopyFromBaseOptions(baseOptions);
 				if (context.Options != null)
 				{
-					options = JsonConvert.DeserializeObject<PcFieldSelectOptions>(context.Options.ToString());
+					var optionsVal = context.Options.ToString();
+					options = JsonConvert.DeserializeObject<PcFieldSelectOptions>(optionsVal);
 					if (context.Mode != ComponentMode.Options)
 					{
 						if (String.IsNullOrWhiteSpace(options.LabelHelpText))

@@ -458,6 +458,8 @@ namespace WebVella.Erp.Web.Models
 				switch (variable.Type)
 				{
 					case DataSourceVariableType.DATASOURCE:
+						if (string.IsNullOrWhiteSpace(variable.String))
+							return null;
 						result = GetProperty(variable.String);
 						break;
 					case DataSourceVariableType.CODE:
