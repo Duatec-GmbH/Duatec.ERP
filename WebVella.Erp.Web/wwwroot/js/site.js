@@ -30,10 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function stickyErpList(pageHead, erpList) {
 
 	let listHead = erpList.getElementsByTagName('THEAD')[0];
-	let stickyPos = pageHead.getBoundingClientRect().bottom;
 
-	listHead.style.top = `${stickyPos}px`;
-	listHead.style.position = "sticky";
+	if (listHead) {
+		let stickyPos = pageHead.getBoundingClientRect().bottom;
+
+		listHead.style.top = `${stickyPos}px`;
+		listHead.style.position = "sticky";
+	}
 }
 
 /*******************************************************************************
