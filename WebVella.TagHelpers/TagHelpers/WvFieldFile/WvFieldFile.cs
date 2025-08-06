@@ -29,6 +29,9 @@ namespace WebVella.TagHelpers.TagHelpers
 		[HtmlAttributeName("clipboard-support")]
 		public bool ClipboardSupport { get; set; } = false;
 
+		[HtmlAttributeName("scan-support")]
+		public bool ScanSupport { get; set; } = false;
+
 		public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
 		{
 			output.TagMode = TagMode.StartTagAndEndTag;
@@ -125,6 +128,18 @@ namespace WebVella.TagHelpers.TagHelpers
 						appendPasteLink.InnerHtml.AppendHtml(appendDeleteLinkIcon);
 						appendEl.InnerHtml.AppendHtml(appendPasteLink);
 					}
+					if (ScanSupport)
+					{
+						var btn = new TagBuilder("button");
+						btn.Attributes.Add("type", "button");
+						btn.Attributes.Add("id", $"scan-{FieldId}");
+						btn.AddCssClass("btn btn-white");
+                        var icon = new TagBuilder("span");
+                        icon.AddCssClass("fa fa-fw fa-trash go-red");
+                        btn.InnerHtml.AppendHtml(icon);
+                        appendEl.InnerHtml.AppendHtml(btn);
+                    }
+
 					var selectFileLink = new TagBuilder("button");
 					selectFileLink.Attributes.Add("type", $"button");
 					selectFileLink.AddCssClass("btn btn-white");
