@@ -175,6 +175,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 deviceTags: [],
                 type: dbArticle?.TypeId ?? Article.DefaultType,
                 amount: article.Amount,
+                denomination: article.Denomination,
                 importState: state,
                 availableActions: ArticleImportAction.AvailableActions(state),
                 action: ArticleImportAction.Default(state));

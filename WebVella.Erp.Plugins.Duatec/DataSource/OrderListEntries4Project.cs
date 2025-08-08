@@ -139,22 +139,22 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
             var isInventoryProject = new ProjectRepository(recMan).Find(projectId)?.IsInventoryProject ?? false;
 
-            var projectOrderEntries = orderRepository.FindManyEntriesByProject(projectId);
-            var orderEntries = orderRepository.FindManyByProject(projectId)
+            var orderEntries = orderRepository.FindManyEntriesByProject(projectId);
+            var orderLookup = orderRepository.FindManyByProject(projectId)
                 .ToDictionary(r => r.Id!.Value, r => r);
 
-            var orderedAmountLookup = projectOrderEntries
-                .GroupBy(r => r.Article)
+            var orderedAmountLookup = orderEntries
+                .GroupBy(r => (r.Article, r.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var receivedAmountLookup = goodsReceivingRepo.FindManyEntriesByProject(projectId)
-                .GroupBy(r => r.Article)
+                .GroupBy(r => (r.Article, r.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
-            var ordersLookup = projectOrderEntries
-                .GroupBy(r => r.Article)
+            var ordersLookup = orderEntries
+                .GroupBy(r => (r.Article, r.Denomination))
                 .ToDictionary(g => g.Key, g => g
-                    .Select(r => orderEntries.TryGetValue(r.Order, out var v) ? v : null)
+                    .Select(r => orderLookup.TryGetValue(r.Order, out var v) ? v : null)
                     .Where(v => v != null)
                     .ToList()!);
 
@@ -163,12 +163,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var entriesFromPartList = (!ArticleId.HasValue
                 ? new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
                 : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true))
-                .GroupBy(ple => ple.ArticleId)
+                .GroupBy(ple => (ple.ArticleId, ple.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 
-            var articleIds = projectOrderEntries.Select(oe => oe.Article)
-                .Concat(inventoryAmountLookup.Keys)
-                .Concat(entriesFromPartList.Keys)
+            var articleIds = orderEntries.Select(oe => oe.Article)
+                .Concat(inventoryAmountLookup.Keys.Select(kp => kp.ArticleId))
+                .Concat(entriesFromPartList.Keys.Select(kp => kp.ArticleId))
                 .Distinct()
                 .ToArray();
 
@@ -176,11 +176,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var entriesFromOrder = orderedAmountLookup
                 .Where(kp => !entriesFromPartList.ContainsKey(kp.Key))
-                .Select(kp => new KeyValuePair<Guid, decimal>(kp.Key, 0m));
+                .Select(kp => new KeyValuePair<(Guid ArticleId, decimal Denomination), decimal>(kp.Key, 0m));
 
             var entriesFromInventory = inventoryAmountLookup
                 .Where(kp => !orderedAmountLookup.ContainsKey(kp.Key) && !entriesFromPartList.ContainsKey(kp.Key))
-                .Select(kp => new KeyValuePair<Guid, decimal>(kp.Key, 0m));
+                .Select(kp => new KeyValuePair<(Guid ArticleId, decimal Denomination), decimal>(kp.Key, 0m));
 
             return entriesFromPartList
                 .Concat(entriesFromOrder)
@@ -199,26 +199,27 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         }
 
         private static OrderListEntry BuildOrderEntry(
-            Guid articleId, decimal demand,
+            (Guid ArticleId, decimal Denomination) key, decimal demand,
             Dictionary<Guid, Article?> articleLookup,
-            Dictionary<Guid, List<Order>> ordersLookup, 
-            Dictionary<Guid, decimal> orderedAmountLookup, 
-            Dictionary<Guid, decimal> receivedAmountLookup, 
-            Dictionary<Guid, decimal> inventoryAmountLookup,
+            Dictionary<(Guid ArticleId, decimal Denomination), List<Order>> ordersLookup, 
+            Dictionary<(Guid ArticleId, decimal Denomination), decimal> orderedAmountLookup, 
+            Dictionary<(Guid ArticleId, decimal Denomination), decimal> receivedAmountLookup, 
+            Dictionary<(Guid ArticleId, decimal Denomination), decimal> inventoryAmountLookup,
             bool isInventoryProject)
         {
 
-            var article = articleLookup[articleId];
-            var orders = ordersLookup.TryGetValue(articleId, out var l) ? l : [];
-            var orderedAmount = GetAmount(orderedAmountLookup, articleId);
-            var receivedAmount = GetAmount(receivedAmountLookup, articleId);
-            var inventoryAmount = GetAmount(inventoryAmountLookup, articleId);
+            var article = articleLookup[key.ArticleId];
+            var orders = ordersLookup.TryGetValue(key, out var l) ? l : [];
+            var orderedAmount = GetAmount(orderedAmountLookup, key);
+            var receivedAmount = GetAmount(receivedAmountLookup, key);
+            var inventoryAmount = GetAmount(inventoryAmountLookup, key);
             var toOrder = Math.Max(0m, demand - orderedAmount - inventoryAmount);
 
             var rec = new OrderListEntry()
             {
-                Id = articleId,
-                ArticleId = articleId,
+                Id = key.ArticleId,
+                ArticleId = key.ArticleId,
+                Denomination = key.Denomination,
                 Demand = demand,
                 OrderedAmount = orderedAmount,
                 InventoryAmount = inventoryAmount,
@@ -250,7 +251,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return OrderListEntryState.Incomplete;
         }
 
-        private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)
+        private static decimal GetAmount(Dictionary<(Guid ArticleId, decimal Denomination), decimal> dict, (Guid ArticleId, decimal Denomination) key)
         {
             if (dict.TryGetValue(key, out var amount))
                 return amount;

@@ -48,7 +48,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public List<PartListEntry> FindManyEntriesByPartList(Guid partList, string select = "*")
             => FindManyEntriesBy(PartListEntry.Fields.PartList, partList, select);
 
-        public bool EntryExistsWithinList(Guid partListId, Guid articleId, Guid? excludedId = null)
+        public bool EntryExistsWithinList(Guid partListId, Guid articleId, decimal denomination, Guid? excludedId = null)
         {
             var subQueries = new List<QueryObject>()
             {
@@ -63,6 +63,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     FieldName = PartListEntry.Fields.Article, 
                     FieldValue = articleId,
                     QueryType = QueryType.EQ 
+                },
+                new()
+                {
+                    FieldName = PartListEntry.Fields.Denomination,
+                    FieldValue = denomination,
+                    QueryType = QueryType.EQ
                 }
             };
             if (excludedId.HasValue)

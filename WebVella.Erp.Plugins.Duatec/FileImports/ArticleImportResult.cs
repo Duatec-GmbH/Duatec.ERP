@@ -3,7 +3,7 @@
     internal class ArticleImportResult
     {
         internal ArticleImportResult(
-            string partNumber, string typeNumber, string orderNumber, string designation, Guid type, decimal amount, List<string> deviceTags,
+            string partNumber, string typeNumber, string orderNumber, string designation, Guid type, decimal amount, decimal denomination, List<string> deviceTags,
             ArticleImportState importState, string action, string[] availableActions)
         {
             PartNumber = partNumber;

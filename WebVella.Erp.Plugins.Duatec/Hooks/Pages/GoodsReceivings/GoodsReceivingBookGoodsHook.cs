@@ -15,7 +15,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
-    using UpdateInfo = (Guid ArticleId, decimal Amount, int Index);
+    using UpdateInfo = (Guid ArticleId, decimal Denomination, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.GoodsReceiving.Book)]
     class GoodsReceivingBookGoodsHook : TypedValidatedManageHook<Order>, IPageHook
@@ -43,7 +43,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         {
             var demandedEntries = OpenOrderEntries4Booking.Execute(record.Id!.Value)
                 .Select(TypedEntityRecordWrapper.Wrap<OrderEntry>)
-                .ToDictionary(oe => oe.Article, oe => oe);
+                .ToDictionary(oe => (oe.Article, oe.Denomination), oe => oe);
 
             var updateInfos = GetUpdateInfo(pageModel)
                 .ToArray();
@@ -75,6 +75,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 {
                     Amount = t.Amount,
                     Article = t.ArticleId,
+                    Denomination = t.Denomination,
                     GoodsReceiving = goodsReceiving.Id.Value
                 })
                 .ToArray();
@@ -129,21 +130,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             pageModel.BeforeRender();
         }
 
-        private static IEnumerable<ValidationError> Validate(Dictionary<Guid, OrderEntry> demandedEntries, UpdateInfo[] updateInfos)
+        private static IEnumerable<ValidationError> Validate(Dictionary<(Guid ArticleId, decimal Denomination), OrderEntry> demandedEntries, UpdateInfo[] updateInfos)
         {
             if (!Array.Exists(updateInfos, t => t.Amount > 0))
                 yield return new ValidationError(string.Empty, "Something must be selected");
 
-            foreach (var (articleId, amount, index) in updateInfos)
+            foreach (var (articleId, denomination, amount, index) in updateInfos)
             {
                 if (articleId == Guid.Empty)
                     yield return ArticleError(index, "Article must not be empty");
 
-                else if (!demandedEntries.TryGetValue(articleId, out var orderEntry) && amount > 0)
+                else if (!demandedEntries.TryGetValue((articleId, denomination), out var orderEntry) && amount > 0)
                     yield return ArticleError(index, "There is no demand on this article");
 
                 else
                 {
+                    if (denomination < 0)
+                        yield return DenominationError(index, $"Denomination must not be smaller than '0'");
+
                     if (amount > orderEntry!.Amount)
                         yield return AmountError(index, $"Amount must not be greater than ordered amount ({orderEntry.Amount})");
 
@@ -160,6 +164,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         private static ValidationError AmountError(int index, string message)
             => new($"amount[{index}]", message);
 
+        private static ValidationError DenominationError(int index, string message)
+            => new($"denomination[{index}]", message);
+
         private static IEnumerable<UpdateInfo> GetUpdateInfo(BaseErpPageModel pageModel)
         {
             var i = 0;
@@ -171,7 +178,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 var amount = decimal.TryParse(pageModel.Request.Form[$"amount[{i}]"], out var d) 
                     ? d : 0m;
 
-                yield return (articleId, amount, i);
+                var denomination = decimal.TryParse(pageModel.Request.Form[$"denomination[{i}]"], out d)
+                    ? d : 0m;
+
+                yield return (articleId, denomination, amount, i);
 
                 i++;
             }

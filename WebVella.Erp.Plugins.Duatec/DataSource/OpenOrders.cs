@@ -53,7 +53,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return new EntityRecordList();
 
             var orderSelect = $"*, ${Order.Relations.Project}.*";
-            var orders = orderRepo.FindMany(orderSelect, openOrders.ToArray()).Values
+            var orders = orderRepo.FindMany(orderSelect, [.. openOrders]).Values
                 .Where(o => o != null);
 
             var allOrders = ApplyFilters(arguments, orders!)
@@ -76,7 +76,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return [];
 
             var receivedSelect = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
-            var receivedEntries = goodsReceivingRepo.FindManyEntriesByOrders(receivedSelect, orderEntries.Keys.ToArray())
+            var receivedEntries = goodsReceivingRepo.FindManyEntriesByOrders(receivedSelect, [.. orderEntries.Keys])
                 .GroupBy(e => e.GetGoodsReceiving().Order)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -90,10 +90,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 else
                 {
                     var receivedLookup = received
-                        .GroupBy(re => re.Article)
+                        .GroupBy(re => (re.Article, re.Denomination))
                         .ToDictionary(g => g.Key, g => g.Sum(re => re.Amount));
 
-                    if (entries.Exists(e => e.Amount > 0 && (!receivedLookup.TryGetValue(e.Article, out var d) || e.Amount > d)))
+                    if (entries.Exists(e => e.Amount > 0 && (!receivedLookup.TryGetValue((e.Article, e.Denomination), out var d) || e.Amount > d)))
                         openOrders.Add(orderId);
                 }
             }

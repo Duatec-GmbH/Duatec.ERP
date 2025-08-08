@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             void TransactionalAction()
             {
-                var amount = record.Amount;
+                var amount = record.Amount; // gets changed on insert, thats why we save that here
 
                 var repo = new InventoryRepository();
                 if (repo.Insert(record) == null)
@@ -42,6 +42,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     ProjectSourceId = record.Project,
                     WarehouseLocationId = record.WarehouseLocation,
                     WarehouseLocationSourceId = record.WarehouseLocation,
+                    Denomination = record.Denomination,
                     UserId = userId,
                     Comment = comment,
                 };

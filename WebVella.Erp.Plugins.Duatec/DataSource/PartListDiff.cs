@@ -63,10 +63,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var articleRepo = new ArticleRepository(recMan);
 
             var pl1Entries = partListRepo.FindManyEntriesByPartList(partList1)
-                .ToDictionary(ple => ple.ArticleId, ple => ple.Amount);
+                .ToDictionary(ple => (ple.ArticleId, ple.Denomination), ple => ple.Amount);
 
             var pl2Entries = partListRepo.FindManyEntriesByPartList(partList2)
-                .ToDictionary(ple => ple.ArticleId, ple => ple.Amount);
+                .ToDictionary(ple => (ple.ArticleId, ple.Denomination), ple => ple.Amount);
 
             var allArticleIds = pl1Entries.Keys.Union(pl2Entries.Keys).ToArray();
 
@@ -74,22 +74,23 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 $"${Article.Relations.Manufacturer}.name," +
                 $"${Article.Relations.Type}.*";
 
-            var articleLookup = articleRepo.FindMany(articleSelect, allArticleIds);
+            var articleLookup = articleRepo.FindMany(articleSelect, [..allArticleIds.Select(kp => kp.ArticleId)]);
 
-            foreach(var articleId in allArticleIds)
+            foreach(var kp in allArticleIds)
             {
-                var pl1Amount = pl1Entries.TryGetValue(articleId, out var d) ? d : 0m;
-                var pl2Amount = pl2Entries.TryGetValue(articleId, out d) ? d : 0m;
+                var pl1Amount = pl1Entries.TryGetValue(kp, out var d) ? d : 0m;
+                var pl2Amount = pl2Entries.TryGetValue(kp, out d) ? d : 0m;
 
                 var rec = new PartListEntryDiff()
                 {
                     Amount1 = pl1Amount,
                     Amount2 = pl2Amount,
-                    ArticleId = articleId,
+                    ArticleId = kp.ArticleId,
+                    Denomination = kp.Denomination,
                     Diff = Math.Abs(pl1Amount - pl2Amount),
                 };
 
-                if (articleLookup.TryGetValue(articleId, out var article))
+                if (articleLookup.TryGetValue(kp.ArticleId, out var article))
                     rec.SetArticle(article);
 
                 yield return rec;

@@ -31,7 +31,8 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 var csvArticle = new CsvArticleDto(
                     partNumber: GetValue(cols, partNumberIndex),
                     orderNumber: GetValue(cols, orderNumberIndex),
-                    amount: GetAmount(cols, amountIndex));
+                    amount: GetAmount(cols, amountIndex),
+                    denomination: GetDenomination(cols, amountIndex));
 
                 result.Add(csvArticle);
 
@@ -43,7 +44,29 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
         private static int GetAmount(string[] line, int index)
         {
             var val = GetValue(line, index);
-            if (int.TryParse(val, out var result))
+
+            if (val.Contains('x'))
+                val = val[..val.IndexOf('x')];
+            else if (val.Contains('x'))
+                val = val[..val.IndexOf('X')];
+
+            if (int.TryParse(val.Trim(), out var result))
+                return result;
+            return 0;
+        }
+
+        private static int GetDenomination(string[] line, int index)
+        {
+            var val = GetValue(line, index);
+
+            if (val.Contains('x'))
+                val = val[(val.IndexOf('x') + 1)..];
+            else if (val.Contains('x'))
+                val = val[(val.IndexOf('X') + 1)..];
+            else
+                return 0;
+
+            if (int.TryParse(val.Trim(), out var result))
                 return result;
             return 0;
         }

@@ -36,6 +36,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 var booking = new InventoryBooking()
                 {
                     Amount = amount,
+                    Denomination = record.Denomination,
                     ArticleId = unmodified.Article,
                     ProjectId = record.Project,
                     ProjectSourceId = unmodified.Project,

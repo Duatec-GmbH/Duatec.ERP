@@ -41,28 +41,28 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var inventoryRepository = new InventoryRepository(recMan);
 
             var inventoryLookup = inventoryRepository.FindManyByProject(projectId)
-                .GroupBy(ie => ie.Article)
+                .GroupBy(ie => (ie.Article, ie.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(ie => ie.Amount));
 
             if (inventoryLookup.Count == 0)
                 yield break;
 
-            var articleIds = inventoryLookup.Select(kp => kp.Key).ToArray();
+            var articleIds = inventoryLookup.Select(kp => kp.Key.Article).ToArray();
             const string select = $"*, " +
                 $"${Article.Relations.Manufacturer}.{Company.Fields.Name}, " +
                 $"${Article.Relations.Type}.*";
 
             var articleLookup = new ArticleRepository(recMan).FindMany(select, articleIds);
             var demandLookup = new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
-                .GroupBy(ple => ple.ArticleId)
+                .GroupBy(ple => (ple.ArticleId, ple.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 
             var reservedAmountLookup = inventoryRepository.GetReservedArticleAmountLookup(projectId);
 
-            foreach(var (articleId, amount) in inventoryLookup)
+            foreach(var (key, amount) in inventoryLookup)
             {
-                var demand = demandLookup.TryGetValue(articleId, out var d) ? d : 0m;
-                var reserved = reservedAmountLookup.TryGetValue(articleId, out d) ? d : 0m;
+                var demand = demandLookup.TryGetValue(key, out var d) ? d : 0m;
+                var reserved = reservedAmountLookup.TryGetValue(key, out d) ? d : 0m;
 
                 if(demand < reserved)
                 {
@@ -71,13 +71,14 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
                     var result = new SuperfluousInventoryArticle()
                     {
-                        ArticleId = articleId,
+                        ArticleId = key.Article,
+                        Denomination = key.Denomination,
                         AvailableAmount = available,
                         SelectedAmount = relativeDemand,
                         RelativeDemand = relativeDemand
                     };
 
-                    result.SetArticle(articleLookup[articleId]);
+                    result.SetArticle(articleLookup[key.Article]);
 
                     yield return result;
                 }

@@ -16,6 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             public const string AvailableAmount = "available_amount";
             public const string SelectedAmount = "selected_amount";
             public const string Demand = "demand";
+            public const string Denomination = "denomination";
         }
 
         public static class Relations
@@ -29,6 +30,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             get => Get<Guid>(Fields.ArticleId);
             set => Properties[Fields.ArticleId] = value;
+        }
+
+        public decimal Denomination
+        {
+            get => Get(Fields.Denomination, 0m);
+            set => Properties[Fields.Denomination] = value;
         }
 
         public decimal RelativeDemand

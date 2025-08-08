@@ -53,7 +53,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                     Amount = fv.Amount,
                     ArticleId = fv.ArticleId,
                     DeviceTag = string.Empty,
-                    PartListId = record.Id!.Value
+                    PartListId = record.Id!.Value,
+                    Denomination = fv.Denomination,
 
                 }).ToArray();
 

@@ -122,31 +122,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return FindManyEntriesByQuery(query, select);
         }
 
-        public List<GoodsReceivingEntry> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
-        {
-            var projectQuery = GetFindManyEntriesByProjectQuery(projectId);
-            if(projectQuery == null) 
-                return [];
-
-            var query = new QueryObject()
-            {
-                QueryType = QueryType.AND,
-                SubQueries =
-                [
-                    new QueryObject()
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = GoodsReceivingEntry.Fields.Article,
-                        FieldValue = articleId
-                    },
-                    projectQuery
-                ]
-            };
-
-            return FindManyEntriesByQuery(query, select);
-        }
-
-        public bool EntryExists(Guid goodsReceiving, Guid article, Guid? excluded = null)
+        public bool EntryExists(Guid goodsReceiving, Guid article, decimal denomination, Guid? excluded = null)
         {
             var query = new QueryObject()
             {
@@ -164,7 +140,13 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         QueryType = QueryType.EQ,
                         FieldName = GoodsReceivingEntry.Fields.Article,
                         FieldValue = article
-                    }
+                    },
+                    new QueryObject()
+                    {
+                        QueryType = QueryType.EQ,
+                        FieldName = GoodsReceivingEntry.Fields.Denomination,
+                        FieldValue = denomination
+                    },
                 ]
             };
             if (excluded.HasValue)

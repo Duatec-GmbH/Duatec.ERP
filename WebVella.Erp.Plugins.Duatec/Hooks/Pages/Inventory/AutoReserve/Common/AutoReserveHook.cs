@@ -11,7 +11,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
 {
-    using FormValues = (Guid ArticleId, decimal Amount, int Index);
+    using FormValues = (Guid ArticleId, decimal Denomination, decimal Amount, int Index);
 
     internal abstract class AutoReserveHook : IRecordManagePageHook, IPageHook
     {
@@ -48,8 +48,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
             {
                 var articleId = Guid.TryParse(articleIdVal, out var id) ? id : Guid.Empty;
                 var amount = decimal.TryParse(form[$"amount[{i}]"], out var d) ? d : 0m;
+                var denomination = decimal.TryParse(form[$"denomination[{i}]"], out d) ? d : 0m;
 
-                result.Add((articleId, amount, i));
+                result.Add((articleId, denomination, amount, i));
 
                 i++;
             }
@@ -96,6 +97,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 WarehouseLocationId = entry.WarehouseLocation,
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 ProjectSourceId = entry.Project,
+                Denomination = entry.Denomination,
                 ProjectId = projectId,
                 Comment = "Auto reserve",
                 UserId = userId
@@ -120,6 +122,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 WarehouseLocationId = entry.WarehouseLocation,
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 ProjectSourceId = entry.Project,
+                Denomination = entry.Denomination,
                 ProjectId = projectId,
                 UserId = userId,
                 Comment = "Auto reserve",

@@ -33,6 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Amount = "amount";
             public const string Kind = "kind";
             public const string Comment = "comment";
+            public const string Denomination = "denomination";
         }
 
         public static class Relations
@@ -83,6 +84,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<decimal>(Fields.Amount);
             set => Properties[Fields.Amount] = value;
+        }
+
+        public decimal Denomination
+        {
+            get => Get(Fields.Denomination, 0m);
+            set => Properties[Fields.Denomination] = value;
         }
 
         public DateTime Timestamp

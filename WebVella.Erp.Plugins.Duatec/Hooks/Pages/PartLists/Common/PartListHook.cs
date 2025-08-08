@@ -5,7 +5,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 {
-    using Row = (Guid ArticleId, decimal Amount, int Index);
+    using Row = (Guid ArticleId, decimal Denomination, decimal Amount, int Index);
 
     internal static class PartListHook
     {
@@ -14,7 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             var formValues = GetEntryFormValues(pageModel);
             var articleLookup = GetArticleLookup(formValues);
 
-            foreach (var (articleId, amount, idx) in formValues)
+            foreach (var (articleId, denomination, amount, idx) in formValues)
             {
                 if (articleId == Guid.Empty)
                     yield return ArticleError(idx, "Article must not be empty");
@@ -24,6 +24,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 
                 else
                 {
+                    if (denomination < 0)
+                        yield return DenominationError(idx, "Unexpected negative amount");
+
                     var isInt = article.GetArticleType().IsInteger;
 
                     if (isInt && amount % 1 != 0)
@@ -38,10 +41,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 
             var duplications = formValues
                 .Where(t => t.ArticleId != Guid.Empty)
-                .GroupBy(t => t.ArticleId)
+                .GroupBy(t => (t.ArticleId, t.Denomination))
                 .Where(g => g.Count() > 1);
 
-            foreach (var (_, _, idx) in duplications.SelectMany(g => g))
+            foreach (var (_, _, _, idx) in duplications.SelectMany(g => g))
                 yield return ArticleError(idx, "Article is used multiple times within same part list");
         }
 
@@ -52,7 +55,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             record.SetEntries(formValues.Select(fv => new PartListEntry()
             {
                 Amount = fv.Amount,
-                ArticleId = fv.ArticleId
+                ArticleId = fv.ArticleId,
+                Denomination = fv.Denomination
             }));
             pageModel.DataModel.SetRecord(record);
             pageModel.BeforeRender();
@@ -78,8 +82,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             {
                 var articleId = Guid.TryParse(articleVal, out var id) ? id : Guid.Empty;
                 var amount = decimal.TryParse(form[$"amount[{idx}]"], out var d) ? d : 0m;
+                var denomination = decimal.TryParse(form[$"amount[{idx}]"], out d) ? d : 0m;
 
-                result.Add((articleId, amount, idx));
+                result.Add((articleId, denomination, amount, idx));
 
                 idx++;
             }
@@ -91,5 +96,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 
         private static ValidationError AmountError(int index, string message)
             => new($"amount[{index}]", message);
+
+        private static ValidationError DenominationError(int index, string message)
+            => new($"denomination[{index}]", message);
     }
 }

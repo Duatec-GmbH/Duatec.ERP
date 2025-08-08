@@ -19,6 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Article = Entities.Article.AsForeignKey;
             public const string GoodsReceiving = "goods_receiving_id";
             public const string Amount = "amount";
+            public const string Denomination = "denomination";
         }
 
         public override string EntityName => Entity;
@@ -33,6 +34,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
+        }
+
+        public decimal Denomination
+        {
+            get => Get(Fields.Denomination, 0m);
+            set => Properties[Fields.Denomination] = value;
         }
 
         public decimal Amount

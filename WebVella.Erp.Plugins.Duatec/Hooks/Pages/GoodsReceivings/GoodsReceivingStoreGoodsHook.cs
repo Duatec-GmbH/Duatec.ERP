@@ -16,7 +16,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 {
-    using UpdateInfo = (Guid? ProjectId, Guid ArticleId, Guid WarehouseLocationId, decimal Amount, int Index);
+    using UpdateInfo = (Guid? ProjectId, Guid ArticleId, decimal Denomination, Guid WarehouseLocationId, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.GoodsReceiving.Store)]
     internal class GoodsReceivingStoreGoodsHook : TypedValidatedManageHook<GoodsReceiving>, IPageHook
@@ -61,13 +61,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             var userId = pageModel.CurrentUser.Id;
 
             var defaultEntries = GetDefaultEntries(record, recMan)
-                .GroupBy(ie => ie.Article)
+                .GroupBy(ie => (ie.Article, ie.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             var updateInfos = GetUpdateInfo(pageModel)
                 .ToArray();
 
-            if (defaultEntries.Keys.Except(updateInfos.Select(ui => ui.ArticleId).Distinct()).Any())
+            if (defaultEntries.Keys.Select(kp => kp.Article).Except(updateInfos.Select(ui => ui.ArticleId).Distinct()).Any())
                 return pageModel.BadRequest();
 
             validationErrors.AddRange(Validate(updateInfos, defaultEntries));
@@ -166,37 +166,51 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     Amount = entry.Amount,
                     Article = entry.Article,
                     Project = projectId,
+                    Denomination = entry.Denomination,
                 };
 
                 inventoryEntry.SetArticle(articleLookup[entry.Article]);
                 inventoryEntry.WarehouseLocation
-                    = SmartWarehouseLocationSelection(inventoryRepo, entry.GetArticle(), projectId);
+                    = SmartWarehouseLocationSelection(inventoryRepo, entry.GetArticle(), entry.Denomination, projectId);
 
                 yield return inventoryEntry;
             }
         }
 
-        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Article article, Guid? projectid)
+        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Article article, decimal denomination, Guid? projectid)
         {
             if (article.PreferedWarehouseLocation.HasValue)
                 return article.PreferedWarehouseLocation.Value;
 
-            var location = repo.FindManyByArticleAndProject(article.Id!.Value, projectid)
+            var entries = repo.FindManyByArticle(article.Id!.Value);
+            var location = entries
+                .FirstOrDefault(e => e.Project == projectid && e.Denomination == denomination)?.WarehouseLocation;
+
+            if (location.HasValue)
+                return location.Value;
+
+            location = entries
+                .FirstOrDefault(e => e.Project == projectid)?.WarehouseLocation;
+
+            if (location.HasValue)
+                return location.Value;
+
+            location = entries
+                .FirstOrDefault(e => e.Denomination == denomination)?.WarehouseLocation;
+
+            if (location.HasValue)
+                return location.Value;
+
+            location = entries
                 .FirstOrDefault()?.WarehouseLocation;
 
-            if (!location.HasValue)
-            {
-                location = repo.FindManyByArticle(article.Id!.Value)
-                    .FirstOrDefault()?.WarehouseLocation;
+            if (location.HasValue)
+                return location.Value;
 
-                if (!location.HasValue)
-                {
-                    location = repo.FindManyBookingsByArticle(article.Id!.Value)
-                        .Where(b => b.Kind == InventoryBookingKind.Take)
-                        .OrderByDescending(b => b.Timestamp)
-                        .FirstOrDefault()?.WarehouseLocationSourceId;
-                }
-            }
+            location = repo.FindManyBookingsByArticle(article.Id!.Value)
+                .Where(b => b.Kind == InventoryBookingKind.Take)
+                .OrderByDescending(b => b.Timestamp)
+                .FirstOrDefault()?.WarehouseLocationSourceId;
 
             return location ?? Guid.Empty;
         }
@@ -210,15 +224,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     Article = t.ArticleId,
                     WarehouseLocation = t.WarehouseLocationId,
                     Amount = t.Amount,
+                    Denomination = t.Denomination,
                 });
         }
 
-        private static IEnumerable<ValidationError> Validate(UpdateInfo[] updateInfos, Dictionary<Guid, InventoryEntry[]> defaultLookup)
+        private static IEnumerable<ValidationError> Validate(UpdateInfo[] updateInfos, Dictionary<(Guid ArticleId, decimal Denomination), InventoryEntry[]> defaultLookup)
         {
             var projectSetPoint = defaultLookup
                 .First().Value[0].Project;
 
-            foreach (var (projectId, articleId, warehouseLocationId, amount, index) in updateInfos)
+            foreach (var (projectId, articleId, denomination, warehouseLocationId, amount, index) in updateInfos)
             {
                 if (warehouseLocationId == Guid.Empty)
                     yield return WarehouseLocationError(index, "Warehouse location is required");
@@ -227,12 +242,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     yield return ProjectError(index, "Fatal error project id missmatch");
 
                 if (amount <= 0)
-                    yield return AmountError(index, "Positive value expected");
+                    yield return AmountError(index, "Zero or positive value expected");
+
+                if (denomination < 0)
+                    yield return DenominationError(index, "Positive value expected");
 
                 if (articleId == Guid.Empty)
                     yield return ArticleError(index, "Article is required");
 
-                else if (!defaultLookup.TryGetValue(articleId, out var entries) || entries.Length == 0)
+                else if (!defaultLookup.TryGetValue((articleId, denomination), out var entries) || entries.Length == 0)
                     yield return ArticleError(index, "Article is not defined in goodsreceiving");
 
                 else
@@ -243,7 +261,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     else
                     {
                         var equivalentArticles = updateInfos
-                            .Where(t => t.ArticleId == articleId)
+                            .Where(t => t.ArticleId == articleId && t.Denomination == denomination)
                             .ToArray();
 
                         var totalAmount = equivalentArticles
@@ -267,12 +285,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         private static ValidationError AmountError(int index, string message)
             => new($"amount[{index}]", message);
 
+        private static ValidationError DenominationError(int index, string message)
+            => new($"denomination[{index}]", message);
+
         private static ValidationError ProjectError(int index, string message)
             => new($"project_id[{index}]", message);
 
         private static void SetUpErrorPage(
             GoodsReceiving record,  BaseErpPageModel pageModel, 
-            Dictionary<Guid, InventoryEntry[]> bookedEntries, UpdateInfo[] updateInfos)
+            Dictionary<(Guid ArticleId, decimal Denomination), InventoryEntry[]> bookedEntries, UpdateInfo[] updateInfos)
         {
             var entries = updateInfos.Select(t => new InventoryEntry()
             {
@@ -280,13 +301,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 Article = t.ArticleId,
                 Project = t.ProjectId,
                 WarehouseLocation = t.WarehouseLocationId,
+                Denomination = t.Denomination,
                 Amount = t.Amount,
 
             }).ToList();
 
             foreach(var entry in entries)
             {
-                if (bookedEntries.TryGetValue(entry.Article, out var gre))
+                if (bookedEntries.TryGetValue((entry.Article, entry.Denomination), out var gre))
                     entry.SetArticle(gre[0].GetArticle());
             }
 
@@ -316,7 +338,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 var amount = decimal.TryParse(form[$"amount[{i}]"], out var d)
                     ? d : 0m;
 
-                yield return (projectId, articleId, warehouseLocationId, amount, i);
+                var denomination = decimal.TryParse(form[$"amount[{i}]"], out d)
+                    ? d : 0m;
+
+                yield return (projectId, articleId, denomination, warehouseLocationId, amount, i);
 
                 i++;
             }

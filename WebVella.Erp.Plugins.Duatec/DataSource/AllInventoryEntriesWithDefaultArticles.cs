@@ -65,6 +65,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     Id = a.Id!.Value,
                     Article = a.Id!.Value,
                     Amount = 0,
+                    Denomination = 0,
                     WarehouseLocation = a.PreferedWarehouseLocation!.Value,
                     Project = null,
                 });

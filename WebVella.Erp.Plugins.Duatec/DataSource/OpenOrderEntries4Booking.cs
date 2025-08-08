@@ -59,7 +59,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.{GoodsReceiving.Fields.Order}";
             var recievedAmountLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
-                .GroupBy(e => e.Article)
+                .GroupBy(e => (e.Article, e.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
 
             var typeIds = allEntries
@@ -77,7 +77,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             foreach (var orderEntry in allEntries)
             {
-                var received = recievedAmountLookup.TryGetValue(orderEntry.Article, out var d) ? d : 0m;
+                var received = recievedAmountLookup.TryGetValue((orderEntry.Article, orderEntry.Denomination), out var d) ? d : 0m;
                 if (received < orderEntry.Amount)
                 {
                     orderEntry.Amount -= received;

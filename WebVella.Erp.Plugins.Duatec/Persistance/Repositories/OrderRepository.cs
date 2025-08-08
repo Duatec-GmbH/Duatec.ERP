@@ -24,31 +24,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return base.Delete(id);
         }
 
-        public List<Order> FindManyByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
-        {
-            var entries = FindManyEntriesByProjectAndArticle(projectId, articleId)
-                .Select(e => e.Order)
-                .Distinct()
-                .ToArray();
-
-            if (entries.Length == 0)
-                return [];
-
-            var query = new QueryObject()
-            {
-                QueryType = QueryType.OR,
-                SubQueries = entries.Select(id => new QueryObject()
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = "id",
-                        FieldValue = id,
-                    }).ToList()
-            };
-
-            return FindManyByQuery(query, select);
-        }
-
-        public OrderEntry? FindEntryByOrderAndArticle(Guid orderId, Guid articleId, Guid? excludedId = null, string select = "*")
+        public OrderEntry? FindEntryByOrderAndArticle(Guid orderId, Guid articleId, decimal denomination, Guid? excludedId = null, string select = "*")
         {
             var query = new QueryObject()
             {
@@ -66,6 +42,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         QueryType = QueryType.EQ,
                         FieldName = OrderEntry.Fields.Article,
                         FieldValue = articleId,
+                    },
+                    new QueryObject()
+                    {
+                        QueryType = QueryType.EQ,
+                        FieldName = OrderEntry.Fields.Denomination,
+                        FieldValue = denomination,
                     }
                 ]
             };
@@ -83,30 +65,6 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             var query = OrdersByProjectQuery(projectId);
             if (query == null)
                 return [];
-            return FindManyEntriesByQuery(query, select);
-        }
-
-        public List<OrderEntry> FindManyEntriesByProjectAndArticle(Guid projectId, Guid articleId, string select = "*")
-        {
-            var ordersByProjectQuery = OrdersByProjectQuery(projectId);
-            if (ordersByProjectQuery == null)
-                return [];
-
-            var query = new QueryObject()
-            {
-                QueryType = QueryType.AND,
-                SubQueries =
-                [
-                    new()
-                    {
-                        QueryType = QueryType.EQ,
-                        FieldName = OrderEntry.Fields.Article,
-                        FieldValue = articleId
-                    },
-                    ordersByProjectQuery
-                ]
-            };
-
             return FindManyEntriesByQuery(query, select);
         }
 
@@ -227,9 +185,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         private List<OrderBill> FindBills(Guid orderId)
         {
-            return RepositoryHelper.FindManyBy(RecordManager, OrderBill.Entity, OrderBill.Fields.OrderId, orderId)
-                .Select(TypedEntityRecordWrapper.Wrap<OrderBill>)
-                .ToList();
+            return [..RepositoryHelper.FindManyBy(RecordManager, OrderBill.Entity, OrderBill.Fields.OrderId, orderId)
+                .Select(TypedEntityRecordWrapper.Wrap<OrderBill>)];
         }
 
         private QueryObject? OrdersByProjectQuery(Guid projectId)

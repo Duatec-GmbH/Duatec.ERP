@@ -20,6 +20,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             public const string InventoryAmount = "inventory_amount";
             public const string ToOrder = "to_order";
             public const string State = "state";
+            public const string Denomination = "denomination";
         }
 
         public override string EntityName => string.Empty;
@@ -28,6 +29,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
+        }
+
+        public decimal Denomination
+        {
+            get => Get(Fields.Denomination, 0m);
+            set => Properties[Fields.Denomination] = value;
         }
 
         public decimal Demand

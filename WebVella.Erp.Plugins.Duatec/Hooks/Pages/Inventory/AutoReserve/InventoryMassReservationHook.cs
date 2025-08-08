@@ -16,7 +16,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 {
-    using FormValues = (Guid ArticleId, decimal Amount, int Index);
+    using FormValues = (Guid ArticleId, decimal Denomination, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.Inventory.MassReservation)]
     internal class InventoryMassReservationHook : AutoReserveHook
@@ -33,7 +33,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 return Info(pageModel, "Nothing to do here");
 
             var availableArticleLookup = AvailableInventoryEntries4Project.Execute(projectId)
-                .ToDictionary(aie => aie.ArticleId);
+                .ToDictionary(aie => (aie.ArticleId, aie.Denomination));
 
             validationErrors.AddRange(Validate(formData, availableArticleLookup));
 
@@ -48,19 +48,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             var inventoryRepo = new InventoryRepository(recMan);
 
             var availableInventoryEntryLookup = inventoryRepo.FindManyByProject(null)
-                .GroupBy(aie => aie.Article)
+                .GroupBy(aie => (aie.Article, aie.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             var projectInventoryLookup = inventoryRepo.FindManyByProject(projectId)
-                .GroupBy(pie => pie.Article)
+                .GroupBy(pie => (pie.Article, pie.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             void TransactionalAction()
             {
-                foreach (var (articleId, amount, _) in formData.Where(t => t.Amount > 0))
+                foreach (var (articleId, denomination, amount, _) in formData.Where(t => t.Amount > 0))
                 {
-                    var availableInventoryEntries = availableInventoryEntryLookup[articleId];
-                    var reseredInventoryEntries = projectInventoryLookup.TryGetValue(articleId, out var arr)
+                    var availableInventoryEntries = availableInventoryEntryLookup[(articleId, denomination)];
+                    var reseredInventoryEntries = projectInventoryLookup.TryGetValue((articleId, denomination), out var arr)
                         ? arr : [];
 
                     MoveInventory(recMan, projectId, amount, availableInventoryEntries, reseredInventoryEntries, pageModel.CurrentUser.Id);
@@ -102,20 +102,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
         }
 
         private static void BuildErrorPage(Guid projectId, BaseErpPageModel pageModel,
-            List<FormValues> formValues, Dictionary<Guid, AvailableInventoryArticle> availableArticleInfo)
+            List<FormValues> formValues, Dictionary<(Guid ArticleId, decimal Denomination), AvailableInventoryArticle> availableArticleInfo)
         {
             var records = new List<EntityRecord>(formValues.Count);
 
-            foreach (var (articleId, amount, _) in formValues)
+            foreach (var (articleId, denomination, amount, _) in formValues)
             {
-                if (availableArticleInfo.TryGetValue(articleId, out var aie))
+                if (availableArticleInfo.TryGetValue((articleId, denomination), out var aie))
                 {
                     var entry = new AvailableInventoryArticle()
                     {
                         ArticleId = articleId,
                         Amount = amount,
                         Demand = aie.Demand,
-                        AvailableAmount = aie.AvailableAmount
+                        AvailableAmount = aie.AvailableAmount,
+                        Denomination = denomination,
                     };
                     entry.SetArticle(aie.GetArticle());
                     records.Add(entry);
@@ -130,14 +131,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
         }
 
 
-        private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<Guid, AvailableInventoryArticle> availableArticleInfos)
+        private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<(Guid ArticleId, decimal Denomination), AvailableInventoryArticle> availableArticleInfos)
         {
-            foreach (var (articleId, amount, index) in formData)
+            foreach (var (articleId, denomination, amount, index) in formData)
             {
                 ArticleType? type = null;
                 decimal available = 0m;
 
-                if (availableArticleInfos.TryGetValue(articleId, out var articleInfo))
+                if (availableArticleInfos.TryGetValue((articleId, denomination), out var articleInfo))
                 {
                     type = articleInfo.GetArticle().GetArticleType();
                     available = articleInfo.AvailableAmount;

@@ -52,7 +52,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         {
             return record.Order != Guid.Empty
                 && record.Article != Guid.Empty
-                && new OrderRepository().FindEntryByOrderAndArticle(record.Order, record.Article, id) != null;
+                && new OrderRepository().FindEntryByOrderAndArticle(record.Order, record.Article, record.Denomination, id) != null;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
             public const string Diff = "diff";
             public const string Amount1 = "part_list1_amount";
             public const string Amount2 = "part_list2_amount";
+            public const string Denomination = "denomination";
         }
 
         public static class Relations
@@ -24,6 +25,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             get => Get<Guid>(Fields.Article);
             set => Properties[Fields.Article] = value;
+        }
+
+        public decimal Denomination
+        {
+            get => Get(Fields.Denomination, 0m);
+            set => Properties[Fields.Denomination] = value;
         }
 
         public decimal Diff

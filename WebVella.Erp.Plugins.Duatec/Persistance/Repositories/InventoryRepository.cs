@@ -22,11 +22,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public override InventoryEntry? Insert(InventoryEntry record)
         {
-            RoundAmount(record);
+            RoundNumbers(record);
             if (record.Amount <= 0)
                 throw new ArgumentException("Can not insert inventory entry with amount smaller or equal '0'");
 
-            if(Find(record.Article, record.WarehouseLocation, record.Project) is InventoryEntry entry)
+            if(Find(record.Article, record.Denomination, record.WarehouseLocation, record.Project) is InventoryEntry entry)
             {
                 entry.Amount += record.Amount;
 
@@ -48,7 +48,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public InventoryEntry? MovePartial(InventoryEntry record)
         {
-            RoundAmount(record);
+            RoundNumbers(record);
             var unmodified = Find(record.Id!.Value)!;
 
             if (unmodified.Amount <= record.Amount)
@@ -66,7 +66,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public override InventoryEntry? Update(InventoryEntry record)
         {
-            RoundAmount(record);
+            RoundNumbers(record);
             if (record.Amount <= 0)
                 return Delete(record.Id!.Value);
 
@@ -79,7 +79,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 return base.Update(record);
             }
 
-            if (Find(record.Article, record.WarehouseLocation, record.Project) is InventoryEntry entry)
+            if (Find(record.Article, record.Denomination, record.WarehouseLocation, record.Project) is InventoryEntry entry)
             {
                 entry.Amount += record.Amount;
 
@@ -95,31 +95,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return base.Update(record);
         }
 
-        public List<InventoryEntry> FindManyByArticleAndProject(Guid articleId, Guid? projectId, string select = "*")
-        {
-            var query = new QueryObject()
-            {
-                QueryType = QueryType.AND,
-                SubQueries = 
-                [
-                    new() 
-                    { 
-                        FieldName = InventoryEntry.Fields.Article, 
-                        FieldValue = articleId, 
-                        QueryType = QueryType.EQ 
-                    },
-                    new() 
-                    { 
-                        FieldName = InventoryEntry.Fields.Project, 
-                        FieldValue = projectId, 
-                        QueryType = QueryType.EQ 
-                    },
-                ]
-            };
-            return FindManyByQuery(query, select);
-        }
-
-        public InventoryEntry? Find(Guid articleId, Guid locationId, Guid? projectId, string select = "*")
+        public InventoryEntry? Find(Guid articleId, decimal denomination, Guid locationId, Guid? projectId, string select = "*")
         {
             var query = new QueryObject()
             {
@@ -144,6 +120,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         FieldValue = projectId, 
                         QueryType = QueryType.EQ 
                     },
+                    new()
+                    {
+                        FieldName = InventoryEntry.Fields.Denomination,
+                        FieldValue = denomination,
+                        QueryType = QueryType.EQ,
+                    }
                 ]
             };
             return FindByQuery(query, select);
@@ -157,9 +139,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<InventoryBooking> InsertManyBookings(IEnumerable<InventoryBooking> bookings)
         {
-            return RepositoryHelper.InsertMany(RecordManager, InventoryBooking.Entity, bookings)
-                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)
-                .ToList();
+            return [.. RepositoryHelper.InsertMany(RecordManager, InventoryBooking.Entity, bookings)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];
         }
         
         public InventoryBooking? ReverseBooking(Guid id)
@@ -183,13 +164,14 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     Article = booking.ArticleId,
                     Project = booking.ProjectSourceId,
                     WarehouseLocation = booking.WarehouseLocationId!.Value,
+                    Denomination = booking.Denomination,
                 };
                 if (Insert(entry) == null)
                     return null;
             }
             else if (booking.Kind == InventoryBookingKind.Store)
             {
-                var entry = Find(booking.ArticleId, booking.WarehouseLocationId!.Value, booking.ProjectId);
+                var entry = Find(booking.ArticleId, booking.Denomination, booking.WarehouseLocationId!.Value, booking.ProjectId);
 
                 if (entry == null || entry.Amount < booking.Amount)
                     return null;
@@ -211,7 +193,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 if (!booking.WarehouseLocationSourceId.HasValue)
                     return null;
 
-                var entry = Find(booking.ArticleId, booking.WarehouseLocationId!.Value, booking.ProjectId);
+                var entry = Find(booking.ArticleId, booking.Denomination, booking.WarehouseLocationId!.Value, booking.ProjectId);
 
                 if (entry == null || entry.Amount < booking.Amount)
                     return null;
@@ -234,6 +216,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     Amount = booking.Amount,
                     Project = booking.ProjectSourceId,
                     WarehouseLocation = booking.WarehouseLocationSourceId.Value,
+                    Denomination = booking.Denomination,
                 };
 
                 if (Insert(rec) == null)
@@ -245,43 +228,44 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
         }
 
-
-
         private InventoryBooking? FindBooking(Guid id, string select = "*")
             => TypedEntityRecordWrapper.Wrap<InventoryBooking>(RepositoryHelper.Find(RecordManager, InventoryBooking.Entity, id, select));
 
         public List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
         {
-            return RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ProjectId, projectId, select)
-                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>).ToList();
+            return [..RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ProjectId, projectId, select)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];
         }
 
         public List<InventoryBooking> FindManyBookingsByArticle(Guid articleId, string select = "*")
         {
-            return RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ArticleId, articleId, select)
-                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>).ToList();
+            return [..RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ArticleId, articleId, select)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];
         }
 
-        public Dictionary<Guid, decimal> GetReservedArticleAmountLookup(Guid projectId)
+        public Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetReservedArticleAmountLookup(Guid projectId)
         {
             var takenLookup = FindManyBookingsByProject(projectId)
                 .Where(be => be.Kind == InventoryBookingKind.Take && be.Amount != 0m)
-                .GroupBy(be => be.ArticleId)
+                .GroupBy(be => (be.ArticleId, be.Denomination))
                 .ToDictionary(g => g.Key, g => g
                     .Aggregate(0m, (sum, be) => sum + be.Amount));
 
             foreach(var ie in FindManyByProject(projectId))
             {
-                if (takenLookup.ContainsKey(ie.Article))
-                    takenLookup[ie.Article] += ie.Amount;
+                if (takenLookup.ContainsKey((ie.Article, ie.Denomination)))
+                    takenLookup[(ie.Article, ie.Denomination)] += ie.Amount;
                 else
-                    takenLookup[ie.Article] = ie.Amount;
+                    takenLookup[(ie.Article, ie.Denomination)] = ie.Amount;
             }
 
             return takenLookup;
         }
 
-        private static void RoundAmount(InventoryEntry record)
-            => record.Amount = Math.Round(record.Amount, 2);
+        private static void RoundNumbers(InventoryEntry record)
+        {
+            record.Amount = Math.Round(record.Amount, 2);
+            record.Denomination = Math.Round(record.Denomination, 2);
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             {
                 var articleFormId = $"{OrderEntry.Fields.Article}[{i}]";
                 var amountFormId = $"{OrderEntry.Fields.Amount}[{i}]";
+                var denominationFormId = $"{OrderEntry.Fields.Denomination}[{i}]";
                 var arrivalFormId = $"{OrderEntry.Fields.ExpectedArrival}[{i}]";
 
                 var form = pageModel.Request.Form;
@@ -33,6 +34,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 var entry = new OrderEntry()
                 {
                     Amount = GetNumber(pageModel.GetFormValue(amountFormId)),
+                    Denomination = GetNumber(pageModel.GetFormValue(denominationFormId)),
                     Article = GetId(pageModel.GetFormValue(articleFormId)),
                     ExpectedArrival = GetDate(pageModel.GetFormValue(arrivalFormId)),
                 };
@@ -83,7 +85,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 yield return error;
         }
 
-        private static IEnumerable<ValidationError> GetEntryFormatErrors(OrderEntry entry, int idx, ArticleType? type)
+        private static List<ValidationError> GetEntryFormatErrors(OrderEntry entry, int idx, ArticleType? type)
         {
             var result = GetAmountFormatErrors(entry, idx, type);
             if (entry.Article == Guid.Empty)

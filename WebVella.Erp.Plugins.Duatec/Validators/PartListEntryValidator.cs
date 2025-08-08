@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
 
             var recMan = new RecordManager();
 
-            if (result.Count == 0 && new PartListRepository(recMan).EntryExistsWithinList(record.PartListId, record.ArticleId, id))
+            if (result.Count == 0 && new PartListRepository(recMan).EntryExistsWithinList(record.PartListId, record.ArticleId, record.Denomination, id))
                 result.Add(new ValidationError(Fields.Article, "Part list entry with the same article already exists within part list"));
 
             if (record.ArticleId != Guid.Empty)

@@ -17,7 +17,7 @@ using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
 {
-    using FormValues = (Guid ArticleId, decimal Amount, int Index);
+    using FormValues = (Guid ArticleId, decimal Denomination, decimal Amount, int Index);
 
     [HookAttachment(key: HookKeys.Inventory.MassRelease)]
     internal class InventoryMassReservationReleaseHook : AutoReserveHook
@@ -34,7 +34,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                 return Info(pageModel, "Nothing to do here");
 
             var superfluousArticleLookup = InventoryEntriesToRelease4Project.Execute(projectId)
-                .ToDictionary(sia => sia.ArticleId);
+                .ToDictionary(sia => (sia.ArticleId, sia.Denomination));
 
             if (superfluousArticleLookup.Values.All(sia => sia.AvailableAmount == sia.SelectedAmount))
                 return Info(pageModel, "Nothing to do here");
@@ -52,24 +52,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             var inventoryRepo = new InventoryRepository(recMan);
 
             var availableInventoryEntryLookup = inventoryRepo.FindManyByProject(null)
-                .GroupBy(aie => aie.Article)
+                .GroupBy(aie => (aie.Article, aie.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             var projectInventoryLookup = inventoryRepo.FindManyByProject(projectId)
-                .GroupBy(pie => pie.Article)
+                .GroupBy(pie => (pie.Article, pie.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             void TransactionalAction()
             {
-                foreach (var (articleId, amount, _) in formData)
+                foreach (var (articleId, denomination, amount, _) in formData)
                 {
-                    if(superfluousArticleLookup.TryGetValue(articleId, out var articleInfo))
+                    if(superfluousArticleLookup.TryGetValue((articleId, denomination), out var articleInfo))
                     {
                         var diff = articleInfo.AvailableAmount - amount;
                         if(diff > 0)
                         {
-                            var reseredInventoryEntries = projectInventoryLookup[articleId];
-                            var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue(articleId, out var arr)
+                            var reseredInventoryEntries = projectInventoryLookup[(articleId, denomination)];
+                            var availableInventoryEntries = availableInventoryEntryLookup.TryGetValue((articleId, denomination), out var arr)
                                 ? arr : [];
 
                             MoveInventory(recMan, diff, availableInventoryEntries, reseredInventoryEntries, pageModel.CurrentUser.Id);
@@ -112,17 +112,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
         }
 
         private static void BuildErrorPage(Guid projectId, BaseErpPageModel pageModel,
-            List<FormValues> formValues, Dictionary<Guid, SuperfluousInventoryArticle> superfluousArticleInfo)
+            List<FormValues> formValues, Dictionary<(Guid ArticleId, decimal Denomination), SuperfluousInventoryArticle> superfluousArticleInfo)
         {
             var records = new List<EntityRecord>(formValues.Count);
 
-            foreach (var (articleId, amount, _) in formValues)
+            foreach (var (articleId, denomination, amount, _) in formValues)
             {
                 var availableAmount = 0m;
                 var relativeDemand = 0m;
                 Article? article = null;
 
-                if (superfluousArticleInfo.TryGetValue(articleId, out var sai))
+                if (superfluousArticleInfo.TryGetValue((articleId, denomination), out var sai))
                 {
                     availableAmount = sai.AvailableAmount;
                     relativeDemand = sai.RelativeDemand;
@@ -135,6 +135,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
                     SelectedAmount = amount,
                     AvailableAmount = availableAmount,
                     RelativeDemand = relativeDemand,
+                    Denomination = denomination,
                 };
 
                 rec.SetArticle(article);
@@ -148,15 +149,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve
             pageModel.BeforeRender();
         }
 
-        private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<Guid, SuperfluousInventoryArticle> superfluousArticleLookup)
+        private static IEnumerable<ValidationError> Validate(List<FormValues> formData, Dictionary<(Guid ArticleId, decimal Denomination), SuperfluousInventoryArticle> superfluousArticleLookup)
         {
-            foreach (var (articleId, amount, index) in formData)
+            foreach (var (articleId, denomination, amount, index) in formData)
             {
                 ArticleType? type = null;
                 var available = 0m;
                 var relativeDemand = 0m;
 
-                if (superfluousArticleLookup.TryGetValue(articleId, out var articleInfo))
+                if (superfluousArticleLookup.TryGetValue((articleId, denomination), out var articleInfo))
                 {
                     type = articleInfo.GetArticle().GetArticleType();
                     available = articleInfo.AvailableAmount;

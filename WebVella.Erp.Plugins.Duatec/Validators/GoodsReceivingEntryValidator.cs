@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
                 result.Add(new ValidationError(Fields.GoodsReceiving, "Goods receiving entry 'goods receiving' is required"));
             if (record.Article == Guid.Empty)
                 result.Add(new ValidationError(Fields.Article, "Goods receiving entry 'article' is required"));
-            if (record.GoodsReceiving != Guid.Empty && record.Article != Guid.Empty && goodsReceivingRepo.EntryExists(record.GoodsReceiving, record.Article, id))
+            if (record.GoodsReceiving != Guid.Empty && record.Article != Guid.Empty && goodsReceivingRepo.EntryExists(record.GoodsReceiving, record.Article, record.Denomination, id))
                 result.Add(new ValidationError(Fields.Article, "Goods receiving entry with the same article already exists within goods receiving"));
 
             if (record.Article != Guid.Empty)

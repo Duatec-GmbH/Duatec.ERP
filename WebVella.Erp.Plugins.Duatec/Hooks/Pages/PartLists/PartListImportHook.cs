@@ -8,7 +8,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {
-    using Row = (string PartNumber, bool Import, decimal Amount);
+    using Row = (string PartNumber, decimal Denomination, bool Import, decimal Amount);
 
     [HookAttachment(key: HookKeys.PartList.Import)]
     internal class PartListImportHook : IPageHook
@@ -45,7 +45,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 return Error(pageModel, "Some articles have been inserted meanwhile you tried to import please try again");
 
             var entries = rows
-                .GroupBy(r => r.PartNumber)
+                .GroupBy(r => (r.PartNumber, r.Denomination))
                 .Select(g => ListEntryRecord(g, articleLookup!, listId))
                 .ToArray();
 
@@ -64,10 +64,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             var partNumbers = pageModel.GetFormValues(Article.Fields.PartNumber);
             var importValues = pageModel.GetFormValues("import");
             var amounts = pageModel.GetFormValues(PartListEntry.Fields.Amount);
+            var denominations = pageModel.GetFormValues(PartListEntry.Fields.Denomination);
 
             rows = new List<Row>(partNumbers.Length);
 
-            if (partNumbers.Length != importValues.Length || partNumbers.Length != amounts.Length)
+            if (partNumbers.Length != importValues.Length || partNumbers.Length != amounts.Length || partNumbers.Length != denominations.Length)
                 return false;
 
             for (var i = 0; i < partNumbers.Length; i++)
@@ -78,8 +79,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 if (!int.TryParse(amounts[i], out var amount))
                     return false;
 
+                if (!int.TryParse(denominations[i], out var denomination))
+                    return false;
+
                 if (import && amount > 0)
-                    rows.Add(new(partNumbers[i], import, amount));
+                    rows.Add(new(partNumbers[i], denomination, import, amount));
             }
 
             return true;
@@ -102,15 +106,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             return null;
         }
 
-        private static PartListEntry ListEntryRecord(IGrouping<string, Row> g, Dictionary<string, Article> articleLookup, Guid partListId)
+        private static PartListEntry ListEntryRecord(IGrouping<(string PartNumber, decimal Denomination), Row> g, Dictionary<string, Article> articleLookup, Guid partListId)
         {
             return new PartListEntry()
             {
                 Id = Guid.NewGuid(),
                 PartListId = partListId,
-                ArticleId = articleLookup[g.Key].Id!.Value,
+                ArticleId = articleLookup[g.Key.PartNumber].Id!.Value,
                 DeviceTag = string.Empty,
-                Amount = g.Sum(r => r.Amount)
+                Amount = g.Sum(r => r.Amount),
+                Denomination = g.Key.Denomination,
             };
         }
     }

@@ -82,7 +82,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             const string receivedQuery = $"*, ${GoodsReceivingEntry.Relations.GoodsReceiving}.*";
             var goodsReceivingEntryLookup = goodsReceivingRepo.FindManyEntriesByOrder(orderId, receivedQuery)
-                .GroupBy(e => e.Article)
+                .GroupBy(e => (e.Article, e.Denomination))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
 
@@ -100,7 +100,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
                 var receivedAmount = 0m;
                 
-                if (!goodsReceivingEntryLookup.TryGetValue(orderEntry.Article, out var receivingEntries))
+                if (!goodsReceivingEntryLookup.TryGetValue((orderEntry.Article, orderEntry.Denomination), out var receivingEntries))
                     orderEntry.SetGoodsReceivings([]);
                 else
                 {

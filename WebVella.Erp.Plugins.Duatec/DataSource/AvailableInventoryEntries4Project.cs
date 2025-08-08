@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var demandLookup = GetDemandLookup(recMan, projectId);
             var inventoryEntries = new InventoryRepository(recMan).FindManyByProject(null)
-                .Where(r => demandLookup.ContainsKey(r.Article))
+                .Where(r => demandLookup.ContainsKey((r.Article, r.Denomination)))
                 .ToArray();
 
             if (inventoryEntries.Length == 0)
@@ -37,7 +37,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var articleLookup = GetArticleLookup(recMan, inventoryEntries);
             return inventoryEntries
-                .GroupBy(s => s.Article)
+                .GroupBy(s => (s.Article, s.Denomination))
                 .Select(g => RecordFromGroup(g, articleLookup, demandLookup))
                 .OrderBy(r => r.GetArticle().PartNumber);
         }
@@ -54,29 +54,29 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static Dictionary<Guid, decimal> GetDemandLookup(RecordManager recMan, Guid projectId)
+        private static Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetDemandLookup(RecordManager recMan, Guid projectId)
         {
             var demandLookup = new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
-                .GroupBy(ple => ple.ArticleId)
+                .GroupBy(ple => (ple.ArticleId, ple.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var orderedLookup = new OrderRepository(recMan).FindManyEntriesByProject(projectId)
-                .GroupBy(oe => oe.Article)
+                .GroupBy(oe => (oe.Article, oe.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
 
             var inventoryRepo = new InventoryRepository(recMan);
             var reservedLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
-            var result = new Dictionary<Guid, decimal>(demandLookup.Count);
+            var result = new Dictionary<(Guid ArticleId, decimal Denomination), decimal>(demandLookup.Count);
 
-            foreach(var (articleId, demand) in demandLookup)
+            foreach(var (key, demand) in demandLookup)
             {
-                var ordered = orderedLookup.TryGetValue(articleId, out var d) ? d : 0m;
-                var fromInventory = reservedLookup.TryGetValue(articleId, out d) ? d : 0m;
+                var ordered = orderedLookup.TryGetValue(key, out var d) ? d : 0m;
+                var fromInventory = reservedLookup.TryGetValue(key, out d) ? d : 0m;
 
                 var relativeDemand = demand - ordered - fromInventory;
                 if (relativeDemand > 0)
-                    result.Add(articleId, relativeDemand);
+                    result.Add(key, relativeDemand);
             }
 
             return result;
@@ -97,12 +97,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         }
 
         private static AvailableInventoryArticle RecordFromGroup(
-            IGrouping<Guid, InventoryEntry> g, 
+            IGrouping<(Guid ArticleId, decimal Denomination), InventoryEntry> g, 
             Dictionary<Guid, Article?> articleLookup, 
-            Dictionary<Guid, decimal> demandLookup)
+            Dictionary<(Guid ArticleId, decimal Denomination), decimal> demandLookup)
         {
-            var articleId = g.Key;
-            var demand = demandLookup[articleId];
+            var articleId = g.Key.ArticleId;
+            var denomination = g.Key.Denomination;
+            var demand = demandLookup[g.Key];
 
             var available = g.Sum(r => r.Amount);
 
@@ -112,7 +113,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 ArticleId = articleId,
                 Amount = Math.Min(available, demand),
                 AvailableAmount = available,
-                Demand = demand
+                Demand = demand,
+                Denomination = denomination,
             };
 
             rec.SetArticle(articleLookup[articleId]);
