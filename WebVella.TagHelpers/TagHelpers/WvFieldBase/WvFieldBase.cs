@@ -92,6 +92,9 @@ namespace WebVella.TagHelpers.TagHelpers
 		[HtmlAttributeName("autocomplete")]
 		public bool? AutoComplete { get; set; } = null;
 
+		[HtmlAttributeName("disable-form-group-class")]
+		public bool? DisableFormGroupAttribute { get; set; } = null;
+
 		public List<string> PrependHtml { get; set; } = new List<string>();
 
 		public List<string> AppendHtml { get; set; } = new List<string>();
@@ -319,7 +322,10 @@ namespace WebVella.TagHelpers.TagHelpers
 			{
 				CssClassList.Add(Class);
 			}
-			CssClassList.Add("form-group");
+
+			if(DisableFormGroupAttribute is not true)
+				CssClassList.Add("form-group");
+
 			CssClassList.Add("wv-field");
 			if (LabelMode == WvLabelRenderMode.Horizontal)
 			{

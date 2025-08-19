@@ -20,5 +20,5 @@
 				init-errors="@fieldModel.InitErrors" validation-errors="@fieldModel.ValidationErrors.ToKeyValuePair()" 
 				api-url="@fieldModel.ApiUrl" access-denied-message="@fieldModel.AccessDeniedMessage"
 				empty-value-message="@fieldModel.EmptyValueMessage" required="@fieldModel.Required" placeholder="@fieldModel.Placeholder"
-				description="@fieldModel.Description" locale="@fieldModel.Locale" 
-				options="@fieldModel.Options.ToWvSelectOption()" is-visible="(bool)ViewBag.IsVisible"></wv-field-checkbox-list>
+				description="@fieldModel.Description" locale="@fieldModel.Locale"
+                        options="@fieldModel.Options.ToWvSelectOption()" is-visible="(bool)ViewBag.IsVisible" disable-form-group-class="@options.DisableFormGroupClass"></wv-field-checkbox-list>

@@ -5141,6 +5141,11 @@ input{
 	max-width: 200px;
 }
 
+.article-denomination{
+	min-width: 80px;
+	max-width: 200px;
+}
+
 .article-select {
 	max-width: 600px;
 	white-space: nowrap;

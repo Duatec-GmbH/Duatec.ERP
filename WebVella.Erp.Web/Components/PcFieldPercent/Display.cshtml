@@ -21,7 +21,8 @@
 				  api-url="@fieldModel.ApiUrl" access-denied-message="@fieldModel.AccessDeniedMessage"
 				  empty-value-message="@fieldModel.EmptyValueMessage" required="@fieldModel.Required" placeholder="@fieldModel.Placeholder"
 				  description="@options.Description" locale="@fieldModel.Locale" min="@options.Min"
-				  max="@options.Max" decimal-digits="@options.DecimalDigits" is-visible="(bool)ViewBag.IsVisible">
+				  max="@options.Max" decimal-digits="@options.DecimalDigits" is-visible="(bool)ViewBag.IsVisible"
+                  disable-form-group-class="@options.DisableFormGroupClass">
 	@if (options.ShowIcon)
 	{
 		<wv-field-prepend><span class='input-group-text'><i class='fa fa-fw fa-percent'></i></span></wv-field-prepend>

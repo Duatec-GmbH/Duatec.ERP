@@ -79,7 +79,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 result.Add(importResult);
             }
 
-            return result.GroupBy(a => (a.PartNumber, a.OrderNumber)).Select(FromGroup).ToList();
+            return result.GroupBy(a => (a.PartNumber, a.OrderNumber, a.Denomination)).Select(FromGroup).ToList();
         }
 
         public static List<ArticleImportResult> FromEplanArticles(List<EplanArticleDto> eplanArticles)
@@ -117,6 +117,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                     type: typeId,
                     deviceTags: article.DeviceTags,
                     amount: article.Amount,
+                    denomination: 0,
                     importState: importState,
                     action: ArticleImportAction.Default(importState),
                     availableActions: ArticleImportAction.AvailableActions(importState));
@@ -127,7 +128,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
             return result;
         }
 
-        private static ArticleImportResult FromGroup(IGrouping<(string PartNumber, string OrderNumber), ArticleImportResult> group)
+        private static ArticleImportResult FromGroup(IGrouping<(string PartNumber, string OrderNumber, decimal Denomination), ArticleImportResult> group)
         {
             var first = group.First();
 
@@ -141,6 +142,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
                 amount: group.Sum(a => a.Amount),
                 importState: first.ImportState,
                 availableActions: first.AvailableActions,
+                denomination: group.Key.Denomination,
                 action: first.Action);
         }
 

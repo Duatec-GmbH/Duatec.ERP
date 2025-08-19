@@ -10,14 +10,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string Update = "article_update";
             public const string FileUpload = "article_file_upload";
             public const string FileImport = "article_file_import";
-
-            public static class Type
-            {
-                public const string Create = "article_type_create";
-                public const string Manage = "article_type_manage";
-                public const string Delete = "article_type_delete";
-                public const string Update = "article_type_update";
-            }
         }
 
         public static class Inventory

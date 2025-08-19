@@ -28,7 +28,8 @@
 					  empty-value-message="@fieldModel.EmptyValueMessage" required="@fieldModel.Required" placeholder="@placeholder"
 					  description="@options.Description" locale="@fieldModel.Locale" options="@fieldModel.Options.ToWvSelectOption()" 
 					  is-visible="(bool)ViewBag.IsVisible"  ajax-datasource="@options.AjaxDatasource.ToWvSelectOptionsAjaxDatasource()" 
-                      select-match-type="@options.SelectMatchingType" ajax-datasource-api="@options.AjaxDatasourceApi">
+                      select-match-type="@options.SelectMatchingType" ajax-datasource-api="@options.AjaxDatasourceApi"
+                      disable-form-group-class="@options.DisableFormGroupClass">
 	@if (options.ShowIcon)
 	{
 		<wv-field-prepend><span class='input-group-text'><i class='fa fa-fw fa-indent'></i></span></wv-field-prepend>

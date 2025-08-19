@@ -16,6 +16,7 @@
             Action = action;
             AvailableActions = availableActions;
             DeviceTags = deviceTags;
+            Denomination = denomination;
         }
 
         public string PartNumber { get; }
@@ -25,6 +26,8 @@
         public string OrderNumber { get; }
 
         public string Designation { get; }
+
+        public decimal Denomination { get; }
 
         public decimal Amount { get; }
 

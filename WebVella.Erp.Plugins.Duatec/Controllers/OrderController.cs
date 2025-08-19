@@ -8,14 +8,13 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     [Authorize]
     public class OrderController : Controller
     {
-        private readonly RecordManager _recMan = new();
-
         [HttpGet]
         [Route("/api/v3.0/o/orders/free-order-numbers/all")]
         public ActionResult GetFreeOrderNumberLookup()
         {
-            var orders = new OrderRepository(_recMan).FindAll();
-            var projects = new ProjectRepository(_recMan).FindAll()
+            var recMan = new RecordManager();
+            var orders = new OrderRepository(recMan).FindAll();
+            var projects = new ProjectRepository(recMan).FindAll()
                 .ToDictionary(p => p.Id!.Value);
 
             var projectNumbers = projects.Select(kp => kp.Value.Number.ToString())

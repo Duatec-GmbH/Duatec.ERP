@@ -1597,51 +1597,27 @@ namespace WebVella.Erp.Web.Models
 				if (parameters[0].Value is not List<EntityRecord> l)
 					throw new PropertyDoesNotExistException($"function {Name} requires List<EntityRecord> as first argument");
 
-				if (parameters[1].Value is not string relationName)
+				if (parameters[1].Value is not string relationPaths)
 					throw new PropertyDoesNotExistException($"function {Name} requires string as second argument");
 
-				if (!relationName.StartsWith('$'))
-					throw new PropertyDoesNotExistException($"function {Name} second argument requires a relation");
-
-				if (l.Count == 0)
+				var first = l.FirstOrDefault(o => o != null);
+				if (first == null)
 					return l;
 
-				relationName = relationName.TrimStart('$');
-
-				var relation = DataModel.relMan.Read().Object
-					.Single(r => r.Name == relationName);
-
-				var ids = l.Select(r => (Guid)r[relation.TargetFieldName])
-					.Distinct()
-					.ToArray();
-
-				var subQuery = ids.Select(id =>
-					new QueryObject()
-					{
-						QueryType = QueryType.EQ,
-						FieldName = relation.OriginFieldName,
-						FieldValue = id,
-					}).ToList();
-
-				var query = subQuery.Count == 1 ? subQuery[0] : new QueryObject()
+				foreach(var path in relationPaths.Split(',').Select(s => s.Trim()))
 				{
-					QueryType = QueryType.OR,
-					SubQueries = subQuery
-				};
+					if (!path.StartsWith('$'))
+						throw new PropertyDoesNotExistException($"function {Name} second argument requires one or many relations seperated by ','");
 
-				var response = DataModel.recMan.Find(new EntityQuery(relation.OriginEntityName, "*", query));
+					var relationName = path.Split('.')[0].TrimStart('$');
+					var relation = DataModel.relMan.Read().Object
+						.Single(r => r.Name == relationName);
 
-				if(response.Success && response.Object?.Data != null)
-				{
-					var lookup = response.Object.Data
-						.ToDictionary(r => (Guid)r[relation.OriginFieldName], r => r);
-
-					foreach(var r in l)
-					{
-						var id = (Guid)r[relation.TargetFieldName];
-						if (lookup.TryGetValue(id, out var relatedRec))
-							r[$"${relationName}"] = relatedRec;
-					}
+					var entityName = relation.TargetFieldName != "id" && first.Properties.ContainsKey(relation.TargetFieldName)
+						? relation.TargetEntityName
+						: relation.OriginEntityName;
+					
+					l = [.. l.Select(entityName, path, DataModel.recMan)];
 				}
 
 				return l;

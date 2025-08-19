@@ -84,6 +84,9 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "description")]
 			public string Description { get; set; } = "";
 
+			[JsonProperty(PropertyName = "disable_form_group_class")]
+			public bool DisableFormGroupClass { get; set; } = false;
+
 		}
 
 		public class PcFieldBaseModel
@@ -98,7 +101,6 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "label_help_text")]
 			public string LabelHelpText { get; set; } = "";
-
 
 			//Field
 			[JsonProperty(PropertyName = "field_id")]
@@ -191,7 +193,7 @@ namespace WebVella.Erp.Web.Components
 					ValidationErrors = input.ValidationErrors,
 					Value = input.Value,
 					DefaultValue = input.DefaultValue,
-					Options = options
+					Options = options,
 				};
 			}
 		}

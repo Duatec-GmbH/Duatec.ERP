@@ -74,7 +74,7 @@ namespace WebVella.Erp.Utilities
 			}
 
 			entityName = nextEntityName;
-			return Enumerable.Where(currentRecords, v => v != null)!.ToArray();
+			return Enumerable.Where(result.Values, v => v != null)!.ToArray()!;
 		}
 
 
@@ -139,7 +139,7 @@ namespace WebVella.Erp.Utilities
 			}
 			else
 			{
-				recordProperty = relation.TargetEntityName;
+				recordProperty = relation.TargetFieldName;
 				nextIdProperty = relation.OriginFieldName;
 				nextEntityName = relation.OriginEntityName;
 			}

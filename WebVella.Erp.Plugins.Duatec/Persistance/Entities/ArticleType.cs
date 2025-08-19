@@ -13,6 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Label = "label";
             public const string Unit = "unit";
             public const string IsInteger = "is_integer";
+            public const string IsDivisible = "is_divisible";
         }
 
         public override string EntityName => Entity;
@@ -33,6 +34,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<bool>(Fields.IsInteger);
             set => Properties[Fields.IsInteger] = value;
+        }
+
+        public bool IsDivisible
+        {
+            get => Get<bool>(Fields.IsDivisible);
+            set => Properties[Fields.IsDivisible] = value;
         }
     }
 }
