@@ -1600,27 +1600,7 @@ namespace WebVella.Erp.Web.Models
 				if (parameters[1].Value is not string relationPaths)
 					throw new PropertyDoesNotExistException($"function {Name} requires string as second argument");
 
-				var first = l.FirstOrDefault(o => o != null);
-				if (first == null)
-					return l;
-
-				foreach(var path in relationPaths.Split(',').Select(s => s.Trim()))
-				{
-					if (!path.StartsWith('$'))
-						throw new PropertyDoesNotExistException($"function {Name} second argument requires one or many relations seperated by ','");
-
-					var relationName = path.Split('.')[0].TrimStart('$');
-					var relation = DataModel.relMan.Read().Object
-						.Single(r => r.Name == relationName);
-
-					var entityName = relation.TargetFieldName != "id" && first.Properties.ContainsKey(relation.TargetFieldName)
-						? relation.TargetEntityName
-						: relation.OriginEntityName;
-					
-					l = [.. l.Select(entityName, path, DataModel.recMan)];
-				}
-
-				return l;
+				return l.Include(relationPaths);
 			}
 		}
 

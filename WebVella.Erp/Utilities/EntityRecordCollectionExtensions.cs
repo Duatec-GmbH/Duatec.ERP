@@ -10,12 +10,40 @@ namespace WebVella.Erp.Utilities
 
 	public static class EntityRecordCollectionExtensions
 	{
-		public static IEnumerable<T> Select<T>(this IEnumerable<T> records, string entityName, string relationName, RecordManager? recMan = null)
+		public static IEnumerable<T> Include<T>(this IEnumerable<T> records, string relationPaths, RecordManager? recMan = null)
 			where T : EntityRecord
 		{
-			if (!Enumerable.Any(records))
+			if(string.IsNullOrWhiteSpace(relationPaths)) 
 				return records;
 
+			var first = records.FirstOrDefault(o => o != null);
+			if (first == null)
+				return records;
+
+			recMan ??= new RecordManager();
+
+			foreach (var path in relationPaths.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+			{
+				if (!path.StartsWith('$'))
+					throw new InvalidOperationException("Relations must start with '$'");
+
+				var relationName = path.Split('.')[0].TrimStart('$');
+				var relation = recMan.RelationManager.Read().Object
+					.Single(r => r.Name == relationName);
+
+				var entityName = relation.TargetFieldName != "id" && first.Properties.ContainsKey(relation.TargetFieldName)
+					? relation.TargetEntityName
+					: relation.OriginEntityName;
+
+				records = records.IncludeRelation(entityName, path, recMan);
+			}
+
+			return records;
+		}
+
+		private static IEnumerable<T> IncludeRelation<T>(this IEnumerable<T> records, string entityName, string relationName, RecordManager? recMan = null)
+			where T : EntityRecord
+		{
 			recMan ??= new();
 			var relations = recMan.RelationManager.Read().Object;
 
