@@ -12,7 +12,11 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
         public ActionResult GetDenominationLookup()
         {
             var result = new ArticleRepository().FindAll($"id, ${Article.Relations.Type}.{ArticleType.Fields.IsDivisible}")
-                .ToDictionary(a => a.Id!.Value, a => a.GetArticleType().IsDivisible);
+                .ToDictionary(a => a.Id!.Value, a => new
+                {
+                    isDivisible = a.GetArticleType().IsDivisible,
+                    unit = a.GetArticleType().Unit
+                });
 
             return Json(result);
         }

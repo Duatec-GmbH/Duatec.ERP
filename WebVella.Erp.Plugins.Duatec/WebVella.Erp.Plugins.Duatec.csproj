@@ -23,6 +23,10 @@
     <Compile Remove="Snippets\ManufacturerListVisitButtonVisibilitySnippet.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Embeded\article-denomination.js" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -46,6 +50,9 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>WebVella.Erp.Plugins.Duatec.Test</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Embeded\article-denomination.js" />
   </ItemGroup>
 
 </Project>

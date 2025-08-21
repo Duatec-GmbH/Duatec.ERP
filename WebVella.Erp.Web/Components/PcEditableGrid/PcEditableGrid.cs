@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Services;
+using WebVella.Erp.Web.Utils;
 using WebVella.TagHelpers.Models;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -466,6 +469,94 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "container12_horizontal_align")]
 			public WvHorizontalAlignmentType Container12HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
+			#endregion
+		}
+
+		public static void ModifyChildElement(PageBodyNode childNode, JObject childOptions, int rowIndex, 
+			EntityRecord record,
+			PageComponentContext componentContext, 
+			Dictionary<string, Dictionary<string, SelectOption>> cachedSelectOptions)
+		{
+			if(childNode.Nodes.Count > 0)
+			{
+				// node container
+
+				foreach(var n in childNode.Nodes)
+				{
+					var options = PageUtils.ConvertStringToJObject(n.Options.ToString());
+
+					var context = new PageComponentContext(n, componentContext.DataModel, ComponentMode.Display, options, componentContext.Items);
+					context.DataModel.SetRowRecord(record);
+
+					ModifyChildElement(n, options, rowIndex, record, context, cachedSelectOptions);
+					n.Options = JsonConvert.SerializeObject(options);
+				}
+
+				return;
+			}
+
+			var name = $"{childOptions["name"]}";
+			var brackOpenIndex = name.IndexOf('[');
+
+			if (brackOpenIndex >= 0)
+				name = name[..brackOpenIndex];
+
+			if (string.IsNullOrWhiteSpace(name))
+				return;
+
+			childOptions["name"] = $"{name}[{rowIndex}]";
+
+			#region Performance increase by caching datasources of select options and reduce to selected element
+
+			var nodeComponentName = "";
+			if (childNode != null)
+			{
+				var nameArray = childNode.ComponentName.Split('.');
+				nodeComponentName = nameArray[^1];
+			}
+
+			if (nodeComponentName == "PcFieldSelect")
+			{
+				var selectOptions = PageUtils.ConvertStringToJObject(childOptions["options"]?.ToString());
+
+				if (selectOptions["type"]?.ToString() == "0")
+				{
+					var dataSourceName = $"{selectOptions["string"]}";
+
+					if (!string.IsNullOrEmpty(dataSourceName))
+					{
+						if (!dataSourceName.Contains("RowRecord"))
+						{
+							var valueOptions = PageUtils.ConvertStringToJObject(childOptions["value"]?.ToString());
+
+							if (valueOptions["type"]?.ToString() == "0")
+							{
+								var value = componentContext.DataModel.GetProperty($"{valueOptions["string"]}");
+
+								if (!cachedSelectOptions.TryGetValue(dataSourceName, out var lookup))
+								{
+									if (componentContext.DataModel.GetProperty(dataSourceName) is List<SelectOption> options)
+									{
+										lookup = options.ToDictionary(o => o.Value, o => o);
+										cachedSelectOptions.Add(dataSourceName, lookup);
+									}
+								}
+
+								if (lookup != null)
+								{
+									if (lookup.TryGetValue($"{value}", out var selectedOption))
+										childOptions["options"] = JsonConvert.SerializeObject(new SelectOption[] { selectedOption });
+									else
+									{
+										selectOptions["string"] = string.Empty;
+										childOptions["options"] = selectOptions.ToString();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			#endregion
 		}
 

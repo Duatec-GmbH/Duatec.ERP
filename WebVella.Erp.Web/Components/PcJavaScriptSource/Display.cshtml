@@ -1,0 +1,11 @@
+﻿@addTagHelper *, WebVella.Erp.Plugins.Core
+@addTagHelper *, WebVella.Erp.Web
+@addTagHelper *, WebVella.TagHelpers
+@using WebVella.Erp.Web.Utils;
+@using WebVella.Erp.Web.Components;
+@using WebVella.Erp.Web.Models;
+@using WebVella.Erp.Web;
+@{
+    var options = (PcJavaScriptSource.PcJavaScriptSourceOptions)ViewBag.Options;
+}
+<script src="@options.Source" type="text/javascript"></script>

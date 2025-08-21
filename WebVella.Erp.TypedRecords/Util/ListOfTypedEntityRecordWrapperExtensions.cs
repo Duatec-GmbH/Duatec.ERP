@@ -47,7 +47,7 @@ namespace WebVella.Erp.TypedRecords.Util
             recMan ??= new();
 
             var result = recMan.RelationManager.Read().Object
-                .Single(r => r.TargetEntityName == entity1 && r.OriginEntityName == entity2 || r.OriginEntityName == entity1 && r.TargetEntityName == entity2)
+                .Single(r => r.TargetEntityName == entity1 && r.OriginEntityName == entity2 || r.OriginEntityName == entity1 && r.TargetEntityName == entity2);
 
             return result;
         }

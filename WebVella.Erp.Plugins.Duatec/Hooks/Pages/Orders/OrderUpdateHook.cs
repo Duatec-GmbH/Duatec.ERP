@@ -34,14 +34,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var oldEntries = repository.FindManyEntriesByOrder(record.Id!.Value);
 
             var newArticleIds = entries
-                .Select(e => e.Article)
+                .Select(e => (e.Article, e.Denomination))
                 .ToHashSet();
 
             DeleteEntries(repository, oldEntries, newArticleIds);
             UpdateEntries(repository, entries, newArticleIds, oldEntries);
 
             var oldArticleIds = oldEntries
-                .Select(e => e.Article)
+                .Select(e => (e.Article, e.Denomination))
                 .ToHashSet();
 
             AddEntries(repository, entries, oldArticleIds);
@@ -68,29 +68,29 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var partListRepo = new PartListRepository(recMan);
 
             var oldEntries = orderRepo.FindManyEntriesByOrder(record.Id!.Value)
-                .Select(r => r.Article)
+                .Select(r => (r.Article, r.Denomination))
                 .Distinct()
                 .ToHashSet();
 
             var demands = partListRepo.FindManyEntriesByProject(record.Project.Value, true)
-                .Select(ple => ple.ArticleId)
+                .Select(ple => (ple.ArticleId, ple.Denomination))
                 .Distinct()
                 .ToHashSet();
 
             var index = 0;
-            foreach(var articleId in entries.Select(e => e.Article))
+            foreach(var (article, denomination) in entries.Select(e => (e.Article, e.Denomination)))
             {
                 // only check on new entries
-                if (articleId != Guid.Empty && !oldEntries.Contains(articleId) && !demands.Contains(articleId))
+                if (article != Guid.Empty && !oldEntries.Contains((article, denomination)) && !demands.Contains((article, denomination)))
                     yield return Error(OrderEntry.Fields.Article, index, "There is no demand on given article");
                 index++;
             }
         }
 
-        private static void DeleteEntries(OrderRepository repository, List<OrderEntry> oldEntries, HashSet<Guid> newArticleIds)
+        private static void DeleteEntries(OrderRepository repository, List<OrderEntry> oldEntries, HashSet<(Guid Article, decimal Denomination)> newArticleIds)
         {
             var toDelete = oldEntries
-                .Where(oe => !newArticleIds.Contains(oe.Article))
+                .Where(oe => !newArticleIds.Contains((oe.Article, oe.Denomination)))
                 .Select(oe => oe.Id!.Value)
                 .ToArray();
 
@@ -98,17 +98,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 throw new DbException("Could not delete entries");
         }
 
-        private static void AddEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<Guid> oldArticleIds)
+        private static void AddEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<(Guid Article, decimal Denomination)> oldArticleIds)
         {
-            var newEntries = entries.Where(e => !oldArticleIds.Contains(e.Article)).ToArray();
+            var newEntries = entries.Where(e => !oldArticleIds.Contains((e.Article, e.Denomination))).ToArray();
 
             if(repository.InsertManyEntries(newEntries).Count != newEntries.Length)
                 throw new DbException("Could not add entries");
         }
 
-        private static void UpdateEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<Guid> newArticleIds, List<OrderEntry> oldEntries)
+        private static void UpdateEntries(OrderRepository repository, List<OrderEntry> entries, HashSet<(Guid Article, decimal Denomination)> newArticleIds, List<OrderEntry> oldEntries)
         {
-            foreach (var entry in oldEntries.Where(oe => newArticleIds.Contains(oe.Article)))
+            foreach (var entry in oldEntries.Where(oe => newArticleIds.Contains((oe.Article, oe.Denomination))))
             {
                 var newEntry = entries.Single(e => e.Article == entry.Article);
 

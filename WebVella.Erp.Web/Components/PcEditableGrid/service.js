@@ -24,6 +24,8 @@ let usedIds = new Set();
 			updateFieldNames: function (body) { updateFieldNames(body) },
 			handleSelect2Elements: function (node) { handleSelect2Elements(node) },
 			performClone: function (row) { return performClone(row); },
+			getValue: function (cell) { return getValue(cell); },
+			setValue: function (cell, value) { return setValue(cell, value); },
 		};
 
 		let loader = document.body.getElementsByClassName('loader')[0];

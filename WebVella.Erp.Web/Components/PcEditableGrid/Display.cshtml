@@ -140,55 +140,7 @@
 
                                                 if (idx >= 0)
                                                 {
-                                                    childOptions["name"] = $"{childOptions["name"]}[{idx}]";
-
-                                                    #region Performance increase by caching datasources of select options and reduce to selected element
-
-                                                    if(nodeComponentName == "PcFieldSelect")
-                                                    {
-                                                        var selectOptions = PageUtils.ConvertStringToJObject(childOptions["options"]?.ToString());
-
-                                                        if (selectOptions["type"]?.ToString() == "0")
-                                                        {
-                                                            var dataSourceName = $"{selectOptions["string"]}";
-
-                                                            if (!string.IsNullOrEmpty(dataSourceName))
-                                                            {
-                                                                if(!dataSourceName.Contains("RowRecord"))
-                                                                {
-                                                                    var valueOptions = PageUtils.ConvertStringToJObject(childOptions["value"]?.ToString());
-
-                                                                    if (valueOptions["type"]?.ToString() == "0")
-                                                                    {
-                                                                        var value = componentContext.DataModel.GetProperty($"{valueOptions["string"]}");
-
-                                                                        Dictionary<string, SelectOption> lookup = null;
-
-                                                                        if (!cachedSelectOptions.TryGetValue(dataSourceName, out lookup))
-                                                                        {
-                                                                            if (componentContext.DataModel.GetProperty(dataSourceName) is List<SelectOption> options)
-                                                                            {
-                                                                                lookup = options.ToDictionary(o => o.Value, o => o);
-                                                                                cachedSelectOptions.Add(dataSourceName, lookup);
-                                                                            }
-                                                                        }
-
-                                                                        if (lookup != null)
-                                                                        {
-                                                                            if (lookup.TryGetValue($"{value}", out var selectedOption))
-                                                                                childOptions["options"] = JsonSerializer.Serialize<SelectOption[]>(new SelectOption[] { selectedOption });
-                                                                            else
-                                                                            {
-                                                                                selectOptions["string"] = string.Empty;
-                                                                                childOptions["options"] = selectOptions.ToString();
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-#endregion
+                                                    PcEditableGrid.ModifyChildElement(childNode, childOptions, idx, record, componentContext, cachedSelectOptions);
                                                 }
 
                                                 @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })

@@ -9,7 +9,7 @@ using WebVella.TagHelpers.Models;
 
 namespace WebVella.Erp.Web.Components
 {
-    [PageComponent(Label = "Div", Library = "WebVella", Description = "Render a div element", Version = "0.0.1", IconClass = "fas fa-poll-h")]
+    [PageComponent(Label = "Div", Library = "WebVella", Description = "Render a div element", Version = "0.0.1", IconClass = "fas fa-code")]
     public class PcDiv : PageComponent
     {
         protected ErpRequestContext ErpRequestContext { get; set; }
