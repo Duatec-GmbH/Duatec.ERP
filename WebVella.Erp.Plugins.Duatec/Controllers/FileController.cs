@@ -9,7 +9,9 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     {
         [AllowAnonymous]
         [Route("api/v3.0/f/files/javascript")]
-        //[ResponseCache(NoStore = false, Duration = 30 * 24 * 3600)]
+#if !DEBUG
+        [ResponseCache(NoStore = false, Duration = 30 * 24 * 3600)]
+#endif
         [HttpGet]
         public ContentResult TimeTrackJs([FromQuery] string file = "")
         {

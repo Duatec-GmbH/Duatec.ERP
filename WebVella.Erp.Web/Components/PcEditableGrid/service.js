@@ -184,9 +184,8 @@ let usedIds = new Set();
 							let row = getTargetRow(body);
 							if (row) {
 								loader.classList.remove('d-none');
-								let headers = getHeaders(body);
-								let tableId = getParentTable(body).id;
-								let selectOptionSet = editableGridSelectSources.get(tableId);
+								const tableId = getParentTable(body).id;
+								const selectOptionSet = editableGridSelectSources.get(tableId);
 
 								const text = await navigator.clipboard.readText();
 								try {
@@ -194,7 +193,7 @@ let usedIds = new Set();
 
 									if (isCompatible(body, obj.compatibility)) {
 
-										let newNodes = obj.data[0][1].map(_ => performClone(body.children[0]));
+										const newNodes = obj.data.map(_ => performClone(body.children[0]));
 
 										let n = row;
 										for (let node of newNodes) {
@@ -202,7 +201,7 @@ let usedIds = new Set();
 											n = node;
 										}
 
-										let selectCellOffsets = [];
+										const selectCellOffsets = [];
 										let cnt = 0;
 
 										for (let i = 0; i < body.children[0].children.length; i++) {
@@ -211,44 +210,45 @@ let usedIds = new Set();
 											cnt += body.children[0].children[i].getElementsByTagName('select').length;
 										}
 
-										for (let kp of obj.data) {
+										for (let i = 0; i < obj.data.length; i++) {
 
-											let header = kp[0];
-											let data = kp[1];
-											let childIdx = headers.indexOf(header);
+											const rowNode = newNodes[i];
+											const rowData = obj.data[i];
 
-											if (childIdx >= 0) {
-												for (let i = 0; i < newNodes.length; i++) {
+											let cellIdx = 0;
 
-													let value = data[i];
-													let cell = newNodes[i].children[childIdx];
+											for (const cell of rowNode.children) {
 
-													let selects = cell.getElementsByTagName('select');
+												const selects = cell.getElementsByTagName('select');
 
-													for (let j = 0; j < selects.length; j++) {
+												for (let j = 0; j < selects.length; j++) {
 
-														let select = selects[j];
-														let emptyOption = document.createElement('option');
+													const select = selects[j];
+													if (select.hasAttribute('name')) {
+
+														const valueLookup = new Map(Object.entries(rowData));
+														const value = valueLookup.get(select.getAttribute('name'));
+
+														const emptyOption = document.createElement('option');
 														select.appendChild(emptyOption);
 
-														let textLookup = selectOptionSet[selectCellOffsets[childIdx] + j].textLookup;
-														let text = textLookup.get(value);
+														const textLookup = selectOptionSet[selectCellOffsets[cellIdx] + j].textLookup;
+														const text = textLookup.get(value);
 
 														if (text) {
-															let selectedOption = document.createElement('option');
+															const selectedOption = document.createElement('option');
 															selectedOption.value = value;
 															selectedOption.text = text;
 															select.appendChild(selectedOption);
 														}
 													}
-
-													setValue(cell, value);
 												}
-											}
-										}
 
-										for (let node of newNodes) {
-											handleSelect2Elements(node);
+												cellIdx++;
+											}
+
+											setValue(rowNode, rowData);
+											handleSelect2Elements(rowNode);
 										}
 
 										updateFieldNames(body);
@@ -456,140 +456,181 @@ let usedIds = new Set();
 
 		function getValue(col) {
 
-			for (let i = 0; i < col.children.length; i++) {
-				let elem = col.children[i];
+			const resultArr = [];
 
-				if (elem.classList.contains('wv-field-number'))
-					return getNumber(elem);
-				if (elem.classList.contains('wv-field-text'))
-					return getText(elem);
-				if (elem.classList.contains('wv-field-checkbox'))
-					return getBool(elem);
-				if (elem.classList.contains('wv-field-select'))
-					return getSelectId(elem);
-			}
+			appendValuesOf(resultArr, col, 'wv-field-number', getNumber);
+			appendValuesOf(resultArr, col, 'wv-field-text', getText);
+			appendValuesOf(resultArr, col, 'wv-field-checkbox', getBool);
+			appendValuesOf(resultArr, col, 'wv-field-select', getSelectId);
 
-			return null;
+			if (resultArr.length === 0)
+				return null;
+
+			return Object.fromEntries(resultArr.map(v => [v.name, v.value]));
 		}
 
-		function setValue(col, value) {
+		function appendValuesOf(resultArr, col, className, getFunction) {
 
-			for (let i = 0; i < col.children.length; i++) {
-				let elem = col.children[i];
+			for (const elem of col.getElementsByClassName(className)) {
+				if (!elem.classList.contains('editable-grid-ignore')) {
 
-				if (elem.classList.contains('wv-field-number'))
-					return setNumber(elem, value);
-				if (elem.classList.contains('wv-field-text'))
-					return setText(elem, value);
-				if (elem.classList.contains('wv-field-checkbox'))
-					return setBool(elem, value);
-				if (elem.classList.contains('wv-field-select'))
-					return setSelectId(elem, value);
-
-				throw new Error(`Could not insert value at ${elem.tagName}`);
-
+					const val = getFunction(elem);
+					if (val)
+						resultArr[resultArr.length] = val;
+				}
 			}
+		}
 
-			return null;
+		function valueName(name) {
+			if (!name)
+				return '';
+
+			const brackIdx = name.indexOf('[');
+			if (brackIdx < 0)
+				return name;
+
+			return name.substring(0, brackIdx);
 		}
 
 		function getNumber(numberField) {
 			let input = numberField.getElementsByTagName('input')[0];
-			return input.value;
-		}
 
-		function setNumber(numberField, value) {
-			let input = numberField.getElementsByTagName('input')[0];
-			input.value = value;
+			if (input && input.getAttribute('name'))
+				return {
+					name: valueName(input.getAttribute('name')),
+					value: input.value 
+				};
 		}
 
 		function getText(textField) {
 			let input = textField.getElementsByTagName('input')[0];
-			if (input)
-				return input.value;
-
-			let p = textField;
-
-			while (p.children[0])
-				p = p.children[0];
-			return p?.innerText ?? null;
-		}
-
-		function setText(textField, value) {
-			let input = textField.getElementsByTagName('input')[0];
-			if (input) {
-				input.value = value;
-				return;
-			}
-
-			let p = textField;
-
-			while (p.children[0])
-				p = p.children[0];
-
-			p.innerText = value;
+			if (input && input.getAttribute('name'))
+				return {
+					name: valueName(input.getAttribute('name')),
+					value: input.value
+				};
 		}
 
 		function getBool(checkBoxField) {
 			let inputs = checkBoxField.getElementsByTagName('input');
 			for (let input of inputs) {
-				if (input.hasAttribute('data-source-id'))
-					return input.value;
+				if (input.hasAttribute('data-source-id') && input.getAttribute('name'))
+					return {
+						name: valueName(input.getAttribute('name')),
+						value: input.value
+					};
+			}
+		}
+
+		function getSelectId(selectField) {
+			let select = selectField.getElementsByTagName('select')[0];
+			if (select && select.getAttribute('name'))
+				return {
+					name: valueName(select.getAttribute('name')),
+					value: select.value
+				};
+		}
+
+		function setValue(col, value) {
+			setValueOn(col, value, 'wv-field-number', setNumber);
+			setValueOn(col, value, 'wv-field-text', setText);
+			setValueOn(col, value, 'wv-field-checkbox', setBool);
+			setValueOn(col, value, 'wv-field-select', setSelectId);
+		}
+
+		function setValueOn(col, value, className, setFunction) {
+
+			for (const elem of col.getElementsByClassName(className)) {
+				if (!elem.classList.contains('editable-grid-ignore')) {
+					setFunction(elem, value);
+				}
+			}
+		}
+
+		function setNumber(numberField, value) {
+			let input = numberField.getElementsByTagName('input')[0];
+			if (input && input.hasAttribute('name')) {
+
+				const name = valueName(input.getAttribute('name'));
+				const v = value[name];
+
+				if(v)
+					input.value = v;
+			}
+		}
+
+		function setText(textField, value) {
+			let input = textField.getElementsByTagName('input')[0];
+			if (input && input.hasAttribute('name')) {
+
+				const name = valueName(input.getAttribute('name'));
+				const v = value[name];
+
+				if (v)
+					input.value = v;
 			}
 		}
 
 		function setBool(checkBoxField, value) {
-			let inputs = checkBoxField.getElementsByTagName('input');
-			let hidden = inputs[0];
-			let visible = inputs[1];
+			const inputs = checkBoxField.getElementsByTagName('input');
+			const hidden = inputs[0];
+			const visible = inputs[1];
 
-			hidden.value = value;
-			let b = value === 'true';
+			const name = valueName(hidden.getAttribute('name') ?? visible.getAttribute('name'));
+			const v = value[name];
 
-			visible.checked = b;
-		}
-
-		function getSelectId(selectField) {
-			return selectField.getElementsByTagName('select')[0].value;
+			if (v) {
+				hidden.value = v;
+				const b = v === 'true';
+				visible.checked = b;
+			}
 		}
 
 		function setSelectId(selectField, value) {
-			selectField.getElementsByTagName('select')[0].value = value;
+			const input = selectField.getElementsByTagName('select')[0];
+			if (input && input.hasAttribute('name')) {
+
+				const name = valueName(input.getAttribute('name'));
+				const v = value[name];
+
+				if (v)
+					input.value = v;
+			}
 		}
 
 		async function putDataToClipboard(body) {
 			let rows = body.getElementsByClassName('row-selected');
 			if (rows.length > 0) {
-				let headers = getHeaders(body);
-				let map = new Map();
-				let skip = [];
 
-				for (let i = 0; i < headers.length; i++) {
-					if (headers[i] == '' || map.has(headers[i])) {
-						skip[i] = true;
-					}
-					else {
-						map.set(headers[i], []);
-						skip[i] = false;
-					}
-				}
+				const headers = getHeaders(body);
 
-				if (map.size > 0) {
+				if (headers.some(h => h)) {
+
+					const skip = headers.map(h => h ? false : true);
+					const data = [];
 
 					for (let row of rows) {
 
+						const rowData = [];
+
 						for (let i = 0; i < headers.length; i++) {
 							if (!skip[i]) {
+								var cellData = getValue(row.children[i]);
 
-								let values = map.get(headers[i]);
-								values[values.length] = getValue(row.children[i]);
+								if (cellData) {
+									for (let kp of Object.entries(cellData)) {
+										rowData[rowData.length] = kp;
+									}
+								}
 							}
 						}
+
+						data[data.length] = Object.fromEntries(rowData);
 					}
 
 					let obj = {
 						compatibility: body.getAttribute('compatibility'),
-						data: Array.from(map.entries().filter(kp => kp[1].some(v => v != null && v != undefined)))
+						data: data
 					};
 
 					await navigator.clipboard.writeText(JSON.stringify(obj));
