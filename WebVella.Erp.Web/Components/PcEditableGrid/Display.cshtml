@@ -1,6 +1,7 @@
 ﻿@addTagHelper *, WebVella.Erp.Plugins.Core
 @addTagHelper *, WebVella.Erp.Web
 @addTagHelper *, WebVella.TagHelpers
+@using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @using System.Text.Json
 @using WebVella.Erp.Web.TagHelpers
@@ -104,7 +105,6 @@
                     for(var i = 0; i < records.Count; i++)
                         await CreateRow(records[i], i);
 
-
                     async Task CreateRow(EntityRecord record, int idx = -1)
                     {
                         var rowClass = idx < 0 ? "d-none" : string.Empty;
@@ -118,8 +118,10 @@
                                 var columnClass = optType.GetProperty($"Container{i}Class").GetValue(options, null)?.ToString() ?? string.Empty;
                                 var verticalAlign = (WvVerticalAlignmentType)(optType.GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
                                 var horizontalAlign = (WvHorizontalAlignmentType)(optType.GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
-                                var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
                                 var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
+                                var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId)
+                                    .Select(n => JsonConvert.DeserializeObject<PageBodyNode>(JsonConvert.SerializeObject(n)))
+                                    .ToList();
 
                                 <wv-td width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" width="@columnWidth" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
                                     @{
@@ -131,6 +133,7 @@
                                                 var nameArray = childNode.ComponentName.Split('.');
                                                 nodeComponentName = nameArray[nameArray.Length - 1];
                                             }
+
                                             if (!String.IsNullOrWhiteSpace(nodeComponentName))
                                             {
                                                 var childOptions = PageUtils.ConvertStringToJObject(childNode.Options.ToString());
@@ -145,7 +148,6 @@
 
                                                 @await Component.InvokeAsync(nodeComponentName, new { context = pcContext })
                                             }
- 
                                         }
                                     }
                             </wv-td>

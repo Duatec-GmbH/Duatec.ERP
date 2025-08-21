@@ -477,7 +477,12 @@ namespace WebVella.Erp.Web.Components
 			PageComponentContext componentContext, 
 			Dictionary<string, Dictionary<string, SelectOption>> cachedSelectOptions)
 		{
-			if(childNode.Nodes.Count > 0)
+			var name = $"{childOptions["name"]}";
+
+			if (!string.IsNullOrWhiteSpace(name))
+				childOptions["name"] = $"{name}[{rowIndex}]";
+
+			if (childNode.Nodes.Count > 0)
 			{
 				// node container
 
@@ -489,22 +494,10 @@ namespace WebVella.Erp.Web.Components
 					context.DataModel.SetRowRecord(record);
 
 					ModifyChildElement(n, options, rowIndex, record, context, cachedSelectOptions);
+
 					n.Options = JsonConvert.SerializeObject(options);
 				}
-
-				return;
 			}
-
-			var name = $"{childOptions["name"]}";
-			var brackOpenIndex = name.IndexOf('[');
-
-			if (brackOpenIndex >= 0)
-				name = name[..brackOpenIndex];
-
-			if (string.IsNullOrWhiteSpace(name))
-				return;
-
-			childOptions["name"] = $"{name}[{rowIndex}]";
 
 			#region Performance increase by caching datasources of select options and reduce to selected element
 
