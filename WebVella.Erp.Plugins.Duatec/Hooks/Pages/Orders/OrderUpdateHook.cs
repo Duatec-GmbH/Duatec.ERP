@@ -110,7 +110,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
         {
             foreach (var entry in oldEntries.Where(oe => newArticleIds.Contains((oe.Article, oe.Denomination))))
             {
-                var newEntry = entries.Single(e => e.Article == entry.Article);
+                var newEntry = entries.Single(e => e.Article == entry.Article && e.Denomination == entry.Denomination);
 
                 entry.Amount = newEntry.Amount;
                 entry.ExpectedArrival = newEntry.ExpectedArrival;

@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Embeded\article-denomination.js" />
+    <None Remove="Scripts\article-denomination.js" />
   </ItemGroup>
 
 
@@ -52,7 +52,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Embeded\article-denomination.js" />
+    <EmbeddedResource Include="Scripts\Extensions\Components\PcEditableGrid\article-denomination.js" />
   </ItemGroup>
 
 </Project>

@@ -13,13 +13,13 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
         [ResponseCache(NoStore = false, Duration = 30 * 24 * 3600)]
 #endif
         [HttpGet]
-        public ContentResult TimeTrackJs([FromQuery] string file = "")
+        public ContentResult GetScript([FromQuery] string file = "")
         {
             if (string.IsNullOrWhiteSpace(file))
                 return Content("", "text/javascript");
             try
             {
-                var jsContent = FileService.GetEmbeddedTextResource(file, "WebVella.Erp.Plugins.Duatec.Embeded", "WebVella.Erp.Plugins.Duatec");
+                var jsContent = FileService.GetEmbeddedTextResource(file, "WebVella.Erp.Plugins.Duatec.Scripts", "WebVella.Erp.Plugins.Duatec");
 
                 return Content(jsContent, "text/javascript");
             }

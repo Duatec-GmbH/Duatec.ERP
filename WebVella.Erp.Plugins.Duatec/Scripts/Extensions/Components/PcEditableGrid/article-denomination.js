@@ -96,7 +96,7 @@ if (tableInfos.length > 0) {
                                 const articleCell = rows[i].children[tableInfo.articleColumn];
                                 const amountCell = rows[i].children[tableInfo.amountColumn];
 
-                                const articleId = EditableGrid.getValue(articleCell);
+                                const articleId = EditableGrid.getValue(articleCell)['article_id'];
                                 const articleInfo = articleLookup.get(articleId);
 
                                 if (articleInfo) {
@@ -191,7 +191,7 @@ function addTableObserver(tableInfo, articleLookup) {
 
 function updateAmountCell(articleCell, amountCell, articleLookup) {
 
-    const articleInfo = articleLookup.get(EditableGrid.getValue(articleCell));
+    const articleInfo = articleLookup.get(EditableGrid.getValue(articleCell)['article_id']);
 
     if (articleInfo) {
 

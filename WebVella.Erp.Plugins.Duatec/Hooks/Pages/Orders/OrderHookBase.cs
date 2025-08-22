@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
@@ -43,6 +45,27 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             return result;
         }
 
+        protected override IActionResult? OnPreValidate(Order record, Entity entity, TModel pageModel)
+        {
+            var articleIds = pageModel.Request.Form.Where(kp => kp.Key.StartsWith($"{OrderEntry.Fields.Article}["))
+                .Select(kp => GetId($"{kp.Value}"))
+                .ToArray();
+
+            var denominationLookup = new ArticleRepository().FindMany($"id, ${Article.Relations.Type}.{ArticleType.Fields.IsDivisible}", articleIds)
+                .ToDictionary(kp => kp.Key, kp => kp.Value?.GetArticleType()?.IsDivisible ?? false);
+
+            var formDictionary = pageModel.Request.Form.ToDictionary();
+
+            for (var i = 0; i < articleIds.Length; i++)
+            {
+                if (!denominationLookup[articleIds[i]])
+                    formDictionary[$"{OrderEntry.Fields.Denomination}[{i}]"] = "0";
+            }
+
+            pageModel.Request.Form = new FormCollection(formDictionary, pageModel.Request.Form.Files);
+            return null;
+        }
+
         protected override List<ValidationError> Validate(Order record, Entity entity, TModel pageModel)
         {
             var result = base.Validate(record, entity, pageModel);
@@ -81,30 +104,35 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                     yield return error;
             }
 
-            foreach (var error in GetArticleUniquenessErrors(entries, articleIds))
+            var articleDenominations = entries.Select(e => (e.Article, e.Denomination))
+                .Distinct()
+                .ToArray();
+
+            foreach (var error in GetArticleUniquenessErrors(entries, articleDenominations))
                 yield return error;
         }
 
         private static List<ValidationError> GetEntryFormatErrors(OrderEntry entry, int idx, ArticleType? type)
         {
             var result = GetAmountFormatErrors(entry, idx, type);
+            result.AddRange(GetDenominationErrors(entry, idx, type));
             if (entry.Article == Guid.Empty)
                 result.Add(Error(OrderEntry.Fields.Article, idx, "Order entry 'article' is required"));
 
             return result;
         }
 
-        private static IEnumerable<ValidationError> GetArticleUniquenessErrors(List<OrderEntry> entries, Guid[] articleIds)
+        private static IEnumerable<ValidationError> GetArticleUniquenessErrors(List<OrderEntry> entries, (Guid Article, decimal Denomination)[] articleDenominations)
         {
-            if (entries.Count != articleIds.Length)
+            if (entries.Count != articleDenominations.Length)
             {
                 var idx = 0;
-                var idxInfo = entries.Select(e => new { Index = idx++, e.Article })
+                var idxInfo = entries.Select(e => new { Index = idx++, e.Article, e.Denomination })
                     .ToArray();
 
-                foreach (var id in articleIds.Where(aId => aId != Guid.Empty))
+                foreach (var (id, denomination) in articleDenominations.Where(e => e.Article != Guid.Empty))
                 {
-                    var occurances = idxInfo.Where(t => t.Article == id)
+                    var occurances = idxInfo.Where(t => t.Article == id && t.Denomination == denomination)
                         .ToArray();
 
                     if (occurances.Length > 1)
@@ -124,6 +152,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 entry.EntityName, OrderEntry.Fields.Amount, isInt, true, false);
 
             return validator.Validate(entry.Amount, $"{OrderEntry.Fields.Amount}[{idx}]");
+        }
+
+        private static List<ValidationError> GetDenominationErrors(OrderEntry entry, int idx, ArticleType? type)
+        {
+            var validator = new NumberFormatValidator(
+                entry.EntityName, OrderEntry.Fields.Denomination, true, true);
+
+            var field = $"{OrderEntry.Fields.Denomination}";
+            var result = validator.Validate(entry.Denomination, $"{field}[{idx}]");
+
+            if (!(type?.IsDivisible ?? false) && entry.Denomination != 0m)
+                result.Add(new ValidationError(string.Empty, "When article is not divisible, denomination must be '0'."));
+
+            return result;
         }
 
         protected static ValidationError Error(string field, int index, string errorMessage)
