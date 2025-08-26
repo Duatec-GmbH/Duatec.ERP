@@ -94,6 +94,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     ProjectSourceId = projectId,
                     WarehouseLocationId = e.WarehouseLocation,
                     WarehouseLocationSourceId = e.WarehouseLocation,
+                    Denomination = e.Denomination,
                     Timestamp = timestamp,
                     UserId = userId,
                     Comment = "Goods Receiving Store"
@@ -338,7 +339,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                 var amount = decimal.TryParse(form[$"amount[{i}]"], out var d)
                     ? d : 0m;
 
-                var denomination = decimal.TryParse(form[$"amount[{i}]"], out d)
+                var denomination = decimal.TryParse(form[$"denomination[{i}]"], out d)
                     ? d : 0m;
 
                 yield return (projectId, articleId, denomination, warehouseLocationId, amount, i);

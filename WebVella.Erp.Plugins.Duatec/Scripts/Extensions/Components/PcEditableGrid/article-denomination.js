@@ -193,7 +193,9 @@ function updateAmountCell(articleCell, amountCell, articleLookup) {
 
     const articleInfo = articleLookup.get(EditableGrid.getValue(articleCell)['article_id']);
 
-    if (articleInfo) {
+    if (!articleInfo)
+        hideDenominationElements(amountCell);
+    else {
 
         if (articleInfo.isDivisible)
             showDenominationElements(amountCell);

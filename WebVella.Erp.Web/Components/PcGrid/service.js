@@ -40,7 +40,7 @@
 
 		document.addEventListener('DOMContentLoaded', () => {
 
-			document.addEventListener('keyup', e => {
+			document.addEventListener('keyup', async e => {
 
 				if (e.key == 'c' || e.key == 'C') cDown = false;
 				if (e.key == 'a' || e.key == 'A') aDown = false;
@@ -161,55 +161,79 @@
 
 	function getValue(col) {
 
-		for (let i = 0; i < col.children.length; i++) {
-			let elem = col.children[i];
+		const resultArr = [];
 
-			if (elem.classList.contains('wv-field-number'))
-				return getNumber(elem);
-			if (elem.classList.contains('wv-field-text'))
-				return getText(elem);
-			if (elem.classList.contains('wv-field-checkbox'))
-				return getBool(elem);
-			if (elem.classList.contains('wv-field-select'))
-				return getSelectId(elem);
+		appendValuesOf(resultArr, col, 'wv-field-number', getNumber);
+		appendValuesOf(resultArr, col, 'wv-field-text', getText);
+		appendValuesOf(resultArr, col, 'wv-field-checkbox', getBool);
+		appendValuesOf(resultArr, col, 'wv-field-select', getSelectId);
+
+		if (resultArr.length === 0)
+			return null;
+
+		return Object.fromEntries(resultArr.map(v => [v.name, v.value]));
+	}
+
+	function appendValuesOf(resultArr, col, className, getFunction) {
+
+		for (const elem of col.getElementsByClassName(className)) {
+			if (!elem.classList.contains('editable-grid-ignore')) {
+
+				const val = getFunction(elem);
+				if (val)
+					resultArr[resultArr.length] = val;
+			}
 		}
+	}
 
-		return null;
+	function valueName(name) {
+		if (!name)
+			return '';
+
+		const brackIdx = name.indexOf('[');
+		if (brackIdx < 0)
+			return name;
+
+		return name.substring(0, brackIdx);
+	}
+
+	function getNumber(numberField) {
+		let input = numberField.getElementsByTagName('input')[0];
+
+		if (input && input.getAttribute('name'))
+			return {
+				name: valueName(input.getAttribute('name')),
+				value: input.value
+			};
+	}
+
+	function getText(textField) {
+		let input = textField.getElementsByTagName('input')[0];
+		if (input && input.getAttribute('name'))
+			return {
+				name: valueName(input.getAttribute('name')),
+				value: input.value
+			};
 	}
 
 	function getBool(checkBoxField) {
 		let inputs = checkBoxField.getElementsByTagName('input');
 		for (let input of inputs) {
-			if (input.hasAttribute('data-source-id'))
-				return input.value;
+			if (input.hasAttribute('data-source-id') && input.getAttribute('name'))
+				return {
+					name: valueName(input.getAttribute('name')),
+					value: input.value
+				};
 		}
 	}
 
-	function getText(textField) {
-		let input = textField.getElementsByTagName('input')[0];
-		if (input)
-			return input.value;
-
-		let p = textField;
-
-		while (p.children[0])
-			p = p.children[0];
-		return p?.innerText ?? null;
-	}
-
-	function getNumber(numberField) {
-
-		let input = numberField.getElementsByTagName('input')[0];
-		if(input)
-			return input.value;
-		let div = numberField.getElementsByClassName('form-control-plaintext')[0];
-		if (div)
-			return parseFloat(div.innerText).toString() ?? null;
-		return null;
-	}
-
 	function getSelectId(selectField) {
-		return selectField.getElementsByTagName('select')[0].value;
+		let select = selectField.getElementsByTagName('select')[0];
+		if (select && select.getAttribute('name'))
+			return {
+				name: valueName(select.getAttribute('name')),
+				value: select.value
+			};
 	}
 
 	function getHeaders(body) {
@@ -237,42 +261,41 @@
 	function putDataToClipboard(body) {
 		let rows = body.getElementsByClassName('row-selected');
 		if (rows.length > 0) {
-			let headers = getHeaders(body);
-			let map = new Map();
-			let skip = [];
 
-			for (let i = 0; i < headers.length; i++) {
-				if (headers[i] == '' || map.has(headers[i])) {
-					skip[i] = true;
-				}
-				else {
-					map.set(headers[i], []);
-					skip[i] = false;
-				}
-			}
+			const headers = getHeaders(body);
 
-			if (map.size > 0) {
+			if (headers.some(h => h)) {
+
+				const skip = headers.map(h => h ? false : true);
+				const data = [];
 
 				for (let row of rows) {
 
+					const rowData = [];
+
 					for (let i = 0; i < headers.length; i++) {
 						if (!skip[i]) {
+							var cellData = getValue(row.children[i]);
 
-							let values = map.get(headers[i]);
-							values[values.length] = getValue(row.children[i]);
+							if (cellData) {
+								for (let kp of Object.entries(cellData)) {
+									rowData[rowData.length] = kp;
+								}
+							}
 						}
 					}
+
+					data[data.length] = Object.fromEntries(rowData);
 				}
 
 				let obj = {
 					compatibility: body.parentElement.getAttribute('compatibility'),
-					data: Array.from(map.entries().filter(kp => kp[1].some(v => v != null && v != undefined)))
+					data: data
 				};
 
-				return navigator.clipboard.writeText(JSON.stringify(obj));
+				navigator.clipboard.writeText(JSON.stringify(obj));
 			}
 		}
-		return null;
 	}
 
 	function getTargetBody() {

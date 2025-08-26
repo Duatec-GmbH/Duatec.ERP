@@ -78,16 +78,33 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             var form = pageModel.Request.Form;
             var result = new List<Row>(64);
 
-            while (form.TryGetValue($"article_id[{idx}]", out var articleVal))
+            while (form.TryGetValue($"{PartListEntry.Fields.Article}[{idx}]", out var articleVal))
             {
                 var articleId = Guid.TryParse(articleVal, out var id) ? id : Guid.Empty;
-                var amount = decimal.TryParse(form[$"amount[{idx}]"], out var d) ? d : 0m;
-                var denomination = decimal.TryParse(form[$"amount[{idx}]"], out d) ? d : 0m;
+                var amount = decimal.TryParse(form[$"{PartListEntry.Fields.Amount}[{idx}]"], out var d) ? d : 0m;
+                var denomination = decimal.TryParse(form[$"{PartListEntry.Fields.Denomination}[{idx}]"], out d) ? d : 0m;
 
                 result.Add((articleId, denomination, amount, idx));
 
                 idx++;
             }
+
+            const string articleSelect = $"id, ${Article.Relations.Type}.{ArticleType.Fields.IsDivisible}";
+            var ids = result.Select(r => r.ArticleId).ToArray();
+
+            var isDivisibleLookup = new ArticleRepository().FindMany(articleSelect, ids)
+                .ToDictionary(kp => kp.Key, kp => kp.Value?.GetArticleType()?.IsDivisible ?? false);
+
+            for(var i = 0; i < result.Count; i++)
+            {
+                var (articleId, denomination, amount, index) = result[i];
+
+                if (!isDivisibleLookup.TryGetValue(articleId, out var isDivisible) || !isDivisible)
+                    denomination = 0;
+
+                result[i] = (articleId, denomination, amount, index);
+            }
+
             return result;
         }
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
@@ -7,41 +6,15 @@ using WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
-using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Hooks.Page;
-using WebVella.Erp.Web.Hooks;
-using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 {
     [HookAttachment(key: HookKeys.PartList.Update)]
-    internal class PartListUpdateHook : TypedValidatedManageHook<PartList>, IPageHook
+    internal class PartListUpdateHook : TypedValidatedManageHook<PartList>
     {
-        public IActionResult? OnGet(BaseErpPageModel pageModel)
-        {
-            var partList = TypedEntityRecordWrapper.Wrap<PartList>(pageModel.TryGetDataSourceProperty<EntityRecord>("Record"));
-            const string entryKey = $"${PartListEntry.Relations.PartsList}";
-
-            if (!partList.Properties.ContainsKey(entryKey))
-            {
-                const string select = $"*, ${PartListEntry.Relations.Article}.part_number";
-                var entries = new PartListRepository().FindManyEntriesByPartList(partList.Id!.Value, select)
-                    .OrderBy(e => e.GetArticle().PartNumber);
-
-                partList.SetEntries(entries);
-
-                pageModel.DataModel.SetRecord(partList);
-            }
-
-            return null;
-        }
-
-        public IActionResult? OnPost(BaseErpPageModel pageModel)
-            => null;
-
-
         protected override List<ValidationError> Validate(PartList record, PartList unmodified, RecordManagePageModel pageModel)
         {
             var errors = base.Validate(record, unmodified, pageModel);

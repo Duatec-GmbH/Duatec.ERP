@@ -916,12 +916,6 @@ namespace WebVella.Erp.Web.Models
 
 		private object ExecFunction(string propName)
 		{
-			var leftPars = propName.Count(c => c == '(');
-			var rightPars = propName.Count(c => c == ')');
-
-			if (leftPars != rightPars)
-				throw new PropertyDoesNotExistException($"function call is malformed");
-
 			var openParIdx = propName.IndexOf('(');
 			var funName = propName[..openParIdx].Trim();
 
@@ -1268,14 +1262,25 @@ namespace WebVella.Erp.Web.Models
 				while(idx < paramsString.Length)
 				{
 					var c = paramsString[idx];
-					if (c == '(')
-						parDepth++;
-					else if (c == ')')
-						parDepth--;
-					else if(c == ',' && parDepth == 0)
+
+					if(c == '\'' || c == '"')
 					{
-						result.Add(paramsString[start..idx].Trim());
-						start = idx + 1;
+						var closeIdx = IndexOfStringClosing(paramsString, idx);
+						if (closeIdx <= idx)
+							throw new PropertyDoesNotExistException("Could not interpret property value");
+						idx = closeIdx;
+					}
+					else
+					{
+						if (c == '(')
+							parDepth++;
+						else if (c == ')')
+							parDepth--;
+						else if (c == ',' && parDepth == 0)
+						{
+							result.Add(paramsString[start..idx].Trim());
+							start = idx + 1;
+						}
 					}
 					idx++;
 				}
@@ -1284,6 +1289,40 @@ namespace WebVella.Erp.Web.Models
 					result.Add(paramsString[start..idx].Trim());
 
 				return result;
+			}
+
+			private static int IndexOfStringClosing(string paramsString, int stringOpenIndex)
+			{
+				var i = stringOpenIndex + 1;
+
+				while(i < paramsString.Length)
+				{
+					if (i < paramsString.Length - 1 && paramsString[i] == '{' && paramsString[i + 1] == '{')
+					{
+						i += 2;
+						var depth = 0;
+						var end = i;
+						while (end < paramsString.Length - 1 && !(paramsString[end] == '}' && paramsString[end + 1] == '}' && depth <= 0))
+						{
+							if (end < paramsString.Length - 1)
+							{
+								if (paramsString[end] == '{' && paramsString[end + 1] == '{')
+									depth++;
+								else if (paramsString[end] == '}' && paramsString[end + 1] == '}')
+									depth--;
+							}
+							end++;
+						}
+
+						if (end <= i || end >= paramsString.Length - 1 || paramsString[end] != '}' || paramsString[end + 1] != '}')
+							return -1;
+					}
+					else if (paramsString[i] == '\'' || paramsString[i] == '"')
+						return i;
+
+					i++;
+				}
+				return -1;
 			}
 
 			public object Execute(string paramsString)

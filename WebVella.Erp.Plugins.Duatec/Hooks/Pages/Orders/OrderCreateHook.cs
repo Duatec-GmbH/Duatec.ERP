@@ -31,14 +31,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var partListRepos = new PartListRepository();
 
             var demands = partListRepos.FindManyEntriesByProject(record.Project.Value, true)
-                .Select(ple => ple.ArticleId)
+                .Select(ple => (ple.ArticleId, ple.Denomination))
                 .Distinct()
                 .ToHashSet();
 
             for (var i = 0; i < entries.Count; i++)
             {
                 var article = entries[i].Article;
-                if (article != Guid.Empty && !demands.Contains(article))
+                var denomination = entries[i].Denomination;
+                if (article != Guid.Empty && !demands.Contains((article, denomination)))
                     yield return Error(OrderEntry.Fields.Article, i, "There is no demand for this article");
             }
         }
