@@ -16,6 +16,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
     [HookAttachment(key: HookKeys.Inventory.Create)]
     internal class InventoryEntryCreateHook : TypedValidatedCreateHook<InventoryEntry>
     {
+        protected override IActionResult? OnValidationFailure(InventoryEntry record, RecordCreatePageModel pageModel)
+        {
+            pageModel.DataModel.SetRecord(record);
+            return null;
+        }
+
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, RecordCreatePageModel pageModel)
         {
             var userId = pageModel.TryGetDataSourceProperty<ErpUser>("CurrentUser")!.Id;
@@ -23,6 +29,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var id = Guid.NewGuid();
             record.Id = id;
             var comment = pageModel.GetFormValue("comment");
+
+            if (!record.GetArticle().GetArticleType().IsDivisible)
+                record.Denomination = 0;
 
             void TransactionalAction()
             {
@@ -45,6 +54,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Denomination = record.Denomination,
                     UserId = userId,
                     Comment = comment,
+                    TaggedRecordId = null,
+                    TaggedEntityName = null,
                 };
 
                 if (repo.InsertBooking(booking) == null)

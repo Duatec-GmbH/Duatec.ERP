@@ -40,9 +40,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var articleRepo = new ArticleRepository(recMan);
             var warehouseRepo = new WarehouseRepository(recMan);
 
-            const string inventoryEntrySelect = "*, $project.*";
-            const string articleSelect = "*, $article_article_type.*, $article_manufacturer.name";
-            const string locationSelect = "*, $warehouse.id, $warehouse.designation";
+            const string inventoryEntrySelect = $"*, ${InventoryEntry.Relations.Project}.*";
+            const string articleSelect = $"*, ${Article.Relations.Type}.*, " +
+                $"${Article.Relations.Manufacturer}.{Company.Fields.Name}";
+            const string locationSelect = $"*, ${WarehouseLocation.Relations.Warehouse}.id, " +
+                $"${WarehouseLocation.Relations.Warehouse}.{Warehouse.Fields.Designation}";
 
             var inventoryEntries = inventoryRepo.FindAll(inventoryEntrySelect);
             var locations = warehouseRepo.FindAllEntries(locationSelect)
@@ -59,10 +61,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var entriesToAdd = articles.Values
                 .Where(a => !entryArticleIds.Contains(a.Id!.Value)
                     && a.PreferedWarehouseLocation.HasValue
-                    && a.PreferedWarehouseLocation != Guid.Empty)
+                    && a.PreferedWarehouseLocation != Guid.Empty
+                    && !a.GetArticleType().IsDivisible)
                 .Select(a => new InventoryEntry()
                 {
-                    Id = a.Id!.Value,
+                    Id = Guid.NewGuid(),
                     Article = a.Id!.Value,
                     Amount = 0,
                     Denomination = 0,

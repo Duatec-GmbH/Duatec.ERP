@@ -125,6 +125,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
             foreach (var entry in demandedEntries.Where(e => Array.Exists(updateInfos, t => t.ArticleId == e.Article)))
                 entry["initial"] = Array.Find(updateInfos, t => t.ArticleId == entry.Article).Amount;
 
+            record["delivery_note"] = $"{pageModel.Request.Form["delivery_note"]}";
             record.SetEntries(demandedEntries.OrderBy(e => e.GetArticle().PartNumber));
             pageModel.DataModel.SetRecord(record);
             pageModel.BeforeRender();
@@ -145,15 +146,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
                 else
                 {
+                    var isInt = orderEntry!.GetArticle().GetArticleType().IsInteger;
+
+                    if (isInt && denomination % 1 != 0)
+                        yield return DenominationError(index, $"Denomination is expected to be an integer value");
+
                     if (denomination < 0)
                         yield return DenominationError(index, $"Denomination must not be smaller than '0'");
 
-                    if (amount > orderEntry!.Amount)
-                        yield return AmountError(index, $"Amount must not be greater than ordered amount ({orderEntry.Amount})");
-
-                    var isInt = orderEntry.GetArticle().GetArticleType().IsInteger;
                     if (isInt && amount % 1 != 0)
                         yield return AmountError(index, "Amount is expected to be an integer value");
+
+                    else if (amount > orderEntry.Amount)
+                        yield return AmountError(index, $"Amount must not be greater than ordered amount ({orderEntry.Amount})");
                 }
             }
         }

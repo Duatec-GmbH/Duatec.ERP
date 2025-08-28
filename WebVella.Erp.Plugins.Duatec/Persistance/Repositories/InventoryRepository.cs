@@ -262,6 +262,31 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return takenLookup;
         }
 
+        public List<InventoryBooking> FindManyBookingsByTaggedRecord(string entityName, Guid id, string select = "*")
+        {
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.AND,
+                SubQueries = [
+                    new()
+                    {
+                        FieldName = InventoryBooking.Fields.TaggedEntityName,
+                        FieldValue = entityName,
+                        QueryType = QueryType.EQ
+                    },
+                    new()
+                    {
+                        FieldName = InventoryBooking.Fields.TaggedRecordId,
+                        FieldValue = id,
+                        QueryType = QueryType.EQ
+                    },
+                ]
+            };
+
+            return [..RepositoryHelper.FindManyByQuery(RecordManager, InventoryBooking.Entity, query, select)
+                .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];  
+        }
+
         private static void RoundNumbers(InventoryEntry record)
         {
             record.Amount = Math.Round(record.Amount, 2);

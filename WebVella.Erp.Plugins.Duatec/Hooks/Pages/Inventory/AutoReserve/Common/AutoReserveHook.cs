@@ -100,7 +100,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 Denomination = entry.Denomination,
                 ProjectId = projectId,
                 Comment = "Auto reserve",
-                UserId = userId
+                UserId = userId,
+                TaggedRecordId = null,
+                TaggedEntityName = null,
             };
 
             entry.Project = projectId;
@@ -126,6 +128,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 ProjectId = projectId,
                 UserId = userId,
                 Comment = "Auto reserve",
+                TaggedRecordId = null,
+                TaggedEntityName = null,
             };
 
             entry.Project = projectId;

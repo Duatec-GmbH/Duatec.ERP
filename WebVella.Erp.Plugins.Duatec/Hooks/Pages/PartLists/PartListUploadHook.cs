@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
@@ -46,14 +47,19 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
             var list = new EntityRecordList { TotalCount = importResult.Count };
 
-            var articlesWithinPartList = new PartListRepository().FindManyEntriesByPartList(listId)
-                .Select(ple => ple.GetArticle().PartNumber)
+            var recMan = new RecordManager();
+            var articlesWithinPartList = new PartListRepository(recMan).FindManyEntriesByPartList(listId)
+                .Select(ple => (ple.GetArticle().PartNumber, ple.Denomination))
                 .ToHashSet();
 
-            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber).ThenBy(r => r.OrderNumber))
-                list.Add(GetRecord(res, articlesWithinPartList));
+            var articleRepo = new ArticleRepository(recMan);
+            var defaultType = articleRepo.FindType(Article.DefaultType)!;
 
-            fsRepository.Delete(filePath);
+            var articleSelect = $"*, ${Article.Relations.Type}.*";
+            var articleLookup = articleRepo.FindMany(articleSelect, [.. importResult.Select(ir => ir.PartNumber)]);
+
+            foreach (var res in importResult.OrderBy(r => r.ImportState).ThenBy(r => r.PartNumber).ThenBy(r => r.OrderNumber))
+                list.Add(GetRecord(res, articlesWithinPartList, articleLookup, defaultType));
 
             var record = new EntityRecord();
             record["articles"] = list;
@@ -84,24 +90,28 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             return null;
         }
 
-        private static EntityRecord GetRecord(ArticleImportResult article, HashSet<string> articlesWithinPartList)
+        private static EntityRecord GetRecord(ArticleImportResult importResult, HashSet<(string PartNumber, decimal Denomination)> articlesWithinPartList, Dictionary<string, Article?> articleLookup, ArticleType defaultType)
         {
             var rec = new EntityRecord();
+            var partNumber = string.IsNullOrWhiteSpace(importResult.PartNumber)
+                ? "-" : importResult.PartNumber;
 
-            var deviceTag = string.Join(Environment.NewLine, article.DeviceTags);
-            var partNumber = string.IsNullOrWhiteSpace(article.PartNumber)
-                ? "-" : article.PartNumber;
-            var state = articlesWithinPartList.Contains(partNumber) 
-                ? ArticleImportState.DuplicateArticle : article.ImportState;
+            var state = articlesWithinPartList.Contains((partNumber, importResult.Denomination)) 
+                ? ArticleImportState.DuplicateArticle : importResult.ImportState;
+
+            if (state == ArticleImportState.EplanArticle)
+                state = ArticleImportState.InvalidEplanArticle;
             
             rec[Article.Fields.PartNumber] = partNumber;
-            rec[Article.Fields.OrderNumber] = article.OrderNumber;
-            rec[Article.Fields.TypeNumber] = article.TypeNumber;
-            rec[Article.Fields.Designation] = article.Designation;
-            rec[PartListEntry.Fields.DeviceTag] = deviceTag;
-            rec[PartListEntry.Fields.Amount] = article.Amount;
+            rec[Article.Fields.OrderNumber] = importResult.OrderNumber;
+            rec[Article.Fields.TypeNumber] = importResult.TypeNumber;
+            rec[Article.Fields.Designation] = importResult.Designation;
+            // rec[PartListEntry.Fields.DeviceTag] = string.Join(Environment.NewLine, importResult.DeviceTags);
+            rec[PartListEntry.Fields.Amount] = importResult.Amount;
+            rec[PartListEntry.Fields.Denomination] = importResult.Denomination;
+            rec[$"$type"] = articleLookup.TryGetValue(partNumber, out var article) ? article?.GetArticleType() ?? defaultType : defaultType;
             rec["import_state"] = state;
-            rec["import"] = GetDefaultImportState(state, article.Amount);
+            rec["import"] = GetDefaultImportState(state, importResult.Amount);
 
             return rec;
         }

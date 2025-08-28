@@ -76,21 +76,21 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var articleLookup = articleRepo.FindMany(articleSelect, [..allArticleIds.Select(kp => kp.ArticleId)]);
 
-            foreach(var kp in allArticleIds)
+            foreach(var key in allArticleIds)
             {
-                var pl1Amount = pl1Entries.TryGetValue(kp, out var d) ? d : 0m;
-                var pl2Amount = pl2Entries.TryGetValue(kp, out d) ? d : 0m;
+                var pl1Amount = pl1Entries.TryGetValue(key, out var d) ? d : 0m;
+                var pl2Amount = pl2Entries.TryGetValue(key, out d) ? d : 0m;
 
                 var rec = new PartListEntryDiff()
                 {
                     Amount1 = pl1Amount,
                     Amount2 = pl2Amount,
-                    ArticleId = kp.ArticleId,
-                    Denomination = kp.Denomination,
+                    ArticleId = key.ArticleId,
+                    Denomination = key.Denomination,
                     Diff = Math.Abs(pl1Amount - pl2Amount),
                 };
 
-                if (articleLookup.TryGetValue(kp.ArticleId, out var article))
+                if (articleLookup.TryGetValue(key.ArticleId, out var article))
                     rec.SetArticle(article);
 
                 yield return rec;

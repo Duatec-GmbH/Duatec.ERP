@@ -30,22 +30,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var amount = record.Amount;
 
             if (amount >= max + eps)
-            {
-                var articleRepo = new ArticleRepository();
-
-                var type = articleRepo.FindTypeByArticleId(unmodified.Article)!;
-                var isInt = type.IsInteger;
-                var maxVal = isInt ? $"{max:0}" : $"{max:0.00}";
-                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {maxVal} {type.Unit}"));
-            }
+                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {max}"));
 
             return result;
+        }
+
+        protected override IActionResult? OnValidationFailure(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
+        {
+            pageModel.DataModel.SetRecord(record);
+            return null;
         }
 
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
         {
             var id = record.Id!.Value;
             var comment = pageModel.GetFormValue("comment");
+
+            if (!record.GetArticle().GetArticleType().IsDivisible)
+                record.Denomination = 0;
 
             void TransactionalAction()
             {
@@ -62,6 +64,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Kind = InventoryBookingKind.Move,
                     Timestamp = DateTime.Now,
                     Comment = comment,
+                    TaggedRecordId = null,
+                    TaggedEntityName = null,
                 };
 
                 var repo = new InventoryRepository();
@@ -76,8 +80,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     throw new DbException("Could not insert booking");
             }
 
-            if(!Transactional.TryExecute(pageModel, TransactionalAction))
+            if (!Transactional.TryExecute(pageModel, TransactionalAction))
             {
+                OnValidationFailure(record, unmodified, pageModel);
                 pageModel.BeforeRender();
                 return pageModel.Page();
             }
@@ -91,7 +96,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
             return pageModel.LocalRedirect(pageModel.EntityDetailUrl(record.Id!.Value));
         }
-
 
         private static bool OriginAndTargetAreSame(InventoryEntry a, InventoryEntry b)
         {

@@ -237,7 +237,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
         private static ArticleImportState GetState(Article? dbArticle, DataPortalArticleDto? edpArticle)
         {
             if (dbArticle != null)
-                return ArticleImportState.DbArticle;
+                return dbArticle.IsBlocked ? ArticleImportState.BlockedArticle : ArticleImportState.DbArticle;
             if (edpArticle != null)
                 return ArticleImportState.EplanArticle;
             return ArticleImportState.UnknownArticle;

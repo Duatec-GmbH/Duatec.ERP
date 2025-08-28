@@ -34,6 +34,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Kind = "kind";
             public const string Comment = "comment";
             public const string Denomination = "denomination";
+            public const string TaggedRecordId = "tagged_record_id";
+            public const string TaggedEntityName = "tagged_entity_name";
         }
 
         public static class Relations
@@ -78,6 +80,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<Guid>(Fields.UserId);
             set => Properties[Fields.UserId] = value;
+        }
+
+        public Guid? TaggedRecordId
+        {
+            get => Get<Guid?>(Fields.TaggedRecordId);
+            set => Properties[Fields.TaggedRecordId] = value;
+        }
+
+        public string? TaggedEntityName
+        {
+            get => Get<string?>(Fields.TaggedEntityName);
+            set => Properties[Fields.TaggedEntityName] = value;
         }
 
         public decimal Amount

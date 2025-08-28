@@ -23,33 +23,39 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             if (!pageModel.Request.Query.TryGetValue("plId", out var listVal) || !Guid.TryParse(listVal, out var listId))
                 return pageModel.BadRequest();
 
-            if (!TryGetRows(pageModel, out var rows))
+            var partNumbers = pageModel.GetFormValues(Article.Fields.PartNumber)
+                .Distinct()
+                .ToArray();
+
+            var recMan = new RecordManager();
+            const string articleSelect = $"*, ${Article.Relations.Type}.*";
+            var articleLookup = new ArticleRepository(recMan).FindMany(articleSelect, partNumbers);
+
+            if (!TryGetRows(pageModel, articleLookup, out var rows))
                 return pageModel.BadRequest();
 
             if (rows.Count == 0)
                 return PartListDetail(pageModel, listId);
 
-            var partNumbers = rows
+            var partNumberLookup = rows
                 .Select(r => r.PartNumber)
-                .Distinct()
-                .ToArray();
+                .ToHashSet();
 
-            var recMan = new RecordManager();
-            var articleLookup = new ArticleRepository(recMan).FindMany(partNumbers: partNumbers!);
-            var oldEntries = new PartListRepository(recMan).FindManyEntriesByPartList(listId);
+            articleLookup = articleLookup
+                .Where(kp => partNumberLookup.Contains(kp.Key))
+                .ToDictionary();
 
             if (articleLookup.Any(kp => kp.Value == null))
                 return Error(pageModel, "Some articles are not present anymore in database please try again");
 
-            if (oldEntries.Any(ple => articleLookup.Values.Any(a => a!.Id == ple.ArticleId)))
-                return Error(pageModel, "Some articles have been inserted meanwhile you tried to import please try again");
+            var repo = new PartListRepository(recMan);
+            var oldEntries = repo.FindManyEntriesByPartList(listId);
 
             var entries = rows
                 .GroupBy(r => (r.PartNumber, r.Denomination))
                 .Select(g => ListEntryRecord(g, articleLookup!, listId))
                 .ToArray();
 
-            var repo = new PartListRepository(recMan);
             if(repo.InsertManyEntries(entries).Count != entries.Length)
             {
                 pageModel.PutMessage(ScreenMessageType.Error, "Could not create part list entries");
@@ -59,7 +65,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             return PartListDetail(pageModel, listId);
         }
 
-        private static bool TryGetRows(BaseErpPageModel pageModel, out List<Row> rows)
+        private static bool TryGetRows(BaseErpPageModel pageModel, Dictionary<string, Article?> articleLookup, out List<Row> rows)
         {
             var partNumbers = pageModel.GetFormValues(Article.Fields.PartNumber);
             var importValues = pageModel.GetFormValues("import");
@@ -76,14 +82,22 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                 if (!bool.TryParse(importValues[i], out var import))
                     return false;
 
-                if (!int.TryParse(amounts[i], out var amount))
-                    return false;
+                if (import)
+                {
+                    if (!int.TryParse(amounts[i], out var amount))
+                        return false;
 
-                if (!int.TryParse(denominations[i], out var denomination))
-                    return false;
+                    if(amount > 0)
+                    {
+                        if (!int.TryParse(denominations[i], out var denomination))
+                            return false;
 
-                if (import && amount > 0)
-                    rows.Add(new(partNumbers[i], denomination, import, amount));
+                        if (!articleLookup.TryGetValue(partNumbers[i], out var article) || article?.GetArticleType().IsDivisible is not true)
+                            denomination = 0;
+
+                        rows.Add(new(partNumbers[i], denomination, import, amount));
+                    }
+                }                    
             }
 
             return true;

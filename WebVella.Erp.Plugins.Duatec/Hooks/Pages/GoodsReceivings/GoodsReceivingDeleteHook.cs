@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Hooks;
@@ -17,8 +18,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
         {
             void TransactionalAction()
             {
-                if (new GoodsReceivingRepository().Delete(record.Id!.Value) == null)
+                var recMan = new RecordManager();
+                var id = record.Id!.Value;
+
+
+                if (new GoodsReceivingRepository(recMan).Delete(id) == null)
                     throw new DbException("Could not delete goods receiving record");
+
+                if (record.HasBeenStored)
+                {
+                    var inventoryRepo = new InventoryRepository(recMan);
+                    var entries = inventoryRepo.FindManyBookingsByTaggedRecord(record.EntityName, id);
+
+                    foreach(var entry in entries)
+                    {
+                        if (inventoryRepo.ReverseBooking(entry.Id!.Value) == null)
+                            throw new DbException("Could not reverse booking");
+                    }
+                }
             }
 
             if(!Transactional.TryExecute(pageModel, TransactionalAction))

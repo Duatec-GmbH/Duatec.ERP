@@ -20,9 +20,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var result = base.Validate(record, unmodified, pageModel);
 
             if (record.Amount > unmodified.Amount)
-                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Can't take out more than amount in inventory ({unmodified.Amount})"));
+                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Amount}"));
 
             return result;
+        }
+
+        protected override IActionResult? OnValidationFailure(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
+        {
+            pageModel.DataModel.SetRecord(record);
+            return null;
         }
 
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
@@ -30,6 +36,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var repo = new InventoryRepository();
             var amount = record.Amount = Math.Max(0m, Math.Round(record.Amount, 2));
             var comment = pageModel.GetFormValue("comment");
+            var isDeleted = false;
+
+            if (!record.GetArticle().GetArticleType().IsDivisible)
+                record.Denomination = 0;
 
             void TransactionalAction()
             {
@@ -46,12 +56,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Timestamp = DateTime.Now,
                     Kind = InventoryBookingKind.Take,
                     Comment = comment,
+                    TaggedRecordId = null,
+                    TaggedEntityName = null,
                 };
 
                 if (amount >= unmodified.Amount)
                 {
                     if (repo.Delete(record.Id!.Value) == null)
                         throw new DbException("Could not delete inventory entry");
+                    isDeleted = true;
                 }
                 else
                 {
@@ -67,13 +80,28 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             if (!Transactional.TryExecute(pageModel, TransactionalAction))
             {
+                OnValidationFailure(record, unmodified, pageModel);
                 pageModel.BeforeRender();
                 return pageModel.Page();
             }
 
             pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles");
+
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                return pageModel.LocalRedirect(pageModel.ReturnUrl);
+            {
+                var url = pageModel.ReturnUrl;
+                if (isDeleted)
+                {
+                    const string phrase = "returnUrl=";
+                    var start = url.IndexOf(phrase);
+
+                    if (start < 0)
+                        url = string.Empty;
+                    else
+                        url = url[(start + phrase.Length)..];
+                }
+                return pageModel.LocalRedirect(url);
+            }
             return pageModel.LocalRedirect(pageModel.EntityListUrl());
         }
     }

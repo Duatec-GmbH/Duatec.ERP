@@ -155,8 +155,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 
         private static List<ValidationError> GetDenominationErrors(OrderEntry entry, int idx, ArticleType? type)
         {
+            var isInt = type?.IsInteger ?? false;
+
             var validator = new NumberFormatValidator(
-                entry.EntityName, OrderEntry.Fields.Denomination, true, true);
+                entry.EntityName, OrderEntry.Fields.Denomination, isInt, false, true);
 
             var field = $"{OrderEntry.Fields.Denomination}";
             var result = validator.Validate(entry.Denomination, $"{field}[{idx}]");

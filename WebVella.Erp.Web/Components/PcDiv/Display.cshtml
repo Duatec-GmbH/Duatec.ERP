@@ -12,7 +12,7 @@
     var componentContext = (PageComponentContext)ViewBag.ComponentContext;
     var classValue = $"wv-div {options.Class}".TrimEnd();
 }
-@if (!bool.TryParse(options.IsVisible, out var isVisible) || isVisible)
+@if (ViewBag.IsVisible is not bool b || b)
 {
     <div id="@options.Id" class="@classValue" name="@options.Name">
         @foreach (var childNode in node.Nodes)

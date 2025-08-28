@@ -36,14 +36,15 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
             var oldPartListEntries = repo.FindManyEntriesByPartList(record.Id!.Value);
 
             var toAdd = formValues
-                .Where(t => !oldPartListEntries.Exists(ple => ple.ArticleId == t.ArticleId))
+                .Where(fv => !oldPartListEntries.Exists(ple => ple.ArticleId == fv.ArticleId && ple.Denomination == fv.Denomination))
                 .ToArray();
 
             var toUpdate = oldPartListEntries
-                .Where(ple => formValues.Exists(fv => fv.ArticleId == ple.ArticleId && fv.Amount != ple.Amount));
+                .Where(ple => formValues.Exists(fv => fv.ArticleId == ple.ArticleId && ple.Denomination == fv.Denomination && fv.Amount != ple.Amount))
+                .ToArray();
 
             var toDelete = oldPartListEntries
-                .Where(ple => !formValues.Exists(fv => fv.ArticleId == ple.ArticleId))
+                .Where(ple => !formValues.Exists(fv => fv.ArticleId == ple.ArticleId && ple.Denomination == fv.Denomination))
                 .Select(ple => ple.Id!.Value)
                 .ToArray();
             
@@ -62,7 +63,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                         Amount = fv.Amount,
                         ArticleId = fv.ArticleId,
                         DeviceTag = string.Empty,
-                        PartListId = record.Id.Value
+                        PartListId = record.Id.Value,
+                        Denomination = fv.Denomination,
                     });
 
                     if (repo.InsertManyEntries(entries).Count != toAdd.Length)
@@ -71,7 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
 
                 foreach(var entry in toUpdate)
                 {
-                    var amount = formValues.Find(t => t.ArticleId == entry.ArticleId).Amount;
+                    var amount = formValues.Find(t => t.ArticleId == entry.ArticleId && t.Denomination == entry.Denomination).Amount;
                     if(entry.Amount != amount)
                     {
                         entry.Amount = amount;

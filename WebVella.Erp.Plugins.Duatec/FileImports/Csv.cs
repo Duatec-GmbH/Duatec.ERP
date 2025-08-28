@@ -16,9 +16,25 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
 
             var headers = header.Split(delimiter, StringSplitOptions.TrimEntries);
 
-            var partNumberIndex = Array.IndexOf(headers, "part_number");
-            var orderNumberIndex = Array.IndexOf(headers, "order_number");
-            var amountIndex = Array.IndexOf(headers, "amount");
+            var partNumberIndex = -1;
+            var orderNumberIndex = -1;
+            var amountIndex = -1;
+
+            const StringComparison comparison = StringComparison.OrdinalIgnoreCase;
+
+            for (var i = 0; i < headers.Length; i++)
+            {
+                var s = headers[i];
+
+                if (partNumberIndex < 0 && (s.Equals("part_number", comparison) || s.Equals("part number", comparison) || s.Equals("partnumber", comparison)))
+                    partNumberIndex = i;
+
+                else if (orderNumberIndex < 0 && (s.Equals("order_number", comparison) || s.Equals("order number", comparison) || s.Equals("ordernumber", comparison)))
+                    orderNumberIndex = i;
+
+                else if (amountIndex < 0 && s.Equals("amount", comparison))
+                    amountIndex = i;
+            }
 
             var result = new List<CsvArticleDto>();
 
@@ -52,6 +68,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
 
             if (int.TryParse(val.Trim(), out var result))
                 return result;
+
             return 0;
         }
 
@@ -68,6 +85,7 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports
 
             if (int.TryParse(val.Trim(), out var result))
                 return result;
+
             return 0;
         }
 

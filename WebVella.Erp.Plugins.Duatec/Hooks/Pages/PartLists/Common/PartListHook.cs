@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Exceptions;
+﻿using System.Globalization;
+using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Web.Models;
@@ -24,16 +25,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
 
                 else
                 {
-                    if (denomination < 0)
-                        yield return DenominationError(idx, "Unexpected negative amount");
-
                     var isInt = article.GetArticleType().IsInteger;
+
+                    if(isInt && denomination % 1 != 0)
+                        yield return DenominationError(idx, "Integer value expected");
+
+                    else if (denomination < 0)
+                        yield return DenominationError(idx, "Unexpected negative amount");
 
                     if (isInt && amount % 1 != 0)
                         yield return AmountError(idx, "Integer value expected");
 
-                    if (amount == 0)
+                    else if (amount == 0)
                         yield return AmountError(idx, "Positive amount expected");
+
                     else if (amount < 0)
                         yield return AmountError(idx, "Unexpected negative amount");
                 }
@@ -81,8 +86,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             while (form.TryGetValue($"{PartListEntry.Fields.Article}[{idx}]", out var articleVal))
             {
                 var articleId = Guid.TryParse(articleVal, out var id) ? id : Guid.Empty;
-                var amount = decimal.TryParse(form[$"{PartListEntry.Fields.Amount}[{idx}]"], out var d) ? d : 0m;
-                var denomination = decimal.TryParse(form[$"{PartListEntry.Fields.Denomination}[{idx}]"], out d) ? d : 0m;
+
+                var amountVal = form[$"{PartListEntry.Fields.Amount}[{idx}]"];
+                var amount = decimal.TryParse(amountVal, CultureInfo.InvariantCulture, out var d) ? d : 0m;
+
+                var denominationVal = form[$"{PartListEntry.Fields.Denomination}[{idx}]"];
+                var denomination = decimal.TryParse(denominationVal, CultureInfo.InvariantCulture, out d) ? d : 0m;
 
                 result.Add((articleId, denomination, amount, idx));
 

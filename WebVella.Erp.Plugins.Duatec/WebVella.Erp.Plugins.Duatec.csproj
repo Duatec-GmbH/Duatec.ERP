@@ -52,6 +52,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Scripts\AutoScroll\auto-scroll.js" />
     <EmbeddedResource Include="Scripts\Extensions\Components\PcEditableGrid\article-denomination.js" />
   </ItemGroup>
 
