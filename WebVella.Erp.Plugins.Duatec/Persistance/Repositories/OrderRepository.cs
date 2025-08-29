@@ -57,6 +57,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return FindEntryByQuery(query, select);
         }
 
+        public List<OrderEntry> FindManyEntriesByArticle(Guid articleId, string select = "*")
+        {
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.EQ,
+                FieldName = OrderEntry.Fields.Article,
+                FieldValue = articleId,
+            };
+
+            return FindManyEntriesByQuery(query, select);
+        }
+
         public List<OrderEntry> FindManyEntriesByOrder(Guid orderId, string select = "*")
             => FindManyEntriesBy(OrderEntry.Fields.Order, orderId, select);
 

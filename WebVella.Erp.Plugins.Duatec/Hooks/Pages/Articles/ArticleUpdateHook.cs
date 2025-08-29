@@ -6,6 +6,8 @@ using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Models;
+using WebVella.Erp.Exceptions;
+using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 {
@@ -14,6 +16,32 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
     [HookAttachment(key: HookKeys.Article.Update)]
     internal class ArticleUpdateHook : TypedValidatedManageHook<Article>
     {
+        protected override List<ValidationError> Validate(Article record, Article unmodified, RecordManagePageModel pageModel)
+        {
+            var result = base.Validate(record, unmodified, pageModel);
+
+            if(record.Id.HasValue && record.TypeId != unmodified.TypeId)
+            {
+                var type = unmodified.GetArticleType();
+
+                if(type != null && type.IsDivisible)
+                {
+                    var recMan = new RecordManager();
+
+                    if(new PartListRepository(recMan).FindManyEntriesByArticle(record.Id.Value).Exists(ple => ple.Denomination != 0)
+                        || new OrderRepository(recMan).FindManyEntriesByArticle(record.Id.Value).Exists(oe => oe.Denomination != 0)
+                        || new InventoryRepository(recMan).FindManyByArticle(record.Id.Value).Exists(ie => ie.Denomination != 0)
+                        || new InventoryRepository(recMan).FindManyBookingsByArticle(record.Id.Value).Exists(ibe => ibe.Denomination != 0)
+                        || new GoodsReceivingRepository(recMan).FindManyEntriesByArticle(record.Id.Value).Exists(gre => gre.Denomination != 0))
+                    {
+                        result.Add(new ValidationError(Article.Fields.Type, $"When denominatable articles are used within the system, type can not be changed anymore"));
+                    }
+                }
+            }
+
+            return result;
+        }
+
         protected override IActionResult? OnValidationSuccess(Article record, Article unmodified, RecordManagePageModel pageModel)
         {
             if(record.Image != unmodified.Image)
