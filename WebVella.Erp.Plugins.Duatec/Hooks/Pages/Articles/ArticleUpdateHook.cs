@@ -34,7 +34,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                         || new InventoryRepository(recMan).FindManyBookingsByArticle(record.Id.Value).Exists(ibe => ibe.Denomination != 0)
                         || new GoodsReceivingRepository(recMan).FindManyEntriesByArticle(record.Id.Value).Exists(gre => gre.Denomination != 0))
                     {
-                        result.Add(new ValidationError(Article.Fields.Type, $"When denominatable articles are used within the system, type can not be changed anymore"));
+                        result.Add(new ValidationError(Article.Fields.Type, "When denominatable articles are used within part lists, orders, inventory or in inventory history, type can not be changed anymore"));
                     }
                 }
             }
