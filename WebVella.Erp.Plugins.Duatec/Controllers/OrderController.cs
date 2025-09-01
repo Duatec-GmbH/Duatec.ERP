@@ -1,13 +1,65 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using WebVella.Erp.Api;
+using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Utilities;
 
 namespace WebVella.Erp.Plugins.Duatec.Controllers
 {
     [Authorize]
     public class OrderController : Controller
     {
+        [HttpGet]
+        [Route("/api/v3.0/o/orders/{id}/export")]
+        public ActionResult GetExportData([FromRoute]Guid id, [FromQuery]string? delimiter = "tab", [FromQuery]int denominationHandle = 0)
+        {
+            var recMan = new RecordManager();
+            var entries = new OrderRepository(recMan).FindManyEntriesByOrder(id)
+                .Include($"${OrderEntry.Relations.Article}.${Article.Relations.Type}");
+
+            if (delimiter == "comma")
+                delimiter = ",";
+            else if (delimiter == "semicolon")
+                delimiter = ";";
+            else
+                delimiter = "\t";
+
+            var sb = new StringBuilder();
+
+            foreach(var entry in entries)
+            {
+                var article = entry.GetArticle();
+                var type = article.GetArticleType();
+
+                if (!type.IsDivisible || entry.Denomination == 0)
+                    sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}");
+                else
+                {
+                    if (denominationHandle == 1) // sum up
+                    {
+                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount * entry.Denomination}");
+                    }
+                    else if(denominationHandle == 2) // <amount>x<denomination>
+                    {
+                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}x{entry.Denomination}");
+                    }
+                    else if(denominationHandle == 3) // <amount>(<denomination>)
+                    {
+                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}({entry.Denomination})");
+                    }
+                    else  // roll out
+                    {
+                        for (var i = 0; i < entry.Amount; i++)
+                            sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Denomination}");
+                    }
+                }
+            }
+            return Json(sb.ToString());
+        }
+
+
         [HttpGet]
         [Route("/api/v3.0/o/orders/free-order-numbers/all")]
         public ActionResult GetFreeOrderNumberLookup()
