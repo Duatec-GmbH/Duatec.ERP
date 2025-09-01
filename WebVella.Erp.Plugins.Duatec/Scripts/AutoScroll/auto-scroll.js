@@ -54,28 +54,25 @@ if (anchorTags.length) {
 
         for (let anchorTag of anchorTags) {
 
-            let nonEncodedIdx = anchorTag.href.indexOf('returnUrl=');
-            let encodedIdx = anchorTag.href.indexOf('returnUrl%3D');
+            let idx = anchorTag.href.indexOf('returnUrl=');
 
-            if (nonEncodedIdx < 0 && encodedIdx < 0)
-                continue;
-
-            // unencoded verion
-            if (nonEncodedIdx >= 0 && (nonEncodedIdx < encodedIdx || encodedIdx < 0)) {
+            if (idx >= 0) {
 
                 let returnUrlString = 'returnUrl=';
-                let idx = nonEncodedIdx + returnUrlString.length;
+                idx += returnUrlString.length;
                 let returnUrl = anchorTag.href.substring(idx);
 
                 if (returnUrl) {
 
                     const start = anchorTag.href.substring(0, idx);
-                    const queryStartIdx = returnUrl.indexOf('?');
+                    const decodedQueryStart = returnUrl.indexOf('?');
+                    const encodedQueryStart = returnUrl.indexOf('%3F');
 
-                    if (queryStartIdx < 0) {
-                        returnUrl += '?scrollPos=' + pos;
+                    if (decodedQueryStart < 0 && encodedQueryStart < 0) {
+                        returnUrl += '%3FscrollPos%3D' + pos;
                     }
-                    else {
+                    else if (encodedQueryStart < 0 || decodedQueryStart >= 0 && decodedQueryStart < encodedQueryStart) {
+
                         let argIdx = returnUrl.indexOf('scrollPos=');
                         const returnUrlIdx = returnUrl.indexOf(returnUrlString);
 
@@ -96,36 +93,19 @@ if (anchorTags.length) {
                             }
                         }
                     }
-                    anchorTag.href = start + returnUrl;
-                }
-            }
-            else if (encodedIdx >= 0) {
-                // encoded version
+                    else if (decodedQueryStart < 0 || encodedQueryStart >= 0 && encodedQueryStart < decodedQueryStart) {
 
-                let returnUrlString = 'returnUrl%3D';
-                let idx = nonEncodedIdx + returnUrlString.length;
-                let returnUrl = anchorTag.href.substring(idx);
-
-                if (returnUrl) {
-
-                    const start = anchorTag.href.substring(0, idx);
-                    const queryStartIdx = returnUrl.indexOf('%3F'); // ?
-
-                    if (queryStartIdx < 0) {
-                        returnUrl += '%3FscrollPos%3D' + pos;
-                    }
-                    else {
                         let argIdx = returnUrl.indexOf('scrollPos%3D');
-                        const returnUrlIdx = returnUrl.indexOf(returnUrlString);
+                        const returnUrlIdx = returnUrl.indexOf('returnUrl%3D');
 
                         if (argIdx < 0 || returnUrlIdx >= 0 && argIdx >= returnUrlIdx) {
 
-                            idx = returnUrl.indexOf('%3F'); // ?
+                            idx = returnUrl.indexOf('%3F');
                             returnUrl = returnUrl.substring(0, idx + 3) + 'scrollPos%3D' + pos + '%26' + returnUrl.substring(idx + 3);
                         }
                         else {
 
-                            const nextArgIdx = returnUrl.indexOf('%26', argIdx); // &
+                            const nextArgIdx = returnUrl.indexOf('%26', argIdx);
 
                             if (nextArgIdx < 0) {
                                 returnUrl = returnUrl.substring(0, argIdx) + 'scrollPos%3D' + pos;
@@ -135,9 +115,14 @@ if (anchorTags.length) {
                             }
                         }
                     }
+
                     anchorTag.href = start + returnUrl;
                 }
             }
         }
     });
+}
+
+function removeScrollFromUrlPos() {
+
 }
