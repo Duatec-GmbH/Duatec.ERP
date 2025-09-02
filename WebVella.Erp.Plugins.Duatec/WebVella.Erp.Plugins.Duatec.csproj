@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <None Remove="Scripts\article-denomination.js" />
+    <None Remove="Scripts\AutoUpdate\warehouse-location-select-auto-update.js" />
+    <None Remove="Scripts\Extensions\Components\PcEditableGrid\warehouse-location-select-auto-update.js" />
   </ItemGroup>
 
 
@@ -53,8 +55,14 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Scripts\AutoUpdate\project-select-auto-update.js" />
+    <EmbeddedResource Include="Scripts\AutoUpdate\warehouse-location-select-auto-update.js" />
+    <EmbeddedResource Include="Scripts\Extensions\Components\PcEditableGrid\article-select-auto-update.js" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Scripts\AutoScroll\auto-scroll.js" />
     <EmbeddedResource Include="Scripts\Extensions\Components\PcEditableGrid\article-denomination.js" />
+    <EmbeddedResource Include="Scripts\Extensions\Components\PcEditableGrid\warehouse-location-select-auto-update.js" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles.Common;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords.Hooks.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Api.Articles

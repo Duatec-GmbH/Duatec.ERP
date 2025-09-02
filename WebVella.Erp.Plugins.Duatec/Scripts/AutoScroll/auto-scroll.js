@@ -122,7 +122,3 @@ if (anchorTags.length) {
         }
     });
 }
-
-function removeScrollFromUrlPos() {
-
-}

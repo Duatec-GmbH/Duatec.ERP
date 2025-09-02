@@ -26,6 +26,7 @@ let usedIds = new Set();
 			performClone: function (row) { return performClone(row); },
 			getValue: function (cell) { return getValue(cell); },
 			setValue: function (cell, value) { return setValue(cell, value); },
+			updateSelectSource: function (tableId, selectName, data) { updateSelectSource(tableId, selectName, data) },
 		};
 
 		let loader = document.body.getElementsByClassName('loader')[0];
@@ -185,7 +186,6 @@ let usedIds = new Set();
 							if (row) {
 								loader.classList.remove('d-none');
 								const tableId = getParentTable(body).id;
-								const selectOptionSet = editableGridSelectSources.get(tableId);
 
 								const text = await navigator.clipboard.readText();
 								try {
@@ -193,6 +193,7 @@ let usedIds = new Set();
 
 									if (isCompatible(body, obj.compatibility)) {
 
+										const selectOptionSet = editableGridSelectSources.get(tableId);
 										const newNodes = obj.data.map(_ => performClone(body.children[0]));
 
 										let n = row;
@@ -339,6 +340,82 @@ let usedIds = new Set();
 			loader.classList.add('d-none');
 		});
 
+		function updateSelectSource(tableId, selectName, data) {
+
+			const table = document.getElementById(tableId);
+
+			if (!table)
+				throw new Error('Table with id \'' + tableId + '\' does not exist.');
+
+			const selectOptionSet = editableGridSelectSources.get(tableId);
+
+			if (!selectOptionSet)
+				throw new Error('Table has no select sources.');
+
+			const selects = table.getElementsByTagName('TBODY')[0].children[0].getElementsByTagName('select');
+			let idx = -1;
+
+			for (let i = 0; i < selects.length; i++) {
+
+				if (selects[i].name === selectName) {
+					idx = i;
+					break;
+				}
+			}
+
+			if (idx < 0)
+				throw new Error('Select source with name \'' + selectName + '\' does not exist.');
+
+			let textLookup = new Map();
+			let valueLookup = new Map();
+
+			for (let elem of data) {
+				textLookup.set(elem.text, elem.id);
+				valueLookup.set(elem.id, elem.text);
+			}
+
+			selectOptionSet[idx] = {
+				textLookup: textLookup,
+				data: data
+			};
+
+			for (let select of table.getElementsByTagName('select')) {
+				if (select.name.includes(selectName + '[')) {
+
+					let options = select.getElementsByTagName('option');
+
+					for (var i = options.length - 1; i >= 0; i--) {
+
+						const option = options[i];
+
+						if (option.value && option.value !== select.value)
+							option.parentElement.removeChild(option);
+					}
+
+					for (let option of select.getElementsByTagName('option')) {
+
+						if (option.value && option.value === select.value) {
+
+							const text = valueLookup.get(option.value);
+
+							if (!text) {
+								option.parentElement.removeChild(option);
+								select.value = '';
+							}
+							else {
+								option.text = text;
+
+								var rendered = select.parentElement?.getElementsByClassName('select2-selection__rendered')[0];
+
+								if (rendered)
+									rendered.innerHTML = text;
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
 
 		function hasSomethingElseSelected() {
 			return document.getSelection().toString().trim().length > 0;
@@ -823,7 +900,7 @@ let usedIds = new Set();
 					}						
 				}
 
-				const data = selectOptionSet[i].data;
+				const idx = i;
 
 				$(n).select2({
 					ajax: {
@@ -834,7 +911,7 @@ let usedIds = new Set();
 								const filteredData = [];
 								const searchText = params.data.term.toUpperCase();
 
-								for (const elem of data) {
+								for (const elem of selectOptionSet[idx].data) {
 
 									if (!elem.text || elem.text.toUpperCase().includes(searchText))
 										filteredData[filteredData.length] = elem;
@@ -843,7 +920,7 @@ let usedIds = new Set();
 								onSuccessHandler({ results: filteredData });
 							}
 							else {
-								onSuccessHandler({ results: data });
+								onSuccessHandler({ results: selectOptionSet[idx].data });
 							}
 						},
 					}

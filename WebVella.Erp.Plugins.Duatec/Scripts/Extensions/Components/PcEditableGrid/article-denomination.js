@@ -62,11 +62,48 @@ for (const table of document.getElementsByClassName('editable-grid')) {
 
 if (tableInfos.length > 0) {
 
-    document.addEventListener('DOMContentLoaded', () => {
+    const articleLookup = new Map();
+
+    EditableGrid.updateArticleDenominations = async function (silent) { await update(silent) };
+
+    document.addEventListener('DOMContentLoaded', async () => {
 
         loader.classList.remove('d-none');
 
-        $.ajax({
+        await update(true);
+
+        for (const tableInfo of tableInfos) {
+
+            addTableObserver(tableInfo, articleLookup);
+
+            const body = tableInfo.table.getElementsByTagName('TBODY')[0];
+            const rows = body.children;
+
+            for (let i = 1; i < rows.length; i++) { // first is always dummy, we don't modify this
+
+                var colLen = rows[i].children.length;
+
+                if (tableInfo.articleColumn < colLen && tableInfo.amountColumn < colLen) {
+
+                    const articleCell = rows[i].children[tableInfo.articleColumn];
+                    const amountCell = rows[i].children[tableInfo.amountColumn];
+
+                    addArticleObserver(articleCell, amountCell, articleLookup);
+                }
+            }
+        }
+
+        loader.classList.add('d-none');
+
+    }, true);
+
+    async function update(silent) {
+
+        if(!silent)
+            loader.classList.remove('d-none');
+
+        await $.ajax({
+
             type: 'GET',
             url: '/api/v3.0/a/articles/denomination-lookup',
             dataType: 'json',
@@ -74,16 +111,13 @@ if (tableInfos.length > 0) {
 
                 try {
 
-                    const articleLookup = new Map();
+                    articleLookup.clear();
 
                     for (const [key, value] of Object.entries(response)) {
                         articleLookup.set(key, value);
                     }
 
                     for (const tableInfo of tableInfos) {
-
-                        addTableObserver(tableInfo, articleLookup);
-
                         const body = tableInfo.table.getElementsByTagName('TBODY')[0];
                         const rows = body.children;
 
@@ -103,15 +137,16 @@ if (tableInfos.length > 0) {
 
                                     if (articleInfo.isDivisible)
                                         showDenominationElements(amountCell);
-
-                                    addArticleObserver(articleCell, amountCell, articleLookup);
+                                    else
+                                        hideDenominationElements(amountCell);
                                 }
                             }
                         }
                     }
                 }
                 finally {
-                    loader.classList.add('d-none');
+                    if(!silent)
+                        loader.classList.add('d-none');
                 }
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -119,91 +154,92 @@ if (tableInfos.length > 0) {
                     toastr.error(textStatus, 'Error!', { closeButton: false, tapToDismiss: true });
                 }
                 finally {
-                    loader.classList.add('d-none');
+                    if(!silent)
+                        loader.classList.add('d-none');
                 }
             }
         });
-    }, true);
+    }
+
+    function showDenominationElements(elem) {
+
+        for (const e of elem.getElementsByClassName('visible-when-divisible')) {
+            e.style.removeProperty('display');
+        }
+    }
+
+    function addArticleObserver(articleCell, amountCell, articleLookup) {
+
+        const container = articleCell.getElementsByClassName('select2-container')[0];
+
+        if (!container)
+            return null;
+
+        const observer = new MutationObserver((mutationList) => {
+            mutationList
+                .filter((m) => m.type === 'childList')
+                .forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        updateAmountCell(articleCell, amountCell, articleLookup);
+                    });
+                });
+        });
+
+        observer.observe(container, { childList: true, subtree: true });
+
+        return observer;
+    }
+
+    function addTableObserver(tableInfo, articleLookup) {
+
+        const body = tableInfo.table.getElementsByTagName('TBODY')[0];
+
+        const observer = new MutationObserver((mutationList) => {
+            mutationList
+                .filter((m) => m.type === 'childList')
+                .forEach((mutation) => {
+                    mutation.addedNodes.forEach((row) => {
+
+                        if (tableInfo.articleColumn < row.children.length && tableInfo.amountColumn < row.children.length) {
+
+                            const articleCell = row.children[tableInfo.articleColumn];
+                            const amountCell = row.children[tableInfo.amountColumn];
+
+                            updateAmountCell(articleCell, amountCell, articleLookup);
+                            addArticleObserver(articleCell, amountCell, articleLookup);
+                        }
+                    });
+                });
+        });
+
+        observer.observe(body, { childList: true, subtree: false });
+
+        return observer;
+    }
+
+    function updateAmountCell(articleCell, amountCell, articleLookup) {
+
+        const articleInfo = articleLookup.get(EditableGrid.getValue(articleCell)['article_id']);
+
+        if (!articleInfo)
+            hideDenominationElements(amountCell);
+        else {
+
+            if (articleInfo.isDivisible)
+                showDenominationElements(amountCell);
+            else
+                hideDenominationElements(amountCell);
+
+            var unitElement = amountCell.getElementsByClassName('article-unit')[0];
+            if (unitElement)
+                unitElement.textContent = articleInfo.unit;
+        }
+    }
 }
 
 function hideDenominationElements(elem) {
 
     for (const e of elem.getElementsByClassName('visible-when-divisible')) {
         e.style.setProperty('display', 'none', 'important');
-    }
-}
-
-function showDenominationElements(elem) {
-
-    for (const e of elem.getElementsByClassName('visible-when-divisible')) {
-        e.style.removeProperty('display');
-    }
-}
-
-function addArticleObserver(articleCell, amountCell, articleLookup) {
-
-    const container = articleCell.getElementsByClassName('select2-container')[0];
-
-    if (!container)
-        return null;
-
-    const observer = new MutationObserver((mutationList) => {
-        mutationList
-            .filter((m) => m.type === 'childList')
-            .forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    updateAmountCell(articleCell, amountCell, articleLookup);
-                });
-            });
-    });
-
-    observer.observe(container, { childList: true, subtree: true });
-
-    return observer;
-}
-
-function addTableObserver(tableInfo, articleLookup) {
-
-    const body = tableInfo.table.getElementsByTagName('TBODY')[0];
-
-    const observer = new MutationObserver((mutationList) => {
-        mutationList
-            .filter((m) => m.type === 'childList')
-            .forEach((mutation) => {
-                mutation.addedNodes.forEach((row) => {
-
-                    if (tableInfo.articleColumn < row.children.length && tableInfo.amountColumn < row.children.length) {
-
-                        const articleCell = row.children[tableInfo.articleColumn];
-                        const amountCell = row.children[tableInfo.amountColumn];
-
-                        updateAmountCell(articleCell, amountCell, articleLookup);
-                        addArticleObserver(articleCell, amountCell, articleLookup);
-                    }
-                });
-            });
-    });
-
-    observer.observe(body, { childList: true, subtree: false });
-
-    return observer;
-}
-
-function updateAmountCell(articleCell, amountCell, articleLookup) {
-
-    const articleInfo = articleLookup.get(EditableGrid.getValue(articleCell)['article_id']);
-
-    if (!articleInfo)
-        hideDenominationElements(amountCell);
-    else {
-
-        if (articleInfo.isDivisible)
-            showDenominationElements(amountCell);
-        else
-            hideDenominationElements(amountCell);
-
-        var unitElement = amountCell.getElementsByClassName('article-unit')[0];
-        if (unitElement)
-            unitElement.textContent = articleInfo.unit;
     }
 }
