@@ -137,7 +137,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orderRepository = new OrderRepository(recMan);
             var inventoryRepo = new InventoryRepository(recMan);
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
-            var isInventoryProject = new ProjectRepository(recMan).Find(projectId)?.IsInventoryProject ?? false;
+            var project = new ProjectRepository(recMan).Find(projectId);
+            var isInventoryProject = project?.IsInventoryProject ?? false;
+            var reserveStoredArticles = project?.ReserveStoredArticles ?? true;
 
             var orderEntries = orderRepository.FindManyEntriesByProject(projectId);
             var orderLookup = orderRepository.FindManyByProject(projectId)
@@ -185,7 +187,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return entriesFromPartList
                 .Concat(entriesFromOrder)
                 .Concat(entriesFromInventory)
-                .Select(kp => BuildOrderEntry(kp.Key, kp.Value, articleLookup, ordersLookup!, orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup, isInventoryProject))
+                .Select(kp => BuildOrderEntry(
+                    kp.Key, kp.Value, 
+                    articleLookup, ordersLookup!, orderedAmountLookup, receivedAmountLookup, inventoryAmountLookup, 
+                    isInventoryProject, reserveStoredArticles))
                 .OrderBy(r => r.GetArticle().PartNumber.ToString());
         }
 
@@ -205,7 +210,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Dictionary<(Guid ArticleId, decimal Denomination), decimal> orderedAmountLookup, 
             Dictionary<(Guid ArticleId, decimal Denomination), decimal> receivedAmountLookup, 
             Dictionary<(Guid ArticleId, decimal Denomination), decimal> inventoryAmountLookup,
-            bool isInventoryProject)
+            bool isInventoryProject,
+            bool reserveStoredArticles)
         {
 
             var article = articleLookup[key.ArticleId];
@@ -225,7 +231,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 InventoryAmount = inventoryAmount,
                 ToOrder = toOrder,
                 ReceivedAmount = receivedAmount,
-                State = GetState(demand, orderedAmount, receivedAmount, inventoryAmount, isInventoryProject),
+                State = GetState(demand, orderedAmount, receivedAmount, inventoryAmount, isInventoryProject, reserveStoredArticles),
             };
 
             rec.SetArticle(article);
@@ -234,9 +240,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return rec;
         }
 
-        private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory, bool isInventoryProject)
+        private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory, bool isInventoryProject, bool reserveStoredArticles)
         {
-            if (isInventoryProject)
+            if (isInventoryProject && reserveStoredArticles)
                 fromInventory -= received;
 
             if (Math.Max(ordered, received) + fromInventory > demand)

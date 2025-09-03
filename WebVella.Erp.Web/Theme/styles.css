@@ -5159,6 +5159,25 @@ input{
 	z-index: 10;
 }
 
+.id-table-cell {
+	width: 12em;
+	max-width: 12em;
+}
+
+.secondary-id-table-cell{
+	width: 10em;
+	max-width: 10em;
+}
+
+.image-table-cell {
+	width: 5em;
+	max-width: 5em;
+}
+
+.minor-info-table-cell{
+	max-width: 10em;
+}
+
 /* ########### field file modified ################# */
 
 .wv-field-file .erp-file {

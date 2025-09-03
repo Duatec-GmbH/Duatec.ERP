@@ -27,6 +27,17 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
+window.addEventListener("resize", () => {
+
+	for (let selectContainer of document.getElementsByClassName('select2-container')) {
+
+		let div = selectContainer.parentElement;
+
+		if (div && div.offsetWidth)
+			selectContainer.style.width = `${div.offsetWidth}px`;
+	}
+}, true);
+
 function stickyErpList(pageHead, erpList) {
 
 	let listHead = erpList.getElementsByTagName('THEAD')[0];
