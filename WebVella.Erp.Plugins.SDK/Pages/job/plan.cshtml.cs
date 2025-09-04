@@ -57,11 +57,14 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
 			SortOrder = sortOrder;
 
 
-			#endregion
+            #endregion
 
-			#region << Create Columns >>
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			Columns = new List<WvGridColumnMeta>() {
+            #region << Create Columns >>
+
+            Columns = new List<WvGridColumnMeta>() {
 				new WvGridColumnMeta(){
 					Name = "action",
 					Width="140px"
@@ -137,7 +140,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
 			if (schedulePlan == null)
 				return NotFound();
 
-			ScheduleManager.Current.TriggerNowSchedulePlan(schedulePlan);
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ScheduleManager.Current.TriggerNowSchedulePlan(schedulePlan);
 
 			BeforeRender();
 			return Redirect(PageContext.HttpContext.Request.Path + PageContext.HttpContext.Request.QueryString.ToUriComponent());

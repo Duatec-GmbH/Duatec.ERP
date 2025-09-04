@@ -90,9 +90,11 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
 			if (Plan == null)
 				return NotFound();
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
 
-			Enabled = Plan.Enabled;
+            Enabled = Plan.Enabled;
 			Id = Plan.Id;
 			Name = Plan.Name;
 
@@ -134,7 +136,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
 
 			InitPage();
 
-			try
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            try
 			{
 				Id = Plan.Id;
 				Plan.Name = Name;

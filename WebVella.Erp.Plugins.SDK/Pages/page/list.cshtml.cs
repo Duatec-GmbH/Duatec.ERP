@@ -155,11 +155,14 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			ReturnUrlEncoded = HttpUtility.UrlEncode(PageContext.HttpContext.Request.Path + PageContext.HttpContext.Request.QueryString);
 
 			PageDescription = PageUtils.GenerateListPageDescription(PageContext.HttpContext, "", TotalCount);
-			#endregion
+            #endregion
 
-			#region << Create Columns >>
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			Columns = new List<WvGridColumnMeta>() {
+            #region << Create Columns >>
+
+            Columns = new List<WvGridColumnMeta>() {
 				new WvGridColumnMeta(){
 					Name = "action",
 					Width="1%"
@@ -291,8 +294,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if (!Guid.TryParse(PageContext.HttpContext.Request.Query["pageId"], out Guid pageId))
 				return NotFound();
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			pageServ.ClonePage(pageId);
+            pageServ.ClonePage(pageId);
 			BeforeRender();
 			return Redirect($"/sdk/objects/page/l/list");
 		}

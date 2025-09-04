@@ -173,11 +173,14 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			PageDescription = PageUtils.GenerateListPageDescription(PageContext.HttpContext, "", TotalCount);
 
 			HeaderToolbar.AddRange(AdminPageUtils.GetEntityAdminSubNav(ErpEntity, "pages"));
-			#endregion
+            #endregion
 
-			#region << Create Columns >>
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			Columns = new List<WvGridColumnMeta>() {
+            #region << Create Columns >>
+
+            Columns = new List<WvGridColumnMeta>() {
 				new WvGridColumnMeta(){
 					Name = "action",
 					Width="1%"

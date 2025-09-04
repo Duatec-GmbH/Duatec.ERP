@@ -71,7 +71,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpDataSource
 			if (DataSourceObject == null)
 				return NotFound();
 
-			Name = DataSourceObject.Name;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            Name = DataSourceObject.Name;
 			Description = DataSourceObject.Description;
 			EqlInput = DataSourceObject.EqlText;
 			Weight = DataSourceObject.Weight;
@@ -105,7 +108,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpDataSource
 			if (DataSourceObject == null)
 				return NotFound();
 
-			var entMan = new EntityManager();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var entMan = new EntityManager();
 			try
 			{
 				try

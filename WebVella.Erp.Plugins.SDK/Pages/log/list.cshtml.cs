@@ -109,7 +109,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Log
             
             InitPageData();
 
-			BeforeRender();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            BeforeRender();
 			return Page();
 		}
 
@@ -121,6 +124,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Log
             new LogService().ClearErrorLogs();
 
             InitPageData();
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
             BeforeRender();
             return Page();

@@ -54,7 +54,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			if (App == null)
 				return NotFound();
 
-			var initData = new EntityRecord();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var initData = new EntityRecord();
 			initData["sitemap"] = new AppService().OrderSitemap(App.Sitemap);
 			initData["node_page_dict"] = PageUtils.GetNodePageDictionary(App.Id);
 

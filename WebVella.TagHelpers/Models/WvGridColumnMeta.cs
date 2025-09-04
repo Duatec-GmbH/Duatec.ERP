@@ -4,7 +4,10 @@ namespace WebVella.TagHelpers.Models
 {
 	public class WvGridColumnMeta
 	{
-		[JsonPropertyName("container_id")]
+        [JsonPropertyName("is_visible")]
+        public bool IsVisible { get; set; } = true;
+
+        [JsonPropertyName("container_id")]
 		public string ContainerId { get; set; } = "";
 
 		[JsonPropertyName("name")]

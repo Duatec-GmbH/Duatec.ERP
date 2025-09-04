@@ -90,12 +90,14 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			{
 				SearchString = (string)HttpContext.Request.Query[searchKey];
 			}
-			#endregion
+            #endregion
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			#region << Create Columns >>
+            #region << Create Columns >>
 
-			Columns = new List<WvGridColumnMeta>() {
+            Columns = new List<WvGridColumnMeta>() {
 				new WvGridColumnMeta(){
 					Name = "action",
 					Width="1%"

@@ -63,6 +63,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 				Author = App.Author;
 				Color = App.Color;
 				Weight = App.Weight;
+                VisibleOnMobile = App.VisibleOnMobile;
 				if (App.Access != null && App.Access.Count > 0)
 				{
 					Access = App.Access.Select(x => x.ToString()).ToList();

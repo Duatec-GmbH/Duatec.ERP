@@ -24,7 +24,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Role
 			if (initResult != null)
 				return initResult;
 
-			if (string.IsNullOrWhiteSpace(ReturnUrl)) ReturnUrl = "/sdk/access/role/l/list";
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            if (string.IsNullOrWhiteSpace(ReturnUrl)) ReturnUrl = "/sdk/access/role/l/list";
 
 			BeforeRender();
 			return Page();
@@ -38,7 +41,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Role
 			if (initResult != null)
 				return initResult;
 
-			if (string.IsNullOrWhiteSpace(ReturnUrl)) ReturnUrl = "/sdk/access/role/l/list";
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            if (string.IsNullOrWhiteSpace(ReturnUrl)) ReturnUrl = "/sdk/access/role/l/list";
 
 			try
 			{

@@ -54,7 +54,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 				return NotFound();
 			}
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -75,7 +78,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 				return NotFound();
 			}
 
-			var pageServ = new PageService();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var pageServ = new PageService();
 			try
 			{
 				pageServ.UpdatePage(ErpPage.Id, ErpPage.Name, ErpPage.Label, ErpPage.LabelTranslations, ErpPage.IconClass, ErpPage.System, ErpPage.Weight, ErpPage.VisibleOnMobile, ErpPage.Type, ErpPage.AppId, ErpPage.EntityId, ErpPage.NodeId, ErpPage.AreaId, IsRazorBody, RazorBody, ErpPage.Layout);

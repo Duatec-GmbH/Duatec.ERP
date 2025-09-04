@@ -163,11 +163,14 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			PageDescription = PageUtils.GenerateListPageDescription(PageContext.HttpContext, "", TotalCount);
 			HeaderToolbar.AddRange(AdminPageUtils.GetEntityAdminSubNav(ErpEntity, "data"));
 
-			#endregion
+            #endregion
 
-			#region << Create Columns >>
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			Columns.Add(new WvGridColumnMeta()
+            #region << Create Columns >>
+
+            Columns.Add(new WvGridColumnMeta()
 			{
 				Name = "",
 				Label = "",
@@ -263,7 +266,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			if (ErpEntity == null)
 				return NotFound();
 
-			try
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            try
 			{
 				var recMan = new RecordManager();
 				var response = recMan.DeleteRecord(ErpEntity, recordId);

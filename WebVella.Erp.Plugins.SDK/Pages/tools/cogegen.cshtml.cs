@@ -81,7 +81,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Tools
 			if (initResult != null)
 				return initResult;
 
-			InitEntitySelectOptions();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            InitEntitySelectOptions();
 
 			BeforeRender();
 			return Page();
@@ -94,8 +97,11 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Tools
 			var initResult = Init();
 			if (initResult != null)
 				return initResult;
-			
-			InitEntitySelectOptions();
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            InitEntitySelectOptions();
 
 			try
 			{

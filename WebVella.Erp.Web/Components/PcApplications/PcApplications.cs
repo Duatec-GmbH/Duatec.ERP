@@ -79,7 +79,7 @@ namespace WebVella.Erp.Web.Components
                     {
                         foreach (var app in apps)
                         {
-                            if (app.Access == null || app.Access.Count == 0)
+                            if (app.Access == null || app.Access.Count == 0 || ErpRequestContext.IsNonDesktopDevice && !app.VisibleOnMobile)
                                 continue;
 
                             IEnumerable<Guid> accessRoles = app.Access.Intersect(currentUserRoles);

@@ -254,6 +254,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
                 return NotFound();
             }
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
             if (String.IsNullOrWhiteSpace(ReturnUrl))
             {
                 ReturnUrl = $"/sdk/objects/entity/r/{ParentRecordId}/rl/fields/c/select";
@@ -281,6 +284,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
             {
                 return NotFound();
             }
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
             if (String.IsNullOrWhiteSpace(ReturnUrl))
             {

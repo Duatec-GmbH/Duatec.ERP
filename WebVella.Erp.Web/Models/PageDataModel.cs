@@ -44,6 +44,8 @@ namespace WebVella.Erp.Web.Models
 				//if page request context is set, it is used, otherwise, the requestContext is used
 				ErpRequestContext reqCtx = erpPageModel.ErpRequestContext;
 
+				properties.Add("IsDesktop", new MPW(MPT.Object, !reqCtx.IsNonDesktopDevice));
+
 				properties.Add("$not", new MPW(MPT.Function, new NotFunction(this)));
 				properties.Add("$and", new MPW(MPT.Function, new AndFunction(this)));
 				properties.Add("$or", new MPW(MPT.Function, new OrFunction(this)));

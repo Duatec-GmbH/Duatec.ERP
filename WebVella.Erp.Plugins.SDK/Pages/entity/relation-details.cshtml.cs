@@ -76,7 +76,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			if (Relation == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -92,7 +95,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			if (Relation == null)
 				return NotFound();
 
-			var entMan = new EntityManager();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var entMan = new EntityManager();
 			try
 			{
 				var relMan = new EntityRelationManager();

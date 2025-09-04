@@ -65,9 +65,12 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 
 			HeaderToolbar.AddRange(AdminPageUtils.GetEntityAdminSubNav(ErpEntity, "web-api"));
 
-			#endregion
+            #endregion
 
-			BeforeRender();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            BeforeRender();
 			return Page();
 		}
 	}

@@ -128,7 +128,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if (ErpPage == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -143,7 +146,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if(!PageContext.HttpContext.Request.Query.ContainsKey("op"))
 				return NotFound();
 
-			var operation = PageContext.HttpContext.Request.Query["op"];
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var operation = PageContext.HttpContext.Request.Query["op"];
 			var pageServ = new PageService();
 			try
 			{

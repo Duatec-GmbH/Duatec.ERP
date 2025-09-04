@@ -89,7 +89,8 @@ namespace WebVella.TagHelpers.TagHelpers
 		[HtmlAttributeName("has-tfoot")]
 		public bool HasTfoot { get; set; } = true;
 
-		private int RecordsCount { get; set; } = 0;
+
+        private int RecordsCount { get; set; } = 0;
 
 		public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
 		{
@@ -198,7 +199,7 @@ namespace WebVella.TagHelpers.TagHelpers
 				var theadEl = new TagBuilder("thead");
 				var trEl = new TagBuilder("tr");
 
-				foreach (var column in Columns)
+				foreach (var column in Columns.Where(c => c.IsVisible))
 				{
 					var thEl = new TagBuilder("th");
 					var columnCssList = new List<string>();

@@ -81,7 +81,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.User
 			if (UserRecord == null)
 				return NotFound();
 
-			UserName = (string)UserRecord["username"];
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            UserName = (string)UserRecord["username"];
 			Email = (string)UserRecord["email"];
 			Image = (string)UserRecord["image"];
 			FirstName = (string)UserRecord["first_name"];
@@ -111,7 +114,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.User
 			if (UserRecord == null)
 				return NotFound();
 
-			try
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            try
 			{
 
 				var secMan = new SecurityManager();

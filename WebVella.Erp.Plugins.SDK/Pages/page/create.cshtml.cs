@@ -60,10 +60,6 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 
 		[BindProperty]
 		public string RazorBody { get; set; } = "";
-
-        [BindProperty]
-        public bool VisibleOnMobile { get; set; } = true;
-
 		
 		public IActionResult OnGet()
 		{
@@ -71,7 +67,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if (initResult != null)
 				return initResult;
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -84,7 +83,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if (initResult != null)
 				return initResult;
 
-			var pageServ = new PageService();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var pageServ = new PageService();
 			try
 			{
 				var pageId = Guid.NewGuid();

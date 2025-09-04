@@ -49,7 +49,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpDataSource
 			if (initResult != null)
 				return initResult;
 
-			DataSourceManager dsMan = new DataSourceManager();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            DataSourceManager dsMan = new DataSourceManager();
 
 			int pager = 0;
 			string sortBy = "";

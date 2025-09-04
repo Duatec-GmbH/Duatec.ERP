@@ -125,8 +125,8 @@
 			@{
 				var columnSortable = (options.GetType().GetProperty($"Container{i}Sortable").GetValue(options, null) ?? false);
 				var columnSearchable = (options.GetType().GetProperty($"Container{i}Searchable").GetValue(options, null) ?? false);
-				var columnClass = (options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
 				var columnNoWrap = (options.GetType().GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
+                var columnIsVisible = options.GetType().GetProperty($"Container{i}IsVisible").GetValue(options, null) as string ?? string.Empty;
 			}
 			<wv-column span="4">
 				<wv-field-checkbox name="@($"container{i}_nowrap")" value="@columnNoWrap" label-text="@($"Column {i} Text Wrapping")" text-true="mark as non wrappable"></wv-field-checkbox>
@@ -134,15 +134,20 @@
 			<wv-column span="4">
 				<wv-field-checkbox name="@($"container{i}_sortable")" value="@columnSortable" label-text="@($"Column {i} Sortable")" text-true="mark as sortable"></wv-field-checkbox>
 			</wv-column>
-			<wv-column span="4">
-				<wv-field-text name="@($"container{i}_class")" value="@columnClass" label-text="@($"Column {i} Class")"></wv-field-text>
-			</wv-column>
+            <wv-column span="4">
+                <wv-field-datasource name="@($"container{i}_is_visible")" value="@columnIsVisible" label-text="Is Rendered" page-id="erpRequest.Page.Id" placeholder="true"></wv-field-datasource>
+            </wv-column>
+
 		</wv-row>
 		<wv-row>
 			@{
+                var columnClass = (options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
 				var verticalAlign = (options.GetType().GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
 				var horizontalAlign = (options.GetType().GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
 			}
+            <wv-column span="4">
+                <wv-field-text name="@($"container{i}_class")" value="@columnClass" label-text="@($"Column {i} Class")"></wv-field-text>
+            </wv-column>
 			<wv-column span="4">
 				<wv-field-select name="@($"container{i}_vertical_align")" value="@verticalAlign" label-text="@($"Column {i} Vertical Align")" options="@verticalAlignmentOptions" required="true"></wv-field-select>
 			</wv-column>

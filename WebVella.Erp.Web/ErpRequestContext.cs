@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
+using Wangkanai.Detection.Models;
 using Wangkanai.Detection.Services;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
@@ -39,6 +40,11 @@ namespace WebVella.Erp.Web
 		public Guid? RelationId { get; internal set; } = null;
 
 		public Guid? ParentRecordId { get; internal set; } = null;
+
+		public bool IsNonDesktopDevice
+		{
+			get => Detection.Device.Type is Device.Tv or Device.Car or Device.Mobile;
+		}
 
 		public ErpRequestContext([FromServices] IServiceProvider serviceProvider)
 		{

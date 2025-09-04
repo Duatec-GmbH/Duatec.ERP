@@ -131,6 +131,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
 
             InitPageData();
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
             BeforeRender();
             return Page();
         }
@@ -144,6 +147,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Job
             new LogService().ClearJobLogs();
 
             InitPageData();
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
             BeforeRender();
             return Page();

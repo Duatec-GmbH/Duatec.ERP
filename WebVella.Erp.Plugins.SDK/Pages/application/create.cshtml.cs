@@ -74,7 +74,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 
 			InitPage();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
             //Add Admin as the default roles
             Access.Add(SystemIds.AdministratorRoleId.ToString());
 
@@ -92,7 +95,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 
 			InitPage();
 
-			var appServ = new AppService();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var appServ = new AppService();
 			try
 			{
 				var appId = Guid.NewGuid();

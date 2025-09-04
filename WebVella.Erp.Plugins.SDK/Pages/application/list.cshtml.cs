@@ -161,7 +161,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 
 			ErpRequestContext.PageContext = PageContext;
 
-			BeforeRender();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            BeforeRender();
 			return Page();
 		}
 	}

@@ -64,7 +64,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			if (App == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 			var appSrv = new AppService();
 			Records = appSrv.GetApplication(App.Id).HomePages.OrderBy(x => x.Weight).ToList().MapTo<EntityRecord>();
 

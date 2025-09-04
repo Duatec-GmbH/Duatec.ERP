@@ -41,7 +41,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Role
 
 			InitPage();
 
-			if (RoleRecord == null)
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            if (RoleRecord == null)
 				return NotFound();
 
 			Name = (string)RoleRecord["name"];
@@ -61,7 +64,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Role
 			InitPage();
 			if (RoleRecord == null) return NotFound();
 
-			try
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            try
 			{
 				ErpRole role = new ErpRole();
 				role.Id = (Guid)RoleRecord["id"];

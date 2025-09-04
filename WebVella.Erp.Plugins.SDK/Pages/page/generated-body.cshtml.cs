@@ -60,8 +60,11 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			if (ErpPage == null)
 				return NotFound();
 
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			var componentLibrary = new PageComponentLibraryService().GetPageComponentsList();
+
+            var componentLibrary = new PageComponentLibraryService().GetPageComponentsList();
 
 			foreach (var component in componentLibrary)
 			{

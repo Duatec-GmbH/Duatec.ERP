@@ -100,7 +100,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			if (ErpEntity == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -116,7 +119,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			if (ErpEntity == null)
 				return NotFound();
 
-			try
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            try
 			{
 				if (String.IsNullOrWhiteSpace(Origin) || !Origin.Contains("$"))
 				{

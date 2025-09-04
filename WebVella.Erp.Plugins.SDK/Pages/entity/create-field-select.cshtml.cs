@@ -45,7 +45,11 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 			{
 				return NotFound();
 			}
-			HeaderToolbar.AddRange(AdminPageUtils.GetEntityAdminSubNav(ErpEntity, "fields"));
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            HeaderToolbar.AddRange(AdminPageUtils.GetEntityAdminSubNav(ErpEntity, "fields"));
 
 			ErpRequestContext.PageContext = PageContext;
 

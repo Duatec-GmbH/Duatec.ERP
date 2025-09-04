@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Microsoft.AspNetCore.Mvc;
+using Wangkanai.Detection.Models;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
@@ -53,6 +54,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 				Author = App.Author;
 				Color = App.Color;
 				Weight = App.Weight;
+                VisibleOnMobile = App.VisibleOnMobile;
 				if (App.Access != null && App.Access.Count > 0)
 				{
 					Access = App.Access.Select(x => x.ToString()).ToList();
@@ -87,7 +89,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			if (App == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if(IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 			BeforeRender();
 			return Page();
 		}
@@ -102,7 +107,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			if (App == null)
 				return NotFound();
 
-			var appServ = new AppService();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var appServ = new AppService();
 			try
 			{
 				appServ.DeleteApplication(App.Id);

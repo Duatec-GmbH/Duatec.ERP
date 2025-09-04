@@ -68,7 +68,11 @@ namespace WebVella.Erp.Plugins.SDK.Pages.User
 				return initResult;
 
 			InitPage();
-			BeforeRender();
+
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            BeforeRender();
 			return Page();
 		}
 
@@ -82,7 +86,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.User
 
 			InitPage();
 
-			var appServ = new AppService();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var appServ = new AppService();
 			try
 			{
 				var secMan = new SecurityManager();

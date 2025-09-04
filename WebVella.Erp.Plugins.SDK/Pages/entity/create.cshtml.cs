@@ -106,7 +106,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 
 			InitPage();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -122,7 +125,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 
 			InitPage();
 
-			var entMan = new EntityManager();
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var entMan = new EntityManager();
 			try
 			{
 				var entityId = Guid.NewGuid();

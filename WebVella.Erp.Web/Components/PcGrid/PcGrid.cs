@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using EcmaScript.NET;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Eql;
 using WebVella.Erp.Exceptions;
@@ -107,6 +108,10 @@ namespace WebVella.Erp.Web.Components
 			public string Compatibility { get; set; } = string.Empty;
 
 			#region << container1 >>
+
+			[JsonProperty(PropertyName = "container1_is_visible")]
+			public string Container1IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container1_id")]
 			public string Container1Id { get; set; } = "column1";
 
@@ -140,6 +145,10 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container2 >>
+
+			[JsonProperty(PropertyName = "container2_is_visible")]
+			public string Container2IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container2_id")]
 			public string Container2Id { get; set; } = "column2";
 
@@ -172,6 +181,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container3 >>
+			[JsonProperty(PropertyName = "container3_is_visible")]
+			public string Container3IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container3_id")]
 			public string Container3Id { get; set; } = "column3";
 
@@ -204,6 +216,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container4 >>
+			[JsonProperty(PropertyName = "container4_is_visible")]
+			public string Container4IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container4_id")]
 			public string Container4Id { get; set; } = "column4";
 
@@ -236,6 +251,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container5 >>
+			[JsonProperty(PropertyName = "container5_is_visible")]
+			public string Container5IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container5_id")]
 			public string Container5Id { get; set; } = "column5";
 
@@ -268,6 +286,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container6 >>
+			[JsonProperty(PropertyName = "container6_is_visible")]
+			public string Container6IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container6_id")]
 			public string Container6Id { get; set; } = "column6";
 
@@ -300,6 +321,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container7 >>
+			[JsonProperty(PropertyName = "container7_is_visible")]
+			public string Container7IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container7_id")]
 			public string Container7Id { get; set; } = "column7";
 
@@ -332,6 +356,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container8 >>
+			[JsonProperty(PropertyName = "container8_is_visible")]
+			public string Container8IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container8_id")]
 			public string Container8Id { get; set; } = "column8";
 
@@ -364,6 +391,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container9 >>
+			[JsonProperty(PropertyName = "container9_is_visible")]
+			public string Container9IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container9_id")]
 			public string Container9Id { get; set; } = "column9";
 
@@ -396,6 +426,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container10 >>
+			[JsonProperty(PropertyName = "container10_is_visible")]
+			public string Container10IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container10_id")]
 			public string Container10Id { get; set; } = "column10";
 
@@ -428,6 +461,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container11 >>
+			[JsonProperty(PropertyName = "container11_is_visible")]
+			public string Container11IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container11_id")]
 			public string Container11Id { get; set; } = "column11";
 
@@ -460,6 +496,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container12 >>
+			[JsonProperty(PropertyName = "container12_is_visible")]
+			public string Container12IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container12_id")]
 			public string Container12Id { get; set; } = "column12";
 
@@ -492,6 +531,9 @@ namespace WebVella.Erp.Web.Components
 			#endregion
 
 			#region << container13 >>
+			[JsonProperty(PropertyName = "container13_is_visible")]
+			public string Container13IsVisible { get; set; } = "";
+
 			[JsonProperty(PropertyName = "container13_id")]
 			public string Container13Id { get; set; } = "column13";
 
@@ -654,7 +696,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container1Label,
 						Searchable = options.Container1Searchable,
 						Sortable = options.Container1Sortable,
-						Width = options.Container1Width
+						Width = options.Container1Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container1IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 1)
@@ -666,7 +709,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container2Label,
 						Searchable = options.Container2Searchable,
 						Sortable = options.Container2Sortable,
-						Width = options.Container2Width
+						Width = options.Container2Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container2IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 2)
@@ -678,7 +722,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container3Label,
 						Searchable = options.Container3Searchable,
 						Sortable = options.Container3Sortable,
-						Width = options.Container3Width
+						Width = options.Container3Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container3IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 3)
@@ -691,6 +736,8 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container4Searchable,
 						Sortable = options.Container4Sortable,
 						Width = options.Container4Width
+						,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container4IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 4)
@@ -702,7 +749,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container5Label,
 						Searchable = options.Container5Searchable,
 						Sortable = options.Container5Sortable,
-						Width = options.Container5Width
+						Width = options.Container5Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container5IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 5)
@@ -714,7 +762,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container6Label,
 						Searchable = options.Container6Searchable,
 						Sortable = options.Container6Sortable,
-						Width = options.Container6Width
+						Width = options.Container6Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container6IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 6)
@@ -726,7 +775,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container7Label,
 						Searchable = options.Container7Searchable,
 						Sortable = options.Container7Sortable,
-						Width = options.Container7Width
+						Width = options.Container7Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container7IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 7)
@@ -738,7 +788,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container8Label,
 						Searchable = options.Container8Searchable,
 						Sortable = options.Container8Sortable,
-						Width = options.Container8Width
+						Width = options.Container8Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container8IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 8)
@@ -750,7 +801,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container9Label,
 						Searchable = options.Container9Searchable,
 						Sortable = options.Container9Sortable,
-						Width = options.Container9Width
+						Width = options.Container9Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container9IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 9)
@@ -762,7 +814,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container10Label,
 						Searchable = options.Container10Searchable,
 						Sortable = options.Container10Sortable,
-						Width = options.Container10Width
+						Width = options.Container10Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container10IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 10)
@@ -774,7 +827,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container11Label,
 						Searchable = options.Container11Searchable,
 						Sortable = options.Container11Sortable,
-						Width = options.Container11Width
+						Width = options.Container11Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container11IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 11)
@@ -786,7 +840,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container12Label,
 						Searchable = options.Container12Searchable,
 						Sortable = options.Container12Sortable,
-						Width = options.Container12Width
+						Width = options.Container12Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container12IsVisible)
 					});
 				}
 				if (options.VisibleColumns > 12)
@@ -798,7 +853,8 @@ namespace WebVella.Erp.Web.Components
 						Label = options.Container13Label,
 						Searchable = options.Container13Searchable,
 						Sortable = options.Container13Sortable,
-						Width = options.Container13Width
+						Width = options.Container13Width,
+						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container13IsVisible)
 					});
 				}
 				#endregion
@@ -851,6 +907,18 @@ namespace WebVella.Erp.Web.Components
 				};
 				return await Task.FromResult<IViewComponentResult>(View("Error"));
 			}
+		}
+
+		private static bool GetVisibilityByDataSource(PageDataModel dataModel, string text)
+		{
+			var isVisible = true;
+			var isVisibleDS = dataModel.GetPropertyValueByDataSource(text);
+			if (isVisibleDS is string && !string.IsNullOrWhiteSpace(isVisibleDS.ToString()) && bool.TryParse(isVisibleDS.ToString(), out bool outBool))
+				isVisible = outBool;
+			else if (isVisibleDS is bool b)
+				isVisible = b;
+
+			return isVisible;
 		}
 	}
 }

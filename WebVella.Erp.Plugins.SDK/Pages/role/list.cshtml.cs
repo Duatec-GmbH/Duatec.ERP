@@ -47,17 +47,20 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Role
 			SortBy = sortBy;
 			SortOrder = sortOrder;
 
-			//var appServ = new AppService();
+            //var appServ = new AppService();
 
-			//var apps = appServ.GetAllApplications();
-			//TotalCount = apps.Count;
+            //var apps = appServ.GetAllApplications();
+            //TotalCount = apps.Count;
 
-			//ReturnUrlEncoded = HttpUtility.UrlEncode(PageUtils.GetCurrentUrl(PageContext.HttpContext));
-			#endregion
+            //ReturnUrlEncoded = HttpUtility.UrlEncode(PageUtils.GetCurrentUrl(PageContext.HttpContext));
+            #endregion
 
-			#region << Create Columns >>
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
 
-			Columns = new List<WvGridColumnMeta>() {
+            #region << Create Columns >>
+
+            Columns = new List<WvGridColumnMeta>() {
 				new WvGridColumnMeta(){
 					Name = "action",
 					Width="1%"

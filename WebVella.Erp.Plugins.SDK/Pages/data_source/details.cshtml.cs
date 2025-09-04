@@ -109,7 +109,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpDataSource
 			if (DataSourceObject == null)
 				return NotFound();
 
-			ErpRequestContext.PageContext = PageContext;
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            ErpRequestContext.PageContext = PageContext;
 
 			BeforeRender();
 			return Page();
@@ -126,7 +129,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpDataSource
 			if (DataSourceObject == null)
 				return NotFound();
 
-			var existingPageDataSources = new PageService().GetPageDataSourcesByDataSourceId(DataSourceObject.Id);
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            var existingPageDataSources = new PageService().GetPageDataSourcesByDataSourceId(DataSourceObject.Id);
 			if (existingPageDataSources.Count > 0)
 				return Redirect($"/sdk/objects/data_source/r/{DataSourceObject.Id}");
 

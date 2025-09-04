@@ -113,7 +113,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 				return NotFound();
 			}
 
-			if (String.IsNullOrWhiteSpace(ReturnUrl))
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            if (String.IsNullOrWhiteSpace(ReturnUrl))
 			{
 				ReturnUrl = $"/sdk/objects/entity/r/{ErpEntity.Id}/rl/fields/l";
 			}
@@ -141,7 +144,10 @@ namespace WebVella.Erp.Plugins.SDK.Pages.ErpEntity
 				return NotFound();
 			}
 
-			if (String.IsNullOrWhiteSpace(ReturnUrl))
+            if (IsNonDesktopDevice)
+                return new LocalRedirectResult("/error?401");
+
+            if (String.IsNullOrWhiteSpace(ReturnUrl))
 			{
 				ReturnUrl = $"/sdk/objects/entity/r/{ErpEntity.Id}/rl/fields/l";
 			}

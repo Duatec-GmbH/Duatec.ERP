@@ -134,6 +134,11 @@ namespace WebVella.Erp.Web.Models
 			return null;
 		}
 
+		protected bool IsNonDesktopDevice
+		{
+			get => ErpRequestContext.IsNonDesktopDevice;
+		}
+
 		public IActionResult Init(string appName = "", string areaName = "", string nodeName = "",
 						string pageName = "", Guid? recordId = null, Guid? relationId = null, Guid? parentRecordId = null)
 		{
@@ -225,7 +230,7 @@ namespace WebVella.Erp.Web.Models
 
 			if (!VisibleOnMobile)
 			{
-				if (ErpRequestContext.Detection.Device.Type is Device.Tv or Device.Car or Device.Mobile)
+				if (IsNonDesktopDevice)
 					return new LocalRedirectResult("/error?401");
 			}
 
