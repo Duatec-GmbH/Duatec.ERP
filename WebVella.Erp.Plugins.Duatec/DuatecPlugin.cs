@@ -49,7 +49,10 @@ namespace WebVella.Erp.Plugins.Duatec
                 {
                     // insert difference code within braces here here
                     // don't forget to include records of entity "article_type".
-                    
+
+                    {
+
+                    }
 
                     // necessary stuff from webvella (DO NOT DELETE)
 

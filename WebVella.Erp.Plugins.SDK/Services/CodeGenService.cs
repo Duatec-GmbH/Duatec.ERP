@@ -7852,7 +7852,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 (app.Author != null ? $"\tvar author = \"{app.Author}\";\n" : "\tstring author = null;\n") +
                 (app.Color != null ? $"\tvar color = \"{app.Color}\";\n" : "\tstring color = null;\n") +
                 $"\tvar weight = {app.Weight};\n" +
-                $"\tvar visibleOnMobile = {app.VisibleOnMobile};\n" +
+                $"\tvar visibleOnMobile = {app.VisibleOnMobile.ToString().ToLower()};\n" +
                 $"\tvar access = new List<Guid>();\n";
             foreach (Guid roleId in app.Access)
                 response += $"\taccess.Add( new Guid(\"{roleId.ToString()}\") );\n";
@@ -7966,7 +7966,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                     (currentApp.Author != null ? $"\tvar author = \"{currentApp.Author}\";\n" : "\tstring author = null;\n") +
                     (currentApp.Color != null ? $"\tvar color = \"{currentApp.Color}\";\n" : "\tstring color = null;\n") +
                     $"\tvar weight = {currentApp.Weight};\n" +
-                    $"\tvar visibleOnMobile = {currentApp.VisibleOnMobile};\n" +
+                    $"\tvar visibleOnMobile = {currentApp.VisibleOnMobile.ToString().ToLower()};\n" +
                     $"\tvar access = new List<Guid>();\n";
                 foreach (Guid roleId in currentApp.Access)
                     response.Code += $"\taccess.Add( new Guid(\"{roleId.ToString()}\") );\n";
@@ -7995,7 +7995,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 $"\tvar iconClass = \"{area.IconClass}\";\n" +
                 $"\tvar color = \"{area.Color}\";\n" +
                 $"\tvar weight = {area.Weight};\n" +
-                $"\tvar visibleOnMobile = {area.VisibleOnMobile};\n" +
+                $"\tvar visibleOnMobile = {area.VisibleOnMobile.ToString().ToLower()};\n" +
                 $"\tvar showGroupNames = {area.ShowGroupNames.ToString().ToLower()};\n" +
                 $"\tvar access = new List<Guid>();\n";
 
@@ -8168,7 +8168,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 $"\tvar iconClass = \"{currentArea.IconClass}\";\n" +
                 $"\tvar color = \"{currentArea.Color}\";\n" +
                 $"\tvar weight = {currentArea.Weight};\n" +
-                $"\tvar visibleOnMobile = {currentArea.VisibleOnMobile};\n" +
+                $"\tvar visibleOnMobile = {currentArea.VisibleOnMobile.ToString().ToLower()};\n" +
                 $"\tvar showGroupNames = {currentArea.ShowGroupNames.ToString().ToLower()};\n" +
                 $"\tvar access = new List<Guid>();\n";
 
@@ -8671,7 +8671,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 (page.EntityId.HasValue ? $"\tGuid? entityId = new Guid(\"{page.EntityId}\");\n" : $"\tGuid? entityId = null;\n") +
                 (page.NodeId.HasValue ? $"\tGuid? nodeId = new Guid(\"{page.NodeId}\");\n" : $"\tGuid? nodeId = null;\n") +
                 (page.AreaId.HasValue ? $"\tGuid? areaId = new Guid(\"{page.AreaId}\");\n" : $"\tGuid? areaId = null;\n") +
-                $"\tvar visibleOnMobile = {page.VisibleOnMobile};\n" +
+                $"\tvar visibleOnMobile = {page.VisibleOnMobile.ToString().ToLower()};\n" +
                 (page.RazorBody != null ? $"\tstring razorBody = @\"{page.RazorBody.EscapeMultiline()}\";\n" : $"\tstring razorBody = null;\n") +
                 $"\tvar labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();\n";
 
@@ -8821,7 +8821,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                     $"\tvar system = {currentPage.System.ToString().ToLower()};\n" +
                     $"\tvar layout = @\"{currentPage.Layout}\";\n" +
                     $"\tvar weight = {currentPage.Weight};\n" +
-                    $"\tvar visibleOnMobile = {currentPage.VisibleOnMobile};\n" +
+                    $"\tvar visibleOnMobile = {currentPage.VisibleOnMobile.ToString().ToLower()};\n" +
                     $"\tvar type = (PageType)((int){(int)currentPage.Type});\n" +
                     $"\tvar isRazorBody = {currentPage.IsRazorBody.ToString().ToLower()};\n" +
                     (currentPage.AppId.HasValue ? $"\tvar appId = new Guid(\"{currentPage.AppId}\");\n" : $"\tGuid? appId = null;\n") +
