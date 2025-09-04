@@ -33,6 +33,7 @@ namespace WebVella.Erp.Web.Models.AutoMapper.Profiles
 			model.ShowGroupNames = (bool)data["show_group_names"];
 			model.Color = (string)data["color"];
 			model.Weight = (int)data["weight"];
+			model.VisibleOnMobile = (bool)data["visible_on_mobile"];
 
 			if (!string.IsNullOrWhiteSpace((string)data["label_translations"]))
 				model.LabelTranslations = JsonConvert.DeserializeObject<List<TranslationResource>>((string)data["label_translations"]);

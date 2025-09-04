@@ -1287,6 +1287,7 @@ CREATE TABLE public.app_page (
     weight integer DEFAULT '-1'::integer NOT NULL,
     label_translations text,
 	razor_body text,
+	visible_on_mobile boolean DEFAULT true,
     area_id uuid,
     node_id uuid,
     app_id uuid,

@@ -79,6 +79,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 				NodeId = ErpPage.NodeId;
 				Type = ErpPage.Type;
 				Layout = ErpPage.Layout;
+                VisibleOnMobile = ErpPage.VisibleOnMobile;
 			}
 			if (String.IsNullOrWhiteSpace(ReturnUrl))
 			{
@@ -126,7 +127,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			var pageServ = new PageService();
 			try
 			{
-				pageServ.UpdatePage(ErpPage.Id, Name, Label, LabelTranslations, IconClass, ErpPage.System, Weight, Type,
+				pageServ.UpdatePage(ErpPage.Id, Name, Label, LabelTranslations, IconClass, ErpPage.System, Weight, VisibleOnMobile, Type,
 					AppId, EntityId, NodeId, AreaId, ErpPage.IsRazorBody, ErpPage.RazorBody, Layout);
 
 				if (!String.IsNullOrWhiteSpace(ReturnUrl))

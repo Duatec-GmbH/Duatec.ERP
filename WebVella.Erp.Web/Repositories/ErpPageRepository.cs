@@ -122,12 +122,12 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="layout"></param>
 		/// <param name="transaction"></param>
 		public void Insert(Guid id, string name, string label, string labelTranslations, string iconClass, bool system,	int weight, 
-				int type, Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool isRazorBody, string razorBody, string layout,
+				int type, Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool visibleOnMobile, bool isRazorBody, string razorBody, string layout,
 			NpgsqlTransaction transaction = null)
 		{
 			NpgsqlCommand command = new NpgsqlCommand(
-			  "INSERT INTO public.app_page (id,name,label,label_translations,system,type,icon_class,weight,app_id,entity_id,area_id,node_id,is_razor_body,razor_body,layout) " +
-			  "VALUES(@id,@name,@label,@label_translations,@system,@type,@icon_class,@weight,@app_id,@entity_id,@area_id,@node_id,@is_razor_body,@razor_body,@layout)");
+			  "INSERT INTO public.app_page (id,name,label,label_translations,system,type,icon_class,weight,app_id,entity_id,area_id, visible_on_mobile,node_id,is_razor_body,razor_body,layout) " +
+			  "VALUES(@id,@name,@label,@label_translations,@system,@type,@icon_class,@weight,@app_id,@entity_id,@area_id,@visible_on_mobile,@node_id,@is_razor_body,@razor_body,@layout)");
 
 			command.Parameters.Add(new NpgsqlParameter("@id", id));
 			command.Parameters.Add(new NpgsqlParameter("@name", name));
@@ -140,6 +140,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@app_id", (object)appId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@entity_id", (object)entityId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@node_id", (object)nodeId ?? DBNull.Value));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 			command.Parameters.Add(new NpgsqlParameter("@area_id", (object)areaId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@is_razor_body", isRazorBody));
 			command.Parameters.Add(new NpgsqlParameter("@razor_body", (object)razorBody ?? DBNull.Value));
@@ -171,13 +172,14 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="layout"></param>
 		/// <param name="transaction"></param>
 		public void Update(Guid id, string name, string label, string labelTranslations, string iconClass, bool system,	int weight,
-				int type, Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool isRazorBody, string razorBody, string layout,
+				int type, Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool visibleOnMobile, bool isRazorBody, string razorBody, string layout,
 			NpgsqlTransaction transaction = null)
 		{
 			NpgsqlCommand command = new NpgsqlCommand(
 				"UPDATE public.app_page SET " +
 				"name = @name, label = @label, label_translations = @label_translations, system = @system," +
 				"type = @type,icon_class = @icon_class, weight = @weight, app_id = @app_id, entity_id = @entity_id, " +
+				"visible_on_mobile = @visible_on_mobile, " +
 				"area_id = @area_id, node_id = @node_id, is_razor_body = @is_razor_body, razor_body = @razor_body, layout = @layout " +
 				"WHERE id = @id");
 
@@ -192,6 +194,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@app_id", (object)appId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@entity_id", (object)entityId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@node_id", (object)nodeId ?? DBNull.Value));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 			command.Parameters.Add(new NpgsqlParameter("@area_id", (object)areaId ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@is_razor_body", isRazorBody));
 			command.Parameters.Add(new NpgsqlParameter("@razor_body", (object)razorBody ?? DBNull.Value));

@@ -67,7 +67,7 @@ namespace WebVella.Erp.Web.Repositories
 		{
 			#region <--- sql --->
 			const string sql = @"SELECT row_to_json( X ) FROM (
-				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.access,
+				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.visible_on_mobile, app.access,
        	
        				-- pages
 					(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM ( 
@@ -119,7 +119,7 @@ namespace WebVella.Erp.Web.Repositories
 		{
 			#region <--- sql --->
 			const string sql = @"SELECT row_to_json( X ) FROM (
-				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.access,
+				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.visible_on_mobile, app.access,
        	
        				-- pages
 					(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM ( 
@@ -172,7 +172,7 @@ namespace WebVella.Erp.Web.Repositories
 		{
 			#region <--- sql --->
 			const string sql = @"SELECT row_to_json( X ) FROM (
-				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.access,
+				   SELECT app.id, app.name, app.label, app.description, app.icon_class, app.author, app.color, app.weight, app.visible_on_mobile, app.access,
        	
        				-- pages
 					(SELECT  COALESCE( array_to_json( array_agg( row_to_json(d) )), '[]') FROM ( 
@@ -246,12 +246,12 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="access"></param>
 		/// <param name="transaction"></param>
 		public void InsertApplication(Guid id, string name, string label, string description,
-			string iconClass, string author, string color, int weight, List<Guid> access, NpgsqlTransaction transaction = null)
+			string iconClass, string author, string color, int weight, bool visibleOnMobile, List<Guid> access, NpgsqlTransaction transaction = null)
 		{
 
 			NpgsqlCommand command = new NpgsqlCommand(
-				"INSERT INTO public.app (id,name,label,description,icon_class,author,color,weight,access) " +
-				"VALUES(@id,@name,@label,@description,@icon_class,@author,@color,@weight,@access)");
+				"INSERT INTO public.app (id,name,label,description,icon_class,author,color,weight,visible_on_mobile,access) " +
+				"VALUES(@id,@name,@label,@description,@icon_class,@author,@color,@weight,@visible_on_mobile,@access)");
 
 			command.Parameters.Add(new NpgsqlParameter("@id", id));
 			command.Parameters.Add(new NpgsqlParameter("@name", name));
@@ -261,6 +261,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@author", (object)author ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@color", (object)color ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@weight", weight));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 
 			if (access != null && access.Count > 0)
 				command.Parameters.Add("@access", NpgsqlDbType.Array | NpgsqlDbType.Uuid).Value = access.ToArray();
@@ -287,11 +288,11 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="access"></param>
 		/// <param name="transaction"></param>
 		public void UpdateApplication(Guid id, string name, string label, string description,
-			string iconClass, string author, string color, int weight, List<Guid> access, NpgsqlTransaction transaction = null)
+			string iconClass, string author, string color, int weight, bool visibleOnMobile, List<Guid> access, NpgsqlTransaction transaction = null)
 		{
 			NpgsqlCommand command = new NpgsqlCommand(
 				"UPDATE public.app SET name = @name, label = @label, description = @description," +
-				"icon_class = @icon_class, author = @author, color = @color, weight = @weight, access=@access " +
+				"icon_class = @icon_class, author = @author, color = @color, weight = @weight, visible_on_mobile = @visible_on_mobile, access=@access " +
 				"WHERE id = @id");
 
 			command.Parameters.Add(new NpgsqlParameter("@id", id));
@@ -302,6 +303,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@author", (object)author ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@color", (object)color ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@weight", weight));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 
 			if (access != null && access.Count > 0)
 				command.Parameters.Add("@access", NpgsqlDbType.Array | NpgsqlDbType.Uuid).Value = access.ToArray();

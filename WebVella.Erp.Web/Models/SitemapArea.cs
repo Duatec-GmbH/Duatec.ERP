@@ -47,6 +47,9 @@ namespace WebVella.Erp.Web.Models
 		[JsonProperty("nodes")]
 		public List<SitemapNode> Nodes { get; set; } = new List<SitemapNode>(); //can have hardcoded URL
 
+		[JsonProperty("visible_on_mobile")]
+		public bool VisibleOnMobile { get; set; } = true;
+
 		[JsonProperty("access")]
 		public List<Guid> Access { get; 
 			set; } = new List<Guid>(); //show in menu for the added roles, or for all if no roles are selected

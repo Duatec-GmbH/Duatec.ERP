@@ -1032,7 +1032,7 @@ namespace WebVella.Erp.Plugins.Mail
 				var weight = 10;
 				var access = new List<Guid>();
 
-				new WebVella.Erp.Web.Services.AppService().CreateApplication(id, name, label, description, iconClass, author, color, weight, access, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.AppService().CreateApplication(id, name, label, description, iconClass, author, color, weight, visibleOnMobile: true, access, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1051,7 +1051,7 @@ namespace WebVella.Erp.Plugins.Mail
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 				var descriptionTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.AppService().CreateArea(id, appId, name, label, labelTranslations, description, descriptionTranslations, iconClass, color, weight, showGroupNames, access, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.AppService().CreateArea(id, appId, name, label, labelTranslations, description, descriptionTranslations, iconClass, color, weight, visibleOnMobile: true, showGroupNames, access, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1070,7 +1070,7 @@ namespace WebVella.Erp.Plugins.Mail
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 				var descriptionTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.AppService().CreateArea(id, appId, name, label, labelTranslations, description, descriptionTranslations, iconClass, color, weight, showGroupNames, access, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.AppService().CreateArea(id, appId, name, label, labelTranslations, description, descriptionTranslations, iconClass, color, weight, visibleOnMobile: true, showGroupNames, access, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1128,7 +1128,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1150,7 +1150,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1172,7 +1172,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1194,7 +1194,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1216,7 +1216,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 
@@ -1238,7 +1238,7 @@ namespace WebVella.Erp.Plugins.Mail
 				string razorBody = null;
 				var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+				new WebVella.Erp.Web.Services.PageService().CreatePage(id, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile: true, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 			}
 			#endregion
 

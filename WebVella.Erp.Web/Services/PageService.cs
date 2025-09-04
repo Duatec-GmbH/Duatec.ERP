@@ -192,7 +192,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="layout"></param>
 		/// <param name="transaction"></param>
 		public void CreatePage(Guid id, string name, string label, List<TranslationResource> labelTranslations, string iconClass, bool system, int weight, PageType type,
-			Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool isRazorBody, string razorBody, string layout, NpgsqlTransaction transaction = null)
+			Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool visibleOnMobile, bool isRazorBody, string razorBody, string layout, NpgsqlTransaction transaction = null)
 		{
 			var pageRepository = new ErpPageRepository(connectionString);
 
@@ -222,7 +222,7 @@ namespace WebVella.Erp.Web.Services
 				SavePageBodyContentOnFileSystem(id, razorBody ?? string.Empty);
 
 			pageRepository.Insert(id, name, label, lblTr, iconClass, system, weight, (int)type, appId,
-				entityId, nodeId, areaId, !string.IsNullOrWhiteSpace(razorBody), razorBody, layout, transaction);
+				entityId, nodeId, areaId, visibleOnMobile, !string.IsNullOrWhiteSpace(razorBody), razorBody, layout, transaction);
 
 			ClearPagesCache();
 		}
@@ -246,7 +246,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="razorBody"></param>
 		/// <param name="layout"></param>
 		/// <param name="transaction"></param>
-		public void UpdatePage(Guid id, string name, string label, List<TranslationResource> labelTranslations, string iconClass, bool system, int weight, PageType type,
+		public void UpdatePage(Guid id, string name, string label, List<TranslationResource> labelTranslations, string iconClass, bool system, int weight, bool visibleOnMobile, PageType type,
 			Guid? appId, Guid? entityId, Guid? nodeId, Guid? areaId, bool isRazorBody, string razorBody, string layout, NpgsqlTransaction transaction = null)
 		{
 
@@ -298,7 +298,7 @@ namespace WebVella.Erp.Web.Services
 				DeletePageBodyContentOnFileSystem(id);
 
 			pageRepository.Update(id, name, label, lblTr, iconClass, system, weight, (int)type, appId,
-				entityId, nodeId, areaId, isRazorBody, razorBody, layout, transaction);
+				entityId, nodeId, areaId, visibleOnMobile, isRazorBody, razorBody, layout, transaction);
 
 			ClearPagesCache();
 
@@ -574,7 +574,7 @@ namespace WebVella.Erp.Web.Services
 			Guid newPageId = Guid.NewGuid();
 
 			CreatePage(newPageId, newPageName, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight,
-				page.Type, page.AppId, page.EntityId, page.NodeId, page.AreaId, page.IsRazorBody, page.RazorBody, page.Layout, transaction);
+				page.Type, page.AppId, page.EntityId, page.NodeId, page.AreaId, page.VisibleOnMobile, page.IsRazorBody, page.RazorBody, page.Layout, transaction);
 
 			foreach (var node in page.Body)
 				ClonePageBodyNodeInternal(newPageId, null, node, transaction);

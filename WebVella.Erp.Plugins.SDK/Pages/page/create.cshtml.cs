@@ -61,6 +61,9 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 		[BindProperty]
 		public string RazorBody { get; set; } = "";
 
+        [BindProperty]
+        public bool VisibleOnMobile { get; set; } = true;
+
 		
 		public IActionResult OnGet()
 		{
@@ -85,7 +88,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			try
 			{
 				var pageId = Guid.NewGuid();
-				pageServ.CreatePage(pageId, Name, Label, LabelTranslations, IconClass,System,Weight,Type,AppId,EntityId,NodeId,AreaId,false,null,string.Empty);
+				pageServ.CreatePage(pageId, Name, Label, LabelTranslations, IconClass,System,Weight,Type,AppId,EntityId,NodeId,AreaId,VisibleOnMobile,false,null,string.Empty);
 				return Redirect($"/sdk/objects/page/r/{pageId}/");
 			}
 			catch (ValidationException ex)

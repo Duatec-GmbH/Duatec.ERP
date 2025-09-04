@@ -94,7 +94,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="access"></param>
 		/// <param name="transaction"></param>
 		public void CreateApplication(Guid id, string name, string label, string description,
-			string iconClass, string author, string color, int weight, List<Guid> access, NpgsqlTransaction transaction = null)
+			string iconClass, string author, string color, int weight, bool visibleOnMobile, List<Guid> access, NpgsqlTransaction transaction = null)
 		{
 			ValidationException ex = new ValidationException();
 
@@ -116,7 +116,7 @@ namespace WebVella.Erp.Web.Services
 
 			ex.CheckAndThrow();
 
-			repository.InsertApplication(id, name, label, description, iconClass, author, color, weight, access, transaction);
+			repository.InsertApplication(id, name, label, description, iconClass, author, color, weight, visibleOnMobile, access, transaction);
 		}
 
 		/// <summary>
@@ -133,7 +133,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="access"></param>
 		/// <param name="transaction"></param>
 		public void UpdateApplication(Guid id, string name, string label, string description,
-			string iconClass, string author, string color, int weight, List<Guid> access, NpgsqlTransaction transaction = null)
+			string iconClass, string author, string color, int weight, bool visibleOnMobile, List<Guid> access, NpgsqlTransaction transaction = null)
 		{
 			ValidationException ex = new ValidationException();
 
@@ -155,7 +155,7 @@ namespace WebVella.Erp.Web.Services
 
 			ex.CheckAndThrow();
 
-			repository.UpdateApplication(id, name, label, description, iconClass, author, color, weight, access, transaction);
+			repository.UpdateApplication(id, name, label, description, iconClass, author, color, weight, visibleOnMobile, access, transaction);
 
 			ClearAppCache(id);
 		}
@@ -276,7 +276,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="transaction"></param>
 		public void CreateArea(Guid id, Guid appId, string name, string label, List<TranslationResource> labelTranslations,
 			string description, List<TranslationResource> descriptionTranslations, string iconClass, string color,
-			int weight, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
+			int weight, bool visibleOnMobile, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
 		{
 			// VALIDATION
 
@@ -289,7 +289,7 @@ namespace WebVella.Erp.Web.Services
 				descTr = JsonConvert.SerializeObject(descriptionTranslations);
 
 			new SitemapAreaRepository(connectionString).Insert(id, appId, name, label, lblTr, description,
-				descTr, iconClass, color, weight, showGroupNames, accessRoles, transaction);
+				descTr, iconClass, color, weight, visibleOnMobile, showGroupNames, accessRoles, transaction);
 
 			ClearAppCache(appId);
 		}
@@ -312,7 +312,7 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="transaction"></param>
 		public void UpdateArea(Guid id, Guid appId, string name, string label, List<TranslationResource> labelTranslations,
 			string description, List<TranslationResource> descriptionTranslations, string iconClass, string color,
-			int weight, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
+			int weight, bool visibleOnMobile, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
 		{
 			// VALIDATION
 
@@ -325,7 +325,7 @@ namespace WebVella.Erp.Web.Services
 				descTr = JsonConvert.SerializeObject(descriptionTranslations);
 
 			new SitemapAreaRepository(connectionString).Update(id, appId, name, label, lblTr, description,
-				descTr, iconClass, color, weight, showGroupNames, accessRoles, transaction);
+				descTr, iconClass, color, weight, visibleOnMobile, showGroupNames, accessRoles, transaction);
 
 			ClearAppCache(appId);
 		}

@@ -31,10 +31,13 @@
 <wv-form id="ManageRecord" name="ManageRecord" validation-errors="Model.Validation.ToErrorList()" label-mode="Stacked" mode="Form">
 	<wv-section class="mt-4">
 		<wv-row>
-			<wv-column span="12">
+			<wv-column span="6">
 				<wv-field-checkbox label-text="Custom Body" value="@Model.IsRazorBody" name="IsRazorBody"
 								   text-true="custom body  enabled" text-false="custom body disabled"></wv-field-checkbox>
 			</wv-column>
+            <wv-column span="6">
+                <wv-field-checkbox label-text="Visible on Mobile" value="@Model.VisibleOnMobile" name="VisibleOnMobile"></wv-field-checkbox>
+            </wv-column>
 		</wv-row>
 		<div><strong>Templates</strong></div>
 		<div>Replace Razor body with template: <button type="button" class="btn btn-link btn-sm">Record List</button></div>

@@ -26,7 +26,7 @@ namespace WebVella.Erp.Plugins.SDK
 				Access = new List<Guid>() { SystemIds.AdministratorRoleId }
 			};
 			appSrv.CreateApplication(sdkApp.Id, sdkApp.Name, sdkApp.Label, sdkApp.Description, sdkApp.IconClass, sdkApp.Author, sdkApp.Color,
-						sdkApp.Weight, sdkApp.Access, DbContext.Current.Transaction);
+						sdkApp.Weight, sdkApp.VisibleOnMobile, sdkApp.Access, DbContext.Current.Transaction);
 
 			#endregion
 
@@ -43,7 +43,7 @@ namespace WebVella.Erp.Plugins.SDK
 					Color = "#2196F3"
 				};
 				appSrv.CreateArea(appArea.Id, WEBVELLA_SDK_APP_ID, appArea.Name, appArea.Label, appArea.LabelTranslations, appArea.Description, appArea.DescriptionTranslations,
-						appArea.IconClass, appArea.Color, appArea.Weight, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
+						appArea.IconClass, appArea.Color, appArea.Weight, appArea.VisibleOnMobile, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
 			}
 			{
 				var appArea = new SitemapArea()
@@ -57,7 +57,7 @@ namespace WebVella.Erp.Plugins.SDK
 					Color = "#673AB7"
 				};
 				appSrv.CreateArea(appArea.Id, WEBVELLA_SDK_APP_ID, appArea.Name, appArea.Label, appArea.LabelTranslations, appArea.Description, appArea.DescriptionTranslations,
-						appArea.IconClass, appArea.Color, appArea.Weight, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
+						appArea.IconClass, appArea.Color, appArea.Weight, appArea.VisibleOnMobile, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
 			}
 			{
 				var appArea = new SitemapArea()
@@ -71,7 +71,7 @@ namespace WebVella.Erp.Plugins.SDK
 					Color = "#F44336"
 				};
 				appSrv.CreateArea(appArea.Id, WEBVELLA_SDK_APP_ID, appArea.Name, appArea.Label, appArea.LabelTranslations, appArea.Description, appArea.DescriptionTranslations,
-						appArea.IconClass, appArea.Color, appArea.Weight, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
+						appArea.IconClass, appArea.Color, appArea.Weight, appArea.VisibleOnMobile, appArea.ShowGroupNames, appArea.Access, DbContext.Current.Transaction);
 			}
 			#endregion
 

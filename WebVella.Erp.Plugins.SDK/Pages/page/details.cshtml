@@ -50,8 +50,13 @@
 			</wv-column>
 			<wv-column span="6">
 				<wv-field-number label-text="Weight" decimal-digits="0" value="@Model.Weight" name="Weight"></wv-field-number>
-			</wv-column>
+            </wv-column>            
 		</wv-row>
+        <wv-row>
+            <wv-column>
+                <wv-field-checkbox label-text="Visible on Mobile" value="@Model.VisibleOnMobile" name="VisibleOnMobile"></wv-field-checkbox>
+            </wv-column>
+        </wv-row>
 		<wv-row>
 			<wv-column span="6">
 				<wv-field-text label-text="Layout" value="@Model.Layout" name="Layout"></wv-field-text>

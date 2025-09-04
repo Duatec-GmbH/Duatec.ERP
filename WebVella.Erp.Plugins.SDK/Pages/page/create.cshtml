@@ -33,6 +33,11 @@
 				<wv-field-text label-text="Sort Weight" value="@Model.Weight" name="Weight" required="true"></wv-field-text>
 			</wv-column>
 		</wv-row>
+        <wv-row>
+            <wv-column span="4">
+                <wv-field-checkbox label-text="Visible on Mobile" value="@Model.VisibleOnMobile" name="VisibleOnMobile"></wv-field-checkbox>
+            </wv-column>
+        </wv-row>
 	</wv-section>
 	<wv-section class="mt-4" title="Sitemap" is-card="true">
 		@await Component.InvokeAsync("WvSdkPageSitemap", new { presetType = Model.Type, presetAppId = Model.AppId, presetEntityId = Model.PresetEntityId })

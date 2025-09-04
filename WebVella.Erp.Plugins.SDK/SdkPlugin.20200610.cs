@@ -24,7 +24,7 @@ namespace WebVella.Erp.Plugins.SDK
 			var access = new List<Guid>();
 			access.Add( new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda") );
 
-			new WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight,access,WebVella.Erp.Database.DbContext.Current.Transaction);
+			new WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight, visibleOnMobile: true, access,WebVella.Erp.Database.DbContext.Current.Transaction);
 		}
 		#endregion
 

@@ -39,6 +39,9 @@ namespace WebVella.Erp.Web.Models
 		[JsonProperty("weight")]
 		public int Weight { get; set; } = 1;
 
+		[JsonProperty("visible_on_mobile")]
+		public bool VisibleOnMobile { get; set; } = true;
+
 		[JsonProperty("access")]
 		public List<Guid> Access { get; set; } = new List<Guid>(); //show in menu for the added roles, or for all if no roles are selected
 

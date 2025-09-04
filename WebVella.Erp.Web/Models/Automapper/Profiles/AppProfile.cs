@@ -27,6 +27,7 @@ namespace WebVella.Erp.Web.Models.AutoMapper.Profiles
 			model.Author = (string)data["author"];
 			model.Color = (string)data["color"];
 			model.Weight = (int)data["weight"];
+			model.VisibleOnMobile = (bool)data["visible_on_mobile"];
 
 			model.Access = new List<Guid>();
 			if (data["access"] != null)

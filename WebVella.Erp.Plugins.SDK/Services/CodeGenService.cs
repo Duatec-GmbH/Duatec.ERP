@@ -7852,11 +7852,12 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 (app.Author != null ? $"\tvar author = \"{app.Author}\";\n" : "\tstring author = null;\n") +
                 (app.Color != null ? $"\tvar color = \"{app.Color}\";\n" : "\tstring color = null;\n") +
                 $"\tvar weight = {app.Weight};\n" +
+                $"\tvar visibleOnMobile = {app.VisibleOnMobile};\n" +
                 $"\tvar access = new List<Guid>();\n";
             foreach (Guid roleId in app.Access)
                 response += $"\taccess.Add( new Guid(\"{roleId.ToString()}\") );\n";
 
-            response += "\n\tnew WebVella.Erp.Web.Services.AppService().CreateApplication(id,name,label,description,iconClass,author,color,weight,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+            response += "\n\tnew WebVella.Erp.Web.Services.AppService().CreateApplication(id,name,label,description,iconClass,author,color,weight,visibleOnMobile,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
             "}\n" +
             "#endregion\n\n";
 
@@ -7920,6 +7921,12 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 response.ChangeList.Add($"<span class='go-green label-block'>weight</span>  from <span class='go-red'>{oldApp.Weight}</span> to <span class='go-red'>{currentApp.Weight}</span>");
             }
 
+            if(currentApp.VisibleOnMobile != oldApp.VisibleOnMobile)
+            {
+                response.HasUpdate = true;
+                response.ChangeList.Add($"<span class='go-green label-block'>visibleOnMobile</span>  from <span class='go-red'>{oldApp.VisibleOnMobile}</span> to <span class='go-red'>{currentApp.VisibleOnMobile}</span>");
+            }
+
             if (currentApp.Access != null && oldApp.Access != null)
             {
                 bool accessChanged = currentApp.Access.Count != oldApp.Access.Count;
@@ -7959,11 +7966,12 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                     (currentApp.Author != null ? $"\tvar author = \"{currentApp.Author}\";\n" : "\tstring author = null;\n") +
                     (currentApp.Color != null ? $"\tvar color = \"{currentApp.Color}\";\n" : "\tstring color = null;\n") +
                     $"\tvar weight = {currentApp.Weight};\n" +
+                    $"\tvar visibleOnMobile = {currentApp.VisibleOnMobile};\n" +
                     $"\tvar access = new List<Guid>();\n";
                 foreach (Guid roleId in currentApp.Access)
                     response.Code += $"\taccess.Add( new Guid(\"{roleId.ToString()}\") );\n";
 
-                response.Code += "\n\tnew WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+                response.Code += "\n\tnew WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight,visibleOnMobile,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
             "}\n" +
             "#endregion\n\n";
             }
@@ -7987,6 +7995,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 $"\tvar iconClass = \"{area.IconClass}\";\n" +
                 $"\tvar color = \"{area.Color}\";\n" +
                 $"\tvar weight = {area.Weight};\n" +
+                $"\tvar visibleOnMobile = {area.VisibleOnMobile};\n" +
                 $"\tvar showGroupNames = {area.ShowGroupNames.ToString().ToLower()};\n" +
                 $"\tvar access = new List<Guid>();\n";
 
@@ -8002,7 +8011,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 response += $"\tdescriptionTranslations.Add( new WebVella.Erp.Web.Models.TranslationResource{{ Locale=\"{res.Locale}\", Key= \"{res.Key}\", Value= @\"{res.Value.EscapeMultiline()}\"  }} );\n";
 
 
-            response += "\n\tnew WebVella.Erp.Web.Services.AppService().CreateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+            response += "\n\tnew WebVella.Erp.Web.Services.AppService().CreateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,visibleOnMobile,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
             "}\n" +
             "#endregion\n\n";
 
@@ -8049,6 +8058,12 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
             {
                 response.HasUpdate = true;
                 response.ChangeList.Add($"<span class='go-green label-block'>sitemap area weight</span>  from <span class='go-red'>{oldArea.Weight}</span> to <span class='go-red'>{currentArea.Weight}</span>");
+            }
+
+            if (currentArea.VisibleOnMobile != oldArea.VisibleOnMobile)
+            {
+                response.HasUpdate = true;
+                response.ChangeList.Add($"<span class='go-green label-block'>site map area VisibleOnMobile</span>  from <span class='go-red'>{oldArea.VisibleOnMobile}</span> to <span class='go-red'>{currentArea.VisibleOnMobile}</span>");
             }
 
             if (currentArea.Color != oldArea.Color)
@@ -8153,6 +8168,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 $"\tvar iconClass = \"{currentArea.IconClass}\";\n" +
                 $"\tvar color = \"{currentArea.Color}\";\n" +
                 $"\tvar weight = {currentArea.Weight};\n" +
+                $"\tvar visibleOnMobile = {currentArea.VisibleOnMobile};\n" +
                 $"\tvar showGroupNames = {currentArea.ShowGroupNames.ToString().ToLower()};\n" +
                 $"\tvar access = new List<Guid>();\n";
 
@@ -8167,7 +8183,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 foreach (var res in currentArea.DescriptionTranslations ?? new List<TranslationResource>())
                     response.Code += $"\tdescriptionTranslations.Add( new WebVella.Erp.Web.Models.TranslationResource{{ Locale=\"{res.Locale}\", Key= \"{res.Key}\", Value= @\"{res.Value.EscapeMultiline()}\"  }} );\n";
 
-                response.Code += "\n\tnew WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+                response.Code += "\n\tnew WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,visibleOnMobile,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
                 "}\n" +
                 "#endregion\n\n";
             }
@@ -8655,13 +8671,14 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 (page.EntityId.HasValue ? $"\tGuid? entityId = new Guid(\"{page.EntityId}\");\n" : $"\tGuid? entityId = null;\n") +
                 (page.NodeId.HasValue ? $"\tGuid? nodeId = new Guid(\"{page.NodeId}\");\n" : $"\tGuid? nodeId = null;\n") +
                 (page.AreaId.HasValue ? $"\tGuid? areaId = new Guid(\"{page.AreaId}\");\n" : $"\tGuid? areaId = null;\n") +
+                $"\tvar visibleOnMobile = {page.VisibleOnMobile};\n" +
                 (page.RazorBody != null ? $"\tstring razorBody = @\"{page.RazorBody.EscapeMultiline()}\";\n" : $"\tstring razorBody = null;\n") +
                 $"\tvar labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();\n";
 
             foreach (var res in page.LabelTranslations ?? new List<TranslationResource>())
                 response += $"\tlabelTranslations.Add( new WebVella.Erp.Web.Models.TranslationResource{{ Locale=\"{res.Locale}\", Key= \"{res.Key}\", Value= @\"{res.Value.EscapeMultiline()}\"  }} );\n";
 
-            response += "\n\tnew WebVella.Erp.Web.Services.PageService().CreatePage(id,name,label,labelTranslations,iconClass,system,weight,type,appId,entityId,nodeId,areaId,isRazorBody,razorBody,layout,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+            response += "\n\tnew WebVella.Erp.Web.Services.PageService().CreatePage(id,name,label,labelTranslations,iconClass,system,weight,type,appId,entityId,nodeId,areaId,visibleOnMobile,isRazorBody,razorBody,layout,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
             "}\n" +
             "#endregion\n\n";
 
@@ -8711,6 +8728,12 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
             {
                 response.HasUpdate = true;
                 response.ChangeList.Add($"<span class='go-green label-block'>weight</span>  from <span class='go-red'>{oldPage.Weight}</span> to <span class='go-red'>{currentPage.Weight}</span>");
+            }
+
+            if (currentPage.VisibleOnMobile != oldPage.VisibleOnMobile)
+            {
+                response.HasUpdate = true;
+                response.ChangeList.Add($"<span class='go-green label-block'>visibleOnMobile</span>  from <span class='go-red'>{oldPage.VisibleOnMobile}</span> to <span class='go-red'>{currentPage.VisibleOnMobile}</span>");
             }
 
             if (currentPage.Type != oldPage.Type)
@@ -8798,6 +8821,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                     $"\tvar system = {currentPage.System.ToString().ToLower()};\n" +
                     $"\tvar layout = @\"{currentPage.Layout}\";\n" +
                     $"\tvar weight = {currentPage.Weight};\n" +
+                    $"\tvar visibleOnMobile = {currentPage.VisibleOnMobile};\n" +
                     $"\tvar type = (PageType)((int){(int)currentPage.Type});\n" +
                     $"\tvar isRazorBody = {currentPage.IsRazorBody.ToString().ToLower()};\n" +
                     (currentPage.AppId.HasValue ? $"\tvar appId = new Guid(\"{currentPage.AppId}\");\n" : $"\tGuid? appId = null;\n") +
@@ -8810,7 +8834,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
                 foreach (var res in currentPage.LabelTranslations ?? new List<TranslationResource>())
                     response.Code += $"\tlabelTranslations.Add( new WebVella.Erp.Web.Models.TranslationResource{{ Locale=\"{res.Locale}\", Key= \"{res.Key}\", Value= @\"{res.Value.EscapeMultiline()}\"  }} );\n";
 
-                response.Code += "\n\tnew WebVella.Erp.Web.Services.PageService().UpdatePage(id,name,label,labelTranslations,iconClass,system,weight,type,appId,entityId,nodeId,areaId,isRazorBody,razorBody,layout,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
+                response.Code += "\n\tnew WebVella.Erp.Web.Services.PageService().UpdatePage(id,name,label,labelTranslations,iconClass,system,weight,visibleOnMobile,type,appId,entityId,nodeId,areaId,isRazorBody,razorBody,layout,WebVella.Erp.Database.DbContext.Current.Transaction);\n" +
                 "}\n" +
                 "#endregion\n\n";
             }

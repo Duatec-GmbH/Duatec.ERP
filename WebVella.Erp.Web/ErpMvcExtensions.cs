@@ -148,6 +148,7 @@ namespace WebVella.Erp.Web
 			Guid? entityId = null;
 			Guid? nodeId = null;
 			Guid? areaId = null;
+			bool visibleOnMobile = true;
 			string razorBody = null;
 			var labelTranslations = new List<TranslationResource>();
 
@@ -158,7 +159,7 @@ namespace WebVella.Erp.Web
 					connection.BeginTransaction();
 					if (!pageSrv.GetAll(transaction: DbContext.Current.Transaction, useCache: false).Any(x => x.Id == pageId))
 					{
-						pageSrv.CreatePage(pageId, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
+						pageSrv.CreatePage(pageId, name, label, labelTranslations, iconClass, system, weight, type, appId, entityId, nodeId, areaId, visibleOnMobile, isRazorBody, razorBody, layout, WebVella.Erp.Database.DbContext.Current.Transaction);
 						pageSrv.CreatePageBodyNode(new Guid("3a4e8154-9f48-4ba5-9e11-36fa5e7a80c9"), null, pageId, null, 1, "WebVella.Erp.Web.Components.PcApplications", "", @"""{}""", WebVella.Erp.Database.DbContext.Current.Transaction);
 					}
 					connection.CommitTransaction();

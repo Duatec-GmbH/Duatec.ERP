@@ -96,7 +96,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			try
 			{
 				var appId = Guid.NewGuid();
-				appServ.CreateApplication(appId, Name, Label, Description, IconClass, Author, Color, Weight, Access.Select(x => Guid.Parse(x)).ToList());
+				appServ.CreateApplication(appId, Name, Label, Description, IconClass, Author, Color, Weight, VisibleOnMobile, Access.Select(x => Guid.Parse(x)).ToList());
 				return Redirect($"/sdk/objects/application/r/{appId}/");
 			}
 			catch (ValidationException ex)

@@ -82,7 +82,7 @@ namespace WebVella.Erp.Plugins.SDK.Controllers
 			try
 			{
 				appSrv.CreateArea(area.Id, appId ?? Guid.Empty, area.Name, area.Label, area.LabelTranslations, area.Description, area.DescriptionTranslations,
-					area.IconClass, area.Color, area.Weight, area.ShowGroupNames, area.Access);
+					area.IconClass, area.Color, area.Weight, area.VisibleOnMobile, area.ShowGroupNames, area.Access);
 			}
 			catch (Exception ex)
 			{
@@ -134,7 +134,7 @@ namespace WebVella.Erp.Plugins.SDK.Controllers
 			try
 			{
 				appSrv.UpdateArea(area.Id, appId ?? Guid.Empty, area.Name, area.Label, area.LabelTranslations, area.Description, area.DescriptionTranslations,
-					area.IconClass, area.Color, area.Weight, area.ShowGroupNames, area.Access);
+					area.IconClass, area.Color, area.Weight, area.VisibleOnMobile, area.ShowGroupNames, area.Access);
 			}
 			catch (Exception ex)
 			{
@@ -250,7 +250,7 @@ namespace WebVella.Erp.Plugins.SDK.Controllers
 					{
 						throw new Exception("Page not found");
 					}
-					pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight,
+					pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight, page.VisibleOnMobile,
 						page.Type, page.AppId, page.EntityId, node.Id, areaId, page.IsRazorBody, page.RazorBody, page.Layout);
 				}
 			}
@@ -336,7 +336,7 @@ namespace WebVella.Erp.Plugins.SDK.Controllers
 					}
 					if (page.NodeId == null)
 					{
-						pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight,
+						pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight, page.VisibleOnMobile,
 							page.Type, page.AppId, page.EntityId, node.Id, areaId, page.IsRazorBody, page.RazorBody, page.Layout);
 					}
 					else if (page.NodeId == node.Id)
@@ -353,7 +353,7 @@ namespace WebVella.Erp.Plugins.SDK.Controllers
 					{
 						throw new Exception("Page not found");
 					}
-					pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight,
+					pageSrv.UpdatePage(page.Id, page.Name, page.Label, page.LabelTranslations, page.IconClass, page.System, page.Weight, page.VisibleOnMobile,
 						page.Type, page.AppId, page.EntityId, null, null, page.IsRazorBody, page.RazorBody, page.Layout);
 				}
 

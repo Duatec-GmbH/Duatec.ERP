@@ -16,6 +16,7 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
+using Wangkanai.Detection.Models;
 
 namespace WebVella.Erp.Web.Models
 {
@@ -54,6 +55,9 @@ namespace WebVella.Erp.Web.Models
 
 		[BindProperty(SupportsGet = true)]
 		public Guid? ParentRecordId { get; set; } = null;
+
+		[BindProperty(SupportsGet = true)]
+		public bool VisibleOnMobile { get; set; } = true;
 
 		public PageDataModel DataModel { get; protected set; } = null;
 
@@ -145,6 +149,7 @@ namespace WebVella.Erp.Web.Models
 			if (parentRecordId == null) parentRecordId = ParentRecordId;
 
 			var urlInfo = new PageService().GetInfoFromPath(HttpContext.Request.Path);
+
 			if (String.IsNullOrWhiteSpace(appName))
 			{
 				appName = urlInfo.AppName;
@@ -215,7 +220,14 @@ namespace WebVella.Erp.Web.Models
 			ErpRequestContext.ParentRecordId = parentRecordId;
 			ErpRequestContext.PageContext = PageContext;
 
+			if (ErpRequestContext?.Page?.VisibleOnMobile is bool b)
+				VisibleOnMobile = b;
 
+			if (!VisibleOnMobile)
+			{
+				if (ErpRequestContext.Detection.Device.Type is Device.Tv or Device.Car or Device.Mobile)
+					return new LocalRedirectResult("/error?401");
+			}
 
 			if (PageContext.HttpContext.Request.Query.ContainsKey("returnUrl"))
 			{

@@ -68,14 +68,14 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="transaction"></param>
 		public void Insert(Guid id, Guid appId, string name, string label, string labelTranslations,
 			string description, string descriptionTranslations, string iconClass, string color,
-			int weight, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
+			int weight, bool visibleOnMobile, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
 		{
 
 			NpgsqlCommand command = new NpgsqlCommand(
 					"INSERT INTO public.app_sitemap_area (id,app_id,name,label,label_translations,description,description_translations," +
-					"icon_class,color,weight,show_group_names,access_roles )" +
+					"icon_class,color,weight,visible_on_mobile,show_group_names,access_roles )" +
 					"VALUES(@id,@app_id,@name,@label,@label_translations,@description,@description_translations," +
-					"@icon_class,@color,@weight,@show_group_names,@access_roles )");
+					"@icon_class,@color,@weight,@visible_on_mobile,@show_group_names,@access_roles )");
 
 			command.Parameters.Add(new NpgsqlParameter("@id", id));
 			command.Parameters.Add(new NpgsqlParameter("@app_id", appId));
@@ -87,6 +87,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@icon_class", (object)iconClass ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@color", (object)color ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@weight", weight));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 			command.Parameters.Add(new NpgsqlParameter("@show_group_names", showGroupNames));
 
 			if (accessRoles != null && accessRoles.Count > 0)
@@ -118,13 +119,13 @@ namespace WebVella.Erp.Web.Repositories
 		/// <param name="transaction"></param>
 		public void Update(Guid id, Guid appId, string name, string label, string labelTranslations,
 			string description, string descriptionTranslations, string iconClass, string color,
-			int weight, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
+			int weight, bool visibleOnMobile, bool showGroupNames, List<Guid> accessRoles, NpgsqlTransaction transaction = null)
 		{
 			NpgsqlCommand command = new NpgsqlCommand(
 					"UPDATE public.app_sitemap_area " +
 					"SET name = @name, label = @label, label_translations = @label_translations, " +
 					"description = @description,description_translations = @description_translations," +
-					"icon_class = @icon_class, color = @color, weight = @weight, show_group_names = @show_group_names, " +
+					"icon_class = @icon_class, color = @color, weight = @weight, visible_on_mobile = @visible_on_mobile, show_group_names = @show_group_names, " +
 					"access_roles = @access_roles " +
 					" WHERE id = @id");
 
@@ -138,6 +139,7 @@ namespace WebVella.Erp.Web.Repositories
 			command.Parameters.Add(new NpgsqlParameter("@icon_class", (object)iconClass ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@color", (object)color ?? DBNull.Value));
 			command.Parameters.Add(new NpgsqlParameter("@weight", weight));
+			command.Parameters.Add(new NpgsqlParameter("@visible_on_mobile", visibleOnMobile));
 			command.Parameters.Add(new NpgsqlParameter("@show_group_names", showGroupNames));
 
 

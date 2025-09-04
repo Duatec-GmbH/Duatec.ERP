@@ -53,6 +53,9 @@ namespace WebVella.Erp.Web.Models
 		[JsonProperty("layout")]
 		public string Layout { get; set; } = string.Empty;
 
+		[JsonProperty("visible_on_mobile")]
+		public bool VisibleOnMobile { get; set; } = true;
+
 		//lazy loading 
 		private List<PageBodyNode> body = null;
 		[JsonProperty("body")]

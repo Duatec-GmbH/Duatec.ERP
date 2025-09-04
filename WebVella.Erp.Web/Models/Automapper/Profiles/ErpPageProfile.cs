@@ -36,6 +36,7 @@ namespace WebVella.Erp.Web.Models.AutoMapper.Profiles
 			model.IsRazorBody = (bool)data["is_razor_body"];
 			model.RazorBody = (string)data["razor_body"];
 			model.Layout = (string)data["layout"];
+			model.VisibleOnMobile = (bool)data["visible_on_mobile"];
 
 			if (!string.IsNullOrWhiteSpace((string)data["label_translations"]))
 				model.LabelTranslations = JsonConvert.DeserializeObject<List<TranslationResource>>((string)data["label_translations"]);

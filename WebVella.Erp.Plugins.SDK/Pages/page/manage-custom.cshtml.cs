@@ -78,7 +78,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 			var pageServ = new PageService();
 			try
 			{
-				pageServ.UpdatePage(ErpPage.Id, ErpPage.Name, ErpPage.Label, ErpPage.LabelTranslations, ErpPage.IconClass, ErpPage.System, ErpPage.Weight, ErpPage.Type, ErpPage.AppId, ErpPage.EntityId, ErpPage.NodeId, ErpPage.AreaId, IsRazorBody, RazorBody, ErpPage.Layout);
+				pageServ.UpdatePage(ErpPage.Id, ErpPage.Name, ErpPage.Label, ErpPage.LabelTranslations, ErpPage.IconClass, ErpPage.System, ErpPage.Weight, ErpPage.VisibleOnMobile, ErpPage.Type, ErpPage.AppId, ErpPage.EntityId, ErpPage.NodeId, ErpPage.AreaId, IsRazorBody, RazorBody, ErpPage.Layout);
 				if (!String.IsNullOrWhiteSpace(ReturnUrl))
 				{
 					return Redirect(ReturnUrl);

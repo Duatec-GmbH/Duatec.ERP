@@ -81,7 +81,8 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Page
 				IsRazorBody = ErpPage.IsRazorBody;
 				Body = ErpPage.Body;
 				Layout = ErpPage.Layout;
-			}
+                VisibleOnMobile = ErpPage.VisibleOnMobile;
+            }
 			#endregion
 
 			if (String.IsNullOrWhiteSpace(ReturnUrl))

@@ -131,7 +131,7 @@ namespace WebVella.Erp.Plugins.SDK.Pages.Application
 			var appServ = new AppService();
 			try
 			{
-				appServ.UpdateApplication(App.Id, Name, Label, Description, IconClass, Author, Color, Weight, Access.Select(x => Guid.Parse(x)).ToList());
+				appServ.UpdateApplication(App.Id, Name, Label, Description, IconClass, Author, Color, Weight, VisibleOnMobile, Access.Select(x => Guid.Parse(x)).ToList());
 				if (!String.IsNullOrWhiteSpace(ReturnUrl))
 				{
 					return Redirect(ReturnUrl);
