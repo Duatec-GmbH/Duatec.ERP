@@ -60,7 +60,7 @@
 	}
 
 	img {
-		max-width: 90%!important;
+		max-width: 100%!important;
 	}
 
 	#brand-logo{
@@ -4117,7 +4117,7 @@ border-bottom-style:dashed;
 .pc-page-header .page-header-toolbar {
 	margin-top: 15px;
 	margin-left: -15px;
-	margin-right: -15px;
+	margin-right: -5px;
 	margin-bottom: -11px;
 	color: --dark_color;
 	background: #e0e0e0;
