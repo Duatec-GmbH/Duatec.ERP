@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -64,7 +65,7 @@ namespace WebVella.Erp.Web.Utils
 				case FieldType.NumberField:
 				case FieldType.PercentField:
 					{
-						if (InValue == null || InValue.ToString() == "")
+						if (InValue == null || string.IsNullOrWhiteSpace(InValue.ToString()) || InValue.ToLowerInvariant() == "null")
 						{
 							OutValue = null;
 						}
@@ -72,7 +73,7 @@ namespace WebVella.Erp.Web.Utils
 						{
 							OutValue = (decimal)InValue;
 						}
-						else if (Decimal.TryParse(InValue.ToString(), out decimal result))
+						else if (Decimal.TryParse(InValue.ToString(), out decimal result) || decimal.TryParse(InValue.ToString(), CultureInfo.InvariantCulture, out result))
 						{
 							OutValue = result;
 						}

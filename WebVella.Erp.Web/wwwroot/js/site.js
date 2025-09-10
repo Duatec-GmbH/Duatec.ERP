@@ -8,20 +8,25 @@ var ApiBaseUrl = "/api/v3/en_US";
 document.addEventListener("DOMContentLoaded", () => {
 	let pageHeads = document.getElementsByClassName("pc-page-header");
 	let erpLists = document.getElementsByClassName("erp-list");
-	let toolBars = document.getElementsByClassName("page-header-toolbar");
 
-	if (toolBars.length === 0 && pageHeads.length >= 1 && erpLists.length === 1) {
+	if (pageHeads.length === 1 && erpLists.length === 1) {
 
 		let erpList = erpLists[0];
 		let pageHead = pageHeads[0];
 
+		let toolBars = document.getElementsByClassName("page-header-toolbar");
+		if (toolBars.length > 0)
+			pageHead = toolBars[0];
+
 		erpList.addEventListener("resize", () => {
-			stickyErpList(pageHead, erpList);
+			stickyErpList(erpList);
 		});
 
 		document.addEventListener("scroll", () => {
-			stickyErpList(pageHead, erpList);
+			stickyErpList(erpList);
 		});
+
+
 
 		stickyErpList(pageHead, erpList);
 	}
@@ -38,12 +43,22 @@ window.addEventListener("resize", () => {
 	}
 }, true);
 
-function stickyErpList(pageHead, erpList) {
-
+function stickyErpList(erpList) {
 	let listHead = erpList.getElementsByTagName('THEAD')[0];
 
 	if (listHead) {
-		let stickyPos = pageHead.getBoundingClientRect().bottom;
+
+		let stickyPos = 0;
+		let pageHead = document.getElementsByClassName("pc-page-header")[0];
+		let toolBar = document.getElementsByClassName("page-header-toolbar")[0];
+
+		if (!toolBar || toolBar.getBoundingClientRect().bottom <= pageHead.getBoundingClientRect().bottom) {
+
+			stickyPos = pageHead.getBoundingClientRect().bottom;
+		}
+		else {
+			stickyPos = toolBar.getBoundingClientRect().bottom;
+		}
 
 		listHead.style.top = `${stickyPos}px`;
 		listHead.style.position = "sticky";

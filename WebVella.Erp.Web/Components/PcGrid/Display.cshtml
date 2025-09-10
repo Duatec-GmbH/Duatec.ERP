@@ -19,7 +19,7 @@
     var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
     var meta = (PageComponentMeta)(ViewBag.ComponentMeta);
 
-    var allowCopy = options.AllowCopy.ToString().ToLower();
+    var allowCopy = ((bool)ViewBag.AllowCopy).ToString().ToLower();
 
 }
 
@@ -45,7 +45,7 @@
             }
 
             <wv-grid-row>
-                @for (var i = 1; i <= options.VisibleColumns; i++)
+                @for (var i = 1; i <= Math.Min(options.VisibleColumns, columns.Count); i++)
                 {
                     if (!columns[i - 1].IsVisible)
                         continue;

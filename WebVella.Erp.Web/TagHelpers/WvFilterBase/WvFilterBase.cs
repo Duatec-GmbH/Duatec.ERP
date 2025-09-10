@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Web.Models;
@@ -332,7 +333,7 @@ namespace WebVella.Erp.Web.TagHelpers
 				{
 					ValueNumberControl.AddCssClass("rounded-right");
 				}
-				ValueNumberControl.Attributes.Add("value", (Value ?? "").ToString());
+				ValueNumberControl.Attributes.Add("value", (Value ?? "").ToString(CultureInfo.InvariantCulture));
 				ValueNumberControl.Attributes.Add("type", "number");
 				ValueNumberControl.Attributes.Add("name", UrlQueryOfValue);
 			}

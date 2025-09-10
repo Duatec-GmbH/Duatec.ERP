@@ -2,6 +2,7 @@
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
@@ -12,6 +13,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string Warehouse = "warehouse";
             public const string WarehouseLocation = "warehouseLocation";
             public const string Article = "article";
+            public const string DenominationType = "denominationType";
+            public const string Denomination = "denomination";
             public const string Manufacturer = "manufacturer";
             public const string Project = "project";
             public const string Page = "page";
@@ -31,6 +34,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.Project, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
+            Parameters.Add(new() { Name = Arguments.Denomination, Type = "decimal", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.DenominationType, Type = typeof(FilterType).FullName, Value = FilterType.EQ.ToString() });
         }
 
         public override object Execute(Dictionary<string, object> arguments)
@@ -104,12 +109,21 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var article = arguments.TryGetValue(Arguments.Article, out s) ? s as string : null;
             var manufacturer = arguments.TryGetValue(Arguments.Manufacturer, out s) ? s as string : null;
             var project = arguments.TryGetValue(Arguments.Project, out s) ? s as string : null;
+            var denomination = arguments.TryGetValue(Arguments.Denomination, out s) ? s as decimal? : null;
+            var denominationType = EnumValueFromParameter<FilterType?>(arguments[Arguments.DenominationType]);
 
             if (!string.IsNullOrEmpty(warehouse))
                 entries = entries.Where(e => e.GetWarehouseLocation().GetWarehouse().Designation.Contains(warehouse, comparison));
 
             if (!string.IsNullOrEmpty(location))
-                entries = entries.Where(e => e.GetWarehouseLocation().Designation.Contains(location, comparison));
+            {
+                entries = entries.Where(e =>
+                {
+                    var loc = e.GetWarehouseLocation();
+                    return loc.Designation.Contains(location, comparison)
+                        || loc.Id.HasValue && $"{loc.Id}".Equals(location, comparison);
+                });
+            }
 
             if (!string.IsNullOrEmpty(article))
             {
@@ -119,7 +133,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     return a.PartNumber.Contains(article, comparison)
                         || a.TypeNumber.Contains(article, comparison)
                         || a.OrderNumber.Contains(article, comparison)
-                        || a.Designation.Contains(article, comparison);
+                        || a.Designation.Contains(article, comparison)
+                        || a.Id.HasValue && $"{a.Id}".Equals(article, comparison);
                 });
             }
 
@@ -134,6 +149,20 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                     return p != null 
                         && (p.Number.Contains(project, comparison) || p.Name.Contains(project, comparison));
                 });
+            }
+
+            if(denomination.HasValue && denominationType.HasValue)
+            {
+                entries = denominationType.Value switch
+                {
+                    FilterType.EQ => entries.Where(e => e.Denomination == denomination.Value),
+                    FilterType.NOT => entries.Where(e => e.Denomination != denomination.Value),
+                    FilterType.LT => entries.Where(e => e.Denomination < denomination.Value),
+                    FilterType.GT => entries.Where(e => e.Denomination > denomination.Value),
+                    FilterType.LTE => entries.Where(e => e.Denomination <= denomination.Value),
+                    FilterType.GTE => entries.Where(e => e.Denomination >= denomination.Value),
+                    _ => entries
+                };
             }
 
             return entries.OrderBy(e => e.GetArticle().PartNumber)

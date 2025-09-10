@@ -8,13 +8,18 @@
 @addTagHelper *, WebVella.Erp.Web
 
 @{
-	var options = (PcRow.PcRowOptions)ViewBag.Options;
-	var node = (PageBodyNode)ViewBag.Node;
-	var htmlIdPrefix = "wv-row-" + node.Id + "-";
+    var options = (PcRow.PcRowOptions)ViewBag.Options;
+    var node = (PageBodyNode)ViewBag.Node;
+    var htmlIdPrefix = "wv-row-" + node.Id + "-";
+
+    var cl = options.Class;
+
+    if(!string.IsNullOrWhiteSpace(cl) && cl.Contains("mobile-only"))
+        cl = cl.Replace("mobile-only", string.Empty).Replace("  ", " ");
 }
 <div class="p-1">
 <wv-row flex-vertical-alignment="@options.FlexVerticalAlignment" flex-horizontal-alignment="@options.FlexHorizontalAlignment"
-		no-gutters="@options.NoGutters" class="@options.Class">
+		no-gutters="@options.NoGutters" class="@cl">
 	@if (options.VisibleColumns > 0)
 	{
 		<wv-column id="@(htmlIdPrefix)@options.Container1Id" span="@options.Container1Span" span-sm="@options.Container1SpanSm" span-md="@options.Container1SpanMd" span-lg="@options.Container1SpanLg" span-xl="@options.Container1SpanXl"

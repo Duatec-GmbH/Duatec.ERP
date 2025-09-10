@@ -113,6 +113,13 @@
                     <wv-pb-node-container parent-node-id="@node.Id" container-id="@options.Container13Id"></wv-pb-node-container>
                 </wv-grid-column>
             }
+            @if (options.VisibleColumns > 13)
+            {
+                var columnWidth = options.HasThead ? "" : columns[13].Width;
+                <wv-grid-column width="@columnWidth" class="@options.Container14Class" vertical-align="@options.Container14VerticalAlign" horizontal-align="@options.Container14HorizontalAlign">
+                    <wv-pb-node-container parent-node-id="@node.Id" container-id="@options.Container14Id"></wv-pb-node-container>
+                </wv-grid-column>
+            }
 		</wv-grid-row>
 	</wv-grid>
 </div>

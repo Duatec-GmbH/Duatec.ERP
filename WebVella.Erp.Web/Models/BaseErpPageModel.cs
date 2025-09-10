@@ -371,7 +371,7 @@ namespace WebVella.Erp.Web.Models
 				foreach (var area in sitemap.Areas.Where(a => a.Weight < 1000 && a.Access.Count == 0 || CurrentUser.Roles.Exists(r => a.Access.Exists(id => id == r.Id))))
 				{
 					var nodeCount = area.Nodes.Count(n => n.Weight < 1000);
-					if (nodeCount == 0)
+					if (nodeCount == 0 || IsNonDesktopDevice && !area.VisibleOnMobile)
 						continue;
 
 					var areaMenuItem = new MenuItem();

@@ -15,6 +15,11 @@
 	var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
 }
 <wv-row>
+    <wv-column span="4">
+        <wv-field-datasource name="is_visible" label-text="Is Rendered" value="@options.IsVisible" page-id="erpRequest.Page.Id" placeholder="true"></wv-field-datasource>
+    </wv-column>
+</wv-row>
+<wv-row>
 	<wv-column span="4">
 		<wv-field-number min="1" max="12" name="visible_columns" value="@options.VisibleColumns" label-text="Visible Columns"></wv-field-number>
 	</wv-column>
@@ -35,7 +40,7 @@
 </wv-row>
 
 
-@for (int i = 1; i < 13; i++)
+@for (int i = 1; i <= 12; i++)
 		{
 	var containerId = "section-" + (options.GetType().GetProperty($"Container{i}Id").GetValue(options, null) ?? "").ToString();
 	var containerSpan = (int?)options.GetType().GetProperty($"Container{i}Span").GetValue(options, null);

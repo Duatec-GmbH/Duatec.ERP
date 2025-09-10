@@ -24,6 +24,5 @@ namespace WebVella.Erp.Web.TagHelpers
 			output.Content.AppendHtml(content);
 			//return Task.CompletedTask;
 		}
-
 	}
 }

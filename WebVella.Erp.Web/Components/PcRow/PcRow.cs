@@ -40,6 +40,9 @@ namespace WebVella.Erp.Web.Components
 			[JsonProperty(PropertyName = "visible_columns")]
 			public int VisibleColumns { get; set; } = 2;
 
+			[JsonProperty(PropertyName = "is_visible")]
+			public string IsVisible { get; set; } = "true";
+
 			#region << container1 >>
 			[JsonProperty(PropertyName = "container1_id")]
 			public string Container1Id { get; set; } = "column1";
@@ -576,6 +579,14 @@ namespace WebVella.Erp.Web.Components
 
 				#endregion
 
+				var isVisible = true;
+				var isVisibleDs = context.DataModel.GetPropertyValueByDataSource(optionsObject.IsVisible);
+
+				if (isVisibleDs is bool b || isVisibleDs is string s && !string.IsNullOrWhiteSpace(s) && bool.TryParse(s, out b))
+					isVisible = b;
+
+
+				ViewBag.IsVisible = isVisible;
 				ViewBag.Node = context.Node;
 				ViewBag.ComponentMeta = componentMeta;
 				ViewBag.RequestContext = ErpRequestContext;
@@ -591,6 +602,7 @@ namespace WebVella.Erp.Web.Components
 				switch (context.Mode)
 				{
 					case ComponentMode.Display:
+
 						return await Task.FromResult<IViewComponentResult>(View("Display"));
 					case ComponentMode.Design:
 						return await Task.FromResult<IViewComponentResult>(View("Design"));

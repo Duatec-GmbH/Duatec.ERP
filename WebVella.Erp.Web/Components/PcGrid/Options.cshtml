@@ -22,7 +22,7 @@
 		<wv-field-text name="id" value="@options.Id" label-text="Id"></wv-field-text>
 	</wv-column>
     <wv-column span="4">
-        <wv-field-checkbox name="allow-copy" value="@options.AllowCopy" label-text="Allow Copy" text-true="allow copy"></wv-field-checkbox>
+        <wv-field-datasource name="allow-copy" label-text="Allow Copy" value="@options.AllowCopy" page-id="erpRequest.Page.Id" placeholder="false"></wv-field-datasource>
     </wv-column>
 </wv-row>
 <wv-row>
@@ -101,7 +101,7 @@
     In nested components, use <code>RowRecord</code> datasource as a reference to the record renedered in the current row
 </div>
 
-@for (int i = 1; i <= 13; i++)
+@for (int i = 1; i <= 14; i++)
 {
     <wv-section id="@($"section-column{i}")" class="mt-3 @(options.VisibleColumns > i - 1 ? "" : "d-none")"
         is-collapsable="true" is-collapsed="true" title="@("Column " + i)" title-tag="h5">

@@ -527,7 +527,7 @@ namespace WebVella.Erp.Plugins.SDK.Services
                             changeRow.Type = "created";
                             changeRow.Name = $"{bodyNode.Id}({page.Name})";
                             response.Changes.Add(changeRow);
-                            response.Code += CreatePageBodyNodeCode(bodyNode, page.Name);
+                            response.Code += CreatePageBodyNodeCode(bodyNode, page.Name, page.Label);
                         }
                         else
                         {
@@ -691,7 +691,7 @@ namespace WebVella.Erp.Plugins.SDK.Services
                             changeRow.Type = "deleted";
                             changeRow.Name = oldBodyNode.Id.ToString();
                             response.Changes.Add(changeRow);
-                            response.Code += DeletePageBodyNodeCode(oldBodyNode, page.Name);
+                            response.Code += DeletePageBodyNodeCode(oldBodyNode, page.Name, page.Label);
                         }
                     }
 
@@ -8656,7 +8656,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
 
         private string CreateErpPageCode(ErpPage page)
         {
-            var response = $"#region << ***Create page*** Page name: {page.Name} >>\n" +
+            var response = $"#region << ***Create page*** Page name: {page.Name}, Page label: {page.Label} >>\n" +
             "{\n" +
                 $"\tvar id = new Guid(\"{page.Id.ToString()}\");\n" +
                 $"\tvar name = @\"{page.Name}\";\n" +
@@ -8687,7 +8687,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
 
         private string DeleteErpPageCode(ErpPage page)
         {
-            return $"#region << ***Delete page*** Page name: {page.Name} >>\n" +
+            return $"#region << ***Delete page*** Page name: {page.Name}, Page label: {page.Label} >>\n" +
                     "{\n" +
                         $"\n\tnew WebVella.Erp.Web.Services.PageService().DeletePage( new Guid(\"{page.Id}\"),WebVella.Erp.Database.DbContext.Current.Transaction, cascade: false );\n" +
                     "}\n" +
@@ -8812,7 +8812,7 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
 
             if (response.HasUpdate)
             {
-                response.Code = $"#region << ***Update page*** Page name: {currentPage.Name} >>\n" +
+                response.Code = $"#region << ***Update page*** Page name: {currentPage.Name}, Page label: {currentPage.Label} >>\n" +
                 "{\n" +
                     $"\tvar id = new Guid(\"{currentPage.Id.ToString()}\");\n" +
                     $"\tvar name = @\"{currentPage.Name}\";\n" +
@@ -8846,10 +8846,10 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
 
         #region << PageBodyNode >>>
 
-        private string CreatePageBodyNodeCode(PageBodyNode node, string pageName)
+        private string CreatePageBodyNodeCode(PageBodyNode node, string pageName, string pageLabel)
         {
             var response =
-            $"#region << ***Create page body node*** Page name: {pageName}  id: {node.Id} >>\n" +
+            $"#region << ***Create page body node*** Page name: {pageName}, Page label: {pageLabel}, id: {node.Id} >>\n" +
             "{\n" +
                 $"\tvar id = new Guid(\"{node.Id.ToString()}\");\n" +
                 (node.ParentId.HasValue ? $"\tGuid? parentId = new Guid(\"{node.ParentId}\");\n" : $"\tGuid? parentId = null;\n") +
@@ -8935,9 +8935,9 @@ $"#region << ***Update role*** Role name: {(string)currentRole["name"]} >>\n" +
             return response;
         }
 
-        private string DeletePageBodyNodeCode(PageBodyNode node, string pageName)
+        private string DeletePageBodyNodeCode(PageBodyNode node, string pageName, string pageLabel)
         {
-            return $"#region << ***Delete page body node*** Page name: {pageName} ID: {node.Id} >>\n" +
+            return $"#region << ***Delete page body node*** Page name: {pageName}, Page label: {pageLabel}, ID: {node.Id} >>\n" +
                     "{\n" +
                         $"\n\tnew WebVella.Erp.Web.Services.PageService().DeletePageBodyNode( new Guid(\"{node.Id}\"),WebVella.Erp.Database.DbContext.Current.Transaction, cascade: false );\n" +
                     "}\n" +

@@ -24,6 +24,8 @@ namespace WebVella.Erp.Web.Pages
 		[BindProperty]
 		public string Error { get; set; }
 
+		public bool IsMobile { get; private set; }
+
 		public string BrandLogo { get; set; }
 
 		public LoginModel([FromServices]ErpRequestContext reqCtx) { ErpRequestContext = reqCtx; }
@@ -31,10 +33,13 @@ namespace WebVella.Erp.Web.Pages
 		public IActionResult OnGet([FromServices]AuthService authService)
 		{
 			var initResult = Init();
-			if (initResult != null) return initResult;
+			if (initResult != null) 
+				return initResult;
 
 			if (ExecutePageHooksOnGet() is IActionResult res)
 				return res;
+
+			IsMobile = ErpRequestContext.IsNonDesktopDevice;
 
 			if (CurrentUser != null)
 			{
@@ -94,8 +99,6 @@ namespace WebVella.Erp.Web.Pages
 				return new LocalRedirectResult("/");
 
 		}
-
-
 	}
 }
 /*

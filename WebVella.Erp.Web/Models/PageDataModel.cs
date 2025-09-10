@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using Wangkanai.Extensions;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
@@ -43,6 +44,7 @@ namespace WebVella.Erp.Web.Models
 			{
 				//if page request context is set, it is used, otherwise, the requestContext is used
 				ErpRequestContext reqCtx = erpPageModel.ErpRequestContext;
+				properties.Add("Host", new MPW(MPT.Object, erpPageModel.HttpContext?.Request?.Host.Value));
 
 				properties.Add("IsDesktop", new MPW(MPT.Object, !reqCtx.IsNonDesktopDevice));
 
@@ -60,6 +62,7 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$when", new MPW(MPT.Function, new WhenFunction(this)));
 				properties.Add("$hasRole", new MPW(MPT.Function, new HasRoleFunction(this)));
 				properties.Add("$areEqual", new MPW(MPT.Function, new AreEqualFunction(this)));
+				properties.Add("$encodeUrl", new MPW(MPT.Function, new EncodeUrlFunction(this)));
 
 				properties.Add("$filter", new MPW(MPT.Function, new FilterFunction(this)));
 				properties.Add("$count", new MPW(MPT.Function, new CountFunction(this)));
@@ -97,7 +100,9 @@ namespace WebVella.Erp.Web.Models
 				}
 
 				properties.Add("CurrentUrl", new MPW(MPT.Object, erpPageModel.CurrentUrl));
+				properties.Add("CurrentUrlEncoded", new MPW(MPT.Object, HttpUtility.UrlEncode(erpPageModel.CurrentUrl)));
 				properties.Add("ReturnUrl", new MPW(MPT.Object, erpPageModel.ReturnUrl));
+				properties.Add("ReturnUrlEncoded", new MPW(MPT.Object, HttpUtility.UrlEncode(erpPageModel.ReturnUrl)));
 
 				//this is the case of with related/parent entity and related/parent record id set
 				if (erpPageModel.RecordId != null && erpPageModel.ParentRecordId != null && erpPageModel.RelationId != null &&
@@ -1348,6 +1353,27 @@ namespace WebVella.Erp.Web.Models
 			public abstract object Execute(LazyObject[] parameters);
 		}
 
+		private sealed class EncodeUrlFunction : Function
+		{
+			public EncodeUrlFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 1;
+
+			public override int MaxParameters => 1;
+
+			public override string Name => "encodeUrl";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value is not string s)
+					throw new PropertyDoesNotExistException($"function {Name} requires string");
+
+				return HttpUtility.UrlEncode(s);
+			}
+		}
+
 		private sealed class ExistsFunction : Function
 		{
 			public ExistsFunction(PageDataModel dataModel)
@@ -1713,9 +1739,28 @@ namespace WebVella.Erp.Web.Models
 				if (a == null)
 					return true;
 
+				a = CastToDecimalIfIsNumber(a);
+				b = CastToDecimalIfIsNumber(b);
+
 				return a is IEnumerable enA && b is IEnumerable enB && enA.SequenceEquals(enB)
 					|| a.Equals(b);
 			}
+		}
+
+		private static object? CastToDecimalIfIsNumber(object obj)
+		{
+			return obj switch
+			{
+				sbyte sb => (decimal)sb,
+				byte b => (decimal)b,
+				short s => (decimal)s,
+				ushort us => (decimal)us,
+				int i => (decimal)i,
+				uint ui => (decimal)ui,
+				long l => (decimal)l,
+				ulong ul => (decimal)ul,
+				_ => obj,
+			};
 		}
 
 		private abstract class CompareFunction : Function
@@ -1738,8 +1783,8 @@ namespace WebVella.Erp.Web.Models
 				if (parameters[1].Value != null && parameters[1].Value is not IComparable)
 					throw new PropertyDoesNotExistException($"function {Name} argument 2 requires comparable type");
 
-				var a = parameters[0].Value as IComparable;
-				var b = parameters[1].Value as IComparable;
+				var a = CastToDecimalIfIsNumber(parameters[0].Value) as IComparable;
+				var b = CastToDecimalIfIsNumber(parameters[1].Value) as IComparable;
 
 				if (a == null && b == null)
 					return InterpretResult(0);

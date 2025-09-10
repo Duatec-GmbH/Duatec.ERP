@@ -102,7 +102,7 @@ namespace WebVella.Erp.Web.Components
 			public string EmptyText { get; set; } = "No records";
 
 			[JsonProperty(PropertyName = "allow-copy")]
-			public bool AllowCopy { get; set; } = false;
+			public string AllowCopy { get; set; } = "false";
 
 			[JsonProperty(PropertyName = "compatibility")]
 			public string Compatibility { get; set; } = string.Empty;
@@ -565,6 +565,41 @@ namespace WebVella.Erp.Web.Components
 			public WvHorizontalAlignmentType Container13HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
 			#endregion
 
+			#region << container14 >>
+			[JsonProperty(PropertyName = "container14_is_visible")]
+			public string Container14IsVisible { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container14_id")]
+			public string Container14Id { get; set; } = "column14";
+
+			[JsonProperty(PropertyName = "container14_name")]
+			public string Container14Name { get; set; } = ""; //For URL purposes
+
+			[JsonProperty(PropertyName = "container14_label")]
+			public string Container14Label { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container14_width")]
+			public string Container14Width { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container14_sortable")]
+			public bool Container14Sortable { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container14_searchable")]
+			public bool Container14Searchable { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container14_nowrap")]
+			public bool Container14NoWrap { get; set; } = false;
+
+			[JsonProperty(PropertyName = "container14_class")]
+			public string Container14Class { get; set; } = "";
+
+			[JsonProperty(PropertyName = "container14_vertical_align")]
+			public WvVerticalAlignmentType Container14VerticalAlign { get; set; } = WvVerticalAlignmentType.None;
+
+			[JsonProperty(PropertyName = "container14_horizontal_align")]
+			public WvHorizontalAlignmentType Container14HorizontalAlign { get; set; } = WvHorizontalAlignmentType.None;
+			#endregion
+
 		}
 
 
@@ -630,20 +665,8 @@ namespace WebVella.Erp.Web.Components
 
 				if (context.Mode != ComponentMode.Options && context.Mode != ComponentMode.Help)
 				{
-					var isVisible = true;
-					var isVisibleDS = context.DataModel.GetPropertyValueByDataSource(options.IsVisible);
-					if (isVisibleDS is string && !String.IsNullOrWhiteSpace(isVisibleDS.ToString()))
-					{
-						if (Boolean.TryParse(isVisibleDS.ToString(), out bool outBool))
-						{
-							isVisible = outBool;
-						}
-					}
-					else if (isVisibleDS is Boolean)
-					{
-						isVisible = (bool)isVisibleDS;
-					}
-					ViewBag.IsVisible = isVisible;
+					ViewBag.AllowCopy = GetBoolByDataSource(context.DataModel, options.AllowCopy);
+					ViewBag.IsVisible = GetBoolByDataSource(context.DataModel, options.IsVisible, true);
 
 					ViewBag.Records = context.DataModel.GetPropertyValueByDataSource(options.Records) as EntityRecordList ?? new EntityRecordList();
 
@@ -697,7 +720,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container1Searchable,
 						Sortable = options.Container1Sortable,
 						Width = options.Container1Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container1IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container1IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 1)
@@ -710,7 +733,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container2Searchable,
 						Sortable = options.Container2Sortable,
 						Width = options.Container2Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container2IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container2IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 2)
@@ -723,7 +746,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container3Searchable,
 						Sortable = options.Container3Sortable,
 						Width = options.Container3Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container3IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container3IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 3)
@@ -737,7 +760,7 @@ namespace WebVella.Erp.Web.Components
 						Sortable = options.Container4Sortable,
 						Width = options.Container4Width
 						,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container4IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container4IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 4)
@@ -750,7 +773,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container5Searchable,
 						Sortable = options.Container5Sortable,
 						Width = options.Container5Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container5IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container5IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 5)
@@ -763,7 +786,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container6Searchable,
 						Sortable = options.Container6Sortable,
 						Width = options.Container6Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container6IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container6IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 6)
@@ -776,7 +799,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container7Searchable,
 						Sortable = options.Container7Sortable,
 						Width = options.Container7Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container7IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container7IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 7)
@@ -789,7 +812,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container8Searchable,
 						Sortable = options.Container8Sortable,
 						Width = options.Container8Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container8IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container8IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 8)
@@ -802,7 +825,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container9Searchable,
 						Sortable = options.Container9Sortable,
 						Width = options.Container9Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container9IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container9IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 9)
@@ -815,7 +838,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container10Searchable,
 						Sortable = options.Container10Sortable,
 						Width = options.Container10Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container10IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container10IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 10)
@@ -828,7 +851,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container11Searchable,
 						Sortable = options.Container11Sortable,
 						Width = options.Container11Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container11IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container11IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 11)
@@ -841,7 +864,7 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container12Searchable,
 						Sortable = options.Container12Sortable,
 						Width = options.Container12Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container12IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container12IsVisible, true)
 					});
 				}
 				if (options.VisibleColumns > 12)
@@ -854,7 +877,20 @@ namespace WebVella.Erp.Web.Components
 						Searchable = options.Container13Searchable,
 						Sortable = options.Container13Sortable,
 						Width = options.Container13Width,
-						IsVisible = GetVisibilityByDataSource(context.DataModel, options.Container13IsVisible)
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container13IsVisible, true)
+					});
+				}
+				if (options.VisibleColumns > 13)
+				{
+					columns.Add(new WvGridColumnMeta()
+					{
+						ContainerId = options.Container14Id,
+						Name = options.Container14Name,
+						Label = options.Container14Label,
+						Searchable = options.Container14Searchable,
+						Sortable = options.Container14Sortable,
+						Width = options.Container14Width,
+						IsVisible = GetBoolByDataSource(context.DataModel, options.Container14IsVisible, true)
 					});
 				}
 				#endregion
@@ -909,9 +945,9 @@ namespace WebVella.Erp.Web.Components
 			}
 		}
 
-		private static bool GetVisibilityByDataSource(PageDataModel dataModel, string text)
+		private static bool GetBoolByDataSource(PageDataModel dataModel, string text, bool defaultValue = false)
 		{
-			var isVisible = true;
+			var isVisible = defaultValue;
 			var isVisibleDS = dataModel.GetPropertyValueByDataSource(text);
 			if (isVisibleDS is string && !string.IsNullOrWhiteSpace(isVisibleDS.ToString()) && bool.TryParse(isVisibleDS.ToString(), out bool outBool))
 				isVisible = outBool;

@@ -150,7 +150,7 @@ namespace WebVella.Erp.Plugins.Project
 	var access = new List<Guid>();
 	access.Add( new Guid("bdc56420-caf0-4030-8a0e-d264938e0cda") );
 
-	new WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight,access,WebVella.Erp.Database.DbContext.Current.Transaction);
+	new WebVella.Erp.Web.Services.AppService().UpdateApplication(id,name,label,description,iconClass,author,color,weight,visibleOnMobile: false,access,WebVella.Erp.Database.DbContext.Current.Transaction);
 }
 #endregion
 
@@ -169,7 +169,7 @@ namespace WebVella.Erp.Plugins.Project
 	var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 	var descriptionTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
+	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight, visibleOnMobile: false, showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
 }
 #endregion
 
@@ -188,7 +188,7 @@ namespace WebVella.Erp.Plugins.Project
 	var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 	var descriptionTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
+	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight, visibleOnMobile: false, showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
 }
 #endregion
 
@@ -207,7 +207,7 @@ namespace WebVella.Erp.Plugins.Project
 	var labelTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 	var descriptionTranslations = new List<WebVella.Erp.Web.Models.TranslationResource>();
 
-	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight,showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
+	new WebVella.Erp.Web.Services.AppService().UpdateArea(id,appId,name,label,labelTranslations,description,descriptionTranslations,iconClass,color,weight, visibleOnMobile: false, showGroupNames,access,WebVella.Erp.Database.DbContext.Current.Transaction);
 }
 #endregion
 

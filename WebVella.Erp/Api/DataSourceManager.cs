@@ -12,6 +12,7 @@ using WebVella.Erp.Exceptions;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using WebVella.Erp.Utilities;
+using System.Globalization;
 
 namespace WebVella.Erp.Api
 {
@@ -398,10 +399,10 @@ namespace WebVella.Erp.Api
 					}
 				case "decimal":
 					{
-						if (string.IsNullOrWhiteSpace(dsParameter.Value))
+						if (string.IsNullOrWhiteSpace(dsParameter.Value) || dsParameter.Value.ToLowerInvariant() == "null")
 							return null;
 
-						if (Decimal.TryParse(dsParameter.Value, out decimal value))
+						if (Decimal.TryParse(dsParameter.Value, out decimal value) || decimal.TryParse(dsParameter.Value, CultureInfo.InvariantCulture, out value))
 							return value;
 
 						if (dsParameter.IgnoreParseErrors)

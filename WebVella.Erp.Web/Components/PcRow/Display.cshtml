@@ -8,11 +8,14 @@
 @using Newtonsoft.Json.Linq;
 @using WebVella.Erp.Web;
 @{
-	var options = (PcRow.PcRowOptions)ViewBag.Options;
-	var node = (PageBodyNode)ViewBag.Node;
-	var htmlIdPrefix = "wv-row-" + node.Id + "-";
-	var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
-	var componentContext = (PageComponentContext)ViewBag.ComponentContext;
+    var options = (PcRow.PcRowOptions)ViewBag.Options;
+    var node = (PageBodyNode)ViewBag.Node;
+    var htmlIdPrefix = "wv-row-" + node.Id + "-";
+    var erpRequest = (ErpRequestContext)ViewBag.RequestContext;
+    var componentContext = (PageComponentContext)ViewBag.ComponentContext;
+
+    if (!(bool)ViewBag.IsVisible)
+        return;
 }
 
 <wv-row class="@options.Class" flex-vertical-alignment="@options.FlexVerticalAlignment" flex-horizontal-alignment="@options.FlexHorizontalAlignment"
