@@ -11,9 +11,13 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     [Authorize]
     public class OrderController : Controller
     {
+        const int sumUp = 0;
+        const int rollOut = 1;
+        const int threeColumns = 2;
+
         [HttpGet]
         [Route("/api/v3.0/o/orders/{id}/export")]
-        public ActionResult GetExportData([FromRoute]Guid id, [FromQuery]string? delimiter = "tab", [FromQuery]int denominationHandle = 0)
+        public ActionResult GetExportData([FromRoute]Guid id, [FromQuery]string? delimiter = "tab", [FromQuery]int option = sumUp)
         {
             var recMan = new RecordManager();
             var entries = new OrderRepository(recMan).FindManyEntriesByOrder(id)
@@ -28,34 +32,44 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
 
             var sb = new StringBuilder();
 
-            foreach(var entry in entries)
+            foreach(var g in entries.GroupBy(e => e.Article).OrderBy(g => g.First().GetArticle().PartNumber))
             {
-                var article = entry.GetArticle();
+                var article = g.First().GetArticle();
                 var type = article.GetArticleType();
 
-                if (!type.IsDivisible || entry.Denomination == 0)
-                    sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}");
+                if(option == sumUp)
+                {
+                    var amount = g.Sum(e => (e.Denomination == 0 ? 1 : e.Denomination) * e.Amount);
+                    sb.AppendLine($"{article.OrderNumber}{delimiter}{amount}");
+                }
                 else
                 {
-                    if (denominationHandle == 1) // sum up
+                    foreach (var entry in g)
                     {
-                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount * entry.Denomination}");
-                    }
-                    else if(denominationHandle == 2) // <amount>x<denomination>
-                    {
-                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}x{entry.Denomination}");
-                    }
-                    else if(denominationHandle == 3) // <amount>(<denomination>)
-                    {
-                        sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}({entry.Denomination})");
-                    }
-                    else  // roll out
-                    {
-                        for (var i = 0; i < entry.Amount; i++)
-                            sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Denomination}");
+                        if (!type.IsDivisible || entry.Denomination == 0)
+                        {
+                            sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}");
+                        }
+                        else
+                        {
+                            if (option == rollOut)
+                            {
+                                for (var i = 0; i < entry.Amount; i++)
+                                    sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Denomination}");
+                            }
+                            else if (option == threeColumns)
+                            {
+                                sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}{delimiter}{entry.Denomination}");
+                            }
+                            else // ERP Format
+                            {
+                                sb.AppendLine($"{article.OrderNumber}{delimiter}{entry.Amount}x{entry.Denomination}");
+                            }
+                        }
                     }
                 }
             }
+
             return Json(sb.ToString());
         }
 

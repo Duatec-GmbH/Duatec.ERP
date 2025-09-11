@@ -448,6 +448,9 @@ namespace WebVella.Erp.Web.Services
 		/// <param name="content"></param>
 		private void DeletePageBodyContentOnFileSystem(Guid pageId)
 		{
+			if (ErpAppContext.Current.ServiceProvider == null)
+				return;
+
 			var env = ErpAppContext.Current.ServiceProvider.GetService<IWebHostEnvironment>();
 			var erpViewsFolderPath = Path.Combine(env.ContentRootPath, "Pages", "WV", "Pages");
 			var filepath = Path.Combine(erpViewsFolderPath, $"{pageId}.cshtml");

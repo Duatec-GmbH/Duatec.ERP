@@ -9,6 +9,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Web;
+using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Models.AutoMapper;
 
 
