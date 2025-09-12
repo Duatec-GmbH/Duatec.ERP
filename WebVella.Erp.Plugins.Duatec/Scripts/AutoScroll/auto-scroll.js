@@ -22,6 +22,8 @@ const queryStartIdx = baseUrl.indexOf('?');
 if (queryStartIdx >= 0)
     baseUrl = baseUrl.substring(0, queryStartIdx);
 
+const baseUrlAsParameter = encodeURIComponent(baseUrl);
+
 const anchorTags = [];
 
 // get anchor tags which return again to this page
@@ -35,11 +37,14 @@ for (let anchorTag of document.getElementsByTagName('a')) {
         if (appName && appName.length && appName !== '/' && appName !== 'sdk') {
 
             var returnUrlIdx = anchorTag.href.indexOf('returnUrl=');
-            if (returnUrlIdx < 0)
-                returnUrlIdx = anchorTag.href.indexOf('returnUrl%3D');
 
-            if (returnUrlIdx >= 0 && anchorTag.href.indexOf(baseUrl, returnUrlIdx) >= 0) {
-                anchorTags[anchorTags.length] = anchorTag;
+            if (returnUrlIdx >= 0) {
+
+                const idx = anchorTag.href.toLowerCase().indexOf(baseUrlAsParameter.toLowerCase(), returnUrlIdx);
+
+                if (idx === returnUrlIdx + 'returnUrl='.length) {
+                    anchorTags[anchorTags.length] = anchorTag;
+                }
             }
         }
     }
@@ -66,10 +71,10 @@ if (anchorTags.length) {
 
                     const start = anchorTag.href.substring(0, idx);
                     const decodedQueryStart = returnUrl.indexOf('?');
-                    const encodedQueryStart = returnUrl.indexOf('%3F');
+                    const encodedQueryStart = returnUrl.indexOf('%3f');
 
                     if (decodedQueryStart < 0 && encodedQueryStart < 0) {
-                        returnUrl += '%3FscrollPos%3D' + pos;
+                        returnUrl += '%3fscrollPos%3d' + pos;
                     }
                     else if (encodedQueryStart < 0 || decodedQueryStart >= 0 && decodedQueryStart < encodedQueryStart) {
 
@@ -95,23 +100,23 @@ if (anchorTags.length) {
                     }
                     else if (decodedQueryStart < 0 || encodedQueryStart >= 0 && encodedQueryStart < decodedQueryStart) {
 
-                        let argIdx = returnUrl.indexOf('scrollPos%3D');
-                        const returnUrlIdx = returnUrl.indexOf('returnUrl%3D');
+                        let argIdx = returnUrl.indexOf('scrollPos%3d');
+                        const returnUrlIdx = returnUrl.indexOf('returnUrl%3d');
 
                         if (argIdx < 0 || returnUrlIdx >= 0 && argIdx >= returnUrlIdx) {
 
-                            idx = returnUrl.indexOf('%3F');
-                            returnUrl = returnUrl.substring(0, idx + 3) + 'scrollPos%3D' + pos + '%26' + returnUrl.substring(idx + 3);
+                            idx = returnUrl.indexOf('%3f');
+                            returnUrl = returnUrl.substring(0, idx + 3) + 'scrollPos%3d' + pos + '%26' + returnUrl.substring(idx + 3);
                         }
                         else {
 
                             const nextArgIdx = returnUrl.indexOf('%26', argIdx);
 
                             if (nextArgIdx < 0) {
-                                returnUrl = returnUrl.substring(0, argIdx) + 'scrollPos%3D' + pos;
+                                returnUrl = returnUrl.substring(0, argIdx) + 'scrollPos%3d' + pos;
                             }
                             else {
-                                returnUrl = returnUrl.substring(0, argIdx) + 'scrollPos%3D' + pos + returnUrl.substring(nextArgIdx);
+                                returnUrl = returnUrl.substring(0, argIdx) + 'scrollPos%3d' + pos + returnUrl.substring(nextArgIdx);
                             }
                         }
                     }

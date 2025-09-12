@@ -1,6 +1,24 @@
 ﻿"use strict";
 var ApiBaseUrl = "/api/v3/en_US";
 
+
+/*******************************************************************************
+HISTORY MODIFICATION
+ ******************************************************************************/
+
+// TODO
+
+if (!window.location.href.includes('returnUrl='))
+	history.pushState([], null, window.location.href);
+else {
+
+	let returnUrl = decodeURIComponent(window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length));
+	if (!returnUrl)
+		returnUrl = '/';
+
+	history.pushState([returnUrl], null, window.location.href);
+}
+
 /*******************************************************************************
  STICKY ERP LIST
  ******************************************************************************/
@@ -12,11 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	if (pageHeads.length === 1 && erpLists.length === 1) {
 
 		let erpList = erpLists[0];
-		let pageHead = pageHeads[0];
-
-		let toolBars = document.getElementsByClassName("page-header-toolbar");
-		if (toolBars.length > 0)
-			pageHead = toolBars[0];
 
 		erpList.addEventListener("resize", () => {
 			stickyErpList(erpList);
@@ -26,9 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			stickyErpList(erpList);
 		});
 
-
-
-		stickyErpList(pageHead, erpList);
+		stickyErpList(erpList);
 	}
 });
 
