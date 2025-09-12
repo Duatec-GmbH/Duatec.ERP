@@ -6,6 +6,7 @@ using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 using WebVella.Erp.Web.Utils;
 using WebVella.Erp.TypedRecords.Util;
+using System.Web;
 
 namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
 {
@@ -89,7 +90,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
                 return pageModel.ReturnUrl;
 
             idx = pageModel.ReturnUrl.IndexOf('=', idx) + 1;
-            return pageModel.ReturnUrl[idx..];
+            return HttpUtility.UrlDecode(pageModel.ReturnUrl[idx..]);
         }
     }
 }

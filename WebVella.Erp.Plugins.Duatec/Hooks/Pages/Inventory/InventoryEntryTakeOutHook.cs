@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Web;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
@@ -96,10 +97,16 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     var start = url.IndexOf(phrase);
 
                     if (start < 0)
-                        url = string.Empty;
+                        url = pageModel.EntityListUrl();
                     else
-                        url = url[(start + phrase.Length)..];
+                    {
+                        url = HttpUtility.UrlDecode(url[(start + phrase.Length)..]);
+
+                        if (!url.StartsWith("/" + pageModel.AppName))
+                            url = pageModel.EntityListUrl();
+                    }
                 }
+
                 return pageModel.LocalRedirect(url);
             }
             return pageModel.LocalRedirect(pageModel.EntityListUrl());

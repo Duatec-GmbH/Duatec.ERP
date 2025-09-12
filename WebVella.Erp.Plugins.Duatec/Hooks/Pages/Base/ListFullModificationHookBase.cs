@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Web;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Plugins.Duatec.Persistance;
@@ -53,7 +54,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
         {
             var url = pageModel.EntityDetailUrl(recordId);
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                url += $"?returnUrl={pageModel.ReturnUrl}";
+                url += $"?returnUrl={HttpUtility.UrlEncode(pageModel.ReturnUrl)}";
             return url;
         }
 
