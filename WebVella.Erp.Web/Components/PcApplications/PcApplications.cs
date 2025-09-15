@@ -95,7 +95,7 @@ namespace WebVella.Erp.Web.Components
 						{
 							foreach (var node in area.Nodes)
 							{
-								node.Url = PageUtils.GenerateSitemapNodeUrl(node, area, app);
+								node.Url = PageUtils.GenerateSitemapNodeUrl(node, area, app) + "?returnUrl=%2f";
 							}
 						}
 						app.Sitemap = new AppService().OrderSitemap(app.Sitemap);

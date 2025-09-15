@@ -18,7 +18,7 @@
 		var appUrl = "";
 		if (app.HomePages.Count > 0)
 		{
-			appUrl = $"/{app.Name}/a/{app.HomePages[0].Name}";
+			appUrl = $"/{app.Name}/a/{app.HomePages[0].Name}?returnUrl=%2f";
 		}
 		else if (app.Sitemap != null && app.Sitemap.Areas.Count > 0)
 		{

@@ -241,80 +241,9 @@ namespace WebVella.Erp.Web.Models
 				var returnUrlIndex = queryString.IndexOf("returnUrl");
 
 				if(returnUrlIndex >= 0)
-				{
-					var returnUrlQueryIndex = queryString.IndexOf('?', returnUrlIndex);
-
-					if(returnUrlQueryIndex < 0)
-						ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
-					else
-					{
-						var i = returnUrlQueryIndex + 1;
-						var pairs = new List<KeyValuePair<string, StringValues>>();
-
-						while(i >= 0 && i < queryString.Length)
-						{
-							var end = queryString.IndexOf('&', i);
-							if (end < 0)
-								end = queryString.Length;
-
-							var argWithValue = queryString[i..end];
-							var assignIndex = argWithValue.IndexOf('=');
-
-							var key = argWithValue[0..assignIndex];
-							string value;
-
-							if(key != "returnUrl")
-							{
-								value = argWithValue[(assignIndex + 1)..];
-								i = end + 1;
-							}
-							else
-							{
-								i = queryString.IndexOf('=', i);
-								value = queryString[(i + 1)..];
-								i = queryString.Length;
-							}
-
-							pairs.Add(new(key, value));
-						}
-
-						var start = queryString.IndexOf('=', returnUrlIndex) + 1;
-						var returnUrl = queryString[start..(returnUrlQueryIndex + 1)];
-						returnUrl += $"{pairs[0].Key}={pairs[0].Value}";
-
-						foreach (var (key, value) in pairs.Skip(1))
-							returnUrl += $"&{key}={value}";
-
-						ReturnUrl = returnUrl;
-
-						var dict = new Dictionary<string, StringValues>
-						{
-							{ "returnUrl", returnUrl }
-						};
-
-						returnUrlIndex--;
-						i = 1;
-
-						while(i >= 0 && i < returnUrlIndex)
-						{
-							var end = queryString.IndexOf('&', i);
-							if (end < 0 || end > returnUrlIndex)
-								end = returnUrlIndex;
-
-							var argWithValue = queryString[i..end];
-							var assignIndex = argWithValue.IndexOf('=');
-
-							var key = argWithValue[0..assignIndex];
-							var value = argWithValue[(assignIndex + 1)..];
-							i = end + 1;
-
-							dict.Add(key, value);
-						}
-
-						var queryCollection = new QueryCollection(dict);
-						PageContext.HttpContext.Request.Query = queryCollection;
-					}
-				}
+					ReturnUrl = HttpUtility.UrlDecode(queryString[(returnUrlIndex + "returnUrl".Length + 1)..]);
+				else
+					ReturnUrl = HttpUtility.UrlDecode(PageContext.HttpContext.Request.Query["returnUrl"].ToString());
 			}
 
 			ErpAppContext = ErpAppContext.Current;
@@ -340,7 +269,7 @@ namespace WebVella.Erp.Web.Models
 								if (nodePages.Count > 0)
 								{
 									nodePages = nodePages.OrderBy(x => x.Weight).ToList();
-									currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/a/{nodePages[0].Name}";
+									currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/a/{nodePages[0].Name}?returnUrl=%2f";
 								}
 								else
 								{
@@ -348,7 +277,7 @@ namespace WebVella.Erp.Web.Models
 									if (firstAppPage == null)
 										currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/a/";
 									else
-										currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/a/{firstAppPage.Name}";
+										currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/a/{firstAppPage.Name}?returnUrl=%2f";
 								}
 								break;
 							case SitemapNodeType.EntityList:
@@ -356,7 +285,7 @@ namespace WebVella.Erp.Web.Models
 								if (firstListPage == null)
 									currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/l/";
 								else
-									currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/l/{firstListPage.Name}";
+									currentNode.Url = $"/{ErpRequestContext.App.Name}/{area.Name}/{currentNode.Name}/l/{firstListPage.Name}?returnUrl=%2f";
 								break;
 							case SitemapNodeType.Url:
 								//Do nothing

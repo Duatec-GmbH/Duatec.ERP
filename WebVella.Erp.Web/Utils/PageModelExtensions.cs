@@ -8,7 +8,7 @@ namespace WebVella.Erp.Web.Utils
 #nullable enable
 
 		public static string EntityListUrl(this BaseErpPageModel pageModel, string? pageName = null)
-			=> EntityPage(pageModel, 'l', pageName);
+			=> EntityPage(pageModel, 'l', pageName) + "?returnUrl=%2f";
 
 		public static string EntityDetailUrl(this BaseErpPageModel pageModel, Guid id, string? pageName = null)
 			=> EntityGuidPage(pageModel, 'r', id, pageName);

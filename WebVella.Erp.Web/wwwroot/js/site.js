@@ -1,38 +1,48 @@
 ﻿"use strict";
 var ApiBaseUrl = "/api/v3/en_US";
 
-
 /*******************************************************************************
-HISTORY MODIFICATION
+FORCE REFRESH PAGE ON NAVIGATION BACK OR FORWARD
  ******************************************************************************/
 
-let applicationName = window.location.href.substring(window.location.origin.length + 1);
-if (applicationName) {
+let performanceEntries = performance.getEntriesByType("navigation");
 
-	let idx = applicationName.indexOf('/');
-	if (idx < 0)
-		idx = applicationName.indexOf('?');
+if (performanceEntries.length > 0) {
 
-	if (idx >= 0)
-		applicationName = applicationName.substring(0, idx);
+	let entry = performanceEntries[0];
 
-	if (applicationName && applicationName !== 'sdk' && applicationName !== 'login') {
+	if (entry.type === 'back_forward') {
 
-		const currentUrl = window.location.href;
+		const returnUrl = sessionStorage.getItem('returnUrl');
+		const lastPage = sessionStorage.getItem('lastPage');
 
-		if (!window.location.href.includes('returnUrl='))
-			history.pushState({}, '', '/');
-		else {
+		if (lastPage === window.location.origin || lastPage === window.location.origin + '/')
+			location.replace(window.location.origin);
 
-			let returnUrl = decodeURIComponent(currentUrl.substring(currentUrl.indexOf('returnUrl=') + 'returnUrl='.length));
-			if (!returnUrl)
-				returnUrl = '/';
+		else if (returnUrl && returnUrl !== window.location.href)
+			location.replace(returnUrl);
 
-			history.pushState({}, '', returnUrl);
-		}
-
-		history.pushState({}, '', currentUrl);
+		else if (entry.deliveryType === 'cache')
+			location.reload();
 	}
+}
+
+/*******************************************************************************
+MODIFY HISTORY
+ ******************************************************************************/
+
+history.pushState({}, '', window.location.href);
+sessionStorage.setItem('lastPage', window.location.href);
+
+if (window.location.href.includes('returnUrl=')) {
+
+	let returnUrl = window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length);
+	returnUrl = window.location.origin + decodeURIComponent(returnUrl);
+
+	sessionStorage.setItem('returnUrl', returnUrl);
+}
+else {
+	sessionStorage.removeItem('returnUrl');
 }
 
 

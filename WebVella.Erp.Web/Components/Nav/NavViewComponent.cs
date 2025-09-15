@@ -41,7 +41,7 @@ namespace WebVella.Erp.Web.Components
 				if (currentApp.HomePages.Exists(p => p.Weight <= 1000))
 				{
 					var homePages = currentApp.HomePages.OrderBy(x => x.Weight).ToList();
-					ViewBag.AppDefaultLink = $"/{currentApp.Name}/a/{homePages[0].Name}";
+					ViewBag.AppDefaultLink = $"/{currentApp.Name}/a/{homePages[0].Name}?returnUrl=%2f";
 				}
 				else if(currentApp.Sitemap.Areas.Exists(a => a.Weight <= 1000)){
 					var currentAreas = currentApp.Sitemap.Areas.Where(a => a.Weight <= 1000).OrderBy(x => x.Weight).ToList();
@@ -54,7 +54,7 @@ namespace WebVella.Erp.Web.Components
 									ViewBag.AppDefaultLink = $"/{currentApp.Name}/{area.Name}/{currentNode.Name}/a/";
 									break;
 								case SitemapNodeType.EntityList:
-									ViewBag.AppDefaultLink = $"/{currentApp.Name}/{area.Name}/{currentNode.Name}/l/";
+									ViewBag.AppDefaultLink = currentNode.Url;
 									break;
 								case SitemapNodeType.Url:
 									ViewBag.AppDefaultLink = currentNode.Url;

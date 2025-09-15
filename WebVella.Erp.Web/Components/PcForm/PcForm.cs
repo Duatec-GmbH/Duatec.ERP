@@ -157,7 +157,7 @@ namespace WebVella.Erp.Web.Components
                             }
                         }
 						if (HttpContext.Request.Query.TryGetValue("returnUrl", out var returnUrl))
-							queryList.Add(new SelectOption("returnUrl", HttpUtility.UrlEncode(returnUrl)));
+							queryList.Add(new SelectOption("returnUrl", returnUrl.ToString().Contains('?') || returnUrl.ToString().Contains('/') ? HttpUtility.UrlEncode(returnUrl) : returnUrl));
 
                         ViewBag.Action = string.Format(HttpContext.Request.Path + "?{0}", string.Join("&", queryList.Select(kvp => string.Format("{0}={1}", kvp.Value, kvp.Label))));
                     }

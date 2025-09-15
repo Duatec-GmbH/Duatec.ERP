@@ -20,7 +20,7 @@ namespace WebVella.Erp.Web.Components
 
 		public async Task<IViewComponentResult> InvokeAsync(BaseErpPageModel pageModel)
 		{
-			 var areaList = pageModel.ApplicationMenu;
+			var areaList = pageModel.ApplicationMenu;
 			foreach (var area in areaList)
 			{
 				area.Nodes = new RenderService().ConvertListToTree(area.Nodes,new List<MenuItem>(),null);

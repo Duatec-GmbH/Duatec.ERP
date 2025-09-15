@@ -71,7 +71,7 @@ if (anchorTags.length) {
 
                     const start = anchorTag.href.substring(0, idx);
                     const decodedQueryStart = returnUrl.indexOf('?');
-                    const encodedQueryStart = returnUrl.indexOf('%3f');
+                    const encodedQueryStart = returnUrl.toLowerCase().indexOf('%3f');
 
                     if (decodedQueryStart < 0 && encodedQueryStart < 0) {
                         returnUrl += '%3fscrollPos%3d' + pos;
@@ -100,12 +100,12 @@ if (anchorTags.length) {
                     }
                     else if (decodedQueryStart < 0 || encodedQueryStart >= 0 && encodedQueryStart < decodedQueryStart) {
 
-                        let argIdx = returnUrl.indexOf('scrollPos%3d');
-                        const returnUrlIdx = returnUrl.indexOf('returnUrl%3d');
+                        let argIdx = returnUrl.toLowerCase().indexOf('scrollpos%3d');
+                        const returnUrlIdx = returnUrl.toLowerCase().indexOf('returnurl%3d');
 
                         if (argIdx < 0 || returnUrlIdx >= 0 && argIdx >= returnUrlIdx) {
 
-                            idx = returnUrl.indexOf('%3f');
+                            idx = returnUrl.toLowerCase().indexOf('%3f');
                             returnUrl = returnUrl.substring(0, idx + 3) + 'scrollPos%3d' + pos + '%26' + returnUrl.substring(idx + 3);
                         }
                         else {

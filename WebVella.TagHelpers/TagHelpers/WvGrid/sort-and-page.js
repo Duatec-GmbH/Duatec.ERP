@@ -1,7 +1,28 @@
 ﻿function ErpListChangePage(queryName, queryValue) {
-	var currentUrl = getUrl();
+	var currentUrl = getUrlWithoutReturnUrl();
 	var uri = new URI(currentUrl).setSearch(queryName, queryValue);
+	let returnUrl = getReturnUrl();
+
+	if (returnUrl)
+		uri.setSearch('returnUrl', decodeURIComponent(returnUrl));
 	window.location = uri;
+}
+
+function getUrlWithoutReturnUrl() {
+	let url = getUrl();
+
+	let idx = url.indexOf('returnUrl=');
+	if (idx < 0)
+		return url;
+
+	return url.substring(0, idx - 1);
+}
+
+function getReturnUrl() {
+	let idx = window.location.href.indexOf('returnUrl=');
+	if (idx >= 0)
+		return window.location.href.substring(idx + 'returnUrl='.length);
+	return null;
 }
 
 function getUrl() {
