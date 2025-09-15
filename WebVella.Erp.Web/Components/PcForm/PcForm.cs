@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Web.Models;
@@ -156,7 +157,7 @@ namespace WebVella.Erp.Web.Components
                             }
                         }
 						if (HttpContext.Request.Query.TryGetValue("returnUrl", out var returnUrl))
-							queryList.Add(new SelectOption("returnUrl", returnUrl));
+							queryList.Add(new SelectOption("returnUrl", HttpUtility.UrlEncode(returnUrl)));
 
                         ViewBag.Action = string.Format(HttpContext.Request.Path + "?{0}", string.Join("&", queryList.Select(kvp => string.Format("{0}={1}", kvp.Value, kvp.Label))));
                     }

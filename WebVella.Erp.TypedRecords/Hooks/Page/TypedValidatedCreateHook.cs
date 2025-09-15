@@ -7,6 +7,7 @@ using WebVella.Erp.Web.Models;
 using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Web.Utils;
+using System.Web;
 
 namespace WebVella.Erp.TypedRecords.Hooks.Page
 {
@@ -68,7 +69,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page
             var url = pageModel.EntityDetailUrl(recordId, DetailPageName);
 
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
-                url += $"?returnUrl={pageModel.ReturnUrl}";
+                url += $"?returnUrl={HttpUtility.UrlEncode(pageModel.ReturnUrl)}";
 
             return url;
         }

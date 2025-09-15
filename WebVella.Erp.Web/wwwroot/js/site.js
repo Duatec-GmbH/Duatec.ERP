@@ -6,18 +6,35 @@ var ApiBaseUrl = "/api/v3/en_US";
 HISTORY MODIFICATION
  ******************************************************************************/
 
-// TODO
+let applicationName = window.location.href.substring(window.location.origin.length + 1);
+if (applicationName) {
 
-if (!window.location.href.includes('returnUrl='))
-	history.pushState([], null, window.location.href);
-else {
+	let idx = applicationName.indexOf('/');
+	if (idx < 0)
+		idx = applicationName.indexOf('?');
 
-	let returnUrl = decodeURIComponent(window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length));
-	if (!returnUrl)
-		returnUrl = '/';
+	if (idx >= 0)
+		applicationName = applicationName.substring(0, idx);
 
-	history.pushState([returnUrl], null, window.location.href);
+	if (applicationName && applicationName !== 'sdk' && applicationName !== 'login') {
+
+		const currentUrl = window.location.href;
+
+		if (!window.location.href.includes('returnUrl='))
+			history.pushState({}, '', '/');
+		else {
+
+			let returnUrl = decodeURIComponent(currentUrl.substring(currentUrl.indexOf('returnUrl=') + 'returnUrl='.length));
+			if (!returnUrl)
+				returnUrl = '/';
+
+			history.pushState({}, '', returnUrl);
+		}
+
+		history.pushState({}, '', currentUrl);
+	}
 }
+
 
 /*******************************************************************************
  STICKY ERP LIST

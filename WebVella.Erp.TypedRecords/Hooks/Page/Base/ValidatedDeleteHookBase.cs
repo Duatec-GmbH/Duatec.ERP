@@ -85,11 +85,13 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page.Base
             if (string.IsNullOrWhiteSpace(pageModel.ReturnUrl))
                 return pageModel.EntityListUrl();
 
-            var idx = pageModel.ReturnUrl.IndexOf("returnUrl");
+            const string pattern = "returnUrl%3d";
+
+            var idx = pageModel.ReturnUrl.IndexOf(pattern, StringComparison.OrdinalIgnoreCase);
             if (idx < 0)
                 return pageModel.ReturnUrl;
 
-            idx = pageModel.ReturnUrl.IndexOf('=', idx) + 1;
+            idx += pattern.Length;
             return HttpUtility.UrlDecode(pageModel.ReturnUrl[idx..]);
         }
     }
