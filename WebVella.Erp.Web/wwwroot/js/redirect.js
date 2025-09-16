@@ -38,6 +38,8 @@ if (!isDuplicated) {
 					sessionStorage.removeItem('initialized');
 					location.reload();
 				}
+
+				break;
 			}
 		}
 
