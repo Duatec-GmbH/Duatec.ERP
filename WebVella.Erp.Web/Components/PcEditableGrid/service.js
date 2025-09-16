@@ -13,6 +13,8 @@ let usedIds = new Set();
 	let xDown = false;
 	let aDown = false;
 	let ctrlDown = false;
+	let shiftDown = false;
+	let activeSelect = null;
 
 	// !!!!!!!! must be VAR otherwhise gets initialized for every editable grid
 	var editableGridsInitialized;
@@ -122,7 +124,23 @@ let usedIds = new Set();
 				}
 				else if (e.key == 'Insert' || e.key == '+') {
 					let body = getTargetBody();
-					if (body && body.getAttribute('add') === 'true')
+					let add = true;
+
+					if (e.key === '+') {
+						if (document.activeElement) {
+							if (document.activeElement.tagName === 'INPUT') {
+								if (document.activeElement.type === 'number') {
+									e.stopPropagation();
+									e.preventDefault();
+								}
+								else if (e.key == document.activeElement.classList.contains('select2-search-field')) {
+									add = false;
+								}
+							}
+						}
+					}
+
+					if (add && body && body.getAttribute('add') === 'true')
 						addNew(body);
 				}
 				else if (e.key == 'Delete') {
@@ -266,6 +284,64 @@ let usedIds = new Set();
 					}
 					vDown = true;
 				}
+				else if (e.key == 'Shift') {
+					shiftDown = true;
+				}
+				else if (e.key == 'Tab') {
+
+					if (document.activeElement) {
+
+						let control;
+
+						if (!shiftDown && document.activeElement.classList.contains('editable-grid-add-entry-button')) {
+
+							let cell = getParentTable(document.activeElement)?.getElementsByTagName('TBODY')[0]?.children[1]?.firstElementChild;
+
+							if (cell) {
+								let controls = getControlsInCell(cell);
+
+								if (controls.length > 0)
+									control = controls[0];
+							}
+						}
+
+						else {
+
+							let cell = getParentByTagName(document.activeElement, 'TD');
+
+							if (cell) {
+								if (shiftDown)
+									control = getPrevControl(cell);
+								else
+									control = getNextControl(cell);
+							}
+						}
+
+						if (control) {
+
+							let row = getParentTableRow(control);
+
+							if (row) {
+								clearAllSelections();
+								row.classList.add('row-selected');
+							}
+
+							if (control.classList.contains('wv-field-select')) {
+
+								let select = control.getElementsByTagName('select')[0];
+
+								if (select) {
+									document.activeElement.blur();
+
+									$(select).select2('open');
+
+									e.preventDefault();
+									e.stopPropagation();
+								}
+							}
+						}
+					}
+				}
 			});
 
 			document.addEventListener('keyup', e => {
@@ -275,8 +351,9 @@ let usedIds = new Set();
 				if (e.key == 'x' || e.key == 'X') xDown = false;
 				if (e.key == 'a' || e.key == 'A') aDown = false;
 				if (e.key == 'Control') ctrlDown = false;
-
 				if (e.key == 'Shift') {
+
+					shiftDown = false;
 
 					if (!ctrlDown) {
 						for (let table of getEditableGridTables())
@@ -339,6 +416,110 @@ let usedIds = new Set();
 
 			loader.classList.add('d-none');
 		});
+
+		function getPrevControl(cell) {
+
+			let controlsInCell = getControlsInCell(cell);
+
+			if (controlsInCell.length > 1) {
+
+				if (!document.activeElement)
+					return null;
+
+				let index = controlsInCell.indexOf(document.activeElement);
+
+				if (index < 0)
+					return null;
+
+				if (index > 0)
+					return controlsInCell[index - 1];
+			}
+
+			cell = getPrevCell(cell);
+			if (!cell)
+				return null;
+
+			controlsInCell = getControlsInCell(cell);
+
+			if (controlsInCell.length === 0)
+				return getPrevControl(cell);
+			else
+				return controlsInCell[controlsInCell.length - 1];
+		}
+
+		function getNextControl(cell) {	
+
+			let controlsInCell = getControlsInCell(cell);
+
+			if (controlsInCell.length > 1) {
+
+				if (!document.activeElement)
+					return null;
+
+				let index = controlsInCell.indexOf(document.activeElement);
+
+				if (index < 0)
+					return null;
+
+				if (index < controlsInCell.length - 1)
+					return controlsInCell[index + 1];
+			}
+
+			cell = getNextCell(cell);
+			if (!cell)
+				return null;
+
+			controlsInCell = getControlsInCell(cell);
+
+			if (controlsInCell.length === 0)
+				return getNextControl(cell);
+			else
+				return controlsInCell[0];
+		}
+
+		function getNextCell(cell) {
+
+			let next = cell.nextElementSibling;
+			if (next)
+				return next;
+
+			let row = getParentTableRow(cell);
+			return row?.nextElementSibling?.firstElementChild ?? null;
+		}
+
+
+		function getPrevCell(cell) {
+
+			let prev = cell.previousElementSibling;
+			if (prev)
+				return prev;
+
+			let row = getParentTableRow(cell);
+			return row?.previousElementSibling?.lastElementChild ?? null;
+		}
+
+		function getControlsInCell(cell) {
+
+			if (cell.classList.contains('d-none') || cell.style.display === 'none')
+				return [];
+
+			const result = [];
+
+			if (cell.tagName === 'INPUT')
+				result[result.length] = cell;
+
+			else if (cell.classList.contains('wv-field-select'))
+				result[result.length] = cell;
+
+			else {
+				for (let child of cell.children) {
+					for (let elem of getControlsInCell(child))
+						result[result.length] = elem;
+				}
+			}
+
+			return result;
+		}
 
 		function updateSelectSource(tableId, selectName, data) {
 
@@ -861,6 +1042,9 @@ let usedIds = new Set();
 			addRowEvents(node);
 			replaceIds(node);
 
+			for (let btn of node.getElementsByClassName('editable-grid-delete-button'))
+				btn.tabIndex = -1;
+
 			addDeleteButtonEvents(node);
 			addCheckBoxEvents(node);
 
@@ -901,6 +1085,8 @@ let usedIds = new Set();
 				}
 
 				const idx = i;
+
+				$(n).on('seelct2:select', function (e) { $(this).focus(); });
 
 				$(n).select2({
 					ajax: {
