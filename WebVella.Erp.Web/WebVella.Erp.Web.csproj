@@ -51,6 +51,7 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="wwwroot\**\*" />
+		<Content Remove="wwwroot\js\redirect.js" />
 		<EmbeddedResource Include="Components\Nav\script.js" />
 		<EmbeddedResource Include="Components\PcBtnToolbar\service.js" />
 		<EmbeddedResource Include="Components\PcBtnGroup\service.js" />
@@ -121,7 +122,6 @@
 
 	<ItemGroup>
 		<Folder Include="TagHelpers\js-test\" />
-		<Folder Include="wwwroot\" />
 	</ItemGroup>
 
 	<ItemGroup>

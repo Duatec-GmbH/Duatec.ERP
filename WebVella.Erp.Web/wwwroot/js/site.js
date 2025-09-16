@@ -2,51 +2,6 @@
 var ApiBaseUrl = "/api/v3/en_US";
 
 /*******************************************************************************
-FORCE REFRESH PAGE ON NAVIGATION BACK OR FORWARD
- ******************************************************************************/
-
-let performanceEntries = performance.getEntriesByType("navigation");
-
-if (performanceEntries.length > 0) {
-
-	let entry = performanceEntries[0];
-
-	if (entry.type === 'back_forward') {
-
-		const returnUrl = sessionStorage.getItem('returnUrl');
-		const lastPage = sessionStorage.getItem('lastPage');
-
-		if (lastPage === window.location.origin || lastPage === window.location.origin + '/')
-			location.replace(window.location.origin);
-
-		else if (returnUrl && returnUrl !== window.location.href)
-			location.replace(returnUrl);
-
-		else if (entry.deliveryType === 'cache')
-			location.reload();
-	}
-}
-
-/*******************************************************************************
-MODIFY HISTORY
- ******************************************************************************/
-
-history.pushState({}, '', window.location.href);
-sessionStorage.setItem('lastPage', window.location.href);
-
-if (window.location.href.includes('returnUrl=')) {
-
-	let returnUrl = window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length);
-	returnUrl = window.location.origin + decodeURIComponent(returnUrl);
-
-	sessionStorage.setItem('returnUrl', returnUrl);
-}
-else {
-	sessionStorage.removeItem('returnUrl');
-}
-
-
-/*******************************************************************************
  STICKY ERP LIST
  ******************************************************************************/
 
