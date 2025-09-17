@@ -14,7 +14,6 @@ let usedIds = new Set();
 	let aDown = false;
 	let ctrlDown = false;
 	let shiftDown = false;
-	let activeSelect = null;
 
 	// !!!!!!!! must be VAR otherwhise gets initialized for every editable grid
 	var editableGridsInitialized;
@@ -122,36 +121,57 @@ let usedIds = new Set();
 				if (e.key == 'Escape') {
 					clearAllSelections();
 				}
-				else if (e.key == 'Insert' || e.key == '+') {
+				else if (e.key == 'Insert') {
 					let body = getTargetBody();
-					let add = true;
 
-					if (e.key === '+') {
-						if (document.activeElement) {
-							if (document.activeElement.tagName === 'INPUT') {
-								if (document.activeElement.type === 'number') {
-									e.stopPropagation();
-									e.preventDefault();
-								}
-								else if (e.key == document.activeElement.classList.contains('select2-search-field')) {
-									add = false;
-								}
-							}
-						}
-					}
-
-					if (add && body && body.getAttribute('add') === 'true')
+					if (body && body.getAttribute('add') === 'true') {
 						addNew(body);
+					}
 				}
 				else if (e.key == 'Delete') {
 					let body = getTargetBody();
 					if (body && body.getAttribute('delete') === 'true') {
 
-						for (let i = body.children.length - 1; i > 0; i--) {
+						let prevIdx = 0;
+						let nextIdx = 0;
 
+						// get prev row
+						for (let i = body.children.length - 1; i > 0; i--) {
+							let row = body.children[i];
+
+							if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+								prevIdx = i - 1;
+						}
+
+						// get next row
+						for (let i = 1; i < body.children.length; i++) {
+							let row = body.children[i];
+
+							if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
+								nextIdx = i + 1;
+						}
+
+						let selected;
+						if (nextIdx > 0 && nextIdx < body.children.length)
+							selected = body.children[nextIdx];
+
+						else if (prevIdx > 0)
+							selected = body.children[prevIdx];
+	
+						let control = document.activeElement;
+						if (control)
+							control.blur();
+
+						// delete rows
+						for (let i = body.children.length - 1; i > 0; i--) {
 							let row = body.children[i];
 							if (row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
 								body.removeChild(row);
+						}
+
+						if (selected) {
+							markAsSelected(selected);
+							setFocusAtControlInSameColumn(control, selected, body);
 						}
 
 						updateFieldNames(body);
@@ -168,12 +188,21 @@ let usedIds = new Set();
 				}
 				else if (e.key == 'a' || e.key == 'A') {
 					if (e.ctrlKey && !aDown && !hasSomethingElseSelected()) {
+
 						let body = getTargetBody();
 						if (body) {
 							selectAll(body);
+							if (body.children.length > 1 && body.children[1].getElementsByClassName('alert').length === 0) {
+								document.activeElement.blur();
+
+								let control = getFirstControl(body.children[1]);
+								setFocus(control);
+							}
+
 							e.preventDefault();
 						}
-					}
+					}				
+
 					aDown = true;
 				}
 				else if (e.key == 'x' || e.key == 'X') {
@@ -295,13 +324,9 @@ let usedIds = new Set();
 
 						if (!shiftDown && document.activeElement.classList.contains('editable-grid-add-entry-button')) {
 
-							let cell = getParentTable(document.activeElement)?.getElementsByTagName('TBODY')[0]?.children[1]?.firstElementChild;
-
-							if (cell) {
-								let controls = getControlsInCell(cell);
-
-								if (controls.length > 0)
-									control = controls[0];
+							let row = getParentTable(document.activeElement)?.getElementsByTagName('TBODY')[0]?.children[1];
+							if (row) {
+								control = getFirstControl(row);
 							}
 						}
 
@@ -323,17 +348,17 @@ let usedIds = new Set();
 
 							if (row) {
 								clearAllSelections();
-								row.classList.add('row-selected');
+								markAsSelected(row);
 							}
 
-							if (control.classList.contains('wv-field-select')) {
+							if (control.classList.contains('select2-selection')) {
 
-								let select = control.getElementsByTagName('select')[0];
+								let select = getParentByTagName(control, 'DIV')?.getElementsByTagName('select')[0];
 
 								if (select) {
 									document.activeElement.blur();
 
-									$(select).select2('open');
+									$(select).select2('focus');
 
 									e.preventDefault();
 									e.stopPropagation();
@@ -341,6 +366,164 @@ let usedIds = new Set();
 							}
 						}
 					}
+				}
+				else if (e.key == 'Enter') {
+
+					let elem = document.activeElement;
+
+					if (elem && getParentTable(elem) && elem.classList.contains('select2-selection') && document.getElementsByClassName('select2-container--open').length == 0) {
+
+						let select = getParentByTagName(elem, 'DIV')?.getElementsByTagName('select')[0];
+
+						if (select) {
+
+							$(select).select2('focus');
+
+							e.preventDefault();
+							e.stopPropagation();
+						}
+					}
+				}
+				else if (e.key == 'ArrowDown' && document.getElementsByClassName('select2-container--open').length == 0) {
+
+					let body = getTargetBody();
+					if (body) {
+
+						if (shiftDown && shiftAnchor) {
+
+							let firstRow;
+							let lastRow;
+
+							for (let i = 1; i < body.children.length; i++) {
+								if (body.children[i].classList.contains('row-selected')) {
+									lastRow = body.children[i];
+									if (!firstRow)
+										firstRow = body.children[i];
+								}
+							}
+
+							let row;
+
+							if (shiftAnchor === firstRow) {
+								row = lastRow.nextElementSibling;
+								if(row)
+									markAsSelected(row);
+							}
+							else if (shiftAnchor === lastRow) {
+								unmarkAsSelected(firstRow);
+								row = firstRow.nextElementSibling;
+							}
+
+							if (row) {
+								let control = document.activeElement;
+								control.blur();
+								setFocusAtControlInSameColumn(control, row, body);
+							}
+						}
+						else {
+
+							let idx = 0;
+							let row;
+
+							for (let i = 1; i < body.children.length; i++) {
+
+								if (body.children[i].classList.contains('row-selected'))
+									idx = i;
+							}
+
+							if (idx <= 0) { // when nothing is selected, select first row
+								if (body.children.length > 1) {
+									row = body.children[1];
+
+									if (shiftDown && !shiftAnchor)
+										shiftAnchor = row;
+								}
+							}
+							else if (body.children.length > idx + 1) { // when any selected select last
+								row = body.children[idx + 1];
+
+								if (shiftDown && !shiftAnchor)
+									shiftAnchor = body.children[idx];
+							}
+
+							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
+
+								clearAllSelections();
+								markAsSelected(row);
+
+								let control = document.activeElement;
+								document.activeElement.blur();
+
+								setFocusAtControlInSameColumn(control, row, body);
+							}
+						}
+
+						e.preventDefault();
+						e.stopPropagation();
+					}
+				}
+				else if (e.key == 'ArrowUp' && document.getElementsByClassName('select2-container--open').length == 0) {
+
+					let body = getTargetBody();
+					if (body) {
+
+						if (shiftDown) {
+
+							if (shiftAnchor) {
+
+							}
+							else {
+
+							}
+						}
+						else {
+
+
+							let idx = 0;
+							let row;
+
+							for (let i = 1; i < body.children.length; i++) {
+
+								if (body.children[i].classList.contains('row-selected')) {
+									idx = i;
+									break;
+								}
+							}
+
+							if (idx <= 0) { // when nothing is selected, select last row
+								if (body.children.length > 1)
+									row = body.children[body.children.length - 1];
+							}
+							else if (idx > 1) {
+								row = body.children[idx - 1];
+							}
+
+							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
+
+								clearAllSelections();
+								markAsSelected(row);
+
+								let control = document.activeElement;
+								document.activeElement.blur();
+
+								setFocusAtControlInSameColumn(control, row, body);
+							}
+						}
+
+						e.preventDefault();
+						e.stopPropagation();
+					}
+				}
+
+				else if (e.key == 'ArrowLeft' && document.getElementsByClassName('select2-container--open').length == 0) {
+
+
+
+
+				}
+
+				else if (e.key == 'ArrowRight' && document.getElementsByClassName('select2-container--open').length == 0) {
+
 				}
 			});
 
@@ -411,11 +594,79 @@ let usedIds = new Set();
 						markAsSelected(mouseOverRow);
 						shiftAnchor = mouseOverRow;
 					}
+
+					let setFirstFocused = true;
+
+					if (document.activeElement) {
+
+						if (getParentTableRow(document.activeElement) === mouseOverRow)
+							setFirstFocused = false;
+						else
+							document.activeElement.blur();
+					}
+
+					if (setFirstFocused) {
+						let control = getFirstControl(mouseOverRow);
+
+						setFocus(control);
+					}
 				}
 			}, true);
 
 			loader.classList.add('d-none');
 		});
+
+		function setFocusAtControlInSameColumn(control, row, body) {
+			if (!control)
+				setFocus(getFirstControl(row));
+
+
+			let controlParentRow = getParentTableRow(control);
+
+			if (!controlParentRow || controlParentRow.parentElement !== body)
+				setFocus(getFirstControl(row));
+
+			else {
+				let colIdx = -1;
+
+				for (let i = 0; i < controlParentRow.children.length; i++) {
+
+					let controls = getControlsInCell(controlParentRow.children[i]);
+					if (controls.indexOf(control) >= 0) {
+						colIdx = i;
+						break;
+					}
+				}
+
+				if (colIdx < 0 || row.children.length <= colIdx)
+					setFocus(getFirstControl(row));
+				else {
+
+					let controls = getControlsInCell(row.children[colIdx]);
+
+					if (controls.length > 0)
+						setFocus(controls[0]);
+					else
+						setFocus(getFirstControl(row));
+				}
+			}
+		}
+
+		function setFocus(control) {
+			if (control) {
+
+				if (control.classList.contains('select2-selection')) {
+
+					let select = getParentByTagName(control, 'DIV')?.getElementsByTagName('select')[0];
+					if (select) {
+						$(select).select2('focus');
+					}
+				}
+				else {
+					control.focus();
+				}
+			}
+		}
 
 		function getPrevControl(cell) {
 
@@ -498,6 +749,17 @@ let usedIds = new Set();
 			return row?.previousElementSibling?.lastElementChild ?? null;
 		}
 
+		function getFirstControl(row) {
+
+			for (let col of row.children) {
+
+				let controls = getControlsInCell(col);
+				if (controls.length > 0)
+					return controls[0];
+			}
+			return null;
+		}
+
 		function getControlsInCell(cell) {
 
 			if (cell.classList.contains('d-none') || cell.style.display === 'none')
@@ -505,11 +767,15 @@ let usedIds = new Set();
 
 			const result = [];
 
-			if (cell.tagName === 'INPUT')
+			if (cell.tagName === 'INPUT' || cell.tagName === 'select')
 				result[result.length] = cell;
 
-			else if (cell.classList.contains('wv-field-select'))
-				result[result.length] = cell;
+			else if (cell.classList.contains('wv-field-select')) {
+
+				let control = cell.getElementsByClassName('select2-selection')[0];
+				if(control)
+					result[result.length] = control;
+			}
 
 			else {
 				for (let child of cell.children) {
@@ -926,12 +1192,15 @@ let usedIds = new Set();
 
 		function getTargetBody() {
 			let tables = getEditableGridTables();
-			if (tables.length == 1) {
+
+			if (tables.length == 1)
 				return tables[0].getElementsByTagName('tbody')[0];
-			}
-			else if (mouseOverRow) {
+
+			else if (document.activeElement && getParentTableRow(document.activeElement))
+				return getParentTableRow(document.activeElement).parentElement;
+
+			else if (mouseOverRow) 
 				return mouseOverRow.parentElement;
-			}
 
 			var rows = document.getElementsByClassName('row-selected');
 			if (rows && rows.length > 0 && rows.every(r => r.parentElement === rows[0].parentElement)) {
@@ -959,8 +1228,11 @@ let usedIds = new Set();
 
 		function selectAll(tbody) {
 
-			for (let i = 1; i < tbody.children.length; i++) // element 0 is dummy!!!
-				mayAddClass(tbody.children[i], 'row-selected');
+			for (let i = 1; i < tbody.children.length; i++) { // element 0 is dummy!!!
+
+				if (i !== 1 || tbody.children[i].getElementsByClassName('alert').length === 0)
+					mayAddClass(tbody.children[i], 'row-selected');
+			}
 		}
 
 		function clearAllSelections() {
@@ -1024,11 +1296,15 @@ let usedIds = new Set();
 				else
 					row.after(node);
 
-				node.classList.add('row-selected');
+				markAsSelected(node);
 
 				handleSelect2Elements(node);
 				updateFieldNames(body);
 				updateNoRecordsMessage(body);
+
+				let control = getFirstControl(node);
+				if (control)
+					setFocus(control);
 			}
 		}
 
@@ -1086,8 +1362,6 @@ let usedIds = new Set();
 
 				const idx = i;
 
-				$(n).on('seelct2:select', function (e) { $(this).focus(); });
-
 				$(n).select2({
 					ajax: {
 						transport: function (params, onSuccessHandler) {
@@ -1111,7 +1385,26 @@ let usedIds = new Set();
 						},
 					}
 				});
+
+				$(n).on('select2:close', function (e) {
+					const select = getParentByTagName(this, 'DIV')?.getElementsByTagName('select')[0];
+					if (select) {
+
+						$(n).select2('focus');
+						if (select.nextElementSibling)
+							select.nextElementSibling.classList.remove('fake-focus');
+					}
+				});
+
+				$(n).on('select2:opening', function (e) {
+					const select = getParentByTagName(this, 'DIV')?.getElementsByTagName('select')[0];
+
+					if (select && select.nextElementSibling)
+						select.nextElementSibling.classList.add('fake-focus');
+				});
+
 				i++;
+
 			}
 
 			let select2Containers = node.getElementsByClassName('select2');
@@ -1196,12 +1489,32 @@ let usedIds = new Set();
 
 					clearAllSelections();
 					let row = getParentTableRow(btn);
+
 					if (row?.parentElement) {
 
+						let prev = row.previousElementSibling;
+						let next = row.nextElementSibling;
 						let body = row.parentElement;
+
 						body.removeChild(row);
 						updateFieldNames(body);
 						updateNoRecordsMessage(body);
+
+						if (next) {
+
+							markAsSelected(next);
+
+							let control = getFirstControl(next);
+							setFocus(control);
+						}
+
+						else if (prev && !prev.classList.contains('d-none')) {
+
+							markAsSelected(prev);
+
+							let control = getFirstControl(prev);
+							setFocus(control);
+						}
 					}
 				});
 			}

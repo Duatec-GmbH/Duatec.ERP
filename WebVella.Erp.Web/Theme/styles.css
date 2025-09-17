@@ -19,6 +19,38 @@
 	align-items:center;
 }
 
+.editable-grid .select2-container--focus::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border: 3px solid rgba(49,155,247,0.68);
+	border-radius: 3px;
+	pointer-events: none; /* make sure it's not interactive */
+}
+
+.fake-focus::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border: 3px solid rgba(49,155,247,0.68);
+	border-radius: 3px;
+	pointer-events: none; /* make sure it's not interactive */
+}
+
+.editable-grid .input-group:has(input:focus)::before {
+	z-index: 4;
+	content: "";
+	position: absolute;
+	inset: 0;
+	border: 3px solid rgba(49,155,247,0.68);
+	border-radius: 3px;
+	pointer-events: none; /* make sure it's not interactive */
+}
+
+.editable-grid .input-group:has(input:focus) > input {
+	border-style: none!important;
+}
+
 label.control-label > abbr.go-red:has(i){
 	display: none;
 }
