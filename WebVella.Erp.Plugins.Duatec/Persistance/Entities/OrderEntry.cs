@@ -58,6 +58,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         public Article GetArticle()
             => GetSingleByRelation<Article>(Relations.Article)!;
 
+        public void SetArticle(Article article)
+            => SetRelationValue(Relations.Article, article);
+
         public Order GetOrder()
             => GetSingleByRelation<Order>(Relations.Order)!;
 

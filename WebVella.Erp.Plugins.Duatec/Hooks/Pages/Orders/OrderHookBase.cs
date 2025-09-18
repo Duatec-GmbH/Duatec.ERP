@@ -29,7 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 
                 var form = pageModel.Request.Form;
 
-                if (!form.ContainsKey(articleFormId))
+                if (!form.ContainsKey(articleFormId) && !form.ContainsKey(amountFormId) && !form.ContainsKey(denominationFormId) && !form.ContainsKey(arrivalFormId))
                     break;
 
                 var entry = new OrderEntry()
@@ -41,6 +41,20 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 };
                 result.Add(entry);
             }
+
+            var articleIds = result.Select(oe => oe.Article)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToArray();
+
+            var articleLookup = new ArticleRepository().FindMany($"*, ${Article.Relations.Type}.*", articleIds);
+
+            foreach(var entry in result)
+            {
+                if (articleLookup.TryGetValue(entry.Article, out var article) && article != null)
+                    entry.SetArticle(article);
+            }
+
             return result;
         }
 

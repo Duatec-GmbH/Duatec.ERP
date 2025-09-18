@@ -56,12 +56,25 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
         public static void SetUpErrorPage(BaseErpPageModel pageModel, PartList record)
         {
             var formValues = GetEntryFormValues(pageModel);
+            var articleIds = formValues.Select(t => t.ArticleId)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToArray();
 
-            record.SetEntries(formValues.Select(fv => new PartListEntry()
-            {
-                Amount = fv.Amount,
-                ArticleId = fv.ArticleId,
-                Denomination = fv.Denomination
+            var articleLookup = new ArticleRepository().FindMany($"*, ${Article.Relations.Type}.*", articleIds);
+
+            record.SetEntries(formValues.Select(fv => {
+                var entry = new PartListEntry()
+                {
+                    Amount = fv.Amount,
+                    ArticleId = fv.ArticleId,
+                    Denomination = fv.Denomination
+                };
+
+                if(articleLookup.TryGetValue(entry.ArticleId, out var article) && article != null)
+                    entry.SetArticle(article);
+
+                return entry;
             }));
             pageModel.DataModel.SetRecord(record);
             pageModel.BeforeRender();
@@ -83,14 +96,18 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists.Common
             var form = pageModel.Request.Form;
             var result = new List<Row>(64);
 
-            while (form.TryGetValue($"{PartListEntry.Fields.Article}[{idx}]", out var articleVal))
+            while (true)
             {
+                var hasArticle = form.TryGetValue($"{PartListEntry.Fields.Article}[{idx}]", out var articleVal);
+                var hasAmount = form.TryGetValue($"{PartListEntry.Fields.Amount}[{idx}]", out var amountVal);
+                var hasDenomination = form.TryGetValue($"{PartListEntry.Fields.Denomination}[{idx}]", out var denominationVal);
+
+                if (!hasArticle && !hasAmount && !hasDenomination)
+                    break;
+
+
                 var articleId = Guid.TryParse(articleVal, out var id) ? id : Guid.Empty;
-
-                var amountVal = form[$"{PartListEntry.Fields.Amount}[{idx}]"];
                 var amount = decimal.TryParse(amountVal, CultureInfo.InvariantCulture, out var d) ? d : 0m;
-
-                var denominationVal = form[$"{PartListEntry.Fields.Denomination}[{idx}]"];
                 var denomination = decimal.TryParse(denominationVal, CultureInfo.InvariantCulture, out d) ? d : 0m;
 
                 result.Add((articleId, denomination, amount, idx));

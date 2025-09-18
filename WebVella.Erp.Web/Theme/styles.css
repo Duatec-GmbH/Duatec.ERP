@@ -13,13 +13,21 @@
 	font-style: normal;
 }
 
+.invalid-select2 {
+  border-color: #dc3545;
+}
+
 .erp-list .table tbody td a > div{
 	min-height:47px;
 	display:flex;
 	align-items:center;
 }
 
-.editable-grid .select2-container--focus::before {
+.editable-grid .select2-container--focus{
+	overflow:hidden!important;
+}
+
+.editable-grid .select2-container--focus:not(:is(.is-invalid))::before {
 	content: "";
 	position: absolute;
 	inset: 0;
@@ -28,7 +36,7 @@
 	pointer-events: none; /* make sure it's not interactive */
 }
 
-.fake-focus::before {
+.editable-grid .fake-focus:not(.is-invalid)::before {
 	content: "";
 	position: absolute;
 	inset: 0;
@@ -37,7 +45,7 @@
 	pointer-events: none; /* make sure it's not interactive */
 }
 
-.editable-grid .input-group:has(input:focus)::before {
+.editable-grid .input-group:has(input:focus):not(:has(.is-invalid))::before {
 	z-index: 4;
 	content: "";
 	position: absolute;
@@ -45,6 +53,14 @@
 	border: 3px solid rgba(49,155,247,0.68);
 	border-radius: 3px;
 	pointer-events: none; /* make sure it's not interactive */
+}
+
+.wv-field-select .select2-container--focus:is(.is-invalid) {
+	border-color: #dc3545;
+	border-style: solid;
+	border-radius: 3px;
+	border-width: 1px;
+	box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
 .editable-grid .input-group:has(input:focus) > input {

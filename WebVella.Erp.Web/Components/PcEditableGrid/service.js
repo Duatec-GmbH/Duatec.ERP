@@ -120,6 +120,9 @@ let usedIds = new Set();
 
 				if (e.key == 'Escape') {
 					clearAllSelections();
+
+					if (document.getElementsByClassName('select2-container--open').length == 0)
+						document.activeElement.blur();
 				}
 				else if (e.key == 'Insert') {
 					let body = getTargetBody();
@@ -301,6 +304,20 @@ let usedIds = new Set();
 
 										updateFieldNames(body);
 										updateNoRecordsMessage(body);
+
+										if (newNodes.length > 0) {
+
+											clearAllSelections();
+											for (let node of newNodes)
+												node.classList.add('row-selected');
+
+											let control = document.activeElement;
+
+											if (control)
+												control.blur();
+
+											setFocusAtControlInSameColumn(control, newNodes[0], body);
+										}
 									}
 								}
 								catch (e) {
@@ -448,7 +465,9 @@ let usedIds = new Set();
 
 							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
 
-								clearAllSelections();
+								if (!shiftDown)
+									clearAllSelections();
+
 								markAsSelected(row);
 
 								let control = document.activeElement;
@@ -467,13 +486,40 @@ let usedIds = new Set();
 					let body = getTargetBody();
 					if (body) {
 
-						if (shiftDown) {
+						if (shiftDown && shiftAnchor) {
 
-							if (shiftAnchor) {
+							let firstRow;
+							let lastRow;
 
+							for (let i = 1; i < body.children.length; i++) {
+								if (body.children[i].classList.contains('row-selected')) {
+									lastRow = body.children[i];
+									if (!firstRow)
+										firstRow = body.children[i];
+								}
 							}
-							else {
 
+							let row;
+
+							if (shiftAnchor === lastRow) {
+								row = firstRow.previousElementSibling;
+								if (row && row.classList.contains('d-none'))
+									row = null;
+
+								if (row)
+									markAsSelected(row);
+							}
+							else if (shiftAnchor === firstRow) {
+								unmarkAsSelected(lastRow);
+								row = lastRow.previousElementSibling;
+								if (row && row.classList.contains('d-none'))
+									row = null;
+							}
+
+							if (row) {
+								let control = document.activeElement;
+								control.blur();
+								setFocusAtControlInSameColumn(control, row, body);
 							}
 						}
 						else {
@@ -490,17 +536,19 @@ let usedIds = new Set();
 								}
 							}
 
-							if (idx <= 0) { // when nothing is selected, select last row
-								if (body.children.length > 1)
-									row = body.children[body.children.length - 1];
-							}
-							else if (idx > 1) {
+							if (idx > 1) {
 								row = body.children[idx - 1];
+
+								if (shiftDown && !shiftAnchor)
+									shiftAnchor = body.children[idx];
+
 							}
 
 							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
 
-								clearAllSelections();
+								if (!shiftDown)
+									clearAllSelections();
+
 								markAsSelected(row);
 
 								let control = document.activeElement;
@@ -517,13 +565,68 @@ let usedIds = new Set();
 
 				else if (e.key == 'ArrowLeft' && document.getElementsByClassName('select2-container--open').length == 0) {
 
+					if (document.activeElement) {
 
+						let body = getTargetBody();
+						let cell = getParentByTagName(document.activeElement, 'TD');
 
+						if (body && cell && cell.parentElement?.parentElement === body) {
 
+							let control = getPrevControl(cell);
+
+							if (control && getParentTableRow(control)?.parentElement === body) {
+								clearAllSelections();
+								document.activeElement.blur();
+
+								setFocus(control);
+								let row = getParentTableRow(control);
+								if (row)
+									row.classList.add('row-selected');
+							}
+						}
+					}
 				}
 
 				else if (e.key == 'ArrowRight' && document.getElementsByClassName('select2-container--open').length == 0) {
 
+					if (getActiveElement()) {
+
+						let body = getTargetBody();
+						let cell = getParentByTagName(document.activeElement, 'TD');
+
+						if (body && cell && cell.parentElement?.parentElement === body) {
+
+							let control = getNextControl(cell);
+
+							if (control && getParentTableRow(control)?.parentElement === body) {
+								clearAllSelections();
+								document.activeElement.blur();
+
+								setFocus(control);
+								let row = getParentTableRow(control);
+								if (row)
+									row.classList.add('row-selected');
+							}
+						}
+					}
+					else {
+						let body = getTargetBody();
+
+						if (body) {
+
+							let row = getFirstRow(body);
+
+							if (row) {
+								let control = getFirstControl(row);
+
+								if (control) {
+									clearAllSelections();
+									setFocus(control);
+									row.classList.add('row-selected');
+								}
+							}
+						}
+					}
 				}
 			});
 
@@ -616,6 +719,14 @@ let usedIds = new Set();
 			loader.classList.add('d-none');
 		});
 
+		function getFirstRow(body) {
+
+			if (body.children.length > 2 || body.children.length === 2 && body.children[1].getElementsByClassName('alert').length === 0)
+				return body.children[1];
+
+			return null;
+		}
+
 		function setFocusAtControlInSameColumn(control, row, body) {
 			if (!control)
 				setFocus(getFirstControl(row));
@@ -666,6 +777,27 @@ let usedIds = new Set();
 					control.focus();
 				}
 			}
+		}
+
+		function getControlColumnIndex(control) {
+
+			if (!control)
+				return -1;
+
+			let row = getParentTableRow(control);
+
+			if (!row)
+				return -1;
+
+			for (let i = 0; i < row.children.length; i++) {
+
+				let controlsInCell = getControlsInCell(row.children[i]);
+
+				if (controlsInCell.indexOf(control) >= 0)
+					return i;
+			}
+
+			return -1;
 		}
 
 		function getPrevControl(cell) {
@@ -728,16 +860,28 @@ let usedIds = new Set();
 				return controlsInCell[0];
 		}
 
+		function getActiveElement() {
+
+			if (!document.activeElement || document.activeElement.tagName === 'BODY')
+				return null;
+
+			return document.activeElement;
+		}
+
 		function getNextCell(cell) {
 
 			let next = cell.nextElementSibling;
 			if (next)
 				return next;
 
-			let row = getParentTableRow(cell);
-			return row?.nextElementSibling?.firstElementChild ?? null;
-		}
+			let row = getParentTableRow(cell)?.nextElementSibling;
 
+			while (row && row.classList.contains('d-none')) {
+				row = row.nextElementSibling;
+			}
+
+			return row?.firstElementChild ?? null;
+		}
 
 		function getPrevCell(cell) {
 
@@ -745,8 +889,13 @@ let usedIds = new Set();
 			if (prev)
 				return prev;
 
-			let row = getParentTableRow(cell);
-			return row?.previousElementSibling?.lastElementChild ?? null;
+			let row = getParentTableRow(cell)?.previousElementSibling;
+
+			while (row && row.classList.contains('d-none')) {
+				row = row.previousElementSibling;
+			}
+
+			return row?.lastElementChild ?? null;
 		}
 
 		function getFirstControl(row) {
@@ -863,6 +1012,9 @@ let usedIds = new Set();
 				}
 			}
 		}
+
+
+
 
 		function hasSomethingElseSelected() {
 			return document.getSelection().toString().trim().length > 0;
@@ -1184,6 +1336,18 @@ let usedIds = new Set();
 		}
 
 		function getTargetRow(body) {
+
+			let idx = 0;
+
+			for (let i = 1; i < body.children.length; i++) {
+
+				if (body.children[i].classList.contains('row-selected'))
+					idx = i;
+			}
+
+			if (idx > 0)
+				return body.children[idx];
+
 			if (mouseOverRow && mouseOverRow.parentElement === body)
 				return mouseOverRow;
 
@@ -1199,13 +1363,14 @@ let usedIds = new Set();
 			else if (document.activeElement && getParentTableRow(document.activeElement))
 				return getParentTableRow(document.activeElement).parentElement;
 
-			else if (mouseOverRow) 
-				return mouseOverRow.parentElement;
-
 			var rows = document.getElementsByClassName('row-selected');
 			if (rows && rows.length > 0 && rows.every(r => r.parentElement === rows[0].parentElement)) {
 				return rows[0].parentElement;
 			}
+
+			if (mouseOverRow)
+				return mouseOverRow.parentElement;
+
 			return null;
 		}
 
