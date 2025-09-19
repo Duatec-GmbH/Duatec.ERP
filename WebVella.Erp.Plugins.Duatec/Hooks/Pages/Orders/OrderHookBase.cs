@@ -130,7 +130,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
             var result = GetAmountFormatErrors(entry, idx, type);
             result.AddRange(GetDenominationErrors(entry, idx, type));
             if (entry.Article == Guid.Empty)
-                result.Add(Error(OrderEntry.Fields.Article, idx, "Order entry 'article' is required"));
+                result.Add(Error(OrderEntry.Fields.Article, idx, "Article is required"));
 
             return result;
         }
@@ -161,8 +161,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
         {
             var isInt = type?.IsInteger ?? false;
 
-            var validator = new NumberFormatValidator(
-                entry.EntityName, OrderEntry.Fields.Amount, isInt, true, false);
+            var validator = new NumberFormatValidator(OrderEntry.Fields.Amount, isInt, true, false);
 
             return validator.Validate(entry.Amount, $"{OrderEntry.Fields.Amount}[{idx}]");
         }
@@ -171,8 +170,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
         {
             var isInt = type?.IsInteger ?? false;
 
-            var validator = new NumberFormatValidator(
-                entry.EntityName, OrderEntry.Fields.Denomination, isInt, false, true);
+            var validator = new NumberFormatValidator(OrderEntry.Fields.Denomination, isInt, false, true);
 
             var field = $"{OrderEntry.Fields.Denomination}";
             var result = validator.Validate(entry.Denomination, $"{field}[{idx}]");

@@ -5,7 +5,7 @@ namespace WebVella.Erp.Plugins.Duatec.Util
     internal static class Text
     {
         public static string FancyfySnakeCase(string entityName)
-            => entityName.ToLower().Replace('_', ' ');
+            => entityName?.ToLower().Replace('_', ' ') ?? string.Empty;
 
         public static string FancyfyPascalCase(string text)
         {

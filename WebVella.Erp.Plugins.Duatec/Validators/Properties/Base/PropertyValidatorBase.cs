@@ -16,7 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
         {
             _entity = entity;
             _entityProperty = entityProperty;
-            _entityPretty = Text.FancyfySnakeCase(entity).FirstToUpper();
+            _entityPretty = Text.FancyfySnakeCase(entity);
             _entityPropertyPretty = Text.FancyfySnakeCase(entityProperty);
             _required = required;
         }
@@ -25,16 +25,29 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties.Base
         {
             var result = new List<ValidationError>();
             if (_required && string.IsNullOrWhiteSpace(value))
-                result.Add(new ValidationError(_entityProperty, $"{_entityPropertyPretty.FirstToUpper()} is required"));
+                result.Add(new ValidationError(_entityProperty, ErrorMessage("is required")));
 
             if (value.Any(c => !CharIsAllowed(c)))
             {
                 var invalidCharString = Util.Text.InvalidCharacters(value, CharIsAllowed);
-                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not contain invalid characters {invalidCharString}"));
+                result.Add(new ValidationError(formField, ErrorMessage($"must not contain invalid characters {invalidCharString}")));
             }
             return result;
         }
 
         protected virtual bool CharIsAllowed(char c) => true;
+
+        protected virtual string ErrorMessage(string message)
+        {
+            var result = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(_entityPretty))
+                result += $"{_entityPretty} ";
+
+            if (!string.IsNullOrWhiteSpace(_entityPropertyPretty))
+                result += $"{_entityPropertyPretty} ";
+
+            return (result + message).FirstToUpper();
+        }
     }
 }

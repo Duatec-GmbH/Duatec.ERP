@@ -1,10 +1,15 @@
 ﻿using WebVella.Erp.Exceptions;
+using WebVella.Erp.Plugins.Duatec.Util;
 using WebVella.Erp.Plugins.Duatec.Validators.Properties.Base;
 
 namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 {
     internal class NameFormatValidator : PropertyValidatorBase
     {
+        public NameFormatValidator(string entityProperty, bool required)
+            : this(string.Empty, entityProperty, required)
+        { }
+
         public NameFormatValidator(string entity, string entityProperty, bool required) 
             : base(entity, entityProperty, required)
         { }
@@ -14,13 +19,13 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
             var result = new List<ValidationError>();
 
             if (value.Length == 0)
-                result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not be empty"));
+                result.Add(new ValidationError(formField, ErrorMessage("must not be empty")));
             else
             {
                 if (char.IsWhiteSpace(value[0]))
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not start with whitespace characters"));
+                    result.Add(new ValidationError(formField, ErrorMessage("must not start with whitespace characters")));
                 if (char.IsWhiteSpace(value[^1]))
-                    result.Add(new ValidationError(formField, $"{_entityPretty} {_entityPropertyPretty} must not end with whitespace characters"));
+                    result.Add(new ValidationError(formField, ErrorMessage("must not end with whitespace characters")));
 
                 result.AddRange(base.ValidateFormat(value, formField));
             }

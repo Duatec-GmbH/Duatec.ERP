@@ -112,10 +112,17 @@ let usedIds = new Set();
 
 				if (e.key == 'Control') ctrlDown = true;
 
-				if (e.key == 'Shift' && mouseOverRow && document.activeElement.tagName !== 'input') {
+				if (e.key == 'Shift' && document.activeElement.tagName !== 'input') {
 
 					for (let table of getEditableGridTables())
 						table.classList.add('user-select-none');
+
+					if (!shiftAnchor) {
+						let elem = getActiveElement();
+						if (elem && getParentTable(elem)?.classList.contains('editable-grid')) {
+							shiftAnchor = getParentTableRow(elem);
+						}
+					}
 				}
 
 				if (e.key == 'Escape') {
@@ -408,71 +415,60 @@ let usedIds = new Set();
 
 						if (shiftDown && shiftAnchor) {
 
-							let firstRow;
-							let lastRow;
-
-							for (let i = 1; i < body.children.length; i++) {
-								if (body.children[i].classList.contains('row-selected')) {
-									lastRow = body.children[i];
-									if (!firstRow)
-										firstRow = body.children[i];
-								}
-							}
-
 							let row;
 
-							if (shiftAnchor === firstRow) {
-								row = lastRow.nextElementSibling;
-								if(row)
-									markAsSelected(row);
-							}
-							else if (shiftAnchor === lastRow) {
-								unmarkAsSelected(firstRow);
-								row = firstRow.nextElementSibling;
+							if (document.activeElement) {
+
+								let parentRow = getParentTableRow(document.activeElement);
+								if (parentRow && parentRow.parentElement === body)
+									row = getNextRow(parentRow);
 							}
 
 							if (row) {
 								let control = document.activeElement;
 								control.blur();
 								setFocusAtControlInSameColumn(control, row, body);
+								selectBetween(shiftAnchor, row);
 							}
 						}
 						else {
 
-							let idx = 0;
 							let row;
+							let elem = getActiveElement();
 
-							for (let i = 1; i < body.children.length; i++) {
-
-								if (body.children[i].classList.contains('row-selected'))
-									idx = i;
+							if (!elem) {
+								row = getFirstRow(body);
+								if (shiftDown)
+									shiftAnchor = row;
 							}
+							else {
+								let parentRow = getParentTableRow(elem);
 
-							if (idx <= 0) { // when nothing is selected, select first row
-								if (body.children.length > 1) {
-									row = body.children[1];
-
-									if (shiftDown && !shiftAnchor)
+								if (parentRow?.parentElement === body)
+									row = getNextRow(parentRow);
+								else {
+									row = getFirstRow(body);
+									if (shiftDown)
 										shiftAnchor = row;
 								}
 							}
-							else if (body.children.length > idx + 1) { // when any selected select last
-								row = body.children[idx + 1];
 
-								if (shiftDown && !shiftAnchor)
-									shiftAnchor = body.children[idx];
-							}
+							if (row) {
 
-							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
-
-								if (!shiftDown)
+								if (!shiftDown) {
 									clearAllSelections();
+									markAsSelected(row);
+								}
+								else {
 
-								markAsSelected(row);
+									if (!shiftAnchor)
+										shiftAnchor = getPrevRow(row);
+
+									selectBetween(shiftAnchor, row);
+								}
 
 								let control = document.activeElement;
 								document.activeElement.blur();
-
 								setFocusAtControlInSameColumn(control, row, body);
 							}
 						}
@@ -485,76 +481,41 @@ let usedIds = new Set();
 
 					let body = getTargetBody();
 					if (body) {
+						if (document.activeElement) {
 
-						if (shiftDown && shiftAnchor) {
+							let parentRow = getParentTableRow(document.activeElement);
 
-							let firstRow;
-							let lastRow;
+							if (parentRow && parentRow.parentElement === body) {
 
-							for (let i = 1; i < body.children.length; i++) {
-								if (body.children[i].classList.contains('row-selected')) {
-									lastRow = body.children[i];
-									if (!firstRow)
-										firstRow = body.children[i];
+								let row = getPrevRow(parentRow);
+
+								if (row) {
+
+									if (shiftDown && shiftAnchor) {
+										let control = document.activeElement;
+										control.blur();
+										setFocusAtControlInSameColumn(control, row, body);
+										selectBetween(shiftAnchor, row);
+									}
+									else {
+
+										if (!shiftDown) {
+											clearAllSelections();
+											markAsSelected(row);
+										}
+										else {
+
+											if (!shiftAnchor)
+												shiftAnchor = getNextRow(row);
+
+											selectBetween(shiftAnchor, row);
+										}
+
+										let control = document.activeElement;
+										document.activeElement.blur();
+										setFocusAtControlInSameColumn(control, row, body);
+									}
 								}
-							}
-
-							let row;
-
-							if (shiftAnchor === lastRow) {
-								row = firstRow.previousElementSibling;
-								if (row && row.classList.contains('d-none'))
-									row = null;
-
-								if (row)
-									markAsSelected(row);
-							}
-							else if (shiftAnchor === firstRow) {
-								unmarkAsSelected(lastRow);
-								row = lastRow.previousElementSibling;
-								if (row && row.classList.contains('d-none'))
-									row = null;
-							}
-
-							if (row) {
-								let control = document.activeElement;
-								control.blur();
-								setFocusAtControlInSameColumn(control, row, body);
-							}
-						}
-						else {
-
-
-							let idx = 0;
-							let row;
-
-							for (let i = 1; i < body.children.length; i++) {
-
-								if (body.children[i].classList.contains('row-selected')) {
-									idx = i;
-									break;
-								}
-							}
-
-							if (idx > 1) {
-								row = body.children[idx - 1];
-
-								if (shiftDown && !shiftAnchor)
-									shiftAnchor = body.children[idx];
-
-							}
-
-							if (row && row.getElementsByClassName('alert').length === 0 && !row.classList.contains('d-none')) {
-
-								if (!shiftDown)
-									clearAllSelections();
-
-								markAsSelected(row);
-
-								let control = document.activeElement;
-								document.activeElement.blur();
-
-								setFocusAtControlInSameColumn(control, row, body);
 							}
 						}
 
@@ -575,13 +536,21 @@ let usedIds = new Set();
 							let control = getPrevControl(cell);
 
 							if (control && getParentTableRow(control)?.parentElement === body) {
-								clearAllSelections();
-								document.activeElement.blur();
 
+								document.activeElement.blur();
 								setFocus(control);
+
 								let row = getParentTableRow(control);
-								if (row)
-									row.classList.add('row-selected');
+
+								if (!shiftDown) {
+									clearAllSelections();
+									markAsSelected(row);
+								}
+								else {
+									if (!shiftAnchor)
+										shiftAnchor = getParentTableRow(control);
+									selectBetween(row, shiftAnchor);
+								}
 							}
 						}
 					}
@@ -599,13 +568,20 @@ let usedIds = new Set();
 							let control = getNextControl(cell);
 
 							if (control && getParentTableRow(control)?.parentElement === body) {
-								clearAllSelections();
 								document.activeElement.blur();
-
 								setFocus(control);
+
 								let row = getParentTableRow(control);
-								if (row)
-									row.classList.add('row-selected');
+
+								if (!shiftDown) {
+									clearAllSelections();
+									markAsSelected(row);
+								}
+								else {
+									if (!shiftAnchor)
+										shiftAnchor = getParentTableRow(control);
+									selectBetween(row, shiftAnchor);
+								}
 							}
 						}
 					}
@@ -623,6 +599,9 @@ let usedIds = new Set();
 									clearAllSelections();
 									setFocus(control);
 									row.classList.add('row-selected');
+
+									if (!shiftAnchor && shiftDown)
+										shiftAnchor = row;
 								}
 							}
 						}
@@ -640,6 +619,7 @@ let usedIds = new Set();
 				if (e.key == 'Shift') {
 
 					shiftDown = false;
+					shiftAnchor = null;
 
 					if (!ctrlDown) {
 						for (let table of getEditableGridTables())
@@ -719,12 +699,87 @@ let usedIds = new Set();
 			loader.classList.add('d-none');
 		});
 
+		function getPrevRow(row) {
+
+			row = row.previousElementSibling;
+
+			while (row && row.classList.contains('d-none'))
+				row = row.previousElementSibling;
+
+			if (row && row.getElementsByClassName('alert').length > 0)
+				row = null;
+
+			return row;
+		}
+
+		function getNextRow(row) {
+
+			row = row.nextElementSibling;
+
+			while (row && row.classList.contains('d-none'))
+				row = row.nextElementSibling;
+
+			if (row && row.getElementsByClassName('alert').length > 0)
+				row = null;
+
+			return row;
+		}
+
+		function selectBetween(rowA, rowB) {
+			if (!rowA || !rowB || getParentTable(rowA) !== getParentTable(rowB))
+				return;
+
+			let body = rowA.parentElement;
+			if (body) {
+
+				let mode = 'unmark';
+				let switchCount = 0;
+
+				if (rowA === rowB) {
+
+					for (let elem of body.children)
+						unmarkAsSelected(elem);
+
+					if (!rowA.classList.contains('d-none'))
+						markAsSelected(rowA);
+				}
+				else {
+					for (let elem of body.children) {
+						if (elem === rowA || elem === rowB) {
+
+							if (mode === 'unmark')
+								mode = 'mark';
+							else
+								mode = 'unmark';
+
+							switchCount++;
+						}
+
+						if (mode === 'unmark' && switchCount !== 1)
+							unmarkAsSelected(elem);
+						else {
+							if (switchCount === 1)
+								switchCount = 0;
+
+							if (!elem.classList.contains('d-none') && elem.getElementsByClassName('alert').length === 0)
+								markAsSelected(elem);
+						}
+					}
+				}
+			}
+		}
+
 		function getFirstRow(body) {
 
-			if (body.children.length > 2 || body.children.length === 2 && body.children[1].getElementsByClassName('alert').length === 0)
-				return body.children[1];
+			let row;
 
-			return null;
+			if (body.children.length > 2 || body.children.length === 2 && body.children[1].getElementsByClassName('alert').length === 0)
+				row = body.children[1];
+
+			while (row && row.classList.contains('d-none'))
+				row = row.nextElementSibling;
+
+			return row;
 		}
 
 		function setFocusAtControlInSameColumn(control, row, body) {
@@ -1411,6 +1466,9 @@ let usedIds = new Set();
 
 		function markAsSelected(row) {
 
+			if (!row)
+				return;
+
 			let body = row.parentElement;
 
 			if (body && (body.getAttribute('delete') === 'true' || body.getAttribute('copy') === 'true' || body.getAttribute('paste') === 'true')) {
@@ -1421,11 +1479,17 @@ let usedIds = new Set();
 		}
 
 		function unmarkAsSelected(row) {
+			if (!row)
+				return;
+
 			if (row.classList.contains('row-selected'))
 				row.classList.remove('row-selected');
 		}
 
 		function toggleSelection(row) {
+
+			if (!row)
+				return;
 
 			if (!row.classList.contains('row-selected') && !row.getElementsByClassName('alert-info')[0])
 				markAsSelected(row);
@@ -1434,6 +1498,9 @@ let usedIds = new Set();
 		}
 
 		function addAddCallback(btn) {
+
+			if (!btn)
+				return;
 
 			btn.addEventListener('click', () => {
 				let body;
@@ -1502,6 +1569,16 @@ let usedIds = new Set();
 			addDeleteButtonEvents(row);
 			addCheckBoxEvents(row);
 			handleSelect2Elements(row);
+
+			for (let wrapper of row.getElementsByClassName('wv-field-select')) {
+
+				if (wrapper.getElementsByClassName('invalid-feedback').length > 0) {
+
+					let span = wrapper.getElementsByClassName('select2-container')[0];
+					if (span)
+						span.classList.add('is-invalid');
+				}
+			}
 		}
 
 		function handleSelect2Elements(node) {

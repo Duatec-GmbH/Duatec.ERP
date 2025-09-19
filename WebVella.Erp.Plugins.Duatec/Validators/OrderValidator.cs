@@ -13,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     internal class OrderValidator : IRecordValidator<Order>
     {
         const string Entity = Order.Entity;
-        private static readonly NameFormatValidator _nameValidator = new(Entity, Fields.Number, true);
+        private static readonly NameFormatValidator _nameValidator = new(Fields.Number, true);
 
         public List<ValidationError> ValidateOnCreate(Order record)
         {
