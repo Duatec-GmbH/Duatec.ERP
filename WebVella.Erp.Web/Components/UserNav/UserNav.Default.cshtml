@@ -21,7 +21,7 @@
 		<div class="dropdown-menu  dropdown-menu-right level-0">
 			@if (erpUser != null && erpUser.IsAdmin && ViewBag.PageId != null)
 			{
-				<a class="dropdown-item" href="@pageEditUrl" target="_blank"><span class="fas fa-file icon fa-fw"></span>Manage Page</a>
+				<a tabindex="-1" class="dropdown-item" href="@pageEditUrl" target="_blank"><span class="fas fa-file icon fa-fw"></span>Manage Page</a>
 			}
 		</div>
 	</div>
@@ -30,9 +30,24 @@
 
 <div class="menu-nav-wrapper logout">
 	<div class="menu-nav">
-		<a href="/logout" class="pl-2 pr-2" title="Logout">
-			<span class="fas fa-sign-out-alt"></span>
-		</a>
+        @{
+            var returnUrl = ViewBag.ReturnUrlEncoded.ToString();
+
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                <a href="/logout" class="pl-2 pr-2" title="Logout">
+                    <span class="fas fa-sign-out-alt"></span>
+                </a>
+            }
+            else
+            {
+                var href = $"/logout?returnUrl={returnUrl}";
+
+                <a href="@href" class="pl-2 pr-2" title="Logout">
+                    <span class="fas fa-sign-out-alt"></span>
+                </a>
+            }
+        }
 	</div>
 </div>
 

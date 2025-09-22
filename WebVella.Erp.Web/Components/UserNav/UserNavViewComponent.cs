@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using WebVella.Erp.Api;
 using WebVella.Erp.Web.Services;
 
@@ -21,6 +22,7 @@ namespace WebVella.Erp.Web.Components
 			var pageContext = ErpRequestContext.PageContext;
 			ViewBag.CurrentUser = AuthService.GetUser(UserClaimsPrincipal);
 			ViewBag.PageId = null;
+			ViewBag.ReturnUrlEncoded = HttpUtility.UrlEncode(pageContext.HttpContext.Request.Path + pageContext.HttpContext.Request.QueryString);
 			if (ErpRequestContext.Page != null) {
 				ViewBag.PageId = ErpRequestContext.Page.Id;
 			}

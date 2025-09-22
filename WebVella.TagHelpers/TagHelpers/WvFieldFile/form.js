@@ -59,6 +59,8 @@ function FileFormSubmit(fieldId, files){
 						$(selectors.fakeInputEl).closest(".input-group").find(".input-group-append .remove").removeClass("d-none");
 						$(selectors.fakeInputEl).removeClass("erp-file-trigger");
 						$(selectors.inputEl).val(result.object.url);
+						$(document.activeElement).blur();
+						$(selectors.fakeInputLinkEl).focus();
 					},
 					error: function (xhr, status, p3, p4) {
 						var err = "Error " + " " + status + " " + p3 + " " + p4;
@@ -120,8 +122,10 @@ function FileFormInit(fieldId, fieldName, config) {
 	//Remove value
 	$(selectors.removeValueEl).first().on('click', function (e) {
 		$(selectors.fakeInputLinkEl).attr("href", "").attr("title", "").text();
-		$(selectors.fakeInputLinkEl).hide();
-		$(selectors.fakeInputEl).closest(".input-group").find(".icon-addon").addClass("d-none");
+		$(selectors.fakeInputLinkEl).html("");
+		//$(selectors.fakeInputLinkEl).hide();
+		//$(selectors.fakeInputEl).closest(".input-group").find(".icon-addon").addClass("d-none");
+		$(selectors.fakeInputEl).closest('.input-group').find('.icon-addon').find('.input-group-text').find('span').removeClass().addClass('fa fa-fw type-icon  fa-file');
 		$(selectors.fakeInputEl).closest(".input-group").addClass("left-border");
 		$(selectors.fakeInputEl).closest(".input-group").find(".input-group-append .remove").addClass("d-none");
 		$(selectors.inputEl).first().val("");
@@ -146,6 +150,8 @@ function FileFormInit(fieldId, fieldName, config) {
 
 	if ($(selectors.fakeInputTrigger)) {
 		$(selectors.fakeInputTrigger).click(function (e) {
+			$(document.activeElement).blur();
+			$(selectors.fakeInputLinkEl).focus();
 			e.preventDefault();
 			e.stopPropagation();
 			$(selectors.fileUploadEl).click();
@@ -156,5 +162,24 @@ function FileFormInit(fieldId, fieldName, config) {
 		var files = e.target.files;
 		FileFormSubmit(fieldId,files);
 
+	});
+
+	$(selectors.inputEl).parent().on('keydown', e => {
+
+		if (e.key === 'Enter') {
+
+			const isFocused = $(selectors.inputEl).parent()
+				.find('.form-control')
+				.find('a')
+				.is(':focus');
+
+			if (isFocused) {
+
+				$(selectors.fileUploadEl).click();
+
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		}
 	});
 }

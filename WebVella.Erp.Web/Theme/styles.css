@@ -54,6 +54,7 @@
 }
 
 
+
 .editable-grid .select2-container--focus:is(.is-invalid)::before,
 .editable-grid .fake-focus:is(.is-invalid)::before,
 .editable-grid .input-group:has(input:focus):has(.is-invalid)::before {
@@ -75,6 +76,63 @@
 label.control-label > abbr.go-red:has(i){
 	display: none;
 }
+
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group select:focus{
+	border-width: 2px;
+}
+
+.erp-file:has(a:focus)
+{
+	border-color: rgba(128, 189, 255);
+	border-width: 2px;
+}
+
+.input-group > .erp-file > button:focus{
+	border-color: rgba(128, 189, 255);
+	margin-left:0px;
+	padding-left: calc(-1px + 0.75rem);
+	box-shadow:none!important;
+}
+
+.input-group > .erp-file > button:focus::before {
+	z-index: 4;
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	border: 1.5px solid rgba(128, 189, 255);
+}
+
+.btn-white:focus,
+.btn-back:focus,
+.app-card:has(a:focus){
+	box-shadow: 0 0 0 0.12rem rgba(33, 150, 243, 0.5)!important;
+}
+
+.erp-list tr:has(td a:focus){
+	background-color: #c7c7c7!important;
+}
+
+.menu-nav:has(a:focus){
+	background-color: #c7c7c7!important;
+}
+
+.erp-file > a:focus{
+	border: none!important;
+	border-width: 0px!important;
+}
+
+.select2-container--bootstrap4.select2-container--focus .select2-selection{
+	box-shadow: none!important;
+	border: 2px solid rgba(128, 189, 255)!important;
+}
+
+editable-grid .select2-container--bootstrap4.select2-container--focus .select2-selection{
+	border: none!important;
+}
+
 
 .max-with-100px{
 	max-width: 100px!important;

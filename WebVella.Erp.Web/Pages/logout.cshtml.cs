@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Web;
+using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -25,7 +26,12 @@ namespace WebVella.Erp.Web.Pages
 				if (result != null) return result;
 			}
 
-			return new LocalRedirectResult("/");
+			if(ErpRequestContext?.PageContext?.HttpContext?.Request?.Query.TryGetValue("returnUrl", out var returnUrl) is true)
+			{
+				return new LocalRedirectResult($"/login?returnUrl={HttpUtility.UrlEncode(returnUrl)}");
+			}
+
+			return new LocalRedirectResult("/login?returnUrl=%2f");
 		}
 
 		public IActionResult OnPost([FromServices]AuthService authService)
@@ -43,7 +49,12 @@ namespace WebVella.Erp.Web.Pages
 				if (result != null) return result;
 			}
 
-			return new LocalRedirectResult("/");
+			if (ErpRequestContext?.PageContext?.HttpContext?.Request?.Query.TryGetValue("returnUrl", out var returnUrl) is true)
+			{
+				return new LocalRedirectResult($"/login?returnUrl={HttpUtility.UrlEncode(returnUrl)}");
+			}
+
+			return new LocalRedirectResult("/login?returnUrl=%2f");
 		}
 	}
 }

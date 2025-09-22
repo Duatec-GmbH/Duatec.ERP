@@ -45,21 +45,25 @@
             }
 
             <wv-grid-row>
-                @for (var i = 1; i <= Math.Min(options.VisibleColumns, columns.Count); i++)
-                {
-                    if (!columns[i - 1].IsVisible)
-                        continue;
 
-                    var containerId = (options.GetType().GetProperty($"Container{i}Id").GetValue(options, null) ?? "").ToString();
-                    var columnNoWrap = (bool)(options.GetType().GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
-                    var columnClass = (string)(options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
-                    var verticalAlign = (WvVerticalAlignmentType)(options.GetType().GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
-                    var horizontalAlign = (WvHorizontalAlignmentType)(options.GetType().GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
-                    var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
-                    var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
+            @{
+                var isFirst = true;
+
+                    @for (var i = 1; i <= Math.Min(options.VisibleColumns, columns.Count); i++)
+                    {
+                        if (!columns[i - 1].IsVisible)
+                            continue;
+
+                        var containerId = (options.GetType().GetProperty($"Container{i}Id").GetValue(options, null) ?? "").ToString();
+                        var columnNoWrap = (bool)(options.GetType().GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);
+                        var columnClass = (string)(options.GetType().GetProperty($"Container{i}Class").GetValue(options, null) ?? false);
+                        var verticalAlign = (WvVerticalAlignmentType)(options.GetType().GetProperty($"Container{i}VerticalAlign").GetValue(options, null) ?? false);
+                        var horizontalAlign = (WvHorizontalAlignmentType)(options.GetType().GetProperty($"Container{i}HorizontalAlign").GetValue(options, null) ?? false);
+                        var columnChildNodes = node.Nodes.FindAll(x => x.ContainerId == containerId);
+                        var columnWidth = options.HasThead ? "" : columns[i - 1].Width;
 
 
-                async Task CreateChildren()
+                        async Task CreateChildren()
                         {
                             foreach (var childNode in columnChildNodes)
                             {
@@ -79,48 +83,68 @@
                             }
                         }
 
-                    if(url == null)
-                    {
-                        <wv-grid-column width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
-                            @{ await CreateChildren(); }
-                        </wv-grid-column>
-                    }
-                    else
-                    {
-                        var aStyles = "display:block; width:300%; height:300%; text-decoration: none; color: unset; "
+                        if (url == null)
+                        {
+                            <wv-grid-column width="@columnWidth" text-nowrap="@columnNoWrap" class="@columnClass" horizontal-align="@horizontalAlign" vertical-align="@verticalAlign">
+                                @{
+                                    await CreateChildren();
+                                }
+                            </wv-grid-column>
+                        }
+                        else
+                        {
+                            var aStyles = "display:block; width:300%; height:300%; text-decoration: none; color: unset; "
                             + "margin:-100%; padding:100%;";
 
-                        var tdStyles = "overflow: hidden; margin:0px;";
-                        if (!string.IsNullOrEmpty(columnWidth))
-                            tdStyles += $" width: {columnWidth};";
+                            var tdStyles = "overflow: hidden; margin:0px;";
+                            if (!string.IsNullOrEmpty(columnWidth))
+                                tdStyles += $" width: {columnWidth};";
 
-                        if (verticalAlign == WvVerticalAlignmentType.Top)
-                            tdStyles += " vertical-align:top;";
-                        else if(verticalAlign == WvVerticalAlignmentType.Middle)
-                            tdStyles += " vertical-align:middle;";
-                        else if(verticalAlign == WvVerticalAlignmentType.Bottom)
-                            tdStyles += " vertical-align:bottom;";
+                            if (verticalAlign == WvVerticalAlignmentType.Top)
+                                tdStyles += " vertical-align:top;";
+                            else if (verticalAlign == WvVerticalAlignmentType.Middle)
+                                tdStyles += " vertical-align:middle;";
+                            else if (verticalAlign == WvVerticalAlignmentType.Bottom)
+                                tdStyles += " vertical-align:bottom;";
 
-                        if (horizontalAlign == WvHorizontalAlignmentType.Left)
-                            tdStyles += " text-align:left;";
-                        else if (horizontalAlign == WvHorizontalAlignmentType.Center)
-                            tdStyles += " text-align:center;";
-                        else if (horizontalAlign == WvHorizontalAlignmentType.Right)
-                            tdStyles += " text-align:right;";
+                            if (horizontalAlign == WvHorizontalAlignmentType.Left)
+                                tdStyles += " text-align:left;";
+                            else if (horizontalAlign == WvHorizontalAlignmentType.Center)
+                                tdStyles += " text-align:center;";
+                            else if (horizontalAlign == WvHorizontalAlignmentType.Right)
+                                tdStyles += " text-align:right;";
 
-                        if (columnNoWrap)
-                            tdStyles += " white-space:nowrap;";
+                            if (columnNoWrap)
+                                tdStyles += " white-space:nowrap;";
 
-                        <td style="@tdStyles" class="@columnClass">
-                            <a style="@aStyles" href="@url">
-                                
-                                @{ 
-                                    await CreateChildren(); 
-                                }
-                            </a>
-                        </td>
+                            if (isFirst)
+                            {
+                                isFirst = false;
+                                <td style="@tdStyles" class="@columnClass">
+                                    <a style="@aStyles" href="@url">
+
+                                        @{
+                                            await CreateChildren();
+                                        }
+                                    </a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td style="@tdStyles" class="@columnClass">
+                                    <a style="@aStyles" href="@url" tabindex="-1">
+
+                                        @{
+                                            await CreateChildren();
+                                        }
+                                    </a>
+                                </td>
+                            }
+                        }
                     }
-                }
+            }
+
+
             </wv-grid-row>
         }
     }

@@ -111,7 +111,7 @@ namespace WebVella.TagHelpers.TagHelpers
 						appendDeleteLink.Attributes.Add("id", $"remove-{FieldId}");
 						appendDeleteLink.AddCssClass($"btn btn-white remove {(String.IsNullOrWhiteSpace(Value) ? "d-none" : "")}");
 						appendDeleteLink.Attributes.Add("title", "select as undefined");
-						var appendDeleteLinkIcon = new TagBuilder("span");
+                        var appendDeleteLinkIcon = new TagBuilder("span");
 						appendDeleteLinkIcon.AddCssClass("fa fa-fw fa-trash go-red");
 						appendDeleteLink.InnerHtml.AppendHtml(appendDeleteLinkIcon);
 						appendEl.InnerHtml.AppendHtml(appendDeleteLink);
@@ -123,7 +123,7 @@ namespace WebVella.TagHelpers.TagHelpers
 						appendPasteLink.Attributes.Add("id", $"paste-{FieldId}");
 						appendPasteLink.AddCssClass($"btn btn-white");
 						appendPasteLink.Attributes.Add("title", "Activate 'Paste Image' from clipboard");
-						var appendDeleteLinkIcon = new TagBuilder("span");
+                        var appendDeleteLinkIcon = new TagBuilder("span");
 						appendDeleteLinkIcon.AddCssClass("icon fa fa-fw fa-paste");
 						appendPasteLink.InnerHtml.AppendHtml(appendDeleteLinkIcon);
 						appendEl.InnerHtml.AppendHtml(appendPasteLink);
