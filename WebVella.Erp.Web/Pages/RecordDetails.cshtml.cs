@@ -20,8 +20,8 @@ namespace WebVella.Erp.Web.Pages.Application
 			{
 				var initResult = Init();
 				if (initResult != null) return initResult;
-				if (ErpRequestContext.Page == null) return NotFound();
-				if (!RecordsExists()) return NotFound();
+				if (ErpRequestContext.Page == null) Common.TryRedirectToListFromReturnUrl(ErpRequestContext);
+				if (!RecordsExists()) return Common.TryRedirectToListFromReturnUrl(ErpRequestContext);
 				if (PageName != ErpRequestContext.Page.Name)
 				{
 					var queryString = HttpContext.Request.QueryString.ToString();

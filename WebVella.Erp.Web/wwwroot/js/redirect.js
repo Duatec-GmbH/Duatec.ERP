@@ -1,64 +1,79 @@
 "use strict"
 
+ExecuteRedirect();
+sessionStorage.setItem('redirect-script-executed', 'true');
+
+window.addEventListener('load', () => {
+	if (sessionStorage.getItem('redirect-script-executed') !== 'true')
+		ExecuteRedirect();
+});
+
 window.addEventListener('beforeunload', () => {
 
 	sessionStorage.removeItem('initialized');
+	sessionStorage.removeItem('redirect-script-executed');
 });
 
-let isDuplicated = sessionStorage.getItem('initialized') === 'true';
 
-if (!isDuplicated) {
+function ExecuteRedirect() {
 
-	let performanceEntries = performance.getEntriesByType("navigation");
+	let isDuplicated = sessionStorage.getItem('initialized') === 'true';
 
-	if (performanceEntries.length > 0) {
+	if (!isDuplicated) {
 
-		for (let entry of performanceEntries) {
+		let performanceEntries = performance.getEntriesByType("navigation");
 
-			if (entry.type === 'back_forward') {
+		if (performanceEntries.length > 0) {
 
-				const returnUrl = sessionStorage.getItem('returnUrl');
-				const lastPage = sessionStorage.getItem('lastPage');
+			for (let entry of performanceEntries) {
+
+				if (entry.type === 'back_forward') {
+
+					const returnUrl = sessionStorage.getItem('returnUrl');
+					const lastPage = sessionStorage.getItem('lastPage');
 
 
-				if (lastPage === window.location.origin || lastPage === window.location.origin + '/') {
+					if (lastPage === window.location.origin || lastPage === window.location.origin + '/') {
 
-					sessionStorage.removeItem('initialized');
-					location.replace(window.location.origin);
+						sessionStorage.removeItem('initialized');
+						location.replace(window.location.origin);
+					}
+
+					else if (returnUrl && returnUrl !== window.location.href) {
+
+						sessionStorage.removeItem('initialized');
+						location.replace(returnUrl);
+					}
+
+					else if (entry.deliveryType === 'cache') {
+
+						sessionStorage.removeItem('initialized');
+						location.reload();
+					}
+
+					break;
 				}
-
-				else if (returnUrl && returnUrl !== window.location.href) {
-
-					sessionStorage.removeItem('initialized');
-					location.replace(returnUrl);
-				}
-
-				else if (entry.deliveryType === 'cache') {
-
-					sessionStorage.removeItem('initialized');
-					location.reload();
-				}
-
-				break;
 			}
+
+			// this disables the forward button
+			history.pushState(null, null, window.location.href);
+
+			window.addEventListener("popstate", () => { history.back(); })
 		}
-
-		// this disables the forward button
-		history.pushState(null, null, window.location.href);
 	}
+
+	sessionStorage.setItem('lastPage', window.location.href);
+
+	if (window.location.href.includes('returnUrl=')) {
+
+		let returnUrl = window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length);
+		returnUrl = window.location.origin + decodeURIComponent(returnUrl);
+
+		sessionStorage.setItem('returnUrl', returnUrl);
+	}
+	else {
+		sessionStorage.setItem('returnUrl', window.location.origin);
+	}
+
+	sessionStorage.setItem('initialized', 'true');
 }
-
-sessionStorage.setItem('lastPage', window.location.href);
-
-if (window.location.href.includes('returnUrl=')) {
-
-	let returnUrl = window.location.href.substring(window.location.href.indexOf('returnUrl=') + 'returnUrl='.length);
-	returnUrl = window.location.origin + decodeURIComponent(returnUrl);
-
-	sessionStorage.setItem('returnUrl', returnUrl);
-}
-else {
-	sessionStorage.setItem('returnUrl', window.location.origin);
-}
-
-sessionStorage.setItem('initialized', 'true');

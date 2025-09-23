@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Api.Models.AutoMapper;
@@ -25,8 +26,9 @@ namespace WebVella.Erp.Web.Pages.Application
 			{
 				var initResult = Init();
 				if (initResult != null) return initResult;
-				if (ErpRequestContext.Page == null) return NotFound();
-				if (!RecordsExists()) return NotFound();
+				if (ErpRequestContext.Page == null) return Common.TryRedirectToListFromReturnUrl(ErpRequestContext);
+				if (ErpRequestContext.Page == null) 
+				if (!RecordsExists()) Common.TryRedirectToListFromReturnUrl(ErpRequestContext);
 				if (PageName != ErpRequestContext.Page.Name)
 				{
 					var queryString = HttpContext.Request.QueryString.ToString();

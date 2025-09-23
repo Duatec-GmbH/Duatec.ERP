@@ -1043,7 +1043,7 @@ namespace WebVella.Erp.Web.Controllers
 
 		[AllowAnonymous]
 		[Route("api/v3.0/p/core/styles.css")]
-		[ResponseCache(NoStore = false, Duration = 30 * 24 * 3600)]
+		[ResponseCache(NoStore = false, Duration = 24 * 3600)]
 		[HttpGet]
 		public ContentResult StylesCss()
 		{

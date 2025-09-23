@@ -202,7 +202,7 @@ let usedIds = new Set();
 						let body = getTargetBody();
 						if (body) {
 							selectAll(body);
-							if (body.children.length > 1 && body.children[1].getElementsByClassName('alert').length === 0) {
+							if (body.children.length > 1 && body.children[1].getElementsByClassName('alert-info').length === 0) {
 								document.activeElement.blur();
 
 								let control = getFirstControl(body.children[1]);
@@ -707,7 +707,7 @@ let usedIds = new Set();
 			while (row && row.classList.contains('d-none'))
 				row = row.previousElementSibling;
 
-			if (row && row.getElementsByClassName('alert').length > 0)
+			if (row && row.getElementsByClassName('alert-info').length > 0)
 				row = null;
 
 			return row;
@@ -720,7 +720,7 @@ let usedIds = new Set();
 			while (row && row.classList.contains('d-none'))
 				row = row.nextElementSibling;
 
-			if (row && row.getElementsByClassName('alert').length > 0)
+			if (row && row.getElementsByClassName('alert-info').length > 0)
 				row = null;
 
 			return row;
@@ -762,7 +762,7 @@ let usedIds = new Set();
 							if (switchCount === 1)
 								switchCount = 0;
 
-							if (!elem.classList.contains('d-none') && elem.getElementsByClassName('alert').length === 0)
+							if (!elem.classList.contains('d-none') && elem.getElementsByClassName('alert-info').length === 0)
 								markAsSelected(elem);
 						}
 					}
@@ -774,7 +774,7 @@ let usedIds = new Set();
 
 			let row;
 
-			if (body.children.length > 2 || body.children.length === 2 && body.children[1].getElementsByClassName('alert').length === 0)
+			if (body.children.length > 2 || body.children.length === 2 && body.children[1].getElementsByClassName('alert-info').length === 0)
 				row = body.children[1];
 
 			while (row && row.classList.contains('d-none'))
@@ -1451,7 +1451,7 @@ let usedIds = new Set();
 
 			for (let i = 1; i < tbody.children.length; i++) { // element 0 is dummy!!!
 
-				if (i !== 1 || tbody.children[i].getElementsByClassName('alert').length === 0)
+				if (i !== 1 || tbody.children[i].getElementsByClassName('alert-info').length === 0)
 					mayAddClass(tbody.children[i], 'row-selected');
 			}
 		}
@@ -1551,7 +1551,7 @@ let usedIds = new Set();
 			addRowEvents(node);
 			replaceIds(node);
 
-			for (let btn of node.getElementsByClassName('editable-grid-delete-button'))
+			for (let btn of node.getElementsByClassName('editable-grid-delete-button-default'))
 				btn.tabIndex = -1;
 
 			addDeleteButtonEvents(node);
@@ -1566,6 +1566,9 @@ let usedIds = new Set();
 
 			addRowEvents(row);
 			replaceIds(row);
+
+			for (let btn of row.getElementsByClassName('editable-grid-delete-button-default'))
+				btn.tabIndex = -1;
 
 			addDeleteButtonEvents(row);
 			addCheckBoxEvents(row);

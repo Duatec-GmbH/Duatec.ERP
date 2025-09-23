@@ -111,7 +111,7 @@ label.control-label > abbr.go-red:has(i){
 	box-shadow: 0 0 0 0.12rem rgba(33, 150, 243, 0.5)!important;
 }
 
-.erp-list tr:has(td a:focus){
+.erp-list tr:has(td .detail-link:focus){
 	background-color: #c7c7c7!important;
 }
 

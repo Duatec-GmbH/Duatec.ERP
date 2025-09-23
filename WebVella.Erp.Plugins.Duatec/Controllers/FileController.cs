@@ -10,7 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
         [AllowAnonymous]
         [Route("api/v3.0/f/files/javascript")]
 #if !DEBUG
-        [ResponseCache(NoStore = false, Duration = 30 * 24 * 3600)]
+        [ResponseCache(NoStore = false, Duration = 24 * 3600)]
 #endif
         [HttpGet]
         public ContentResult GetScript([FromQuery] string file = "")
