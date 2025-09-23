@@ -1,11 +1,15 @@
 "use strict"
 
-ExecuteRedirect();
-sessionStorage.setItem('redirect-script-executed', 'true');
+ExecuteRedirect(false);
 
 window.addEventListener('load', () => {
 	if (sessionStorage.getItem('redirect-script-executed') !== 'true')
-		ExecuteRedirect();
+		ExecuteRedirect(false);
+});
+
+window.addEventListener('pageshow', () => {
+	if (sessionStorage.getItem('redirect-script-executed') !== 'true')
+		ExecuteRedirect(true);
 });
 
 window.addEventListener('beforeunload', () => {
@@ -14,51 +18,40 @@ window.addEventListener('beforeunload', () => {
 	sessionStorage.removeItem('redirect-script-executed');
 });
 
-
-function ExecuteRedirect() {
+function ExecuteRedirect(fromBfCache) {
 
 	let isDuplicated = sessionStorage.getItem('initialized') === 'true';
 
 	if (!isDuplicated) {
 
-		let performanceEntries = performance.getEntriesByType("navigation");
+		let entry = performance.getEntriesByType("navigation").find(en => en.type === 'back_forward');
 
-		if (performanceEntries.length > 0) {
+		if (fromBfCache || entry) {
 
-			for (let entry of performanceEntries) {
-
-				if (entry.type === 'back_forward') {
-
-					const returnUrl = sessionStorage.getItem('returnUrl');
-					const lastPage = sessionStorage.getItem('lastPage');
+			const returnUrl = sessionStorage.getItem('returnUrl');
+			const lastPage = sessionStorage.getItem('lastPage');
 
 
-					if (lastPage === window.location.origin || lastPage === window.location.origin + '/') {
+			if (lastPage === window.location.origin || lastPage === window.location.origin + '/') {
 
-						sessionStorage.removeItem('initialized');
-						location.replace(window.location.origin);
-					}
+				sessionStorage.removeItem('initialized');
+				location.replace(window.location.origin);
+			}
 
-					else if (returnUrl && returnUrl !== window.location.href) {
+			else if (returnUrl && returnUrl !== window.location.href) {
 
-						sessionStorage.removeItem('initialized');
-						location.replace(returnUrl);
-					}
+				sessionStorage.removeItem('initialized');
+				location.replace(returnUrl);
+			}
 
-					else if (entry.deliveryType === 'cache') {
+			else if (fromBfCache || entry && entry.deliveryType === 'cache') {
 
-						sessionStorage.removeItem('initialized');
-						location.reload();
-					}
-
-					break;
-				}
+				sessionStorage.removeItem('initialized');
+				location.reload();
 			}
 
 			// this disables the forward button
 			history.pushState(null, null, window.location.href);
-
-			window.addEventListener("popstate", () => { history.back(); })
 		}
 	}
 
@@ -76,4 +69,5 @@ function ExecuteRedirect() {
 	}
 
 	sessionStorage.setItem('initialized', 'true');
+	sessionStorage.setItem('redirect-script-executed', 'true');
 }

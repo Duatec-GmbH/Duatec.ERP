@@ -20,6 +20,7 @@ using Wangkanai.Detection.Models;
 
 namespace WebVella.Erp.Web.Models
 {
+	[ResponseCache(NoStore = true)]
 	[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
 	public class BaseErpPageModel : PageModel
 	{

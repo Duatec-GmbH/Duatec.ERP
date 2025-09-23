@@ -1,5 +1,6 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.TypedRecords.Util;
 
 namespace WebVella.Erp.TypedRecords.Persistance
 {
@@ -18,7 +19,7 @@ namespace WebVella.Erp.TypedRecords.Persistance
 
         public static List<EntityRecord> InsertMany(RecordManager recMan, string entity, IEnumerable<EntityRecord> records)
         {
-            var response = recMan.CreateRecords(entity, records);
+            var response = recMan.CreateRecords(entity, records.WithoutRelations());
 
             return response.Object?.Data ?? [];
         }

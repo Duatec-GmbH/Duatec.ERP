@@ -200,6 +200,8 @@ namespace WebVella.Erp.Site
 			app.UseAuthentication();
 			app.UseAuthorization();
 
+            
+
 			app.UseErpPlugin<SdkPlugin>()
                .UseErpPlugin<MailPlugin>()
                .UseErpPlugin<DuatecPlugin>()
@@ -207,8 +209,8 @@ namespace WebVella.Erp.Site
                .UseErpMiddleware()
                .UseJwtMiddleware();
 
-			
-			app.UseEndpoints(endpoints =>
+            app.UseResponseCaching();
+            app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

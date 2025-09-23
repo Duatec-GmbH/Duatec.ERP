@@ -6,6 +6,9 @@ namespace WebVella.Erp.TypedRecords.Util
 {
     public static class ListOfTypedEntityRecordWrapperExtensions
     {
+        public static IEnumerable<T> WithoutRelations<T>(this IEnumerable<T> records) where T : EntityRecord, new()
+            => records.Select(r => r.WithoutRelations());
+
         public static IEnumerable<T> Include<T, TEntity>(IEnumerable<T> records, RecordManager? recMan = null)
             where T : TypedEntityRecordWrapper, new()
             where TEntity : TypedEntityRecordWrapper, new()
