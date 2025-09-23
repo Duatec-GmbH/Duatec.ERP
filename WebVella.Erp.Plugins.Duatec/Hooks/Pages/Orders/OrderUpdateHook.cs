@@ -10,6 +10,7 @@ using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Api;
+using WebVella.Erp.TypedRecords.Util;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
 {
@@ -115,7 +116,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Orders
                 entry.Amount = newEntry.Amount;
                 entry.ExpectedArrival = newEntry.ExpectedArrival;
 
-                if (repository.UpdateEntry(entry) == null)
+                if (repository.UpdateEntry(entry.WithoutRelations()) == null)
                     throw new DbException("Could not update entry");
             }
         }

@@ -7,6 +7,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
+using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Web.Utils;
 
@@ -77,7 +78,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.PartLists
                     if(entry.Amount != amount)
                     {
                         entry.Amount = amount;
-                        if (repo.UpdateEntry(entry) == null)
+                        if (repo.UpdateEntry(entry.WithoutRelations()) == null)
                             throw new DbException("Could not update record");
                     }
                 }
