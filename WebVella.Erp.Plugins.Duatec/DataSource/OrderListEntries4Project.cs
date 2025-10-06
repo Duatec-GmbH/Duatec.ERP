@@ -218,8 +218,11 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orders = ordersLookup.TryGetValue(key, out var l) ? l : [];
             var orderedAmount = GetAmount(orderedAmountLookup, key);
             var receivedAmount = GetAmount(receivedAmountLookup, key);
-            var inventoryAmount = GetAmount(inventoryAmountLookup, key);
-            var toOrder = Math.Max(0m, demand - orderedAmount - inventoryAmount);
+            var fromInventory = GetAmount(inventoryAmountLookup, key);
+
+            var toOrder = (isInventoryProject && reserveStoredArticles) 
+                ? Math.Max(0m, demand - orderedAmount - Math.Max(0m, fromInventory - receivedAmount)) 
+                : Math.Max(0m, demand - orderedAmount - fromInventory);
 
             var rec = new OrderListEntry()
             {
@@ -228,10 +231,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 Denomination = key.Denomination,
                 Demand = demand,
                 OrderedAmount = orderedAmount,
-                InventoryAmount = inventoryAmount,
+                InventoryAmount = fromInventory,
                 ToOrder = toOrder,
                 ReceivedAmount = receivedAmount,
-                State = GetState(demand, orderedAmount, receivedAmount, inventoryAmount, isInventoryProject, reserveStoredArticles),
+                State = GetState(demand, orderedAmount, receivedAmount, fromInventory, isInventoryProject, reserveStoredArticles),
             };
 
             rec.SetArticle(article);
