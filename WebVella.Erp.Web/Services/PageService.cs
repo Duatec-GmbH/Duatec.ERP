@@ -8,6 +8,7 @@ using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using WebVella.Erp.Api;
@@ -1866,7 +1867,7 @@ namespace WebVella.Erp.Web.Services
 					}
 					break;
 				case FieldType.NumberField:
-					if (Decimal.TryParse(resultRecord[key].ToString(), out decimal outNumber))
+					if (Decimal.TryParse(resultRecord[key].ToString(), out decimal outNumber) || decimal.TryParse(resultRecord[key].ToString(), CultureInfo.InvariantCulture, out outNumber))
 						mappedRecord[key] = outNumber;
 					else
 						mappedRecord[key] = null;

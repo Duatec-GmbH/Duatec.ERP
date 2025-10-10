@@ -1,5 +1,4 @@
-﻿using CSScripting;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -66,6 +65,7 @@ namespace WebVella.Erp.Web.Models
 
 				properties.Add("$filter", new MPW(MPT.Function, new FilterFunction(this)));
 				properties.Add("$count", new MPW(MPT.Function, new CountFunction(this)));
+				properties.Add("$sum", new MPW(MPT.Function, new SumFunction(this)));
 				properties.Add("$any", new MPW(MPT.Function, new AnyFunction(this)));
 				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
 				properties.Add("$thenOrderBy", new MPW(MPT.Function, new ThenOrderByFunction(this)));
@@ -1902,6 +1902,119 @@ namespace WebVella.Erp.Web.Models
 
 			public override object Execute(LazyObject[] parameters)
 				=> Array.Exists(parameters, param => param.Value is bool b && b);
+		}
+
+		private sealed class SumFunction: Function
+		{
+			public SumFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 1;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "sum";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value == null)
+					return null;
+
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
+
+				if (parameters.Length == 1)
+				{
+					if (parameters[0].Value is IEnumerable<decimal> decs)
+						return decs.Sum();
+
+					if (parameters[0].Value is IEnumerable<int> ints)
+						return ints.Sum();
+
+					if (parameters[0].Value is IEnumerable<double> doubles)
+						return (decimal)doubles.Sum();
+
+					if (parameters[0].Value is IEnumerable<float> floats)
+						return (decimal)floats.Sum();
+
+					if (parameters[0].Value is IEnumerable<long> longs)
+						return (decimal)longs.Sum();
+
+					if (parameters[0].Value is IEnumerable<ulong> ulongs)
+						return ulongs.Sum(ul => (decimal)ul);
+
+					if (parameters[0].Value is IEnumerable<uint> uints)
+						return uints.Sum(ui => (decimal)ui);
+
+					if (parameters[0].Value is IEnumerable<byte> bytes)
+						return bytes.Sum(by => (decimal)by);
+
+					if (parameters[0].Value is IEnumerable<sbyte> sbytes)
+						return sbytes.Sum(sby => (decimal)sby);
+
+
+					if (parameters[0].Value is IEnumerable<EntityRecord> recs)
+					{
+						var result = 0m;
+
+						foreach(var r in recs)
+						{
+							if (r.Properties.Count != 1)
+								throw new PropertyDoesNotExistException($"Use a selector function on records which have more than one property");
+
+							var prop = r.Properties.First();
+
+							if(prop.Value != null)
+							{
+								if (prop.Value is decimal d) result += d;
+								else if (prop.Value is double lr) result += (decimal)lr;
+								else if (prop.Value is float f) result += (decimal)f;
+								else if (prop.Value is long l) result += l;
+								else if (prop.Value is ulong ul) result += ul;
+								else if (prop.Value is int i) result += i;
+								else if (prop.Value is uint ui) result += ui;
+								else if (prop.Value is short sh) result += sh;
+								else if (prop.Value is ushort ush) result += ush;
+								else if (prop.Value is byte by) result += by;
+								else if (prop.Value is sbyte sby) result += sby;
+
+								else
+									throw new PropertyDoesNotExistException($"Properties must be a integral type to be summed up");
+							}
+						}
+
+						return result;
+					}
+
+					return null;
+				}
+
+				if(parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
+
+				if (parameters[0].Value is not IEnumerable<EntityRecord> records)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires collection of entity record as first argument when selector is used");
+
+				return records.Sum(obj =>
+				{
+					var result = lambda.Execute(obj);
+
+					if (result is decimal d) return d;
+					if (result is double lr) return (decimal)lr;
+					if (result is float f) return (decimal)f;
+					if (result is long l) return l;
+					if (result is ulong ul) return ul;
+					if (result is int i) return i;
+					if (result is uint ui) return ui;
+					if (result is short sh) return sh;
+					if (result is ushort ush) return ush;
+					if (result is byte by) return by;
+					if (result is sbyte sby) return sby;
+
+					return 0m;
+				});
+			}
 		}
 
 

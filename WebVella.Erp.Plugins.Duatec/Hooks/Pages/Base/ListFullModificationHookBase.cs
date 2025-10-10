@@ -53,6 +53,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Base
         protected static string GetRedirectUrl(TModel pageModel, Guid recordId)
         {
             var url = pageModel.EntityDetailUrl(recordId);
+
+            if (!string.IsNullOrWhiteSpace(pageModel.ReturnUrl) && pageModel.ReturnUrl.StartsWith(url, StringComparison.OrdinalIgnoreCase))
+                return pageModel.ReturnUrl;
+
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
                 url += $"?returnUrl={HttpUtility.UrlEncode(pageModel.ReturnUrl)}";
             return url;

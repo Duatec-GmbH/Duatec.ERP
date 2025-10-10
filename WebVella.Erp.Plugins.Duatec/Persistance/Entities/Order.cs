@@ -15,6 +15,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Confirmations = "order_confirmation_order";
             public const string Bills = "order_bill_order";
             public const string GoodsReceivings = GoodsReceiving.Relations.Order;
+            public const string Type = "order_type";
         }
 
         public static class Fields
@@ -24,6 +25,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Order = "order";
             public const string Offer = "offer";
             public const string Bill = "bill";
+            public const string Total = "total";
+            public const string Type = "type_id";
         }
 
         public override string EntityName => Entity;
@@ -52,6 +55,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             set => Properties[Fields.Project] = value;
         }
 
+        public Guid? Type
+        {
+            get => Get<Guid?>(Fields.Type);
+            set => Properties[Fields.Type] = value;
+        }
+
+        public decimal Total
+        {
+            get => Get(Fields.Total, 0m);
+            set => Properties[Fields.Total] = value;
+        }
+
         public Project? GetProject()
             => GetSingleByRelation<Project>(Relations.Project);
 
@@ -69,5 +84,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 
         public IEnumerable<GoodsReceiving> GetGoodsReceivings()
             => GetManyByRelation<GoodsReceiving>(Relations.GoodsReceivings);
+
+        public OrderType? GetOrderType()
+            => GetSingleByRelation<OrderType>(Relations.Type);
+
+        public void SetOrderType(OrderType? orderType)
+            => SetRelationValue(Relations.Type, orderType);
     }
 }

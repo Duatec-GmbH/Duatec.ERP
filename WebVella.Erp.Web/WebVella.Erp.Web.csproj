@@ -51,7 +51,6 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="wwwroot\**\*" />
-		<Content Remove="wwwroot\js\redirect.js" />
 		<EmbeddedResource Include="Components\Nav\script.js" />
 		<EmbeddedResource Include="Components\PcBtnToolbar\service.js" />
 		<EmbeddedResource Include="Components\PcBtnGroup\service.js" />

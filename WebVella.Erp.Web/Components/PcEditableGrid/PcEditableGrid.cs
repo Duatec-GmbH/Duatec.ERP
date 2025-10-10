@@ -18,7 +18,7 @@ using WebVella.TagHelpers.Models;
 namespace WebVella.Erp.Web.Components
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 {
-	[PageComponent(Label = "Editable Grid", Library = "WebVella", Description = "Displays data list in a table format which is editable", Version = "0.0.1", IconClass = "fas fa-table")]
+	[PageComponent(Label = "Editable Grid", Library = "WebVella", Description = "Displays data list in a table format which is editable", Version = "0.1.0", IconClass = "fas fa-table")]
 	public class PcEditableGrid : PageComponent
 	{
 		protected ErpRequestContext ErpRequestContext { get; set; }

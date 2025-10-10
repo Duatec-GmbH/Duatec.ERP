@@ -14,6 +14,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
     {
         const string Entity = Order.Entity;
         private static readonly NameFormatValidator _nameValidator = new(Fields.Number, true);
+        private static readonly NumberFormatValidator _totalValidator = new(Fields.Total, false, true, true);
 
         public List<ValidationError> ValidateOnCreate(Order record)
         {
@@ -28,6 +29,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators
         private static List<ValidationError> Validate(Order record)
         {
             var result = _nameValidator.Validate(record.Number, Fields.Number);
+            result.AddRange(_totalValidator.Validate(record.Total, Fields.Total));
 
             if (!record.Project.HasValue || record.Project == Guid.Empty)
                 result.Add(new ValidationError(Fields.Project, "Project is required"));

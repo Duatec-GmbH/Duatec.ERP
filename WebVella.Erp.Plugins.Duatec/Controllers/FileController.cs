@@ -19,6 +19,11 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
                 return Content("", "text/javascript");
             try
             {
+                var cacheKey = new RenderService().GetCacheKey();
+
+                if (!string.IsNullOrWhiteSpace(cacheKey) && file.EndsWith($"-{cacheKey}.js"))
+                    file = file[0..file.LastIndexOf($"-{cacheKey}.js")] + ".js";
+
                 var jsContent = FileService.GetEmbeddedTextResource(file, "WebVella.Erp.Plugins.Duatec.Scripts", "WebVella.Erp.Plugins.Duatec");
 
                 return Content(jsContent, "text/javascript");

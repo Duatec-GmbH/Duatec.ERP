@@ -14,7 +14,7 @@ using WebVella.TagHelpers.Models;
 
 namespace WebVella.Erp.Web.Components
 {
-	[PageComponent(Label = "Grid", Library = "WebVella", Description = "Displays data list in a table format", Version = "0.0.1", IconClass = "fas fa-table")]
+	[PageComponent(Label = "Grid", Library = "WebVella", Description = "Displays data list in a table format", Version = "0.1.0", IconClass = "fas fa-table")]
 	public class PcGrid : PageComponent
 	{
 		protected ErpRequestContext ErpRequestContext { get; set; }

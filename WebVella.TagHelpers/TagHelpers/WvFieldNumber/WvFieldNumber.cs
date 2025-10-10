@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebVella.TagHelpers.Models;
 using WebVella.TagHelpers.Utilities;
+using System.Globalization;
 
 namespace WebVella.TagHelpers.TagHelpers
 {
@@ -91,7 +92,13 @@ namespace WebVella.TagHelpers.TagHelpers
 				inputElCssClassList.Add("form-control erp-number");
 
 				inputEl.Attributes.Add("type", "number");
-				inputEl.Attributes.Add("value", (Value ?? "").ToString());
+
+				// it has to be in invariant culture otherwhise it can't be displayed
+				var value = $"{Value}";
+				if (!int.TryParse(value, out var _) && (decimal.TryParse(value, out var d) || decimal.TryParse(value, CultureInfo.InvariantCulture, out d)))
+					value = d.ToString(CultureInfo.InvariantCulture);
+
+				inputEl.Attributes.Add("value", value);
 				inputEl.Attributes.Add("id", $"input-{FieldId}");
 				inputEl.Attributes.Add("name", Name);
 				if (Access == WvFieldAccess.Full || Access == WvFieldAccess.FullAndCreate)
