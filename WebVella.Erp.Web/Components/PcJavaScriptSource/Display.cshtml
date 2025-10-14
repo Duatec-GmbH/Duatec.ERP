@@ -12,9 +12,20 @@
 
     var source = options.Source;
 
-    var cacheKey = new RenderService().GetCacheKey();
+    if (!string.IsNullOrWhiteSpace(source) && source.StartsWith('/') && source.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+    {
+        var cacheKey = new RenderService().GetCacheKey();
 
-    if (!string.IsNullOrWhiteSpace(cacheKey) && !string.IsNullOrWhiteSpace(source) && source.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
-        source = $"{source[0..source.LastIndexOf('.')]}-{cacheKey}.js";
+        if (!string.IsNullOrWhiteSpace(cacheKey) )
+            source = $"{source[0..source.LastIndexOf('.')]}-{cacheKey}.js";
+    }
 }
-<script src="@source" type="text/javascript"></script>
+
+@if (options.IsAsync)
+{
+    <script src="@source" type="text/javascript" async></script>
+}
+else
+{
+    <script src="@source" type="text/javascript"></script>
+}

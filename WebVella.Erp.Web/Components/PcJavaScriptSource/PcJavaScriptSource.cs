@@ -25,6 +25,9 @@ namespace WebVella.Erp.Web.Components
 
 			[JsonProperty(PropertyName = "source")]
 			public string Source { get; set; } = string.Empty;
+
+			[JsonProperty(PropertyName = "is_async")]
+			public bool IsAsync { get; set; } = false;
 		}
 
 		public async Task<IViewComponentResult> InvokeAsync(PageComponentContext context)

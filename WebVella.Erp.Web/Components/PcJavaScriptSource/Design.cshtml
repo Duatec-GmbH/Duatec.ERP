@@ -4,6 +4,9 @@
 @using WebVella.Erp.Web.Models;
 @{
     var options = (PcJavaScriptSource.PcJavaScriptSourceOptions)ViewBag.Options;
-    var label = $"<script>Script '{options.Source}'</script>";
+    var label = $"<script>Script '{options.Source}'";
+    if (options.IsAsync)
+        label += " async";
+    label += "</script>";
 }
 <div class="p-1">@label</div>
