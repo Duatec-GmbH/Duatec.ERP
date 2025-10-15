@@ -48,6 +48,11 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
                 typedState = OrderListEntryState.Abundance;
                 imgClass = "fas fa-question go-gray";
             }
+            else if(state == "error" || state.Equals(OrderListEntryState.Error.ToString(), comparison))
+            {
+                typedState = OrderListEntryState.Error;
+                imgClass = "fas fa-times go-red";
+            }
             else return string.Empty;
 
             var stateValue = Text.FancyfyPascalCase(typedState.ToString()).FirstToUpper();

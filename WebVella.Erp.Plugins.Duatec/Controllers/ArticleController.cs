@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
@@ -9,6 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     public class ArticleController : Controller
     {
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/a/articles/denomination-lookup")]
         public ActionResult GetDenominationLookup()
         {
@@ -26,8 +28,8 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
             return Json(result);
         }
 
-
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/a/articles/select-update-info")]
         public ActionResult GetUpdateInfo([FromQuery] DateTime dateTimeUtc)
         {
@@ -48,6 +50,21 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
                 HasChanged = true,
                 Data = data
             });
+        }
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
+        [Route("/api/v3.0/a/articles/{id}/location-suggestion")]
+        public ActionResult GetWarehouseLocationSuggestion([FromRoute] Guid id, [FromQuery] decimal denomination = 0m)
+        {
+            var recMan = new RecordManager();
+
+            var article = new ArticleRepository(recMan).Find(id);
+
+            if (article == null)
+                return Json(null);
+
+            return Json(Suggest.WarehouseLocation(article, denomination, null, recMan));
         }
     }
 }

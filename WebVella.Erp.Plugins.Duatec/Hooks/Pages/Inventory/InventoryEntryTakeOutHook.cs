@@ -23,6 +23,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (record.Amount > unmodified.Amount)
                 result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Amount}"));
 
+            if (!record.Project.HasValue || record.Project == Guid.Empty)
+                result.Add(new ValidationError(InventoryEntry.Fields.Project, $"Project is required"));
+
             return result;
         }
 

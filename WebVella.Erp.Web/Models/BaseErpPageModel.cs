@@ -17,6 +17,8 @@ using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
 using Wangkanai.Detection.Models;
+using WebVella.Erp.Eql;
+using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Web.Models
 {
@@ -398,6 +400,45 @@ namespace WebVella.Erp.Web.Models
 
 
 			DataModel = new PageDataModel(this);
+
+			#region capture user requests
+			try
+			{
+				if (!string.IsNullOrEmpty(CurrentUrl) && DataModel.GetProperty("CurrentUser") is ErpUser user && user.Id != Guid.Empty)
+				{
+					var urlWithoutParameters = CurrentUrl;
+					var returnUrlIndex = urlWithoutParameters.IndexOf("returnUrl=");
+					if (returnUrlIndex >= 0)
+						urlWithoutParameters = urlWithoutParameters[..(returnUrlIndex - 1)];
+
+					const string entityName = "user_activity";
+					const int maxEntries = 500;
+
+					var command = new EqlCommand($"SELECT * FROM {entityName} WHERE user_id = @id ORDER BY timestamp DESC", 
+						new EqlParameter("id", user.Id));
+					var result = command.Execute();
+
+					var recMan = new RecordManager(null, true, false);
+
+					if (result.Count >= maxEntries)
+						recMan.DeleteRecords(entityName, [.. result.Skip(maxEntries - 1).Select(r => (Guid)r.Properties["id"])]);
+
+					var record = new EntityRecord();
+
+					record.Properties["id"] = Guid.NewGuid();
+					record.Properties["user_id"] = user.Id;
+					record.Properties["request_url"] = urlWithoutParameters;
+					record.Properties["timestamp"] = DateTime.UtcNow;
+
+					recMan.CreateRecord(entityName, record);
+				}
+			}
+			catch 
+			{
+				// this is not handled, because users wan't to see the page no mather if their requests are stored or not
+			}
+
+			#endregion
 
 			return null;
 		}

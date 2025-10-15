@@ -16,6 +16,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
         const int threeColumns = 2;
 
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/o/orders/{id}/export")]
         public ActionResult GetExportData([FromRoute]Guid id, [FromQuery]string? delimiter = "tab", [FromQuery]int option = sumUp)
         {
@@ -75,6 +76,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
 
 
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/o/orders/free-order-numbers/all")]
         public ActionResult GetFreeOrderNumberLookup()
         {

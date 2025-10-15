@@ -9,6 +9,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     public class WarehouseLocationController : Controller
     {
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/w/warehouse-locations/select-update-info")]
         public ActionResult GetUpdateInfo([FromQuery] DateTime dateTimeUtc)
         {

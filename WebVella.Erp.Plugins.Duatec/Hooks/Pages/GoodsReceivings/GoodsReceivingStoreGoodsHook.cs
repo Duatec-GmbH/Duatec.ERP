@@ -8,6 +8,7 @@ using WebVella.Erp.Hooks;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Hooks;
@@ -174,48 +175,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
 
                 inventoryEntry.SetArticle(articleLookup[entry.Article]);
                 inventoryEntry.WarehouseLocation
-                    = SmartWarehouseLocationSelection(inventoryRepo, entry.GetArticle(), entry.Denomination, projectId);
+                    = Suggest.WarehouseLocation(entry.GetArticle(), entry.Denomination, projectId, recMan) ?? Guid.Empty;
 
                 yield return inventoryEntry;
             }
-        }
-
-        private static Guid SmartWarehouseLocationSelection(InventoryRepository repo, Article article, decimal denomination, Guid? projectid)
-        {
-            if (article.PreferedWarehouseLocation.HasValue)
-                return article.PreferedWarehouseLocation.Value;
-
-            var entries = repo.FindManyByArticle(article.Id!.Value);
-            var location = entries
-                .FirstOrDefault(e => e.Project == projectid && e.Denomination == denomination)?.WarehouseLocation;
-
-            if (location.HasValue)
-                return location.Value;
-
-            location = entries
-                .FirstOrDefault(e => e.Project == projectid)?.WarehouseLocation;
-
-            if (location.HasValue)
-                return location.Value;
-
-            location = entries
-                .FirstOrDefault(e => e.Denomination == denomination)?.WarehouseLocation;
-
-            if (location.HasValue)
-                return location.Value;
-
-            location = entries
-                .FirstOrDefault()?.WarehouseLocation;
-
-            if (location.HasValue)
-                return location.Value;
-
-            location = repo.FindManyBookingsByArticle(article.Id!.Value)
-                .Where(b => b.Kind == InventoryBookingKind.Take)
-                .OrderByDescending(b => b.Timestamp)
-                .FirstOrDefault()?.WarehouseLocationSourceId;
-
-            return location ?? Guid.Empty;
         }
 
         private static IEnumerable<InventoryEntry> BuildInventoryEntries(UpdateInfo[] updateInfos)

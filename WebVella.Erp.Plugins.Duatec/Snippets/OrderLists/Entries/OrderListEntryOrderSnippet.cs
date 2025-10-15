@@ -21,15 +21,18 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.OrderLists.Entries
 
             var links = orders
                 .OrderBy(o => o[Order.Fields.Number].ToString())
-                .Select(AnchorTag);
+                .Select(o => AnchorTag(o, pageModel));
 
             return string.Join(", ", links);
         }
 
-        private static string AnchorTag(EntityRecord record)
-            => $"<a target=\"_blank\" href=\"{Url(record)}\">{record[Order.Fields.Number]}</a>";
+        private static string AnchorTag(EntityRecord record, BaseErpPageModel pageModel)
+            => $"<a href=\"{Url(record, pageModel)}\">{record[Order.Fields.Number]}</a>";
 
-        private static string Url(EntityRecord record)
-            => $"/order-management/orders/orders/r/{record["id"]}/detail";
+        private static string Url(EntityRecord record, BaseErpPageModel pageModel)
+        {
+            var currentUrlEncoded = $"{pageModel.DataModel.GetProperty("CurrentUrlEncoded")}";
+            return $"/order-management/orders/orders/r/{record["id"]}/detail?returnUrl={currentUrlEncoded}";
+        }
     }
 }

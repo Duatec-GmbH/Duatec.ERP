@@ -67,6 +67,7 @@ namespace WebVella.Erp.Web.Models
 				properties.Add("$count", new MPW(MPT.Function, new CountFunction(this)));
 				properties.Add("$sum", new MPW(MPT.Function, new SumFunction(this)));
 				properties.Add("$any", new MPW(MPT.Function, new AnyFunction(this)));
+				properties.Add("$all", new MPW(MPT.Function, new AllFunction(this)));
 				properties.Add("$orderBy", new MPW(MPT.Function, new OrderByFunction(this)));
 				properties.Add("$thenOrderBy", new MPW(MPT.Function, new ThenOrderByFunction(this)));
 				properties.Add("$orderByDescending", new MPW(MPT.Function, new OrderByDescendingFunction(this)));
@@ -2014,6 +2015,43 @@ namespace WebVella.Erp.Web.Models
 
 					return 0m;
 				});
+			}
+		}
+
+		private sealed class AllFunction: Function
+		{
+			public AllFunction(PageDataModel dataModel)
+				: base(dataModel)
+			{ }
+
+			public override int MinParameters => 2;
+
+			public override int MaxParameters => 2;
+
+			public override string Name => "all";
+
+			public override object Execute(LazyObject[] parameters)
+			{
+				if (parameters[0].Value == null)
+					return null;
+
+				if (parameters[0].Value is not IEnumerable en)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires any collection as first argument");
+
+				if (parameters[1].Value is not Lambda lambda)
+					throw new PropertyDoesNotExistException($"function '{Name}' requires lambda as second argument");
+
+				if (!en.Any())
+					return false;
+
+				foreach(var obj in en)
+				{
+					var result = lambda.Execute(obj);
+					if (result is not true)
+						return false;
+				}
+
+				return true;
 			}
 		}
 

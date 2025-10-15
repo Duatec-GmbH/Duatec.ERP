@@ -245,6 +245,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
         private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory, bool isInventoryProject, bool reserveStoredArticles)
         {
+            if (fromInventory < 0)
+                return OrderListEntryState.Error;
+
             if (isInventoryProject && reserveStoredArticles)
                 fromInventory -= received;
 

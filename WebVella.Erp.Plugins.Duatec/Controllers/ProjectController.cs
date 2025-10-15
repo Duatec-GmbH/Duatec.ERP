@@ -8,6 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     public class ProjectController : Controller
     {
         [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/p/projects/select-update-info")]
         public ActionResult GetUpdateInfo([FromQuery] DateTime dateTimeUtc)
         {

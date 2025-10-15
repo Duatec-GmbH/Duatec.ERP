@@ -1,4 +1,6 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Snippets.Base;
@@ -21,16 +23,19 @@ namespace WebVella.Erp.Plugins.Duatec.Snippets.Orders
 
             var links = receivings
                 .OrderBy(o => (DateTime)o[GoodsReceiving.Fields.TimeStamp])
-                .Select(AnchorTag);
+                .Select(o => AnchorTag(o, pageModel));
 
             return string.Join(", ", links);
         }
 
-        private static string AnchorTag(EntityRecord record)
-            => $"<a target=\"_blank\" href=\"{Url(record)}\">{Presentation(record)}</a>";
+        private static string AnchorTag(EntityRecord record, BaseErpPageModel pageModel)
+            => $"<a href=\"{Url(record, pageModel)}\">{Presentation(record)}</a>";
 
-        private static string Url(EntityRecord record)
-            => $"/goods-receiving/history/goods-receiving/r/{record["id"]}/detail";
+        private static string Url(EntityRecord record, BaseErpPageModel pageModel)
+        {
+            var currentUrlEncoded = $"{pageModel.DataModel.GetProperty("CurrentUrlEncoded")}";
+            return $"/goods-receiving/history/goods-receiving/r/{record["id"]}/detail?returnUrl={currentUrlEncoded}";
+        }
 
         private static string Presentation(EntityRecord record)
         {

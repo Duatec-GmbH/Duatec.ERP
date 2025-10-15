@@ -10,6 +10,7 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
     {
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(NoStore = true, Duration = 0)]
         [Route("/api/v3.0/qr/inventory")]
         public IActionResult ResolveInventoryQRCode([FromQuery] Guid articleId, [FromQuery] decimal? denomination, [FromQuery] Guid warehouseLocationId)
         {

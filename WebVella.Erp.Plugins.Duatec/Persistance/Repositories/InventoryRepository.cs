@@ -233,7 +233,28 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 
         public List<InventoryBooking> FindManyBookingsByProject(Guid? projectId, string select = "*")
         {
-            return [..RepositoryHelper.FindManyBy(RecordManager, InventoryBooking.Entity, InventoryBooking.Fields.ProjectId, projectId, select)
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = 
+                [
+                    new() 
+                    {
+                        FieldName = InventoryBooking.Fields.ProjectId,
+                        FieldValue = projectId,
+                        QueryType = QueryType.EQ,
+                    },
+                    new()
+                    {
+                        FieldName = InventoryBooking.Fields.ProjectSourceId,
+                        FieldValue = projectId,
+                        QueryType = QueryType.EQ,
+                    }
+                ]
+            };
+
+
+            return [..RepositoryHelper.FindManyByQuery(RecordManager, InventoryBooking.Entity, query, select)
                 .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];
         }
 
@@ -246,10 +267,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetReservedArticleAmountLookup(Guid projectId)
         {
             var takenLookup = FindManyBookingsByProject(projectId)
-                .Where(be => be.Kind == InventoryBookingKind.Take && be.Amount != 0m)
+                .Where(be => (be.Kind == InventoryBookingKind.Take && be.ProjectId == projectId || be.Kind == InventoryBookingKind.Store && be.ProjectSourceId == projectId) && be.Amount != 0m)
                 .GroupBy(be => (be.ArticleId, be.Denomination))
                 .ToDictionary(g => g.Key, g => g
-                    .Aggregate(0m, (sum, be) => sum + be.Amount));
+                    .Aggregate(0m, (sum, be) => sum + (be.Kind == InventoryBookingKind.Take ? be.Amount : -be.Amount)));
 
             foreach(var ie in FindManyByProject(projectId))
             {

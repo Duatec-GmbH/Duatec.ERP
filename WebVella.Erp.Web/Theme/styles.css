@@ -5454,6 +5454,10 @@ input{
 	max-width: 5em;
 }
 
+.image-table-cell img {
+	max-width: 5em;
+}
+
 .minor-info-table-cell{
 	max-width: 10em;
 }
