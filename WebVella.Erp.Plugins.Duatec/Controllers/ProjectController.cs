@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WebVella.Erp.Api;
 using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services;
@@ -29,6 +31,20 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
                 HasChanged = true,
                 Data = data
             });
+        }
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
+        [AllowAnonymous]
+        [Route("/api/v3.0/p/projects/{id}/part-list-select-options")]
+        public ActionResult GetPartListSelectOptionsForProject([FromRoute] Guid id)
+        {
+            var recMan = new RecordManager();
+
+            var partLists = new PartListRepository(recMan).FindManyByProject(id);
+
+            return Json(partLists.OrderBy(pl => pl.Name).Select(pl => new SelectOption() { Id = pl.Id!.Value, Text = pl.Name })
+                .ToList());
         }
     }
 }

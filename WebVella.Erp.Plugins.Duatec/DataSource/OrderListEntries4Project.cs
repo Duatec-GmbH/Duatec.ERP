@@ -52,7 +52,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             if (!projectId.HasValue || projectId.Value == Guid.Empty)
                 return new EntityRecordList();
 
-            var records = GetRecords(projectId.Value);
+            var records = GetRecords(projectId.Value, ArticleId);
 
             var article = arguments[Arguments.Article]?.ToString();
             var manufacturer = arguments[Arguments.Manufacturer]?.ToString();
@@ -79,6 +79,14 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             result.TotalCount = filtered.Count;
 
             return result;
+        }
+
+        public static IEnumerable<OrderListEntry> Execute(Guid projectId)
+        {
+            if (projectId == Guid.Empty)
+                return [];
+
+            return GetRecords(projectId);
         }
 
         private static IEnumerable<OrderListEntry> ApplyArticleFilter(string? filterValue, IEnumerable<OrderListEntry> records)
@@ -130,7 +138,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             throw new NotImplementedException($"Filter type '{filterType}' not implemented");
         }
 
-        private IEnumerable<OrderListEntry> GetRecords(Guid projectId)
+        private static IEnumerable<OrderListEntry> GetRecords(Guid projectId, Guid? articleId = null)
         {
             var recMan = new RecordManager();
 
@@ -162,9 +170,9 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
 
             var inventoryAmountLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId);
 
-            var entriesFromPartList = (!ArticleId.HasValue
+            var entriesFromPartList = (!articleId.HasValue
                 ? new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
-                : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, ArticleId.Value, true))
+                : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, articleId.Value, true))
                 .GroupBy(ple => (ple.ArticleId, ple.Denomination))
                 .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
 

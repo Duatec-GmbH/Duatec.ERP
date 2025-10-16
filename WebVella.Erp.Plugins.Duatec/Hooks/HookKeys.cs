@@ -19,6 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
             public const string TakeOut = "inventory_entry_take_out";
             public const string MassReservation = "inventory_reservation_mass_reservation";
             public const string MassRelease = "inventory_reservation_mass_release";
+            public const string Commissioning = "inventory_commissioning";
         }
 
         public static class GoodsReceiving
