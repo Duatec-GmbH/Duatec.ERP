@@ -64,29 +64,37 @@
             @if (options.HasThead)
             {
                 <thead>
-                    @foreach (var column in columns)
-                    {
-                        var style = string.IsNullOrWhiteSpace(column.Width)
+
+                    @{
+                        var idx = 0;
+
+                        foreach (var column in columns)
+                        {
+                            if (!columns[idx++].IsVisible)
+                                continue;
+
+                            var style = string.IsNullOrWhiteSpace(column.Width)
                             ? null : $"width:{column.Width};";
 
-                        <th name="@column.Name" class="@column.Class" style="@style">
-                            @column.Label
-                        </th>
-                    }
-                    @if (options.HasDeleteButtons)
-                    {
-                        <th>
-                            @if (options.HasAddButton) 
-                            {
-                                var style = $"width:{actionButtonWidth};";
+                            <th name="@column.Name" class="@column.Class" style="@style">
+                                @column.Label
+                            </th>
+                        }
+                        if (options.HasDeleteButtons)
+                        {
+                            <th>
+                                @if (options.HasAddButton)
+                                {
+                                    var style = $"width:{actionButtonWidth};";
 
-                                <wv-button icon-class="fa fa-plus go-green"
-                                text="Add"
-                                class="float-right btn-sm mb-2 editable-grid-add-entry-button"
-                                style=@style>
-                                </wv-button>
-                            }
-                        </th>
+                                    <wv-button icon-class="fa fa-plus go-green"
+                                               text="Add"
+                                               class="float-right btn-sm mb-2 editable-grid-add-entry-button"
+                                               style=@style>
+                                    </wv-button>
+                                }
+                            </th>
+                        }
                     }
                 </thead>
             }
@@ -110,8 +118,11 @@
                         var rowClass = idx < 0 ? "d-none" : string.Empty;
 
                         <tr class="@rowClass">
-                            @for (var i = 1; i <= options.VisibleColumns; i++)
+                            @for (var i = 1; i <= Math.Min(options.VisibleColumns, columns.Count); i++)
                             {
+                                if (!columns[i - 1].IsVisible)
+                                    continue;
+
                                 var optType = options.GetType();
                                 var containerId = optType.GetProperty($"Container{i}Id").GetValue(options, null)?.ToString() ?? string.Empty;
                                 var columnNoWrap = (bool)(optType.GetProperty($"Container{i}NoWrap").GetValue(options, null) ?? false);

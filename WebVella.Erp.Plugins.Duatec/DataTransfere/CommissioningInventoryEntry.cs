@@ -8,6 +8,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             public const string AvailableAmount = "available_amount";
             public const string ReservedAmount = "reserved_amount";
+            public const string PartListAmount = "part_list_amount";
         }
 
         public decimal AvailableAmount
@@ -20,6 +21,12 @@ namespace WebVella.Erp.Plugins.Duatec.DataTransfere
         {
             get => Get<decimal>(ExtendedFields.ReservedAmount);
             set => Properties[ExtendedFields.ReservedAmount] = value;
+        }
+
+        public decimal PartListAmount
+        {
+            get => Get<decimal>(ExtendedFields.PartListAmount);
+            set => Properties[ExtendedFields.PartListAmount] = value;
         }
     }
 }

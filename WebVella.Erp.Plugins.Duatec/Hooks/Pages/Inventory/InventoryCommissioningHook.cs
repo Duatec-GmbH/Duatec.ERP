@@ -53,7 +53,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var inventoryEntries = new InventoryRepository(recMan).FindAll()
                 .Include($"${InventoryEntry.Relations.Location}.${WarehouseLocation.Relations.Warehouse}")
                 .Include($"${InventoryEntry.Relations.Article}.${Article.Relations.Type}")
-                .ToList();
+                .OrderBy(ie => ie.GetArticle().PartNumber)
+                .ThenBy(ie => ie.GetWarehouseLocation().GetWarehouse().Designation)
+                .ThenBy(ie => ie.GetWarehouseLocation().Designation);
 
             var result = new List<CommissioningInventoryEntry>();
             var availableAmountLookup = new Dictionary<(Guid ArticleId, decimal Denomination, Guid Location), decimal>();
@@ -82,8 +84,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             foreach(var entry in result)
-                entry.AvailableAmount = availableAmountLookup[(entry.Article, entry.Denomination, entry.WarehouseLocation)];                
-
+            {
+                entry.AvailableAmount = availableAmountLookup[(entry.Article, entry.Denomination, entry.WarehouseLocation)];
+                entry.PartListAmount = partListLookup.TryGetValue((entry.Article, entry.Denomination), out var d) ? d : 0m;
+            }
+            
             return result;
         }
 
