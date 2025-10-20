@@ -7,13 +7,17 @@
 @using WebVella.Erp.Api.Models;
 @using WebVella.TagHelpers.Models;
 @{
-	var options = (PcGrid.PcGridOptions)ViewBag.Options;
-	var node = (PageBodyNode)ViewBag.Node;
-	var pager = (int)ViewBag.Page;
-	var totalCount = (int)ViewBag.TotalCount;
-	var pageSize = (int)ViewBag.PageSize;
-	var records = (List<EntityRecord>)ViewBag.Records;
-	var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
+    var options = (PcGrid.PcGridOptions)ViewBag.Options;
+    var node = (PageBodyNode)ViewBag.Node;
+    var pager = (int)ViewBag.Page;
+    var totalCount = (int)ViewBag.TotalCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var records = (List<EntityRecord>)ViewBag.Records;
+    var columns = (List<WvGridColumnMeta>)ViewBag.Columns;
+
+    foreach (var col in columns)
+        col.IsVisible = true;
+
 }
 <div class="p-1">
 	<wv-grid striped="@options.Striped" small="@options.Small" bordered="@options.Bordered" borderless="@options.Borderless"

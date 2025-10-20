@@ -631,6 +631,9 @@ let usedIds = new Set();
 
 			document.addEventListener('click', e => {
 
+				if (hasSomethingElseSelected())
+					return;
+
 				if (!mouseOverRow) {
 					clearAllSelections();
 				}
