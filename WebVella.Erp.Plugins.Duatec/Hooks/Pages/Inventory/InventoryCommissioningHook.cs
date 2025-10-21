@@ -9,6 +9,8 @@ using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Validators.Properties;
+using WebVella.Erp.TypedRecords.Util;
 using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Models;
@@ -49,8 +51,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var projectId = Guid.TryParse(pageModel.Request.Query["project_id"], out var id) ? id : Guid.Empty;
             var partListId = Guid.TryParse(pageModel.Request.Query["part_list_id"], out id) ? id : Guid.Empty;
             var formValues = GetFormValues(pageModel);
-            var commissioningEntries = GetCommissioningEntries(projectId, partListId, formValues, recMan);
-            var validationErrors = ValidateEntries(commissioningEntries);
+            var significantInventoryEntries = GetSignificantInventoryEntries(projectId, formValues, recMan);
+            var commissioningEntries = GetCommissioningEntries(projectId, partListId, formValues, significantInventoryEntries, recMan);
+            var validationErrors = ValidateEntries(commissioningEntries, significantInventoryEntries);
 
             if(validationErrors.Count > 0)
             {
@@ -59,35 +62,91 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 return pageModel.Page();
             }
 
+            var inventoryLookup = significantInventoryEntries
+                .GroupBy(ie => (ie.Article, ie.Denomination, ie.WarehouseLocation))
+                .ToDictionary(g => g.Key, g => g.ToArray());
+
             var comment = $"{pageModel.Request.Form["comment"]}";
-
-            var toDelete = new List<Guid>();
-            var toUpdate = new List<InventoryEntry>();
-            var bookings = new List<InventoryBooking>();
-
-            foreach (var entry in commissioningEntries)
-            {
-                if (entry.Amount < entry.ReservedAmount)
-                {
-                    // update
-                }
-                else if (entry.Amount == entry.ReservedAmount)
-                {
-                    // just delete
-                }
-                else if (entry.Amount == entry.AvailableAmount)
-                {
-                    // delete all
-                }
-                else
-                {
-                    // delete reserved
-                    // update available
-                }
-            }
+            if (string.IsNullOrWhiteSpace(comment))
+                comment = "Commissioning";
 
             void TransactionalAction()
             {
+                var toDelete = new List<Guid>();
+                var toUpdate = new List<InventoryEntry>();
+                var bookings = new List<InventoryBooking>();
+
+                var timestamp = DateTime.UtcNow;
+
+                foreach (var entry in commissioningEntries)
+                {
+                    if (entry.Amount > 0)
+                    {
+                        var inventoryEntries = inventoryLookup[(entry.Article, entry.Denomination, entry.WarehouseLocation)];
+
+                        if (entry.Amount < entry.ReservedAmount)
+                        {
+                            // update reserved
+
+                            var inventoryEntry = inventoryEntries.FirstOrDefault(ie => ie.Project == projectId);
+
+                            if (inventoryEntry == null || inventoryEntry.Amount <= entry.Amount)
+                                throw new DbException($"Could not take out article '{entry.GetArticle().PartNumber}'");
+
+                            inventoryEntry.Amount -= entry.Amount;
+
+                            toUpdate.Add(inventoryEntry);
+                            bookings.Add(TakeBooking(inventoryEntry, timestamp, comment, pageModel.CurrentUser.Id, entry.Amount));
+                        }
+                        else if (entry.Amount == entry.ReservedAmount)
+                        {
+                            // delete reserved
+
+                            var inventoryEntry = inventoryEntries.FirstOrDefault(ie => ie.Project == projectId);
+
+                            if (inventoryEntry == null || inventoryEntry.Amount != entry.Amount)
+                                throw new DbException($"Could not take out article '{entry.GetArticle().PartNumber}'");
+
+                            toDelete.Add(inventoryEntry.Id!.Value);
+                            bookings.Add(TakeBooking(inventoryEntry, timestamp, comment, pageModel.CurrentUser.Id));
+                        }
+                        else if (entry.Amount < entry.AvailableAmount)
+                        {
+                            // delete reserved
+                            // update available
+
+                            var reserved = inventoryEntries.FirstOrDefault(ie => ie.Project == projectId);
+                            var available = inventoryEntries.FirstOrDefault(ie => ie.Project != projectId);
+
+                            if (reserved == null || available == null || reserved.Amount + available.Amount <= entry.Amount)
+                                throw new DbException($"Could not take out article '{entry.GetArticle().PartNumber}'");
+
+                            var toMove = entry.Amount - reserved.Amount;
+                            available.Amount -= toMove;
+
+                            toDelete.Add(reserved.Id!.Value);
+                            bookings.Add(TakeBooking(reserved, timestamp, comment, pageModel.CurrentUser.Id));
+                            toUpdate.Add(available);
+                            bookings.Add(MoveAndTakeBooking(projectId, available, timestamp, comment, pageModel.CurrentUser.Id, toMove));
+                        }
+                        else if (entry.Amount == entry.AvailableAmount)
+                        {
+                            // delete all
+
+                            var amount = inventoryEntries.Sum(ie => ie.Amount);
+
+                            if (amount != entry.Amount)
+                                throw new DbException($"Could not take out article '{entry.GetArticle().PartNumber}'");
+
+                            toDelete.AddRange(inventoryEntries.Select(ie => ie.Id!.Value));
+                            bookings.AddRange(inventoryEntries.Select(ie => ie.Project == projectId
+                                ? TakeBooking(ie, timestamp, comment, pageModel.CurrentUser.Id)
+                                : MoveAndTakeBooking(projectId, ie, timestamp, comment, pageModel.CurrentUser.Id)));
+                        }
+                        else throw new DbException($"Could not take out article '{entry.GetArticle().PartNumber}'");
+                    }
+                }
+
                 var updateMessage = "Could not take out articles";
                 var repo = new InventoryRepository(recMan);
 
@@ -96,7 +155,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 foreach(var rec in toUpdate)
                 {
-                    if (repo.Update(rec) == null)
+                    if (repo.Update(rec.WithoutRelations()) == null)
                         throw new DbException(updateMessage);
                 }
 
@@ -116,6 +175,54 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 return pageModel.LocalRedirect(pageModel.ReturnUrl);
 
             return pageModel.LocalRedirect($"/{pageModel.AppName}/inventory/inventory/l/all?returnUrl=%2f");
+        }
+
+        private static InventoryBooking MoveAndTakeBooking(Guid projectId, InventoryEntry entry, DateTime timestamp, string comment, Guid userId, decimal amount = -1)
+        {
+            if (amount < 0)
+                amount = entry.Amount;
+
+            return new InventoryBooking()
+            {
+                Amount = amount,
+                Denomination = entry.Denomination,
+                ArticleId = entry.Article,
+                Comment = comment,
+                Id = Guid.NewGuid(),
+                Kind = InventoryBookingKind.Take,
+                ProjectId = projectId,
+                ProjectSourceId = entry.Project,
+                Timestamp = timestamp,
+                WarehouseLocationId = entry.WarehouseLocation,
+                WarehouseLocationSourceId = entry.WarehouseLocation,
+                TaggedRecordId = null,
+                TaggedEntityName = null,
+                UserId = userId,
+            };
+        }
+
+        private static InventoryBooking TakeBooking(InventoryEntry entry, DateTime timestamp, string comment, Guid userId, decimal amount = -1)
+        {
+            if (amount < 0)
+                amount = entry.Amount;
+
+            return new InventoryBooking()
+            {
+                Amount = amount,
+                Denomination = entry.Denomination,
+                ArticleId = entry.Article,
+                Comment = comment,
+                Id = Guid.NewGuid(),
+                Kind = InventoryBookingKind.Take,
+                ProjectId = entry.Project,
+                ProjectSourceId = entry.Project,
+                Timestamp = timestamp,
+                WarehouseLocationId = entry.WarehouseLocation,
+                WarehouseLocationSourceId = entry.WarehouseLocation,
+                TaggedRecordId = null,
+                TaggedEntityName = null,
+                UserId = userId,
+            };
         }
 
         private static void SetUpErrorPage(BaseErpPageModel pageModel, List<CommissioningInventoryEntry> defaultEntries)
@@ -155,23 +262,27 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return result;
         }
 
-        private static List<ValidationError> ValidateEntries(List<CommissioningInventoryEntry> commissioningEntries)
+        private static List<ValidationError> ValidateEntries(List<CommissioningInventoryEntry> commissioningEntries, List<InventoryEntry> significantInventoryEntries)
         {
+            var inventoryLookup = significantInventoryEntries
+                .Select(ie => (ie.Article, ie.Denomination, ie.WarehouseLocation))
+                .Distinct()
+                .ToHashSet();
+
             var result = new List<ValidationError>();
             var index = 0;
+
+            var amountValidator = new NumberFormatValidator(InventoryEntry.Fields.Amount, true, true, true);
 
             foreach(var entry in commissioningEntries)
             {
                 var amountField = $"amount[{index}]";
 
-                if (entry.Amount != 0 && (entry.Article == Guid.Empty || entry.WarehouseLocation == Guid.Empty))
+                if (entry.Amount != 0 && !inventoryLookup.Contains((entry.Article, entry.Denomination, entry.WarehouseLocation)))
                     result.Add(new ValidationError(amountField, $"Entry is not available anymore"));
 
-                else if (entry.Amount < 0)
-                    result.Add(new ValidationError(amountField, $"Amount must not be smaller than '0'"));
-
-                else if (entry.Amount > entry.AvailableAmount)
-                    result.Add(new ValidationError(amountField, $"Amount must not be greater than available amount ({entry.AvailableAmount})"));
+                else
+                    result.AddRange(amountValidator.Validate(entry.Amount, amountField));
 
                 index++;
             }
@@ -226,18 +337,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return result;
         }
 
-        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, Guid partListId, List<FormValue> formValues, RecordManager? recMan = null)
+        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, Guid partListId, List<FormValue> formValues, List<InventoryEntry> significantInventoryEntries, RecordManager? recMan = null)
         {
             recMan ??= new();
 
-            var formValueLookup = formValues
-                .Select(fv => (fv.ArticleId, fv.Denomination, fv.LocationId))
-                .ToHashSet();
-
-            var inventoryLookup = new InventoryRepository(recMan).FindAll()
-                .Where(ie => formValueLookup.Contains((ie.Article, ie.Denomination, ie.WarehouseLocation)))
-                .Include($"${InventoryEntry.Relations.Location}.${WarehouseLocation.Relations.Warehouse}")
-                .Include($"${InventoryEntry.Relations.Article}.${Article.Relations.Type}")
+            var inventoryLookup = significantInventoryEntries
                 .GroupBy(ie => (ie.Article, ie.Denomination, ie.WarehouseLocation))
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
@@ -327,6 +431,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             }
 
             return result;
+        }
+
+        private static List<InventoryEntry> GetSignificantInventoryEntries(Guid projectId, List<FormValue> formValues, RecordManager? recMan = null)
+        {
+            recMan ??= new();
+
+            var formValueLookup = formValues
+                .Select(fv => (fv.ArticleId, fv.Denomination, fv.LocationId))
+                .ToHashSet();
+
+            return [..new InventoryRepository(recMan).FindAll()
+                .Where(ie => formValueLookup.Contains((ie.Article, ie.Denomination, ie.WarehouseLocation)))
+                .Where(ie => !ie.Project.HasValue || ie.Project == Guid.Empty || ie.Project == projectId)
+                .Include($"${InventoryEntry.Relations.Location}.${WarehouseLocation.Relations.Warehouse}")
+                .Include($"${InventoryEntry.Relations.Article}.${Article.Relations.Type}")];
         }
 
 

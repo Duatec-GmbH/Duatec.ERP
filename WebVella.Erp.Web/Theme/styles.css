@@ -13,6 +13,14 @@
 	font-style: normal;
 }
 
+.text-xs {
+	font-size: 0.8em;
+}
+
+.text-xs button {
+	font-size: 1em;
+}
+
 .invalid-select2 {
   border-color: #dc3545;
 }
@@ -148,7 +156,16 @@ editable-grid .select2-container--bootstrap4.select2-container--focus .select2-s
 	padding-right: 5px!important;
 }
 
+.input-xs input {
+	font-size: 0.8rem;
+	height: 1.7rem;
+}
+
 @media only screen and (width <= 600px) {
+
+	.erp-list .table tbody td {
+		padding-right: 0!important;
+	}
 
 	.desktop-only{
 		display: none!important;

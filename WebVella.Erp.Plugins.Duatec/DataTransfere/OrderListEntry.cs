@@ -3,7 +3,7 @@ using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.DataTransfere
 {
-    internal class OrderListEntry : TypedEntityRecordWrapper
+    public class OrderListEntry : TypedEntityRecordWrapper
     {
         public static class Relations
         {

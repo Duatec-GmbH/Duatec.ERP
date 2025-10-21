@@ -975,8 +975,11 @@ let usedIds = new Set();
 
 			const result = [];
 
-			if (cell.tagName === 'INPUT' || cell.tagName === 'select')
-				result[result.length] = cell;
+			if (cell.tagName === 'INPUT' || cell.tagName === 'select') {
+
+				if(cell.tabIndex >= 0)
+					result[result.length] = cell;
+			}
 
 			else if (cell.classList.contains('wv-field-select')) {
 

@@ -7,7 +7,7 @@ using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
 {
-    internal class OrderListEntries4Project : CodeDataSource
+    public class OrderListEntries4Project : CodeDataSource
     {
         public static class Arguments
         {
