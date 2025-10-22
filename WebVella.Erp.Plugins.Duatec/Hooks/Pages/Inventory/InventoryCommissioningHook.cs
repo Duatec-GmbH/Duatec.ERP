@@ -70,12 +70,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (string.IsNullOrWhiteSpace(comment))
                 comment = "Commissioning";
 
+            var toDelete = new List<Guid>();
+            var toUpdate = new List<InventoryEntry>();
+            var bookings = new List<InventoryBooking>();
+
             void TransactionalAction()
             {
-                var toDelete = new List<Guid>();
-                var toUpdate = new List<InventoryEntry>();
-                var bookings = new List<InventoryBooking>();
-
                 var timestamp = DateTime.UtcNow;
 
                 foreach (var entry in commissioningEntries)
@@ -169,7 +169,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 return pageModel.Page();
             }
 
-            pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles from inventory.");
+            if(bookings.Count > 0)
+                pageModel.PutMessage(ScreenMessageType.Success, "Successfully took out articles from inventory.");
 
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
                 return pageModel.LocalRedirect(pageModel.ReturnUrl);
@@ -298,9 +299,9 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var inventoryEntries = new InventoryRepository(recMan).FindAll()
                 .Include($"${InventoryEntry.Relations.Location}.${WarehouseLocation.Relations.Warehouse}")
                 .Include($"${InventoryEntry.Relations.Article}.${Article.Relations.Type}")
-                .OrderBy(ie => ie.GetArticle().PartNumber)
-                .ThenBy(ie => ie.GetWarehouseLocation().GetWarehouse().Designation)
-                .ThenBy(ie => ie.GetWarehouseLocation().Designation);
+                .OrderBy(ie => ie.GetWarehouseLocation().GetWarehouse().Designation)
+                .ThenBy(ie => ie.GetWarehouseLocation().Designation)
+                .ThenBy(ie => ie.GetArticle().PartNumber);
 
             var result = new List<CommissioningInventoryEntry>();
             var availableAmountLookup = new Dictionary<(Guid ArticleId, decimal Denomination, Guid Location), decimal>();

@@ -13,6 +13,11 @@
 	font-style: normal;
 }
 
+.erp-list-filter-container {
+	background: white;
+	z-index: 10;
+}
+
 .text-xs {
 	font-size: 0.8em;
 }
@@ -146,6 +151,10 @@ editable-grid .select2-container--bootstrap4.select2-container--focus .select2-s
 	max-width: 100px!important;
 }
 
+.min-width-100px{
+	min-width: 100px!important;
+}
+
 .pc-page-header > .page-header-toolbar > .row:is(.lnr) {
 	padding-left: 10px!important;
 	padding-right: 10px!important;
@@ -164,7 +173,7 @@ editable-grid .select2-container--bootstrap4.select2-container--focus .select2-s
 @media only screen and (width <= 600px) {
 
 	.erp-list .table tbody td {
-		padding-right: 0!important;
+		padding-right: 2px!important;
 	}
 
 	.desktop-only{

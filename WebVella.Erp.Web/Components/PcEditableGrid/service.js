@@ -19,6 +19,17 @@ let usedIds = new Set();
 	var editableGridsInitialized;
 	var editableGridSelectSources;
 
+	let loader = document.body.getElementsByClassName('loader')[0];
+	if (!loader) {
+		loader = document.createElement('div');
+		loader.classList.add('loader');
+
+		if (document.body.children.length === 0)
+			document.body.appendChild(loader);
+		else
+			document.body.children[0].prepend(loader);
+	}
+
 	if (editableGridsInitialized !== true) {
 
 		var EditableGrid = {
@@ -29,18 +40,6 @@ let usedIds = new Set();
 			setValue: function (cell, value) { return setValue(cell, value); },
 			updateSelectSource: function (tableId, selectName, data) { updateSelectSource(tableId, selectName, data) },
 		};
-
-		let loader = document.body.getElementsByClassName('loader')[0];
-		if (!loader) {
-			loader = document.createElement('div');
-			loader.classList.add('loader');
-
-			if (document.body.children.length === 0)
-				document.body.appendChild(loader);
-			else
-				document.body.children[0].prepend(loader);
-		}
-
 
 		editableGridsInitialized = true;
 		editableGridSelectSources = new Map();
@@ -101,6 +100,15 @@ let usedIds = new Set();
 				}
 
 				updateNoRecordsMessage(body);
+
+				// TODO get nearest search field
+				let fullTextSearchField = document.getElementsByClassName('erp-list-full-text-search-field')[0];
+				if (fullTextSearchField)
+				{
+					fullTextSearchField.addEventListener('input', e => {
+						fullTextSearch(body, e.target.value);
+					});
+				}
 			}
 
 			// initialize add entry buttons
@@ -185,6 +193,7 @@ let usedIds = new Set();
 						}
 
 						updateFieldNames(body);
+						updateRowStyles(body);
 						updateNoRecordsMessage(body);
 					}
 				}
@@ -230,6 +239,7 @@ let usedIds = new Set();
 							}
 
 							updateFieldNames(body);
+							updateRowStyles(body);
 							updateNoRecordsMessage(body);
 						}
 					}
@@ -310,6 +320,7 @@ let usedIds = new Set();
 										}
 
 										updateFieldNames(body);
+										updateRowStyles(body);
 										updateNoRecordsMessage(body);
 
 										if (newNodes.length > 0) {
@@ -329,6 +340,7 @@ let usedIds = new Set();
 								}
 								catch (e) {
 									updateFieldNames(body);
+									updateRowStyles(body);
 									updateNoRecordsMessage(body);
 								}
 								loader.classList.add('d-none');
@@ -1349,21 +1361,24 @@ let usedIds = new Set();
 
 					for (let row of rows) {
 
-						const rowData = [];
+						if (!row.classList.contains('d-none')) {
 
-						for (let i = 0; i < headers.length; i++) {
-							if (!skip[i]) {
-								var cellData = getValue(row.children[i]);
+							const rowData = [];
 
-								if (cellData) {
-									for (let kp of Object.entries(cellData)) {
-										rowData[rowData.length] = kp;
+							for (let i = 0; i < headers.length; i++) {
+								if (!skip[i]) {
+									var cellData = getValue(row.children[i]);
+
+									if (cellData) {
+										for (let kp of Object.entries(cellData)) {
+											rowData[rowData.length] = kp;
+										}
 									}
 								}
 							}
-						}
 
-						data[data.length] = Object.fromEntries(rowData);
+							data[data.length] = Object.fromEntries(rowData);
+						}
 					}
 
 					let obj = {
@@ -1539,6 +1554,7 @@ let usedIds = new Set();
 
 				handleSelect2Elements(node);
 				updateFieldNames(body);
+				updateRowStyles(body);
 				updateNoRecordsMessage(body);
 
 				let control = getFirstControl(node);
@@ -1731,6 +1747,119 @@ let usedIds = new Set();
 			}
 		}
 
+		function fullTextSearch(body, text) {
+
+			clearSelection(body);
+
+			if (!text) {
+				for (let i = 1; i < body.children.length; i++) {
+					body.children[i].classList.remove('d-none');
+					body.children[i].style.backgroundColor = '';
+				}
+			}
+			else {
+				text = text.toUpperCase();
+				let rowIdx = 1;
+
+				for (let i = 1; i < body.children.length; i++) {
+
+					let row = body.children[i];
+					let texts = getTextElements(row);
+
+					if (texts.length === 0 || texts.some(t => t.toUpperCase().includes(text))) {
+
+						if (rowIdx % 2 === 0)
+							row.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+						else
+							row.style.backgroundColor = 'transparent';
+
+						rowIdx++;
+
+						row.classList.remove('d-none');
+					}
+					else {
+						row.classList.add('d-none');
+						row.classList.remove('row-selected');
+					}
+				}
+			}
+
+			if (document.activeElement) {
+
+				let parentRow = getParentTableRow(document.activeElement);
+
+				if (parentRow && parentRow.parentElement === body && parentRow.classList.contains('d-none'))
+					document.activeElement.blur;
+			}
+		}
+
+		function updateRowStyles(body) {
+
+			if (!body || !body.parentElement || !body.parentElement.classList.contains('table-striped'))
+				return;
+
+			let searchField = document.getElementsByClassName('erp-list-full-text-search-field');
+
+			if (searchField && searchField.value) {
+				let rowIdx = 1;
+				for (let i = 1; i < body.children.length; i++) {
+
+					let row = body.children[i];
+
+					if (row.classList.contains('d-none')) {
+
+						if (row.classList.contains('row-selected'))
+							row.style.backgroundColor = '';
+						else if (rowIdx % 2 === 0)
+							row.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+						else
+							row.style.backgroundColor = 'transparent';
+
+						rowIdx++;
+					}
+				}
+			}
+		}
+
+		function getTextElements(elem) {
+
+			let result = [];
+
+			if (!elem || isIgnoredFromSearch(elem))
+				return result;
+
+			if (!elem.children || !elem.childNodes || elem.childNodes.length === 0) {
+
+				let text = elem.textContent?.trim();
+
+				if(text && text !== '\n')
+					result[result.length] = text;
+			}
+
+			else {
+
+				for (let child of elem.childNodes) {
+
+					for (let text of getTextElements(child))
+						result[result.length] = text;
+				}
+
+			}
+
+			return result;
+		}
+
+		function isIgnoredFromSearch(elem) {
+			return elem.tagName === 'option'
+				|| elem.tagName === 'OPTION'
+				|| elem.tagName === 'INPUT'
+				|| elem.tagName === 'input'
+				|| elem.tagName === 'button'
+				|| elem.tagName === 'BUTTON'
+				|| elem.classList && elem.classList.contains('search-ignore');
+		}
+
+
 		function addDeleteCallback(btn) {
 
 			let row = getParentTableRow(btn);
@@ -1750,6 +1879,7 @@ let usedIds = new Set();
 
 						body.removeChild(row);
 						updateFieldNames(body);
+						updateRowStyles(body);
 						updateNoRecordsMessage(body);
 
 						if (next) {

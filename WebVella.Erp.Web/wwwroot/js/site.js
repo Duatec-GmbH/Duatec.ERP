@@ -41,6 +41,8 @@ function stickyErpList(erpList) {
 
 	if (listHead) {
 
+		let filterContainer = document.getElementsByClassName('erp-list-filter-container')[0];
+
 		let stickyPos = 0;
 		let pageHead = document.getElementsByClassName("pc-page-header")[0];
 		let toolBar = document.getElementsByClassName("page-header-toolbar")[0];
@@ -53,8 +55,19 @@ function stickyErpList(erpList) {
 			stickyPos = toolBar.getBoundingClientRect().bottom;
 		}
 
-		listHead.style.top = `${stickyPos}px`;
-		listHead.style.position = "sticky";
+		if (filterContainer) {
+
+			filterContainer.style.top = `${stickyPos}px`;
+			filterContainer.style.position = "sticky";
+
+			listHead.style.top = `${stickyPos + filterContainer.offsetHeight}px`;
+			listHead.style.position = "sticky";
+
+		}
+		else {
+			listHead.style.top = `${stickyPos}px`;
+			listHead.style.position = "sticky";
+		}
 	}
 }
 

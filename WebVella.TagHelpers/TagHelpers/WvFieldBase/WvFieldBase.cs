@@ -157,11 +157,6 @@ namespace WebVella.TagHelpers.TagHelpers
 				Culture = new CultureInfo(Locale);
 			}
 
-			if (String.IsNullOrWhiteSpace(Name) && (Mode == WvFieldRenderMode.Form || Mode == WvFieldRenderMode.InlineEdit)
-				&& context.TagName != "wv-field-plaintext" && (Access == WvFieldAccess.Full || Access == WvFieldAccess.FullAndCreate) )
-			{
-				InitErrors.Add("In InlineEdit or Form the attribute 'name' is required when with full access");
-			}
 			if (ValidationErrors.Count > 0)
 			{
 				ValidationErrors = ValidationErrors.FindAll(x => (x.Key ?? "").ToLowerInvariant() == (Name ?? "").ToLowerInvariant()).ToList();
