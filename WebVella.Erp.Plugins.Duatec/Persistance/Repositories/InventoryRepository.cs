@@ -142,7 +142,11 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             return [.. RepositoryHelper.InsertMany(RecordManager, InventoryBooking.Entity, bookings)
                 .Select(TypedEntityRecordWrapper.Wrap<InventoryBooking>)];
         }
-        
+
+        public InventoryBooking? DeleteBooking(Guid id)
+            => TypedEntityRecordWrapper.WrapElseDefault<InventoryBooking>(RepositoryHelper.Delete(RecordManager, InventoryBooking.Entity, id));
+
+
         public InventoryBooking? ReverseBooking(Guid id)
         {
             var booking = FindBooking(id);

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Database;
 using WebVella.Erp.Exceptions;
@@ -26,7 +25,6 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return null;
         }
 
-
         protected override IActionResult? OnValidationFailure(InventoryEntry record, RecordCreatePageModel pageModel)
         {
             pageModel.DataModel.SetRecord(record);
@@ -37,10 +35,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         {
             var result = base.Validate(record, pageModel);
 
-            if (!record.Project.HasValue || record.Project == Guid.Empty)
+            if (!IsStockTaking(pageModel) && (!record.Project.HasValue || record.Project == Guid.Empty))
                 result.Add(new ValidationError(InventoryEntry.Fields.Project, $"Project is required"));
 
             return result;
+        }
+
+        protected static bool IsStockTaking(BaseErpPageModel pageModel)
+        {
+            var comment = pageModel.GetFormValue("comment");
+
+            if (string.IsNullOrWhiteSpace(comment))
+                return false;
+
+            comment = comment.Trim();
+
+            return comment.Equals("inventur", StringComparison.OrdinalIgnoreCase) // German
+                || comment.Equals("stocktaking", StringComparison.OrdinalIgnoreCase) // English
+                ;
         }
 
         protected override IActionResult? OnValidationSuccess(InventoryEntry record, RecordCreatePageModel pageModel)

@@ -23,10 +23,24 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (record.Amount > unmodified.Amount)
                 result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Amount}"));
 
-            if (!record.Project.HasValue || record.Project == Guid.Empty)
+            if (!IsStockTaking(pageModel) && (!record.Project.HasValue || record.Project == Guid.Empty))
                 result.Add(new ValidationError(InventoryEntry.Fields.Project, $"Project is required"));
 
             return result;
+        }
+
+        protected static bool IsStockTaking(BaseErpPageModel pageModel)
+        {
+            var comment = pageModel.GetFormValue("comment");
+
+            if (string.IsNullOrWhiteSpace(comment))
+                return false;
+
+            comment = comment.Trim();
+
+            return comment.Equals("inventur", StringComparison.OrdinalIgnoreCase) // German
+                || comment.Equals("stocktaking", StringComparison.OrdinalIgnoreCase) // English
+                ;
         }
 
         protected override IActionResult? OnValidationFailure(InventoryEntry record, InventoryEntry unmodified, RecordManagePageModel pageModel)
