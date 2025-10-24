@@ -1,6 +1,5 @@
 ﻿using HtmlAgilityPack;
 using System.Web;
-using WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes;
 
 namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 {
@@ -34,10 +33,13 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             }
         }
 
-        public override async Task<List<ArticleSuggestion>> SuggestAsync(string orderNumberFragment, LanguageKey language)
+        public override async Task<List<ArticleSuggestion>> SuggestAsync(string orderNumberFragment, LanguageKey language, int resultCount)
         {
             try
             {
+                if (resultCount <= 0 || resultCount > 100)
+                    resultCount = 100;
+
                 var url = SuggestUrl(orderNumberFragment, language);
 
                 using var client = new HttpClient();
@@ -63,10 +65,11 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 
                         return new ArticleSuggestion()
                         {
-                            OrderNumber = orderNumber,
+                            PartNumber = "MURR." + orderNumber,
                             ImageUrl = imageUrl,
                         };
-                    }).Where(sugg => sugg != null)];
+                    }).Where(sugg => sugg != null)
+                    .Take(resultCount)];
             }
             catch
             {
@@ -74,9 +77,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             }
         }
 
-        public override List<ArticleSuggestion> Suggest(string orderNumberFragment, LanguageKey language)
+        public override List<ArticleSuggestion> Suggest(string orderNumberFragment, LanguageKey language, int resultCount)
         {
-            var t = SuggestAsync(orderNumberFragment, language);
+            var t = SuggestAsync(orderNumberFragment, language, resultCount);
             t.Wait();
             return t.Result;
         }

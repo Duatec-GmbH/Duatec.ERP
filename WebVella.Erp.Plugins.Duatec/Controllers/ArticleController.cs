@@ -66,5 +66,21 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
 
             return Json(Suggest.WarehouseLocation(article, denomination, null, recMan));
         }
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
+        [Route("/api/v3.0/a/articles/import/suggestion")]
+        public async Task<ActionResult> GetArticleImportSuggesions([FromQuery] string search, [FromQuery] int resultSize = 0, [FromQuery] bool excludeArticlesFromDataBase = false)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return Json(Array.Empty<object>());
+
+            var suggestions = await Suggest.Articles2Import(search, resultSize, excludeArticlesFromDataBase);
+
+            if(resultSize > 0 && suggestions.Count > resultSize)
+                suggestions = [.. suggestions.Take(resultSize)];
+
+            return Json(suggestions);
+        }
     }
 }

@@ -15,6 +15,16 @@ namespace WebVella.Erp.Plugins.Duatec.Test.Services.DataPortal
         }
 
         [Test]
+        public void SuggestArticleByPartNumber_DoesReturnMoreThanOneElement()
+        {
+            var partNumber = "RIT.88060";
+
+            var result = EplanDataPortal.SuggestArticles(partNumber, 10);
+
+            Assert.That(result, Is.Not.Empty);
+        }
+
+        [Test]
         [TestCaseSource(typeof(ArticleResources), nameof(ArticleResources.ArticlePartNumbers10))]
         public void GetArticleWithPartNumber_ReturnsValidDto(string partNumber)
         {

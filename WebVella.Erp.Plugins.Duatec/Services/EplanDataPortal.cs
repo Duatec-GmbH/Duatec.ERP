@@ -10,8 +10,16 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         private static DateTimeOffset _validUntil = DateTimeOffset.Now;
         private static readonly List<DataPortalManufacturerDto> _manufacturers = new(500);
 
-        private static string GetArticleSearchUrl(string partNumber)
+        private static string GetArticleExactSearchUrl(string partNumber)
             => $"https://dataportal.eplan.com/api/parts?search=%22{partNumber}%22&include=picture_file.preview,manufacturer";
+
+        private static string GetArticleSearchUrl(string partNumber, int resultCount)
+        {
+            if (resultCount <= 0 || resultCount > 200)
+                resultCount = 200;
+
+            return $"https://dataportal.eplan.com/api/parts?search={partNumber}&page%5Blimit%5D={resultCount}&include=picture_file.preview,manufacturer";
+        }
 
         private static string GetArticleByIdUrl(long id)
             => $"https://dataportal.eplan.com/api/parts/{id}?include=picture_file.preview,manufacturer";
@@ -57,16 +65,33 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static DataPortalArticleDto? GetArticleByPartNumber(string partNumber)
         {
-            var url = GetArticleSearchUrl(partNumber);
+            var url = GetArticleExactSearchUrl(partNumber);
 
             var json = JsonFromUrl(url);
 
             return DataPortalArticleDto.FromJsonByPartNumber(json, partNumber);
         }
 
+        public static List<DataPortalArticleDto> SuggestArticles(string partNumber, int resultCount)
+        {
+            var url = GetArticleSearchUrl(partNumber, resultCount);
+
+            var json = JsonFromUrl(url);
+
+            return DataPortalArticleDto.ManyFromJson(json);
+        }
+
+        public static async Task<List<DataPortalArticleDto>> SuggestArticlesAsync(string partNumber, int resultCount)
+        {
+            var url = GetArticleSearchUrl(partNumber, resultCount);
+
+            return await JsonFromUrlAsync(url)
+                .ContinueWith(t => DataPortalArticleDto.ManyFromJson(t.Result));
+        }
+
         public static DataPortalArticleDto? GetArticleByOrderNumber(string orderNumber)
         {
-            var url = GetArticleSearchUrl(orderNumber);
+            var url = GetArticleExactSearchUrl(orderNumber);
 
             var json = JsonFromUrl(url);
 
@@ -75,7 +100,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static async Task<DataPortalArticleDto?> GetArticleByPartNumberAsync(string partNumber)
         {
-            var url = GetArticleSearchUrl(partNumber);
+            var url = GetArticleExactSearchUrl(partNumber);
 
             return await JsonFromUrlAsync(url)
                 .ContinueWith(n => DataPortalArticleDto.FromJsonByPartNumber(n.Result, partNumber));
@@ -83,7 +108,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static async Task<DataPortalArticleDto?> GetArticleByOrderNumberAsync(string orderNumber)
         {
-            var url = GetArticleSearchUrl(orderNumber);
+            var url = GetArticleExactSearchUrl(orderNumber);
 
             return await JsonFromUrlAsync(url)
                 .ContinueWith(n => DataPortalArticleDto.FromJsonByOrderNumber(n.Result, orderNumber));

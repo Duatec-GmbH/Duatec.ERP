@@ -69,6 +69,61 @@ namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes.DataModel
                 pictureUrl: GetPictureUrl(json, pictureId) ?? string.Empty);
         }
 
+
+        public static List<DataPortalArticleDto> ManyFromJson(JsonNode? json)
+        {
+            var manufacturers = GetAllManufacturers(json)
+                .ToDictionary(m => m.EplanId);
+
+            var nodes = json?["data"]?.AsArray()?
+                .Where(n => $"{n?["type"]}" == "parts")
+                .Select(n =>
+                {
+                    var manufacturerId = long.TryParse(n!["relationships"]?["manufacturer"]?["data"]?["id"]?.GetValue<string>(), out var l) ? l : -1;
+
+                    if (!manufacturers.TryGetValue(manufacturerId, out var manufacturer))
+                        return null;
+
+                    var id = long.Parse(n["id"]!.GetValue<string>());
+                    var pictureId = n["relationships"]?["picture_file"]?["data"]?["id"]?.GetValue<string>();
+                    var attributes = n["attributes"]!;
+                    var pn = attributes["part_number"]?.GetValue<string>();
+
+                    if (string.IsNullOrWhiteSpace(pn))
+                        return null;
+
+                    return new DataPortalArticleDto(
+                        id: id,
+                        manufacturer: manufacturer,
+                        partNumber: pn,
+                        typeNumber: attributes["type_number"]?.GetValue<string>() ?? string.Empty,
+                        orderNumber: attributes["order_number"]?.GetValue<string>() ?? string.Empty,
+                        designation: GetDesignation(attributes),
+                        pictureUrl: GetPictureUrl(json, pictureId) ?? string.Empty);
+                })
+                .Where(n => n != null)
+                .ToList();
+
+            if (nodes != null)
+                return nodes!;
+
+            return [];
+        }
+
+        private static List<DataPortalManufacturerDto> GetAllManufacturers(JsonNode? json)
+        {
+            var nodes = json?["included"]?.AsArray()?
+                .Where(n => $"{n?["type"]}" == "manufacturers")
+                .Select(DataPortalManufacturerDto.FromJson)
+                .Where(n => n != null)
+                .ToList();
+
+            if (nodes != null)
+                return nodes!;
+
+            return [];
+        }
+
         private static DataPortalManufacturerDto GetManufacturer(JsonNode? json)
         {
             return DataPortalManufacturerDto.FromJson(json?["included"]?.AsArray()

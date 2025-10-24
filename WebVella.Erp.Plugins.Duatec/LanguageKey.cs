@@ -1,4 +1,4 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.FileImports.EplanTypes
+﻿namespace WebVella.Erp.Plugins.Duatec
 {
     public enum LanguageKey
     {
