@@ -33,6 +33,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<string, Article?> FindMany(string select = "*", params string[] partNumbers)
             => FindManyByUniqueArgs(Article.Fields.PartNumber, select, partNumbers);
 
+        public Article? Find(string partNumber, string select = "*")
+            => FindBy(Article.Fields.PartNumber, partNumber, select);
+
         public Dictionary<string, List<Article>> FindManyByOrderNumbers(string select = "*", params string[] orderNumbers)
         {
             if (orderNumbers.Length == 0)
@@ -107,6 +110,9 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 PreferedWarehouseLocation = null,
             };
         }
+
+        public List<ArticleType> FindManyTypes(string select = "*")
+            => [..RepositoryHelper.FindMany(RecordManager, ArticleType.Entity, select).Select(TypedEntityRecordWrapper.WrapElseDefault<ArticleType>)];
 
 
         public ArticleType? FindType(Guid typeId)

@@ -5,14 +5,14 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 {
     internal class MurrArticleFinder : ArticleFinder
     {
-        public override SearchResult GetArticle(string orderNumber, LanguageKey language)
+        public override SearchResult GetArticle(string orderNumber, LanguageKey language, List<ArticleType> types)
         {
             try
             {
                 if (orderNumber.Any(char.IsAsciiLetterLower))
                     orderNumber = orderNumber.ToUpperInvariant().Replace('_', '-');
 
-                var article = FindArticle(orderNumber, language);
+                var article = FindArticle(orderNumber, language, types);
 
                 return new()
                 {
@@ -84,7 +84,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             return t.Result;
         }
 
-        private static ArticlePreview? FindArticle(string orderNumber, LanguageKey language)
+        private static ArticlePreview? FindArticle(string orderNumber, LanguageKey language, List<ArticleType> types)
         {
             if (string.IsNullOrWhiteSpace(orderNumber))
                 return null;
@@ -105,9 +105,12 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 
             return new()
             {
+                PartNumber = "MURR." + orderNumber,
                 OrderNumber = orderNumber,
+                TypeNumber = orderNumber,
                 Designation = (designation + " " + description).Trim(),
                 ImageUrl = imageSource,
+                Type = types.SingleOrDefault((t) => t.Name.Equals("component", StringComparison.OrdinalIgnoreCase))
             };
         }
 

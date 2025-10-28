@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebVella.Erp.Hooks;
-using WebVella.Erp.Web.Pages.Application;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Services;
 using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Web.Models;
+using WebVella.Erp.Web.Pages.Application;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 {
@@ -18,6 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
             var shortName = record.PartNumber;
             shortName = shortName[..shortName.IndexOf('.')];
             record.ManufacturerId = new CompanyRepository().FindByShortName(shortName)!.Id!.Value;
+            record.EplanId = $"{EplanDataPortal.GetArticleByPartNumber(record.PartNumber)?.EplanId}";
 
             if (!string.IsNullOrWhiteSpace(record.Image))
             {

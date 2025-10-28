@@ -19,7 +19,7 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         public override List<ValidationError> ValidateOnCreate(string value, string formField)
         {
             var result = base.ValidateOnCreate(value, formField);
-            result.AddRange(Validate(value, formField, true));
+            result.AddRange(Validate(value, formField, false));
             return result;
         }
 

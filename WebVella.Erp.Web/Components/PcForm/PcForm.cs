@@ -53,6 +53,9 @@ namespace WebVella.Erp.Web.Components
             [JsonProperty(PropertyName = "show_validation")]
             public bool ShowValidation { get; set; } = true;
 
+			[JsonProperty(PropertyName = "autocomplete")]
+			public bool Autocomplete { get; set; } = true;
+
         }
 
         public async Task<IViewComponentResult> InvokeAsync(PageComponentContext context)

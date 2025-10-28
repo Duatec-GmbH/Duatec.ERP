@@ -75,12 +75,28 @@ namespace WebVella.Erp.Plugins.Duatec.Controllers
             if (string.IsNullOrWhiteSpace(search))
                 return Json(Array.Empty<object>());
 
-            var suggestions = await Suggest.Articles2Import(search, resultSize, excludeArticlesFromDataBase);
+            var suggestions = await ArticleImportService.SuggestAsync(search, resultSize, excludeArticlesFromDataBase);
 
             if(resultSize > 0 && suggestions.Count > resultSize)
                 suggestions = [.. suggestions.Take(resultSize)];
 
             return Json(suggestions);
+        }
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Duration = 0)]
+        [Route("/api/v3.0/a/articles/import/preview")]
+        public async Task<ActionResult> GetArticlePreview([FromQuery] string partNumber)
+        {
+            if (string.IsNullOrWhiteSpace(partNumber) || !partNumber.Contains('.'))
+                return NotFound();
+
+            var preview = await ArticleImportService.GetPreviewAsync(partNumber);
+
+            if (preview == null)
+                return NotFound();
+
+            return Json(preview);
         }
     }
 }

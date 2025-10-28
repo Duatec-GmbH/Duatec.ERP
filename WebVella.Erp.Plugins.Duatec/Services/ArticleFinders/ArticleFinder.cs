@@ -2,10 +2,10 @@
 {
     internal abstract class ArticleFinder
     {
-        public abstract SearchResult GetArticle(string orderNumber, LanguageKey language);
+        public abstract SearchResult GetArticle(string orderNumber, LanguageKey language, List<ArticleType> types);
 
-        public virtual Task<SearchResult> GetArticleAsync(string orderNumber, LanguageKey language)
-            => Task.Run(() => GetArticle(orderNumber, language));
+        public virtual Task<SearchResult> GetArticleAsync(string orderNumber, LanguageKey language, List<ArticleType> types)
+            => Task.Run(() => GetArticle(orderNumber, language, types));
 
         public abstract List<ArticleSuggestion> Suggest(string orderNumberFragment, LanguageKey language, int resultCount);
 

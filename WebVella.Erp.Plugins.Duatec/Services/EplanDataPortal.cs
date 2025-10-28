@@ -83,10 +83,10 @@ namespace WebVella.Erp.Plugins.Duatec.Services
 
         public static async Task<List<DataPortalArticleDto>> SuggestArticlesAsync(string partNumber, int resultCount)
         {
-            var url = GetArticleSearchUrl(partNumber, resultCount);
+                var url = GetArticleSearchUrl(partNumber, resultCount);
 
-            return await JsonFromUrlAsync(url)
-                .ContinueWith(t => DataPortalArticleDto.ManyFromJson(t.Result));
+                return await JsonFromUrlAsync(url)
+                    .ContinueWith(t => DataPortalArticleDto.ManyFromJson(t.Result));
         }
 
         public static DataPortalArticleDto? GetArticleByOrderNumber(string orderNumber)

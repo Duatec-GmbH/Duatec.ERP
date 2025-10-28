@@ -7,22 +7,22 @@ namespace WebVella.Erp.Plugins.Duatec.Services
     {
         private static readonly Dictionary<string, ArticleFinder> _finderLookup = GetFinders();
 
-        public static SearchResult GetArticle(string partNumber)
+        public static SearchResult GetArticle(string partNumber, List<ArticleType> types)
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumber);
 
             if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
-                return finder.GetArticle(orderNumber, GetLanguage());
+                return finder.GetArticle(orderNumber, GetLanguage(), types);
 
             return NotFound(shortName);
         }
 
-        public static async Task<SearchResult> GetArticleAsync(string partNumber)
+        public static async Task<SearchResult> GetArticleAsync(string partNumber, List<ArticleType> types)
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumber);
 
             if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
-                return await finder.GetArticleAsync(orderNumber, GetLanguage());
+                return await finder.GetArticleAsync(orderNumber, GetLanguage(), types);
 
             return NotFound(shortName);
         }

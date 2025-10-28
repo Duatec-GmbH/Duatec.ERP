@@ -6,7 +6,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks
         public static class Article
         {
             public const string Create = "article_create";
-            public const string EplanImport = "article_eplan_import";
+            public const string ImportHook = "article_import";
             public const string Update = "article_update";
             public const string FileUpload = "article_file_upload";
             public const string FileImport = "article_file_import";
