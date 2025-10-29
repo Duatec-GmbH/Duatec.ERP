@@ -27,7 +27,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page
         protected virtual IActionResult? OnPreValidate(T record, RecordCreatePageModel pageModel)
             => null;
 
-        protected virtual IActionResult? OnValidationFailure(T record, RecordCreatePageModel pageModel)
+        protected virtual IActionResult? OnValidationFailure(T record, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
             => null;
 
         protected virtual IActionResult? OnValidationSuccess(T record, RecordCreatePageModel pageModel)
@@ -46,7 +46,7 @@ namespace WebVella.Erp.TypedRecords.Hooks.Page
             validationErrors.AddRange(Validate(record, pageModel));
 
             if (validationErrors.Count > 0)
-                return OnValidationFailure(record, pageModel);
+                return OnValidationFailure(record, pageModel, validationErrors);
 
             return OnValidationSuccess(record, pageModel);
         }

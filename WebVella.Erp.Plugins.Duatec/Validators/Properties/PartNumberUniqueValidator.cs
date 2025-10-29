@@ -19,18 +19,18 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
         public override List<ValidationError> ValidateOnCreate(string value, string formField)
         {
             var result = base.ValidateOnCreate(value, formField);
-            result.AddRange(Validate(value, formField, false));
+            result.AddRange(ValidateOnChange(value, formField));
             return result;
         }
 
         public override List<ValidationError> ValidateOnUpdate(string value, string formField, Guid id)
         {
             var result = base.ValidateOnUpdate(value, formField, id);
-            result.AddRange(Validate(value, formField, false));
+            result.AddRange(ValidateOnChange(value, formField));
             return result;
         }
 
-        private List<ValidationError> Validate(string value, string formField, bool checkPartNumberWithEplanApi)
+        private List<ValidationError> ValidateOnChange(string value, string formField)
         {
             var result = new List<ValidationError>();
 
@@ -45,11 +45,8 @@ namespace WebVella.Erp.Plugins.Duatec.Validators.Properties
 
                 if (shortNameErrors.Count == 0)
                 {
-                    if (shortNameErrors.Count == 0 && new CompanyRepository().FindByShortName(shortName) == null)
+                    if (shortNameErrors.Count == 0 && new CompanyRepository().FindByShortName(shortName) == null && EplanDataPortal.GetManufacturerByShortName(shortName) == null)
                         result.Add(new ValidationError(formField, $"{_manufacturer} with {_manufacturerShortName} '{shortName}' does not exist"));
-
-                    if (checkPartNumberWithEplanApi && EplanDataPortal.GetArticleByPartNumber(value) != null)
-                        result.Add(new ValidationError(formField, $"{_entityPretty} with {_entityPropertyPretty} '{value}' is an EPLAN article"));
                 }
             }
 

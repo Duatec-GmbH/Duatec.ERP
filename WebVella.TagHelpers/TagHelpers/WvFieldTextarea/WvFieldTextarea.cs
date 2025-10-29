@@ -80,7 +80,7 @@ namespace WebVella.TagHelpers.TagHelpers
 					inputEl.Attributes.Add("style", $"height:{Height};");
 				}
 				inputEl.InnerHtml.AppendHtml((Value ?? "").ToString());
-				inputEl.Attributes.Add("id", $"textarea-{FieldId}");
+				inputEl.Attributes.Add("id", $"input-{FieldId}");
 				inputEl.Attributes.Add("name", Name);
 				if (Access == WvFieldAccess.Full || Access == WvFieldAccess.FullAndCreate)
 				{

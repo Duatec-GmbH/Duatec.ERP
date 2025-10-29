@@ -17,14 +17,14 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
         protected override IActionResult? OnValidationSuccess(Article record, RecordCreatePageModel pageModel)
         {
             var shortName = record.PartNumber;
-            shortName = shortName[..shortName.IndexOf('.')];
-            record.ManufacturerId = new CompanyRepository().FindByShortName(shortName)!.Id!.Value;
+            shortName = shortName[..shortName.IndexOf('.')].ToUpper();
+
             record.EplanId = $"{EplanDataPortal.GetArticleByPartNumber(record.PartNumber)?.EplanId}";
 
             if (!string.IsNullOrWhiteSpace(record.Image))
             {
                 var file = Images.GetOrDownload(record.Image, pageModel.CurrentUser.Id);
-                if(string.IsNullOrEmpty(file))
+                if (string.IsNullOrEmpty(file))
                 {
                     pageModel.PutMessage(ScreenMessageType.Error, "Could not download image");
                     pageModel.DataModel.SetRecord(record);
@@ -32,6 +32,36 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
                     return pageModel.Page();
                 }
                 record.Image = file;
+            }
+
+            var companyRepo = new CompanyRepository();
+            var manufacturerId = companyRepo.FindByShortName(shortName)?.Id;
+            if (!manufacturerId.HasValue)
+            {
+                var edpCompany = EplanDataPortal.GetManufacturers()
+                    .FirstOrDefault(m => m.ShortName.Equals(shortName, StringComparison.OrdinalIgnoreCase));
+
+                if(edpCompany == null)
+                {
+                    pageModel.PutMessage(ScreenMessageType.Error, $"Could not import manufacturer '{shortName}'");
+                    pageModel.DataModel.SetRecord(record);
+                    pageModel.BeforeRender();
+                    return pageModel.Page();
+                }
+                else
+                {
+                    var companyRec = companyRepo.Insert(edpCompany);
+
+                    if (companyRec == null)
+                    {
+                        pageModel.PutMessage(ScreenMessageType.Error, $"Could not import manufacturer '{shortName}'");
+                        pageModel.DataModel.SetRecord(record);
+                        pageModel.BeforeRender();
+                        return pageModel.Page();
+                    }
+
+                    record.ManufacturerId = companyRec.Id!.Value;
+                }
             }
 
             return base.OnValidationSuccess(record, pageModel);

@@ -25,7 +25,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return null;
         }
 
-        protected override IActionResult? OnValidationFailure(InventoryEntry record, RecordCreatePageModel pageModel)
+        protected override IActionResult? OnValidationFailure(InventoryEntry record, RecordCreatePageModel pageModel, List<ValidationError> validationErrors)
         {
             pageModel.DataModel.SetRecord(record);
             return null;
