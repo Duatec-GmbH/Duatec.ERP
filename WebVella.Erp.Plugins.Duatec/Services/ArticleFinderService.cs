@@ -56,8 +56,10 @@ namespace WebVella.Erp.Plugins.Duatec.Services
                 finder = new MurrArticleFinder();
             else if (shortName == "RIT")
                 finder = new RittalArticleFinder();
+            else if (shortName == "LAPP")
+                finder = new LappArticleFinder();
 
-            if(finder != null)
+            if (finder != null)
             {
                 var recMan = new RecordManager(ignoreSecurity: true, executeHooks: false);
                 var config = new FinderConfigRepository(recMan)

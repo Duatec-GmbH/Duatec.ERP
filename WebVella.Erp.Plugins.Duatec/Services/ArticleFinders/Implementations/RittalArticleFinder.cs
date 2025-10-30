@@ -91,6 +91,10 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             var image = _imageQuery.Execute(doc.DocumentNode);
             var typeNumber = _typeNumberQuery.Execute(doc.DocumentNode);
 
+            var idx = typeNumber.LastIndexOf(' ');
+            if (idx > 0)
+                typeNumber = typeNumber[0..idx] + '.' + typeNumber[(idx + 1)..];
+
             return new()
             {
                 PartNumber = "RIT." + orderNumber,
