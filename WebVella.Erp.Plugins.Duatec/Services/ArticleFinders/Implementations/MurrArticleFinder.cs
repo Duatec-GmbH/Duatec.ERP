@@ -1,10 +1,36 @@
 ﻿using HtmlAgilityPack;
+using System.Text.Json.Nodes;
 using System.Web;
 
 namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 {
     internal class MurrArticleFinder : ArticleFinder
     {
+        private readonly object _lockObject = new();
+        private string? _searchUrl;
+        private string? _suggestUrl;
+        private string? _articleNumberSearchStringEnglish;
+        private string? _articleNumberSearchStringGerman;
+        private XPathQuery? _designationQuery;
+        private XPathQuery? _descriptionQuery;
+        private XPathQuery? _imageQuery;
+
+        public override void Initialize(JsonNode? settings)
+        {
+            lock (_lockObject)
+            {
+                var searchOptions = settings?["searchOptions"];
+                var suggestOptions = settings?["suggestOptions"];
+                _searchUrl = searchOptions?["url"]?.GetValue<string>() ?? string.Empty;
+                _suggestUrl = suggestOptions?["url"]?.GetValue<string>() ?? string.Empty;
+                _articleNumberSearchStringEnglish = searchOptions?["articleNumberEnglish"]?.GetValue<string>() ?? string.Empty;
+                _articleNumberSearchStringGerman = searchOptions?["articleNumberGerman"]?.GetValue<string>() ?? string.Empty;
+                _designationQuery = XPathQuery.FromJsonNode(searchOptions?["designationQuery"]);
+                _descriptionQuery = XPathQuery.FromJsonNode(searchOptions?["descriptionQuery"]);
+                _imageQuery = XPathQuery.FromJsonNode(searchOptions?["imageQuery"]);
+            }
+        }
+
         public override SearchResult GetArticle(string orderNumber, LanguageKey language, List<ArticleType> types)
         {
             try
@@ -84,53 +110,72 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             return t.Result;
         }
 
-        private static ArticlePreview? FindArticle(string orderNumber, LanguageKey language, List<ArticleType> types)
+        private ArticlePreview? FindArticle(string orderNumber, LanguageKey language, List<ArticleType> types)
         {
             if (string.IsNullOrWhiteSpace(orderNumber))
                 return null;
 
-            var doc = new HtmlWeb().Load(GetUrl(orderNumber, language));
+            if(_imageQuery == null || _designationQuery == null || _descriptionQuery == null)
+                return null;
+
+            var url = GetUrl(orderNumber, language);
+            var doc = new HtmlWeb().Load(url);
 
             var searchString = language == LanguageKey.en_US
-                ? "Art.-No.: " + orderNumber
-                : "Art.-Nr.: " + orderNumber;
+                ? _articleNumberSearchStringEnglish + orderNumber
+                : _articleNumberSearchStringGerman + orderNumber;
 
-            var formQuery = $"//*[@id='searchList']//form[//.='{searchString}']";
-
-            var form = doc.DocumentNode.SelectNodes(formQuery).Single();
-
-            var imageSource = GetSource(form.SelectNodes($"{formQuery}//*[@class='pictureBox']//img").Single());
-            var designation = GetFirstTextElement(form.SelectNodes($"{formQuery}//*[@class='title']").Single());
-            var description = GetFirstTextElement(form.SelectNodes($"{formQuery}//*[@class='shortdesc']").Single());
+            var imageSource = ReplaceSearchString(_imageQuery, searchString).Execute(doc.DocumentNode);
+            var designation = ReplaceSearchString(_designationQuery, searchString).Execute(doc.DocumentNode);
+            var description = ReplaceSearchString(_descriptionQuery, searchString).Execute(doc.DocumentNode)
+                .Replace(searchString, "");
 
             return new()
             {
                 PartNumber = "MURR." + orderNumber,
                 OrderNumber = orderNumber,
                 TypeNumber = orderNumber,
-                Designation = (designation + " " + description).Trim(),
+                Designation = (designation + " " + description)
+                    .Replace("\r\n", " ")
+                    .Replace("\n", " ")
+                    .Replace("  ", " ")
+                    .Replace("  ", " ")
+                    .Trim(),
                 ImageUrl = imageSource,
                 Type = types.SingleOrDefault((t) => t.Name.Equals("component", StringComparison.OrdinalIgnoreCase))
             };
         }
 
-        private static string GetUrl(string orderNumber, LanguageKey language)
+        private static XPathQuery ReplaceSearchString(XPathQuery query, string searchString)
+        {
+            return new XPathQuery()
+            {
+                Arguments = query.Arguments,
+                ResolveKind = query.ResolveKind,
+                Query = query.Query.Replace("{searchString}", searchString)
+            };
+        }
+
+        private string GetUrl(string orderNumber, LanguageKey language)
         {
             var lang = language == LanguageKey.en_US ? 1 : 0;
-            return $"https://shop.murrelektronik.at/index.php?cl=search&searchparam={HttpUtility.UrlEncode(orderNumber)}&_artperpage=100&pgNr=0&lang={lang}";
+            orderNumber = HttpUtility.UrlEncode(orderNumber);
+
+            var url = _searchUrl?.Replace("{orderNumber}", orderNumber)
+                .Replace("{language}", lang.ToString());
+
+            return url ?? string.Empty;
         }
 
-        private static string SuggestUrl(string orderNumberFragment, LanguageKey language)
+        private string SuggestUrl(string orderNumberFragment, LanguageKey language)
         {
             orderNumberFragment = HttpUtility.UrlEncode(orderNumberFragment);
-            var lan = language == LanguageKey.en_US ? "lv_shopat_en" : "lv_shopat_de";
-            return $"https://shop.murrelektronik.at/modules/nfc/nfc_ff_suggest/Controller/Proxy/Suggest.php?query={orderNumberFragment}&channel={lan}";
+            var lang = language == LanguageKey.en_US ? "lv_shopat_en" : "lv_shopat_de";
+
+            var url = _suggestUrl?.Replace("{orderNumber}", orderNumberFragment)
+                .Replace("{language}", lang);
+            
+            return url ?? string.Empty;
         }
-
-        private static string GetFirstTextElement(HtmlNode node)
-            => node.ChildNodes.FirstOrDefault()?.InnerText.Trim() ?? node.InnerText.Trim();
-
-        private static string GetSource(HtmlNode node)
-            => node.GetAttributes("src").FirstOrDefault()?.Value ?? string.Empty;
     }
 }

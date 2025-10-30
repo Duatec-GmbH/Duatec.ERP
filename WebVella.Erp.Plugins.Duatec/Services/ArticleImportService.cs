@@ -13,25 +13,6 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             var recMan = new RecordManager(DbContext.Current, ignoreSecurity: true, executeHooks: false);
             var repo = new ArticleRepository(recMan);
 
-            var dbArticle = repo.Find(partNumber, $"*, " +
-                $"${Article.Relations.Type}.*, " +
-                $"${Article.Relations.Manufacturer}.*");
-
-            if (dbArticle != null)
-                return new ArticlePreview()
-                {
-                    PartNumber = dbArticle.PartNumber,
-                    TypeNumber = dbArticle.TypeNumber,
-                    OrderNumber = dbArticle.OrderNumber,
-                    Designation = dbArticle.Designation,
-                    ImageUrl = dbArticle.Image ?? string.Empty,
-                    Type = new()
-                    {
-                        Id = dbArticle.GetArticleType()?.Id ?? Guid.Empty,
-                        Name = dbArticle.GetArticleType()?.Label ?? string.Empty,
-                    }
-                };
-
             var types = repo.FindManyTypes()
                 .Select(t => new ArticleFinders.ArticleType()
                 {

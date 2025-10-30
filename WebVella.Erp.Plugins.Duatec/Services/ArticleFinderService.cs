@@ -1,17 +1,17 @@
-﻿using WebVella.Erp.Plugins.Duatec.Services.ArticleFinders;
+﻿using WebVella.Erp.Api;
+using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Plugins.Duatec.Services.ArticleFinders;
 using WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations;
 
 namespace WebVella.Erp.Plugins.Duatec.Services
 {
     internal static class ArticleFinderService
     {
-        private static readonly Dictionary<string, ArticleFinder> _finderLookup = GetFinders();
-
         public static SearchResult GetArticle(string partNumber, List<ArticleType> types)
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumber);
 
-            if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
+            if (GetFinder(shortName) is ArticleFinder finder)
                 return finder.GetArticle(orderNumber, GetLanguage(), types);
 
             return NotFound(shortName);
@@ -21,7 +21,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumber);
 
-            if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
+            if (GetFinder(shortName) is ArticleFinder finder)
                 return await finder.GetArticleAsync(orderNumber, GetLanguage(), types);
 
             return NotFound(shortName);
@@ -31,7 +31,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumberFragment);
 
-            if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
+            if (GetFinder(shortName) is ArticleFinder finder)
                 return finder.Suggest(orderNumber, GetLanguage(), resultCount);
 
             return [];
@@ -41,18 +41,31 @@ namespace WebVella.Erp.Plugins.Duatec.Services
         {
             var (shortName, orderNumber) = ExtractFromPartNumber(partNumberFragment);
 
-            if (_finderLookup.TryGetValue(shortName.ToUpperInvariant(), out var finder))
+            if (GetFinder(shortName) is ArticleFinder finder)
                 return await finder.SuggestAsync(orderNumber, GetLanguage(), resultCount);
 
             return [];
         }
 
-        private static Dictionary<string, ArticleFinder> GetFinders()
+        private static ArticleFinder? GetFinder(string shortName)
         {
-            return new Dictionary<string, ArticleFinder>
+            shortName = shortName.ToUpperInvariant();
+            ArticleFinder? finder = null;
+
+            if (shortName == "MURR")
+                finder = new MurrArticleFinder();
+            else if (shortName == "RIT")
+                finder = new RittalArticleFinder();
+
+            if(finder != null)
             {
-                ["MURR"] = new MurrArticleFinder()
-            };
+                var recMan = new RecordManager(ignoreSecurity: true, executeHooks: false);
+                var config = new FinderConfigRepository(recMan)
+                    .Find(shortName);
+
+                finder.Initialize(config?.Config);
+            }
+            return finder;
         }
 
         private static SearchResult NotFound(string partNumber)

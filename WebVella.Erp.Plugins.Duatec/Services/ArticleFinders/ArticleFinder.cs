@@ -1,7 +1,11 @@
-﻿namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders
+﻿using System.Text.Json.Nodes;
+
+namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders
 {
     internal abstract class ArticleFinder
     {
+        public abstract void Initialize(JsonNode? settings);
+
         public abstract SearchResult GetArticle(string orderNumber, LanguageKey language, List<ArticleType> types);
 
         public virtual Task<SearchResult> GetArticleAsync(string orderNumber, LanguageKey language, List<ArticleType> types)
@@ -11,5 +15,6 @@
 
         public virtual Task<List<ArticleSuggestion>> SuggestAsync(string orderNumberFragment, LanguageKey language, int resultCount)
             => Task.Run(() => Suggest(orderNumberFragment, language, resultCount));
+
     }
 }
