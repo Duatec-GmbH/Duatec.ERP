@@ -24,7 +24,11 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders
         {
             try
             {
-                var resultNode = node.SelectNodes(Query).Single();
+                var nodes = node.SelectNodes(Query);
+                if (nodes == null || nodes.Count == 0)
+                    return string.Empty;
+
+                var resultNode = nodes[0];
 
                 var result = ResolveKind switch
                 {
@@ -73,6 +77,16 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders
                 Arguments = arguments,
                 ResolveKind = kind,
                 Query = query
+            };
+        }
+
+        public XPathQuery SetQueryParameter(string parameterName, string value)
+        {
+            return new XPathQuery()
+            {
+                Arguments = Arguments,
+                Query = Query.Replace("{" + parameterName + "}", value),
+                ResolveKind = ResolveKind
             };
         }
 

@@ -1,6 +1,5 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Database;
-using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.Plugins.Duatec.Services.ArticleFinders;
 
@@ -14,7 +13,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
             var repo = new ArticleRepository(recMan);
 
             var types = repo.FindManyTypes()
-                .Select(t => new ArticleFinders.ArticleType()
+                .Select(t => new ArticleType()
                 {
                     Id = t.Id!.Value,
                     Name = t.Label,

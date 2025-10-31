@@ -36,7 +36,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Articles
 
             var companyRepo = new CompanyRepository();
             var manufacturerId = companyRepo.FindByShortName(shortName)?.Id;
-            if (!manufacturerId.HasValue)
+
+            if (manufacturerId.HasValue)
+                record.ManufacturerId = manufacturerId.Value;
+            else
             {
                 var edpCompany = EplanDataPortal.GetManufacturers()
                     .FirstOrDefault(m => m.ShortName.Equals(shortName, StringComparison.OrdinalIgnoreCase));

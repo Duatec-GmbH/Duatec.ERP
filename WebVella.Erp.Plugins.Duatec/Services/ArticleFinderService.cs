@@ -58,6 +58,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services
                 finder = new RittalArticleFinder();
             else if (shortName == "LAPP")
                 finder = new LappArticleFinder();
+            else if (shortName == "IGUS")
+                finder = new IgusArticleFinder();
 
             if (finder != null)
             {
