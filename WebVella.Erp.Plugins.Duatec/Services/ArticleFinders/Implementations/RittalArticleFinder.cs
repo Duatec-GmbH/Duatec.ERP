@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Text.Json.Nodes;
+using System.Web;
 
 namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
 {
@@ -90,6 +91,9 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
             var designation = _designationQuery.Execute(doc.DocumentNode);
             var image = _imageQuery.Execute(doc.DocumentNode);
             var typeNumber = _typeNumberQuery.Execute(doc.DocumentNode);
+
+            if (!string.IsNullOrWhiteSpace(designation))
+                designation = HttpUtility.HtmlDecode(designation);
 
             var idx = typeNumber.LastIndexOf(' ');
             if (idx > 0)

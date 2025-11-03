@@ -38,7 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders
                     _ => resultNode.ToString() ?? string.Empty
                 };
 
-                return HttpUtility.HtmlDecode(result);
+                return result;
             }
             catch
             {

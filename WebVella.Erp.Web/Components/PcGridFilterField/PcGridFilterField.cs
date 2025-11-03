@@ -216,10 +216,19 @@ namespace WebVella.Erp.Web.Components
 				}
 				else if (!string.IsNullOrEmpty(options.DataType))
 				{
-					var type = TypeManager.GetEnum(options.DataType)
-						?? throw new Exception($"Type '{options.DataType}' not found");
+					var ds = context.DataModel.GetProperty(options.DataType);
 
-					ViewBag.ValueOptions = ModelExtensions.GetEnumAsSelectOptions(type);
+					if(ds is List<SelectOption> selectOptions)
+					{
+						ViewBag.ValueOptions = selectOptions;
+					}
+					else
+					{
+						var type = TypeManager.GetEnum(options.DataType);
+
+						if (type != null)
+							ViewBag.ValueOptions = ModelExtensions.GetEnumAsSelectOptions(type);
+					}
 				}
 
 				switch (context.Mode)

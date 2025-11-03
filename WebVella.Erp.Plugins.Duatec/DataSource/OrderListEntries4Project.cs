@@ -3,6 +3,7 @@ using WebVella.Erp.Api.Models;
 using WebVella.Erp.Plugins.Duatec.DataTransfere;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
+using WebVella.Erp.Utilities;
 using WebVella.Erp.Web.Models;
 
 namespace WebVella.Erp.Plugins.Duatec.DataSource
@@ -19,6 +20,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             public const string StateFilterType = "state_filter_type";
             public const string Page = "page";
             public const string PageSize = "pageSize";
+            public const string OrderType = "order_type";
+            public const string OrderTypeFilterType = "order_type_filter_type";
         }
 
         public OrderListEntries4Project(Guid articleId)
@@ -40,6 +43,8 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             Parameters.Add(new() { Name = Arguments.Order, Type = "text", Value = "null" });
             Parameters.Add(new() { Name = Arguments.State, Type = typeof(OrderListEntryState).FullName, Value = "null" });
             Parameters.Add(new() { Name = Arguments.StateFilterType, Type = typeof(FilterType).FullName, Value = "null" });
+            Parameters.Add(new() { Name = Arguments.OrderType, Type = "guid", Value = "null" });
+            Parameters.Add(new() { Name = Arguments.OrderTypeFilterType, Type = typeof(FilterType).FullName, Value = "null" });
             Parameters.Add(new() { Name = Arguments.Page, Type = "int", Value = "1" });
             Parameters.Add(new() { Name = Arguments.PageSize, Type = "int", Value = "10" });
         }
@@ -61,10 +66,13 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var stateFilterType = EnumValueFromParameter<FilterType?>(arguments[Arguments.StateFilterType]);
             var page = (int)arguments[Arguments.Page];
             var pageSize = (int)arguments[Arguments.PageSize];
+            var orderListType = arguments.TryGetValue(Arguments.OrderType, out var obj) ? obj as Guid? : null;
+            var orderListTypeFilterType = EnumValueFromParameter<FilterType?>(arguments[Arguments.OrderTypeFilterType]);
 
             records = ApplyArticleFilter(article, records);
             records = ApplyManufacturerFilter(manufacturer, records);
             records = ApplyOrderFilter(order, records);
+            records = ApplyOrderTypeFilter(orderListType, orderListTypeFilterType, records);
             records = ApplyStateFilter(state, stateFilterType, records);
 
             var filtered = records.ToList();
@@ -87,6 +95,29 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 return [];
 
             return GetRecords(projectId);
+        }
+
+        private static IEnumerable<OrderListEntry> ApplyOrderTypeFilter(Guid? type, FilterType? filterType, IEnumerable<OrderListEntry> records)
+        {
+            if (!type.HasValue)
+                return records;
+
+            var ft = filterType.HasValue ? filterType : FilterType.EQ;
+
+            if(type == Guid.Empty)
+            {
+                if (ft == FilterType.NOT)
+                    return records.Where(ole => !ole.GetOrders().Any(o => o.Type == Guid.Empty || o.Type == null));
+                else
+                    return records.Where(ole => ole.GetOrders().Any(o => o.Type == Guid.Empty || o.Type == null));
+            }
+            else
+            {
+                if (ft == FilterType.NOT)
+                    return records.Where(ole => !ole.GetOrders().Any(o => o.Type == type));
+                else
+                    return records.Where(ole => ole.GetOrders().Any(o => o.Type == type));
+            }
         }
 
         private static IEnumerable<OrderListEntry> ApplyArticleFilter(string? filterValue, IEnumerable<OrderListEntry> records)
