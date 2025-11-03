@@ -126,6 +126,8 @@ namespace WebVella.Erp.Plugins.Duatec.Services.ArticleFinders.Implementations
                 : _articleNumberSearchStringGerman + orderNumber;
 
             var imageSource = ReplaceSearchString(_imageQuery, searchString).Execute(doc.DocumentNode);
+            if (!string.IsNullOrWhiteSpace(imageSource) && imageSource.StartsWith("data:image"))
+                imageSource = string.Empty;
             var designation = ReplaceSearchString(_designationQuery, searchString).Execute(doc.DocumentNode);
             var description = ReplaceSearchString(_descriptionQuery, searchString).Execute(doc.DocumentNode)
                 .Replace(searchString, "");
