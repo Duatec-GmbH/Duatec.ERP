@@ -92,7 +92,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     ArticleId = e.Article,
                     Kind = InventoryBookingKind.Store,
                     ProjectId = projectId,
-                    ProjectSourceId = projectId,
+                    ProjectSourceId = null,
                     WarehouseLocationId = e.WarehouseLocation,
                     WarehouseLocationSourceId = e.WarehouseLocation,
                     Denomination = e.Denomination,
