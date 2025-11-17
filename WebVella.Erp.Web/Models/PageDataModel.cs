@@ -1336,6 +1336,7 @@ namespace WebVella.Erp.Web.Models
 			public object Execute(string paramsString)
 			{
 				var parameters = ParseParams(paramsString);
+
 				if (parameters.Count < MinParameters || MaxParameters > -1 && parameters.Count > MaxParameters)
 				{
 					if(MinParameters == MaxParameters)
@@ -1739,6 +1740,12 @@ namespace WebVella.Erp.Web.Models
 
 				if (a == null)
 					return true;
+
+				if (a is string aS && b is Guid bG)
+					return aS.Equals(bG.ToString(), StringComparison.OrdinalIgnoreCase);
+
+				if (b is string bS && a is Guid aG)
+					return bS.Equals(aG.ToString(), StringComparison.OrdinalIgnoreCase);
 
 				a = CastToDecimalIfIsNumber(a);
 				b = CastToDecimalIfIsNumber(b);
