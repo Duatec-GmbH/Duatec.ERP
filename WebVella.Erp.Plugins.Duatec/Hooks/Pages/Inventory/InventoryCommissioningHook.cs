@@ -22,16 +22,23 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
     [HookAttachment(key: HookKeys.Inventory.Commissioning)]
     internal class InventoryCommissioningHook : IPageHook
     {
+        private static List<Guid> GetPartListIds(BaseErpPageModel pageModel)
+        {
+            return [.. $"{pageModel.Request.Query["part_list_id"]}".Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Guid.TryParse(s, out var id) ? id : Guid.Empty)
+                .Where(id => id != Guid.Empty)];
+        }
+
         public IActionResult? OnGet(BaseErpPageModel pageModel)
         {
             var projectId = Guid.TryParse(pageModel.Request.Query["project_id"], out var id) ? id : Guid.Empty;
-            var partListId = Guid.TryParse(pageModel.Request.Query["part_list_id"], out id) ? id : Guid.Empty;
+            var partListIds = GetPartListIds(pageModel);
 
             if (projectId == Guid.Empty)
                 return null;
 
             var list = new List<EntityRecord>();
-            list.AddRange(GetCommissioningEntries(projectId, partListId));
+            list.AddRange(GetCommissioningEntries(projectId, partListIds));
 
             var record = new EntityRecord();
 
@@ -49,10 +56,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var recMan = new RecordManager();
 
             var projectId = Guid.TryParse(pageModel.Request.Query["project_id"], out var id) ? id : Guid.Empty;
-            var partListId = Guid.TryParse(pageModel.Request.Query["part_list_id"], out id) ? id : Guid.Empty;
+            var partListIds = GetPartListIds(pageModel);
+
             var formValues = GetFormValues(pageModel);
             var significantInventoryEntries = GetSignificantInventoryEntries(projectId, formValues, recMan);
-            var commissioningEntries = GetCommissioningEntries(projectId, partListId, formValues, significantInventoryEntries, recMan);
+            var commissioningEntries = GetCommissioningEntries(projectId, partListIds, formValues, significantInventoryEntries, recMan);
+
             var validationErrors = ValidateEntries(commissioningEntries, significantInventoryEntries);
 
             if(validationErrors.Count > 0)
@@ -291,10 +300,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return result;
         }
 
-        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, Guid partListId, RecordManager? recMan = null)
+        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, List<Guid> partListIds, RecordManager? recMan = null)
         {
             recMan ??= new();
-            var partListLookup = GetPartListLookup(partListId, recMan);
+            var partListLookup = GetPartListLookup(partListIds, recMan);
 
             var inventoryEntries = new InventoryRepository(recMan).FindAll()
                 .Include($"${InventoryEntry.Relations.Location}.${WarehouseLocation.Relations.Warehouse}")
@@ -308,7 +317,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
             foreach(var entry in inventoryEntries)
             {
-                if(entry.Project == projectId && (partListId == Guid.Empty || partListLookup.ContainsKey((entry.Article, entry.Denomination))))
+                if(entry.Project == projectId && (partListIds.Count == 0 || partListLookup.ContainsKey((entry.Article, entry.Denomination))))
                 {
                     var commEntry = new CommissioningInventoryEntry();
 
@@ -338,7 +347,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             return result;
         }
 
-        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, Guid partListId, List<FormValue> formValues, List<InventoryEntry> significantInventoryEntries, RecordManager? recMan = null)
+        private static List<CommissioningInventoryEntry> GetCommissioningEntries(Guid projectId, List<Guid> partListIds, List<FormValue> formValues, List<InventoryEntry> significantInventoryEntries, RecordManager? recMan = null)
         {
             recMan ??= new();
 
@@ -347,7 +356,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             var availableAmountLookup = new Dictionary<(Guid ArticleId, decimal Denomination, Guid Location), decimal>();
-            var partListLookup = GetPartListLookup(partListId, recMan);
+            var partListLookup = GetPartListLookup(partListIds, recMan);
 
             var result = new List<CommissioningInventoryEntry>();
             var toResolve = new List<CommissioningInventoryEntry>();
@@ -450,15 +459,27 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         }
 
 
-        private static Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetPartListLookup(Guid partListId, RecordManager? recMan = null)
+        private static Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetPartListLookup(List<Guid> partListIds, RecordManager? recMan = null)
         {
-            if (partListId == Guid.Empty)
+            if (partListIds.Count == 0)
                 return [];
 
-            return new PartListRepository(recMan)
-                .FindManyEntriesByPartList(partListId)
-                .GroupBy(ple => (ple.ArticleId, ple.Denomination))
-                .ToDictionary(g => (g.Key.ArticleId, g.Key.Denomination), g => g.Sum(ple => ple.Amount));
+            var repo = new PartListRepository(recMan);
+            var result = new Dictionary<(Guid ArticleId, decimal Denomination), decimal>();
+
+            foreach(var id in partListIds)
+            {
+                foreach(var g in repo.FindManyEntriesByPartList(id).GroupBy(ple => (ple.ArticleId, ple.Denomination)))
+                {
+                    if (!result.TryGetValue(g.Key, out var value))
+                        result.Add(g.Key, g.Sum(ple => ple.Amount));
+
+                    else
+                        result[g.Key] = value + g.Sum(ple => ple.Amount);
+                }
+            }
+
+            return result;
         }
     }
 }
