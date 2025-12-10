@@ -89,6 +89,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     Comment = comment,
                     TaggedRecordId = null,
                     TaggedEntityName = null,
+                    TaggedObject = null,
                 };
 
                 if (repo.InsertBooking(booking) == null)

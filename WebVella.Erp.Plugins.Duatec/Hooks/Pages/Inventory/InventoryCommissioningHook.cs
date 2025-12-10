@@ -207,6 +207,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 TaggedRecordId = null,
                 TaggedEntityName = null,
+                TaggedObject = null,
                 UserId = userId,
             };
         }
@@ -231,6 +232,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                 WarehouseLocationSourceId = entry.WarehouseLocation,
                 TaggedRecordId = null,
                 TaggedEntityName = null,
+                TaggedObject = null,
                 UserId = userId,
             };
         }

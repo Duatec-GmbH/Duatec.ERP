@@ -13,6 +13,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         Store = 2,
         [SelectOption(Label = "Move", SelectOptionType = SelectOptionType.String)]
         Move = 3,
+        [SelectOption(Label = "Slice", SelectOptionType = SelectOptionType.String)]
+        Slice = 4,
     }
 
     internal class InventoryBooking : TypedEntityRecordWrapper
@@ -36,6 +38,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Denomination = "denomination";
             public const string TaggedRecordId = "tagged_record_id";
             public const string TaggedEntityName = "tagged_entity_name";
+            public const string TaggedObject = "tagged_object";
         }
 
         public static class Relations
@@ -92,6 +95,12 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<string?>(Fields.TaggedEntityName);
             set => Properties[Fields.TaggedEntityName] = value;
+        }
+
+        public string? TaggedObject
+        {
+            get => Get<string?>(Fields.TaggedObject);
+            set => Properties[Fields.TaggedObject] = value;
         }
 
         public decimal Amount

@@ -173,6 +173,110 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 if (Insert(entry) == null)
                     return null;
             }
+            else if(booking.Kind == InventoryBookingKind.Slice)
+            {
+                if (booking.Amount != 1 
+                    || booking.TaggedEntityName != InventoryEntry.Entity 
+                    || booking.TaggedRecordId == null 
+                    || booking.TaggedRecordId == Guid.Empty 
+                    || !Guid.TryParse(booking.TaggedObject, out var newId) 
+                    || newId == Guid.Empty 
+                    || booking.WarehouseLocationSourceId == null 
+                    || booking.WarehouseLocationSourceId == Guid.Empty)
+
+                    return null;
+
+
+                var newRecord = Find(newId);
+
+                if (newRecord == null || newRecord.Denomination < booking.Denomination)
+                    return null;
+
+                else if(newRecord.Denomination == booking.Denomination)
+                {
+                    newRecord.Amount -= 1;
+                    if (Update(newRecord) == null)
+                        return null;
+                }
+                else
+                {
+                    if (newRecord.Amount == 1)
+                    {
+                        newRecord.Denomination -= booking.Denomination;
+                        if (Update(newRecord) == null)
+                            return null;
+                    }
+                    else if (newRecord.Amount > 1)
+                    {
+                        newRecord.Amount -= 1;
+                        if (Update(newRecord) == null)
+                            return null;
+
+                        var rec = new InventoryEntry()
+                        {
+                            Id = Guid.NewGuid(),
+                            Amount = booking.Amount,
+                            Denomination = booking.Denomination,
+                            Article = booking.ArticleId,
+                            Project = booking.ProjectSourceId,
+                            WarehouseLocation = booking.WarehouseLocationSourceId.Value,
+                        };
+                        if (Insert(rec) == null)
+                            return null;
+                    }
+                    else return null;
+                }
+
+                var oldRecord = Find(booking.TaggedRecordId.Value);
+
+                if (oldRecord == null)
+                {
+                    if (Find(booking.ArticleId, booking.Denomination, booking.WarehouseLocationSourceId.Value, booking.ProjectSourceId) != null)
+                        return null;
+
+                    oldRecord = new InventoryEntry()
+                    {
+                        Id = booking.TaggedRecordId,
+                        Amount = booking.Amount,
+                        Denomination = booking.Denomination,
+                        Article = booking.ArticleId,
+                        Project = booking.ProjectSourceId,
+                        WarehouseLocation = booking.WarehouseLocationSourceId.Value
+                    };
+
+                    if (Insert(oldRecord) == null)
+                        return null;
+                }
+                else
+                {
+                    if (oldRecord.Amount == 1)
+                    {
+                        oldRecord.Denomination += booking.Denomination;
+                        if (Update(oldRecord) == null)
+                            return null;
+                    }
+                    else if (newRecord.Amount > 1)
+                    {
+                        var denomination = booking.Denomination + oldRecord.Denomination;
+                        oldRecord.Amount -= 1;
+                        if (Update(oldRecord) == null)
+                            return null;
+
+                        var rec = new InventoryEntry()
+                        {
+                            Id = Guid.NewGuid(),
+                            Amount = booking.Amount,
+                            Denomination = denomination,
+                            Article = booking.ArticleId,
+                            Project = booking.ProjectSourceId,
+                            WarehouseLocation = booking.WarehouseLocationSourceId.Value,
+                        };
+                        if (Insert(rec) == null)
+                            return null;
+                    }
+                    else return null;
+                }
+            }
             else if (booking.Kind == InventoryBookingKind.Store)
             {
                 var entry = Find(booking.ArticleId, booking.Denomination, booking.WarehouseLocationId!.Value, booking.ProjectId);
@@ -180,7 +284,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 if (entry == null || entry.Amount < booking.Amount)
                     return null;
 
-                if(entry.Amount == booking.Amount)
+                if (entry.Amount == booking.Amount)
                 {
                     if (Delete(entry.Id!.Value) == null)
                         return null;
@@ -192,7 +296,7 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                         return null;
                 }
             }
-            else if(booking.Kind == InventoryBookingKind.Move)
+            else if (booking.Kind == InventoryBookingKind.Move)
             {
                 if (!booking.WarehouseLocationSourceId.HasValue)
                     return null;
@@ -271,10 +375,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
         public Dictionary<(Guid ArticleId, decimal Denomination), decimal> GetReservedArticleAmountLookup(Guid projectId)
         {
             var takenLookup = FindManyBookingsByProject(projectId)
-                .Where(be => (be.Kind == InventoryBookingKind.Take && be.ProjectId == projectId || be.Kind == InventoryBookingKind.Store && be.ProjectSourceId == projectId) && be.Amount != 0m)
+                .Where(be => ((be.Kind == InventoryBookingKind.Take || be.Kind == InventoryBookingKind.Slice) && be.ProjectId == projectId || be.Kind == InventoryBookingKind.Store && be.ProjectSourceId == projectId) && be.Amount != 0m)
                 .GroupBy(be => (be.ArticleId, be.Denomination))
                 .ToDictionary(g => g.Key, g => g
-                    .Aggregate(0m, (sum, be) => sum + (be.Kind == InventoryBookingKind.Take ? be.Amount : -be.Amount)));
+                    .Aggregate(0m, (sum, be) => sum + ((be.Kind == InventoryBookingKind.Take || be.Kind == InventoryBookingKind.Slice) ? be.Amount : -be.Amount)));
 
             foreach(var ie in FindManyByProject(projectId))
             {

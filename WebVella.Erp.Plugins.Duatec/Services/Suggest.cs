@@ -41,7 +41,7 @@ namespace WebVella.Erp.Plugins.Duatec.Services
                 return location.Value;
 
             location = repo.FindManyBookingsByArticle(article.Id!.Value)
-                .Where(b => b.Kind == InventoryBookingKind.Take)
+                .Where(b => b.Kind == InventoryBookingKind.Take || b.Kind == InventoryBookingKind.Slice)
                 .OrderByDescending(b => b.Timestamp)
                 .FirstOrDefault()?.WarehouseLocationSourceId;
 

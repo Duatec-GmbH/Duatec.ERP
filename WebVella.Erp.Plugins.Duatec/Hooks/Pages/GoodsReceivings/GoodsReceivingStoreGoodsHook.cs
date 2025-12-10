@@ -101,6 +101,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.GoodsReceivings
                     Comment = "Goods Receiving Store",
                     TaggedRecordId = record.Id,
                     TaggedEntityName = record.EntityName,
+                    TaggedObject = null,
 
                 }).ToArray(); // must be collected, otherwhise amounts will be updated
 

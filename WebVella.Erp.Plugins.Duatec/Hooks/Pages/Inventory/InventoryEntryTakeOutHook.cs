@@ -20,8 +20,17 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
         {
             var result = base.Validate(record, unmodified, pageModel);
 
-            if (record.Amount > unmodified.Amount)
-                result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Amount}"));
+            if (record.GetArticle().GetArticleType().IsDivisible)
+            {
+                if(record.Amount > unmodified.Denomination)
+                    result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Denomination}"));
+            }
+            else
+            {
+                if (record.Amount > unmodified.Amount)
+                    result.Add(new ValidationError(InventoryEntry.Fields.Amount, $"Amount must not be greater than {unmodified.Amount}"));
+            }
+
 
             if (!IsStockTaking(pageModel) && (!record.Project.HasValue || record.Project == Guid.Empty))
                 result.Add(new ValidationError(InventoryEntry.Fields.Project, $"Project is required"));
@@ -56,41 +65,194 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var comment = pageModel.GetFormValue("comment");
             var isDeleted = false;
 
-            if (!record.GetArticle().GetArticleType().IsDivisible)
+            var isDivisible = record.GetArticle().GetArticleType().IsDivisible;
+
+            if (!isDivisible)
                 record.Denomination = 0;
 
             void TransactionalAction()
             {
-                var booking = new InventoryBooking()
-                {
-                    Amount = amount,
-                    Denomination = record.Denomination,
-                    ArticleId = unmodified.Article,
-                    ProjectId = record.Project,
-                    ProjectSourceId = unmodified.Project,
-                    WarehouseLocationId = record.WarehouseLocation,
-                    WarehouseLocationSourceId = unmodified.WarehouseLocation,
-                    UserId = pageModel.CurrentUser.Id,
-                    Timestamp = DateTime.Now,
-                    Kind = InventoryBookingKind.Take,
-                    Comment = comment,
-                    TaggedRecordId = null,
-                    TaggedEntityName = null,
-                };
+                InventoryBooking booking;
 
-                if (amount >= unmodified.Amount)
+                if (isDivisible)
                 {
-                    if (repo.Delete(record.Id!.Value) == null)
-                        throw new DbException("Could not delete inventory entry");
-                    isDeleted = true;
+                    if (amount >= unmodified.Denomination)
+                    {
+                        // Takes full article, similar to take with amount 1
+
+                        booking = new InventoryBooking()
+                        {
+                            Amount = 1,
+                            Denomination = unmodified.Denomination,
+                            ArticleId = unmodified.Article,
+                            ProjectId = record.Project,
+                            ProjectSourceId = unmodified.Project,
+                            WarehouseLocationId = record.WarehouseLocation,
+                            WarehouseLocationSourceId = unmodified.WarehouseLocation,
+                            UserId = pageModel.CurrentUser.Id,
+                            Timestamp = DateTime.Now,
+                            Kind = InventoryBookingKind.Slice,
+                            Comment = comment,
+                            TaggedRecordId = unmodified.Id,
+                            TaggedEntityName = InventoryEntry.Entity,
+                            TaggedObject = null,
+                        };
+
+                        if (unmodified.Amount <= 1)
+                        {
+                            if (repo.Delete(record.Id!.Value) == null)
+                                throw new DbException("Could not delete inventory entry");
+                            isDeleted = true;
+                        }
+                        else
+                        {
+                            var updatedRec = new InventoryEntry()
+                            {
+                                Id = record.Id,
+                                Amount = unmodified.Amount - 1,
+                                Denomination = unmodified.Denomination,
+                                Project = unmodified.Project,
+                                Article = unmodified.Article,
+                                WarehouseLocation = unmodified.WarehouseLocation
+                            };
+
+                            if (repo.Update(updatedRec) == null)
+                                throw new DbException("Could not update inventory entry");
+                        }
+                    }
+                    else
+                    {
+                        // partial take
+
+                        booking = new InventoryBooking()
+                        {
+                            Amount = 1,
+                            Denomination = record.Amount,
+                            ArticleId = unmodified.Article,
+                            ProjectId = record.Project,
+                            ProjectSourceId = unmodified.Project,
+                            WarehouseLocationId = record.WarehouseLocation,
+                            WarehouseLocationSourceId = unmodified.WarehouseLocation,
+                            UserId = pageModel.CurrentUser.Id,
+                            Timestamp = DateTime.Now,
+                            Kind = InventoryBookingKind.Slice,
+                            Comment = comment,
+                            TaggedRecordId = unmodified.Id,
+                            TaggedEntityName = InventoryEntry.Entity,
+                            TaggedObject = null,
+                        };
+
+                        var remainingAmount = unmodified.Denomination - record.Amount;
+
+                        if(repo.Find(unmodified.Article, remainingAmount, unmodified.WarehouseLocation, unmodified.Project) is InventoryEntry rec)
+                        {
+                            // remaining amount is added to another pile
+
+                            rec.Amount += 1;
+                            if (repo.Update(rec) == null)
+                                throw new DbException("Could not update inventory entry");
+
+                            booking.TaggedObject = rec.Id.ToString();
+
+                            var updatedRec = new InventoryEntry()
+                            {
+                                Id = unmodified.Id,
+                                Amount = unmodified.Amount - 1,
+                                Denomination = unmodified.Denomination,
+                                Project = unmodified.Project,
+                                Article = unmodified.Article,
+                                WarehouseLocation = unmodified.WarehouseLocation
+                            };
+
+                            if (repo.Update(updatedRec) == null)
+                                throw new DbException("Could not update inventory entry");
+                        }
+                        else if(unmodified.Amount > 1)
+                        {
+                            // create a new pile for the remaining amount
+
+                            var newEntry = new InventoryEntry()
+                            {
+                                Id = Guid.NewGuid(),
+                                Amount = 1,
+                                Article = unmodified.Article,
+                                Denomination = remainingAmount,
+                                Project = unmodified.Project,
+                                WarehouseLocation = unmodified.WarehouseLocation,
+                            };
+
+                            if (repo.Insert(newEntry) == null)
+                                throw new DbException("Could not create inventory entry");
+
+                            booking.TaggedObject = newEntry.Id.ToString();
+
+                            var updatedRec = new InventoryEntry()
+                            {
+                                Id = unmodified.Id,
+                                Amount = unmodified.Amount - 1,
+                                Denomination = unmodified.Denomination,
+                                Project = unmodified.Project,
+                                Article = unmodified.Article,
+                                WarehouseLocation = unmodified.WarehouseLocation
+                            };
+
+                            if (repo.Update(updatedRec) == null)
+                                throw new DbException("Could not update inventory entry");
+                        }
+                        else
+                        {
+                            // just modify current pile
+
+                            var updatedRec = new InventoryEntry()
+                            {
+                                Id = unmodified.Id,
+                                Amount = 1,
+                                Denomination = remainingAmount,
+                                Project = unmodified.Project,
+                                Article = unmodified.Article,
+                                WarehouseLocation = unmodified.WarehouseLocation
+                            };
+
+                            if (repo.Update(updatedRec) == null)
+                                throw new DbException("Could not update inventory entry");
+                        }
+                    }
                 }
                 else
                 {
-                    record.Amount = unmodified.Amount - amount;
-                    record.Project = unmodified.Project;
-                    if (repo.Update(record) == null)
-                        throw new DbException("Could not update inventory entry");
+                    booking = new InventoryBooking()
+                    {
+                        Amount = amount,
+                        Denomination = record.Denomination,
+                        ArticleId = unmodified.Article,
+                        ProjectId = record.Project,
+                        ProjectSourceId = unmodified.Project,
+                        WarehouseLocationId = record.WarehouseLocation,
+                        WarehouseLocationSourceId = unmodified.WarehouseLocation,
+                        UserId = pageModel.CurrentUser.Id,
+                        Timestamp = DateTime.Now,
+                        Kind = InventoryBookingKind.Take,
+                        Comment = comment,
+                        TaggedRecordId = null,
+                        TaggedEntityName = null,
+                        TaggedObject = null,
+                    };
+
+                    if (amount >= unmodified.Amount)
+                    {
+                        if (repo.Delete(record.Id!.Value) == null)
+                            throw new DbException("Could not delete inventory entry");
+                        isDeleted = true;
+                    }
+                    else
+                    {
+                        record.Amount = unmodified.Amount - amount;
+                        record.Project = unmodified.Project;
+                        if (repo.Update(record) == null)
+                            throw new DbException("Could not update inventory entry");
+                    }
                 }
+
 
                 if (repo.InsertBooking(booking) == null)
                     throw new DbException("Could not insert booking");

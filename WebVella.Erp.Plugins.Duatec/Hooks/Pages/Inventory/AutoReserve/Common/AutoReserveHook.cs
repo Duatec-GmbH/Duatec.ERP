@@ -103,6 +103,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 UserId = userId,
                 TaggedRecordId = null,
                 TaggedEntityName = null,
+                TaggedObject = null,
             };
 
             entry.Project = projectId;
@@ -130,6 +131,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory.AutoReserve.Common
                 Comment = "Auto reserve",
                 TaggedRecordId = null,
                 TaggedEntityName = null,
+                TaggedObject = null,
             };
 
             entry.Project = projectId;
