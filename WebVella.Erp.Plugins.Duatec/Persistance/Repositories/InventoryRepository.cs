@@ -167,9 +167,10 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     Amount = booking.Amount,
                     Article = booking.ArticleId,
                     Project = booking.ProjectSourceId,
-                    WarehouseLocation = booking.WarehouseLocationId!.Value,
+                    WarehouseLocation = booking.WarehouseLocationSourceId!.Value,
                     Denomination = booking.Denomination,
                 };
+
                 if (Insert(entry) == null)
                     return null;
             }
@@ -179,102 +180,103 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                     || booking.TaggedEntityName != InventoryEntry.Entity 
                     || booking.TaggedRecordId == null 
                     || booking.TaggedRecordId == Guid.Empty 
-                    || !Guid.TryParse(booking.TaggedObject, out var newId) 
-                    || newId == Guid.Empty 
                     || booking.WarehouseLocationSourceId == null 
-                    || booking.WarehouseLocationSourceId == Guid.Empty)
+                    || booking.WarehouseLocationSourceId == Guid.Empty
+                    || booking.DeserializeTaggedObject<SliceInfo>() is not SliceInfo sliceInfo)
 
                     return null;
 
 
-                var newRecord = Find(newId);
-
-                if (newRecord == null || newRecord.Denomination < booking.Denomination)
-                    return null;
-
-                else if(newRecord.Denomination == booking.Denomination)
+                if (sliceInfo.IsTake)
                 {
-                    newRecord.Amount -= 1;
-                    if (Update(newRecord) == null)
-                        return null;
-                }
-                else
-                {
-                    if (newRecord.Amount == 1)
+                    var rec = new InventoryEntry()
                     {
-                        newRecord.Denomination -= booking.Denomination;
-                        if (Update(newRecord) == null)
-                            return null;
-                    }
-                    else if (newRecord.Amount > 1)
-                    {
-                        newRecord.Amount -= 1;
-                        if (Update(newRecord) == null)
-                            return null;
-
-                        var rec = new InventoryEntry()
-                        {
-                            Id = Guid.NewGuid(),
-                            Amount = booking.Amount,
-                            Denomination = booking.Denomination,
-                            Article = booking.ArticleId,
-                            Project = booking.ProjectSourceId,
-                            WarehouseLocation = booking.WarehouseLocationSourceId.Value,
-                        };
-                        if (Insert(rec) == null)
-                            return null;
-                    }
-                    else return null;
-                }
-
-                var oldRecord = Find(booking.TaggedRecordId.Value);
-
-                if (oldRecord == null)
-                {
-                    if (Find(booking.ArticleId, booking.Denomination, booking.WarehouseLocationSourceId.Value, booking.ProjectSourceId) != null)
-                        return null;
-
-                    oldRecord = new InventoryEntry()
-                    {
-                        Id = booking.TaggedRecordId,
+                        Id = sliceInfo.OriginalPileId,
                         Amount = booking.Amount,
-                        Denomination = booking.Denomination,
                         Article = booking.ArticleId,
+                        Denomination = booking.Denomination,
                         Project = booking.ProjectSourceId,
-                        WarehouseLocation = booking.WarehouseLocationSourceId.Value
+                        WarehouseLocation = booking.WarehouseLocationSourceId.Value,
                     };
 
-                    if (Insert(oldRecord) == null)
+                    if (Insert(rec) == null)
                         return null;
                 }
                 else
                 {
-                    if (oldRecord.Amount == 1)
+                    var sourcePile = Find(sliceInfo.OriginalPileId);
+
+                    if(sourcePile == null && sliceInfo.UpdatedPileId.HasValue)
+                        sourcePile = Find(sliceInfo.UpdatedPileId.Value);
+
+
+                    if (sliceInfo.MovedPileId != null && sliceInfo.MovedPileId != Guid.Empty)
                     {
-                        oldRecord.Denomination += booking.Denomination;
-                        if (Update(oldRecord) == null)
-                            return null;
-                    }
-                    else if (newRecord.Amount > 1)
-                    {
-                        var denomination = booking.Denomination + oldRecord.Denomination;
-                        oldRecord.Amount -= 1;
-                        if (Update(oldRecord) == null)
+                        // remaining amount was added to another pile
+
+                        var movedPile = Find(sliceInfo.MovedPileId.Value);
+                        if (movedPile == null || movedPile.Denomination != sliceInfo.RemainingAmount)
                             return null;
 
-                        var rec = new InventoryEntry()
+                        movedPile.Amount -= 1;
+
+                        if (Update(movedPile) == null)
+                            return null;
+
+                        var newRec = new InventoryEntry()
                         {
-                            Id = Guid.NewGuid(),
+                            Id = sliceInfo.OriginalPileId,
                             Amount = booking.Amount,
-                            Denomination = denomination,
                             Article = booking.ArticleId,
+                            Denomination = booking.Denomination + sliceInfo.RemainingAmount,
                             Project = booking.ProjectSourceId,
                             WarehouseLocation = booking.WarehouseLocationSourceId.Value,
                         };
-                        if (Insert(rec) == null)
+
+                        if (Insert(newRec) == null)
                             return null;
                     }
-                    else return null;
+
+                    else if(sliceInfo.CreatedPileId != null && sliceInfo.CreatedPileId != Guid.Empty)
+                    {
+                        // remaining amount was added to a new pile
+
+                        var createdPile = Find(sliceInfo.CreatedPileId.Value);
+                        if (createdPile == null || createdPile.Denomination != sliceInfo.RemainingAmount)
+                            return null;
+
+                        createdPile.Amount -= 1;
+
+                        if (Update(createdPile) == null)
+                            return null;
+
+                        var newRec = new InventoryEntry()
+                        {
+                            Id = sliceInfo.OriginalPileId,
+                            Amount = booking.Amount,
+                            Article = booking.ArticleId,
+                            Denomination = booking.Denomination + sliceInfo.RemainingAmount,
+                            Project = booking.ProjectSourceId,
+                            WarehouseLocation = booking.WarehouseLocationSourceId.Value,
+                        };
+
+                        if (Insert(newRec) == null)
+                            return null;
+                    }
+
+                    else
+                    {
+                        // pile was modified only
+
+                        if (sourcePile == null || sourcePile.Amount != 1)
+                            return null;
+
+                        sourcePile.Denomination += booking.Denomination;
+
+                        if (Update(sourcePile) == null)
+                            return null;
+
+                    }
                 }
             }
             else if (booking.Kind == InventoryBookingKind.Store)

@@ -64,6 +64,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var amount = record.Amount = Math.Max(0m, Math.Round(record.Amount, 2));
             var comment = pageModel.GetFormValue("comment");
             var isDeleted = false;
+            Guid? redirectId = null;
 
             var isDivisible = record.GetArticle().GetArticleType().IsDivisible;
 
@@ -76,6 +77,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                 if (isDivisible)
                 {
+                    var sliceInfo = new SliceInfo()
+                    {
+                        OriginalPileId = unmodified.Id!.Value,
+                    };
+
+
                     if (amount >= unmodified.Denomination)
                     {
                         // Takes full article, similar to take with amount 1
@@ -100,7 +107,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                         if (unmodified.Amount <= 1)
                         {
-                            if (repo.Delete(record.Id!.Value) == null)
+                            if (repo.Delete(unmodified.Id!.Value) == null)
                                 throw new DbException("Could not delete inventory entry");
                             isDeleted = true;
                         }
@@ -108,7 +115,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                         {
                             var updatedRec = new InventoryEntry()
                             {
-                                Id = record.Id,
+                                Id = unmodified.Id,
                                 Amount = unmodified.Amount - 1,
                                 Denomination = unmodified.Denomination,
                                 Project = unmodified.Project,
@@ -118,7 +125,12 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                             if (repo.Update(updatedRec) == null)
                                 throw new DbException("Could not update inventory entry");
+
+                            if (updatedRec.Id != unmodified.Id)
+                                sliceInfo.UpdatedPileId = updatedRec.Id;
                         }
+
+                        sliceInfo.IsTake = true;
                     }
                     else
                     {
@@ -152,7 +164,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                             if (repo.Update(rec) == null)
                                 throw new DbException("Could not update inventory entry");
 
-                            booking.TaggedObject = rec.Id.ToString();
+                            sliceInfo.MovedPileId = rec.Id;
+                            sliceInfo.RemainingAmount = remainingAmount;
 
                             var updatedRec = new InventoryEntry()
                             {
@@ -166,14 +179,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                             if (repo.Update(updatedRec) == null)
                                 throw new DbException("Could not update inventory entry");
+
+                            if (updatedRec.Id != sliceInfo.OriginalPileId)
+                                sliceInfo.UpdatedPileId = updatedRec.Id;
+
+                            redirectId = sliceInfo.MovedPileId;
                         }
                         else if(unmodified.Amount > 1)
                         {
                             // create a new pile for the remaining amount
 
+                            var id = Guid.NewGuid();
+
                             var newEntry = new InventoryEntry()
                             {
-                                Id = Guid.NewGuid(),
+                                Id = id,
                                 Amount = 1,
                                 Article = unmodified.Article,
                                 Denomination = remainingAmount,
@@ -184,7 +204,8 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                             if (repo.Insert(newEntry) == null)
                                 throw new DbException("Could not create inventory entry");
 
-                            booking.TaggedObject = newEntry.Id.ToString();
+                            sliceInfo.CreatedPileId = newEntry.Id;
+                            sliceInfo.RemainingAmount = remainingAmount;
 
                             var updatedRec = new InventoryEntry()
                             {
@@ -198,6 +219,11 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                             if (repo.Update(updatedRec) == null)
                                 throw new DbException("Could not update inventory entry");
+
+                            if (updatedRec.Id != sliceInfo.OriginalPileId)
+                                sliceInfo.UpdatedPileId = updatedRec.Id;
+
+                            redirectId = sliceInfo.CreatedPileId;
                         }
                         else
                         {
@@ -215,8 +241,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 
                             if (repo.Update(updatedRec) == null)
                                 throw new DbException("Could not update inventory entry");
+
+                            if (updatedRec.Id != sliceInfo.OriginalPileId)
+                                sliceInfo.UpdatedPileId = updatedRec.Id;
                         }
                     }
+
+                    booking.SetTaggedObject(sliceInfo);
                 }
                 else
                 {
@@ -270,7 +301,13 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             if (!string.IsNullOrEmpty(pageModel.ReturnUrl))
             {
                 var url = pageModel.ReturnUrl;
-                if (isDeleted)
+
+                if (redirectId.HasValue)
+                {
+                    if (url.Contains(unmodified.Id!.Value.ToString()))
+                        url = url.Replace(unmodified.Id!.Value.ToString(), redirectId.Value.ToString());
+                }
+                else if (isDeleted)
                 {
                     const string phrase = "returnUrl=";
                     var start = url.IndexOf(phrase);

@@ -185,43 +185,44 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
                 .ToDictionary(r => r.Id!.Value, r => r);
 
             var orderedAmountLookup = orderEntries
-                .GroupBy(r => (r.Article, r.Denomination))
-                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount * r.Denomination == 0 ? 1 : r.Denomination));
 
             var receivedAmountLookup = goodsReceivingRepo.FindManyEntriesByProject(projectId)
-                .GroupBy(r => (r.Article, r.Denomination))
-                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount));
+                .GroupBy(r => r.Article)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount * r.Denomination == 0 ? 1 : r.Denomination));
 
             var ordersLookup = orderEntries
-                .GroupBy(r => (r.Article, r.Denomination))
+                .GroupBy(r => r.Article)
                 .ToDictionary(g => g.Key, g => g
                     .Select(r => orderLookup.TryGetValue(r.Order, out var v) ? v : null)
-                    .Where(v => v != null)
+                    .Where(o => o?.Id != null && o.Id != Guid.Empty)
+                    .DistinctBy(o => o!.Id)
                     .ToList()!);
 
-            var inventoryAmountLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId);
+            var inventoryAmountLookup = inventoryRepo.GetReservedArticleAmountLookup(projectId)
+                .GroupBy(ie => ie.Key.ArticleId)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Value * r.Key.Denomination == 0 ? 1 : r.Key.Denomination));
 
             var entriesFromPartList = (!articleId.HasValue
                 ? new PartListRepository(recMan).FindManyEntriesByProject(projectId, true)
                 : new PartListRepository(recMan).FindManyEntriesByProjectAndArticle(projectId, articleId.Value, true))
-                .GroupBy(ple => (ple.ArticleId, ple.Denomination))
-                .ToDictionary(g => g.Key, g => g.Sum(ple => ple.Amount));
+                .GroupBy(ple => ple.ArticleId)
+                .ToDictionary(g => g.Key, g => g.Sum(r => r.Amount * r.Denomination == 0 ? 1 : r.Denomination));
 
             var articleIds = orderEntries.Select(oe => oe.Article)
-                .Concat(inventoryAmountLookup.Keys.Select(kp => kp.ArticleId))
-                .Concat(entriesFromPartList.Keys.Select(kp => kp.ArticleId))
+                .Concat(inventoryAmountLookup.Keys)
+                .Concat(entriesFromPartList.Keys)
                 .Distinct()
                 .ToArray();
 
             var articleLookup = GetArticleLookup(recMan, articleIds);
 
             var entriesFromOrder = orderedAmountLookup
-                .Where(kp => !entriesFromPartList.ContainsKey(kp.Key))
-                .Select(kp => new KeyValuePair<(Guid ArticleId, decimal Denomination), decimal>(kp.Key, 0m));
+                .Where(kp => !entriesFromPartList.ContainsKey(kp.Key));
 
             var entriesFromInventory = inventoryAmountLookup
-                .Where(kp => !orderedAmountLookup.ContainsKey(kp.Key) && !entriesFromPartList.ContainsKey(kp.Key))
-                .Select(kp => new KeyValuePair<(Guid ArticleId, decimal Denomination), decimal>(kp.Key, 0m));
+                .Where(kp => !orderedAmountLookup.ContainsKey(kp.Key) && !entriesFromPartList.ContainsKey(kp.Key));
 
             return entriesFromPartList
                 .Concat(entriesFromOrder)
@@ -243,37 +244,46 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
         }
 
         private static OrderListEntry BuildOrderEntry(
-            (Guid ArticleId, decimal Denomination) key, decimal demand,
+            Guid articleId, decimal demand,
             Dictionary<Guid, Article?> articleLookup,
-            Dictionary<(Guid ArticleId, decimal Denomination), List<Order>> ordersLookup, 
-            Dictionary<(Guid ArticleId, decimal Denomination), decimal> orderedAmountLookup, 
-            Dictionary<(Guid ArticleId, decimal Denomination), decimal> receivedAmountLookup, 
-            Dictionary<(Guid ArticleId, decimal Denomination), decimal> inventoryAmountLookup,
+            Dictionary<Guid, List<Order>> ordersLookup, 
+            Dictionary<Guid, decimal> orderedAmountLookup, 
+            Dictionary<Guid, decimal> receivedAmountLookup, 
+            Dictionary<Guid, decimal> inventoryAmountLookup,
             bool isInventoryProject,
             bool reserveStoredArticles)
         {
 
-            var article = articleLookup[key.ArticleId];
-            var orders = ordersLookup.TryGetValue(key, out var l) ? l : [];
-            var orderedAmount = GetAmount(orderedAmountLookup, key);
-            var receivedAmount = GetAmount(receivedAmountLookup, key);
-            var fromInventory = GetAmount(inventoryAmountLookup, key);
+            var article = articleLookup[articleId];
+            var orders = ordersLookup.TryGetValue(articleId, out var l) ? l : [];
+            var orderedAmount = GetAmount(orderedAmountLookup, articleId);
+            var receivedAmount = GetAmount(receivedAmountLookup, articleId);
+            var fromInventory = GetAmount(inventoryAmountLookup, articleId);
+            var type = article?.GetArticleType();
+            var isDivisible = type?.IsDivisible is true;
 
             var toOrder = (isInventoryProject && reserveStoredArticles) 
                 ? Math.Max(0m, demand - orderedAmount - Math.Max(0m, fromInventory - receivedAmount)) 
                 : Math.Max(0m, demand - orderedAmount - fromInventory);
 
+            if (article?.GetArticleType().IsDivisible is true)
+            {
+
+            }
+
+            // TODO fix this on divisible articles
+
             var rec = new OrderListEntry()
             {
-                Id = key.ArticleId,
-                ArticleId = key.ArticleId,
-                Denomination = key.Denomination,
+                Id = articleId,
+                ArticleId = articleId,
+                Denomination = isDivisible ? toOrder : 0m,
                 Demand = demand,
                 OrderedAmount = orderedAmount,
                 InventoryAmount = fromInventory,
-                ToOrder = toOrder,
+                ToOrder = isDivisible ? 1m : toOrder,
                 ReceivedAmount = receivedAmount,
-                State = GetState(demand, orderedAmount, receivedAmount, fromInventory, isInventoryProject, reserveStoredArticles),
+                State = GetState(demand, orderedAmount, receivedAmount, fromInventory, isDivisible, isInventoryProject, reserveStoredArticles),
             };
 
             rec.SetArticle(article);
@@ -282,8 +292,10 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return rec;
         }
 
-        private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory, bool isInventoryProject, bool reserveStoredArticles)
+        private static OrderListEntryState GetState(decimal demand, decimal ordered, decimal received, decimal fromInventory, bool isDivisibleArticle, bool isInventoryProject, bool reserveStoredArticles)
         {
+            // TODO fix the state!!!!
+
             if (fromInventory < 0)
                 return OrderListEntryState.Error;
 
@@ -302,7 +314,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return OrderListEntryState.Incomplete;
         }
 
-        private static decimal GetAmount(Dictionary<(Guid ArticleId, decimal Denomination), decimal> dict, (Guid ArticleId, decimal Denomination) key)
+        private static decimal GetAmount(Dictionary<Guid, decimal> dict, Guid key)
         {
             if (dict.TryGetValue(key, out var amount))
                 return amount;

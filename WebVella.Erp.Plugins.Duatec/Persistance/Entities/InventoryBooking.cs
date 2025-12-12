@@ -1,4 +1,5 @@
-﻿using WebVella.Erp.Api.Models;
+﻿using Newtonsoft.Json;
+using WebVella.Erp.Api.Models;
 using WebVella.Erp.TypedRecords;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
@@ -16,6 +17,22 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         [SelectOption(Label = "Slice", SelectOptionType = SelectOptionType.String)]
         Slice = 4,
     }
+
+    public class SliceInfo
+    {
+        public Guid OriginalPileId { get; set; }
+
+        public Guid? CreatedPileId { get; set; }
+
+        public Guid? MovedPileId { get; set; }
+
+        public Guid? UpdatedPileId { get; set; }
+
+        public decimal RemainingAmount { get; set; }
+
+        public bool IsTake { get; set; }
+    }
+
 
     internal class InventoryBooking : TypedEntityRecordWrapper
     {
@@ -131,6 +148,26 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get(Fields.Comment, string.Empty);
             set => Properties[Fields.Comment] = value;
+        }
+
+        public T? DeserializeTaggedObject<T>()
+        {
+            if(string.IsNullOrWhiteSpace(TaggedObject))
+                return default;
+
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(TaggedObject);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public void SetTaggedObject<T>(T obj)
+        {
+            TaggedObject = JsonConvert.SerializeObject(obj);
         }
     }
 }
