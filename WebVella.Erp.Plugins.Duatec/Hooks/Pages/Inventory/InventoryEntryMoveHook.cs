@@ -9,6 +9,7 @@ using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using WebVella.Erp.TypedRecords.Hooks.Page;
 using WebVella.Erp.Database;
 using WebVella.Erp.Plugins.Duatec.Persistance;
+using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
 {
@@ -46,7 +47,10 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
             var id = record.Id!.Value;
             var comment = pageModel.GetFormValue("comment");
 
-            if (!record.GetArticle().GetArticleType().IsDivisible)
+            var article = record.GetArticle();
+            var articleType = article.GetArticleType();
+
+            if (!articleType.IsDivisible)
                 record.Denomination = 0;
 
             void TransactionalAction()
@@ -69,13 +73,30 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     TaggedObject = null,
                 };
 
-                var repo = new InventoryRepository();
+                var recMan = new RecordManager();
+                var repo = new InventoryRepository(recMan);
+
                 record = (record.Amount >= unmodified.Amount - eps
                     ? repo.Update(record)
                     : repo.MovePartial(record))!;
 
                 if (record == null)
                     throw new DbException("Could not move inventory entry");
+                
+                if(record.WarehouseLocation != Guid.Empty 
+                    && article.PreferedWarehouseLocation.HasValue
+                    && article.PreferedWarehouseLocation != Guid.Empty 
+                    && unmodified.WarehouseLocation == article.PreferedWarehouseLocation)
+                {
+                    var entries = repo.FindManyByArticle(unmodified.Article);
+
+                    if(!entries.Exists(e => e.WarehouseLocation == article.PreferedWarehouseLocation))
+                    {
+                        article.PreferedWarehouseLocation = record.WarehouseLocation;
+                        if (new ArticleRepository(recMan).Update(article) == null)
+                            throw new DbException("Could not update prefered warehouse location on article master entry.");
+                    }
+                }
 
                 if (repo.InsertBooking(booking) == null)
                     throw new DbException("Could not insert booking");

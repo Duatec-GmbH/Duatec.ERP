@@ -700,7 +700,7 @@ let usedIds = new Set();
 
 						if (getParentTableRow(document.activeElement) === mouseOverRow)
 							setFirstFocused = false;
-						else
+						else if (document.getElementsByClassName('select2-container--open').length == 0)
 							document.activeElement.blur();
 					}
 
@@ -1789,7 +1789,7 @@ let usedIds = new Set();
 				let parentRow = getParentTableRow(document.activeElement);
 
 				if (parentRow && parentRow.parentElement === body && parentRow.classList.contains('d-none'))
-					document.activeElement.blur;
+					document.activeElement.blur();
 			}
 		}
 
