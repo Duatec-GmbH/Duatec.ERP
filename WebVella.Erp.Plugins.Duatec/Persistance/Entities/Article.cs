@@ -28,6 +28,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
             public const string Image = "preview";
             public const string IsBlocked = "is_blocked";
             public const string PreferedWarehouseLocation = "prefered_warehouse_location_id";
+            public const string StockControl = "stock_control";
+            public const string MinimumStock = "minimum_stock";
         }
 
         public static Guid DefaultType { get; } = new Guid("14a2d274-c18e-46f8-a920-2814ea5faa2d");
@@ -92,6 +94,18 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
         {
             get => Get<Guid?>(Fields.PreferedWarehouseLocation);
             set => Properties[Fields.PreferedWarehouseLocation] = value;
+        }
+
+        public bool StockControl
+        {
+            get => Get<bool>(Fields.StockControl);
+            set => Properties[Fields.StockControl] = value;
+        }
+
+        public decimal MinimumStock
+        {
+            get => Get<decimal>(Fields.MinimumStock);
+            set => Properties[Fields.MinimumStock] = value;
         }
 
         public ArticleType GetArticleType()

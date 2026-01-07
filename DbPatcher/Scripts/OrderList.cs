@@ -15,8 +15,6 @@ namespace DbPatcher.Scripts
             foreach (var record in records)
             {
                 sb.Append(record.GetArticle().PartNumber);
-                if (record.GetArticle().GetArticleType().IsDivisible)
-                    sb.Append($" ({record.Denomination} {record.GetArticle().GetArticleType().Unit})");
                 sb.Append('\t');
                 sb.Append(record.GetArticle().TypeNumber);
                 sb.Append('\t');

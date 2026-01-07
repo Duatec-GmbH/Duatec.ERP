@@ -1,12 +1,13 @@
 ﻿using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
+using WebVella.Erp.Api.Models.AutoMapper;
 using WebVella.Erp.Plugins.Duatec.Persistance.Entities;
 using WebVella.Erp.TypedRecords;
 using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class InventoryRepository : TypedRepositoryBase<InventoryEntry>
+    public class InventoryRepository : TypedRepositoryBase<InventoryEntry>
     {
         public InventoryRepository(RecordManager? recordManager = null)
             : base(recordManager) { }
@@ -391,6 +392,39 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
             }
 
             return takenLookup;
+        }
+
+        public List<InventoryEntry> FindManyByArticles(string select = "*", params Guid[] articleIds)
+        {
+            if (articleIds.Length == 0)
+                return [];
+
+            QueryObject query;
+
+            if(articleIds.Length == 1)
+            {
+                query = new QueryObject()
+                {
+                    QueryType = QueryType.EQ,
+                    FieldName = InventoryEntry.Fields.Article,
+                    FieldValue = articleIds[0]
+                };
+            }
+            else
+            {
+                query = new QueryObject()
+                {
+                    QueryType = QueryType.OR,
+                    SubQueries = [.. articleIds.Select(id => new QueryObject()
+                    {
+                        FieldName = InventoryEntry.Fields.Article,
+                        QueryType = QueryType.EQ,
+                        FieldValue = id
+                    })]
+                };
+            }
+
+            return FindManyByQuery(query, select);                
         }
 
         public List<InventoryBooking> FindManyBookingsByTaggedRecord(string entityName, Guid id, string select = "*")

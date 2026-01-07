@@ -8,7 +8,7 @@ using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class ArticleRepository : TypedRepositoryBase<Article>
+    public class ArticleRepository : TypedRepositoryBase<Article>
     {
         private static class Alternatives
         {
@@ -242,5 +242,8 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 }
             }
         }
+
+        public List<Article> FindManyByStockControl(bool stockControl, string select = "*")
+            => FindManyBy(Article.Fields.StockControl, stockControl, select);
     }
 }

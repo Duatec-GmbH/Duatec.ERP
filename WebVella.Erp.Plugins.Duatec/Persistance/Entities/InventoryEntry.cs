@@ -4,7 +4,7 @@ using WebVella.Erp.TypedRecords.Attributes;
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Entities
 {
     [TypedEntity(Entity)]
-    internal class InventoryEntry : TypedEntityRecordWrapper
+    public class InventoryEntry : TypedEntityRecordWrapper
     {
         public const string Entity = "inventory_entry";
 

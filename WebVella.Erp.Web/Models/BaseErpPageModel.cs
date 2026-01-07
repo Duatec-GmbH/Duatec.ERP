@@ -1,24 +1,19 @@
-﻿using CSScripting;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Web;
+using WebVella.Erp.Api;
 using WebVella.Erp.Api.Models;
 using WebVella.Erp.Exceptions;
 using WebVella.Erp.Hooks;
 using WebVella.Erp.Web.Hooks;
 using WebVella.Erp.Web.Services;
 using WebVella.Erp.Web.Utils;
-using Wangkanai.Detection.Models;
-using WebVella.Erp.Eql;
-using WebVella.Erp.Api;
 
 namespace WebVella.Erp.Web.Models
 {
@@ -414,14 +409,21 @@ namespace WebVella.Erp.Web.Models
 					const string entityName = "user_activity";
 					const int maxEntries = 500;
 
-					var command = new EqlCommand($"SELECT * FROM {entityName} WHERE user_id = @id ORDER BY timestamp DESC", 
-						new EqlParameter("id", user.Id));
-					var result = command.Execute();
-
 					var recMan = new RecordManager(null, true, false);
 
-					if (result.Count >= maxEntries)
-						recMan.DeleteRecords(entityName, [.. result.Skip(maxEntries - 1).Select(r => (Guid)r.Properties["id"])]);
+					var response = recMan.Find(new EntityQuery(entityName, "*", new QueryObject()
+					{
+						FieldName = "user_id",
+						FieldValue = user.Id,
+						QueryType = QueryType.EQ
+					}));
+
+					if (response.Success)
+					{
+						if (response.Object.Data.Count >= 5)// maxEntries)
+							recMan.DeleteRecords(entityName, [.. response.Object.Data.Skip(maxEntries - 1).Select(r => (Guid)r.Properties["id"])]);
+					}
+
 
 					var record = new EntityRecord();
 

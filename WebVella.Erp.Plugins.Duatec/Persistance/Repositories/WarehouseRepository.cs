@@ -5,7 +5,7 @@ using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class WarehouseRepository : TypedListRepositoryBase<Warehouse, WarehouseLocation>
+    public class WarehouseRepository : TypedListRepositoryBase<Warehouse, WarehouseLocation>
     {
         public WarehouseRepository(RecordManager? recordManager = null)
             : base(recordManager) { }

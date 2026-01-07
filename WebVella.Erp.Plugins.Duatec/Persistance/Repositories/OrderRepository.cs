@@ -220,5 +220,92 @@ namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
                 SubQueries = subQuery
             };
         }
+
+        public List<Order> FindManyByProjects(string select = "*", params Guid[] projectIds)
+        {
+            if (projectIds.Length == 0)
+                return [];
+
+            if(projectIds.Length == 1)
+                return FindManyByProject(projectIds[0], select);
+
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = [.. projectIds.Select(pId => new QueryObject()
+                {
+                    QueryType = QueryType.EQ,
+                    FieldName = Order.Fields.Project,
+                    FieldValue = pId
+                })]
+            };
+
+            return FindManyByQuery(query, select);
+        }
+
+        public List<OrderEntry> FindManyEntriesByProjects(string select = "*", params Guid[] projectIds)
+        {
+            if (projectIds.Length == 0)
+                return [];
+
+            if (projectIds.Length == 1)
+                return FindManyEntriesByProject(projectIds[0], select);
+
+            var orderIds = FindManyByProjects("id", projectIds)
+                .Select(o => o.Id!.Value)
+                .ToArray();
+
+            if (orderIds.Length == 0)
+                return [];
+
+            QueryObject query;
+
+            if(orderIds.Length == 1)
+            {
+                query = new QueryObject()
+                {
+                    QueryType = QueryType.EQ,
+                    FieldName = OrderEntry.Fields.Order,
+                    FieldValue = orderIds[0]
+                };
+            }
+            else
+            {
+                query = new QueryObject()
+                {
+                    QueryType = QueryType.OR,
+                    SubQueries = [.. orderIds.Select(oId => new QueryObject()
+                    {
+                        FieldName = OrderEntry.Fields.Order,
+                        FieldValue = oId,
+                        QueryType = QueryType.EQ,
+                    })]
+                };
+            }
+
+            return FindManyEntriesByQuery(query, select);
+        }
+
+        public List<OrderEntry> FindManyEntriesByOrders(string select = "*", params Guid[] orderIds)
+        {
+            if (orderIds.Length == 0)
+                return [];
+
+            if(orderIds.Length == 1)
+                return FindManyEntriesByOrder(orderIds[0], select);
+
+            var query = new QueryObject()
+            {
+                QueryType = QueryType.OR,
+                SubQueries = [..orderIds.Select(id => new QueryObject()
+                {
+                    FieldName = OrderEntry.Fields.Order,
+                    FieldValue = id,
+                    QueryType = QueryType.EQ,
+                })]
+            };
+
+            return FindManyEntriesByQuery(query, select);
+        }
     }
 }

@@ -7,7 +7,7 @@ using WebVella.Erp.TypedRecords.Persistance;
 
 namespace WebVella.Erp.Plugins.Duatec.Persistance.Repositories
 {
-    internal class CompanyRepository : TypedRepositoryBase<Company>
+    public class CompanyRepository : TypedRepositoryBase<Company>
     {
         public CompanyRepository(RecordManager? recordManager = null)
             : base(recordManager) { }

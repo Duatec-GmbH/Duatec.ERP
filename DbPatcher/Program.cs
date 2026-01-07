@@ -37,7 +37,6 @@ using (SecurityContext.OpenSystemScope())
     {
         // insert code between braces here
         {
-
         }
     }
     catch

@@ -47,7 +47,7 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             var orderRepo = new OrderRepository(recMan);
             var goodsReceivingRepo = new GoodsReceivingRepository(recMan);
 
-            var openOrders = GetOpenOrders(orderRepo, goodsReceivingRepo);
+            var openOrders = GetOpenOrderIds(orderRepo, goodsReceivingRepo);
 
             if (openOrders.Count == 0)
                 return new EntityRecordList();
@@ -66,7 +66,17 @@ namespace WebVella.Erp.Plugins.Duatec.DataSource
             return result;
         }
 
-        private static List<Guid> GetOpenOrders(OrderRepository orderRepo, GoodsReceivingRepository goodsReceivingRepo)
+        public static IEnumerable<Order> Execute(string select = "*", RecordManager? recMan = null)
+        {
+            recMan ??= new RecordManager();
+            var orderRepository = new OrderRepository(recMan);
+
+            var openOrderIds = GetOpenOrderIds(orderRepository, new(recMan));
+
+            return orderRepository.FindMany(select, [.. openOrderIds]).Values.Where(o => o != null)!;
+        }
+
+        private static List<Guid> GetOpenOrderIds(OrderRepository orderRepo, GoodsReceivingRepository goodsReceivingRepo)
         {
             var orderEntries = orderRepo.FindAllEntries()
                 .GroupBy(e => e.Order)

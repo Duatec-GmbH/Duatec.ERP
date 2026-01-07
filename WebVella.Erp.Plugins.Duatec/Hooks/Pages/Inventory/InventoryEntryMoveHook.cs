@@ -73,8 +73,7 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     TaggedObject = null,
                 };
 
-                var recMan = new RecordManager();
-                var repo = new InventoryRepository(recMan);
+                var repo = new InventoryRepository();
 
                 record = (record.Amount >= unmodified.Amount - eps
                     ? repo.Update(record)
@@ -88,13 +87,21 @@ namespace WebVella.Erp.Plugins.Duatec.Hooks.Pages.Inventory
                     && article.PreferedWarehouseLocation != Guid.Empty 
                     && unmodified.WarehouseLocation == article.PreferedWarehouseLocation)
                 {
+
                     var entries = repo.FindManyByArticle(unmodified.Article);
 
                     if(!entries.Exists(e => e.WarehouseLocation == article.PreferedWarehouseLocation))
                     {
                         article.PreferedWarehouseLocation = record.WarehouseLocation;
-                        if (new ArticleRepository(recMan).Update(article) == null)
-                            throw new DbException("Could not update prefered warehouse location on article master entry.");
+
+                        try
+                        {
+                            new ArticleRepository(new RecordManager(null, true, true)).Update(article);
+                        }
+                        catch 
+                        { 
+                            // if this fails, prefered warehouse location is not updated
+                        }                        
                     }
                 }
 
