@@ -1,6 +1,8 @@
 ﻿//ErpEvent.DISPATCH('WebVella.Erp.Web.Components.PcDrawer',{htmlId:null,action:'open',payload:null})
 //ErpEvent.DISPATCH('WebVella.Erp.Web.Components.PcDrawer',{htmlId:null,action:'close',payload:null})
 
+var disableNextDrawerCloseClick = false;
+
 function OpenDrawer(drawerId) {
 
 	$("#body-inner-wrapper-2 > .container-fluid").css("position", "relative");
@@ -17,6 +19,50 @@ function OpenDrawer(drawerId) {
 	else {
 		$(".drawer").addClass("d-block");
 	}
+
+	disableNextDrawerCloseClick = true;
+	document.body.addEventListener('click', BodyClick);
+}
+
+function BodyClick(e) {
+
+	if (disableNextDrawerCloseClick) {
+		disableNextDrawerCloseClick = false;
+		return;
+	}
+
+	let drawers = document.getElementsByClassName('drawer');
+	let openDrawer;
+
+	for (let drawer of drawers) {
+		if (drawer.classList.contains('d-block')) {
+
+			if (openDrawer)
+				return;
+
+			openDrawer = drawer;
+		}
+	}
+
+	if (!openDrawer)
+		return;
+
+	let isInsideDrawer = false;
+	let elem = e.target;
+
+	while (elem) {
+
+		if (elem.classList.contains('drawer')) {
+			isInsideDrawer = true;
+			break;
+		}
+
+		elem = elem.parentElement;
+	}
+
+	if (!isInsideDrawer) {
+		CloseDrawer(openDrawer.id);
+	}
 }
 
 function CloseDrawer(drawerId) {
@@ -29,6 +75,8 @@ function CloseDrawer(drawerId) {
 	else {
 		$(".drawer").removeClass("d-block");
 	}
+
+	document.body.removeEventListener("click", BodyClick);
 }
 
 function WebVellaErpWebComponentsPcDrawer_Init(elementId){
