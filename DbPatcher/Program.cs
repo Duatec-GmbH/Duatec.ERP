@@ -37,6 +37,8 @@ using (SecurityContext.OpenSystemScope())
     {
         // insert code between braces here
         {
+            Inventory.ExportAmountsForProjects("C:\\Users\\florian.reischl.DUATEC\\Desktop\\Temp\\export-20051.txt", recMan, new Guid("cac0bf8c-2525-40ed-bcf7-912bba825572"));
+            Inventory.ExportAmountsForProjects("C:\\Users\\florian.reischl.DUATEC\\Desktop\\Temp\\export-23701.txt", recMan, new Guid("a20f5036-1481-4512-b829-b326089519ee"));
         }
     }
     catch

@@ -2,6 +2,7 @@
 using WebVella.Erp.Plugins.Duatec.Persistance.Repositories;
 using Entity = WebVella.Erp.Plugins.Duatec.Persistance.Entities.InventoryEntry;
 using WebVella.Erp.Api;
+using WebVella.Erp.Utilities;
 
 
 namespace DbPatcher.Scripts
@@ -9,23 +10,38 @@ namespace DbPatcher.Scripts
 
     internal class Inventory
     {
+        public static void ExportAmountsForProjects(string filePath, RecordManager? recMan = null, params Guid[] projectIds)
+        {
+            recMan ??= new();
+
+            var repo = new InventoryRepository(recMan);
+            var entries = projectIds
+                .SelectMany(id => repo.FindManyByProject(id, $"*, ${Entity.Relations.Article}.*, ${Entity.Relations.Location}.*"))
+                .ToList();
+
+            ExportAmounts(filePath, entries, recMan);
+        }
         public static void ExportAvailableAmounts(string filePath, RecordManager? recMan = null)
+        {
+            recMan ??= new();
+
+            var entries = new InventoryRepository(recMan).FindManyByProject(null, $"*, ${Entity.Relations.Article}.*, ${Entity.Relations.Location}.*");
+            ExportAmounts(filePath, entries, recMan);
+        }
+
+        private static void ExportAmounts(string filePath, List<Entity> entries, RecordManager? recMan = null)
         {
             var sb = new StringBuilder();
 
             recMan ??= new RecordManager();
-            var entries = new InventoryRepository(recMan).FindManyByProject(null, $"*, ${Entity.Relations.Article}.*, ${Entity.Relations.Location}.*");
             var typeLookup = new ArticleRepository(recMan).FindManyTypes()
                 .ToDictionary(t => t.Id!.Value);
 
             var manufacturerLookup = new CompanyRepository(recMan).FindMany("*", [.. entries.Select(ie => ie.GetArticle().ManufacturerId).Distinct()]);
             var warehouseLookup = new WarehouseRepository(recMan).FindMany("*", [.. entries.Select(ie => ie.GetWarehouseLocation().Warehouse).Distinct()]);
 
-            foreach(var entry in entries)
+            foreach (var entry in entries)
             {
-                if (!(entry.Project == null || entry.Project == Guid.Empty))
-                    throw new Exception("Only unreserved inventory entries are allowed");
-
                 var article = entry.GetArticle();
                 var type = typeLookup[article.TypeId]!;
                 var manufacturer = manufacturerLookup[article.ManufacturerId]!;
@@ -52,5 +68,6 @@ namespace DbPatcher.Scripts
 
             writer.Write(sb.ToString());
         }
+
     }
 }
