@@ -11,6 +11,16 @@ namespace DbPatcher.Scripts
 
     internal class Inventory
     {
+        public static void ExportAllEntries(string filePath, RecordManager? recMan = null)
+        {
+            recMan ??= new();
+
+            var repo = new InventoryRepository(recMan);
+            var entries = repo.FindAll($"*, ${Entity.Relations.Article}.*, ${Entity.Relations.Location}.*");
+
+            ExportAmounts(filePath, entries, recMan);
+        }
+
         public static void ExportReservedAmountsForProjects(string filePath, Guid projectId, RecordManager? recMan = null)
         {
             recMan ??= new();
